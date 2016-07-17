@@ -1,0 +1,40 @@
+require 'dry-initializer'
+require 'uber/delegates'
+
+# Chainable interface for lazy filtering
+
+module ROM
+  module Ldap
+    class Lookup < ::Hash
+
+      extend Dry::Initializer::Mixin
+      extend Uber::Delegates
+
+      param :relation
+      param :filter
+
+      delegates :relation, :search, :__new__
+      delegates :filter,   :chain
+      delegates :search!,  :as, :order, :to_a, :one, :one!
+
+      def search!
+        __new__(dataset)
+      end
+
+      def dataset
+        # binding.pry
+        search chain(self)
+      end
+
+      def build_lookup(key, *args)
+        self[key] = args.one? ? args.first : args
+        self
+      end
+
+      def method_missing(name, *args)
+        args.any? ? build_lookup(name, *args) : super
+      end
+
+    end
+  end
+end
