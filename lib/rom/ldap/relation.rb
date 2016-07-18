@@ -1,8 +1,12 @@
-require 'rom/ldap/types'
+# encoding: utf-8
+# frozen_string_literal: true
 
+require 'rom/ldap/types'
+require 'rom/ldap/lookup'
+require 'rom/ldap/filter'
+require 'rom/ldap/dataset'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
-require 'rom/ldap/lookup'
 
 module ROM
   module Ldap

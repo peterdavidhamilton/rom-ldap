@@ -1,5 +1,7 @@
-require 'rom/commands'
+# encoding: utf-8
+# frozen_string_literal: true
 
+require 'rom/commands'
 require 'rom/ldap/commands/create'
 require 'rom/ldap/commands/update'
 require 'rom/ldap/commands/delete'

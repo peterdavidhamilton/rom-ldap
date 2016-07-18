@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'net-ldap', '~> 0.15.0'
+  spec.add_runtime_dependency 'dry-initializer', '~> 0.4.0'
   spec.add_runtime_dependency 'dry-types', '~> 0.8'
   spec.add_runtime_dependency 'rom', '~> 2.0'
 
