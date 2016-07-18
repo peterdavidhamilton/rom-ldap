@@ -15,7 +15,6 @@ module ROM
                                      :ends,
                                      :escape,
                                      :equals,
-                                     :equals,
                                      :ge,
                                      :le,
                                      :negate,
@@ -43,7 +42,7 @@ module ROM
         alias :filter :where
 
         def match(args)
-          _intersect generate(:contains, args)
+          _join generate(:contains, args)
         end
 
         def with_attribute(arg)

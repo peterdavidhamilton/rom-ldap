@@ -25,7 +25,6 @@ module ROM
       end
 
       def dataset
-        # binding.pry
         search chain(self)
       end
 
