@@ -5,9 +5,10 @@ module ROM
   module Ldap
     module Commands
       class Update < ROM::Commands::Update
+
         adapter :ldap
 
-        def execute(attributes)
+        def execute(tuples)
           # ldap.delete_attribute 'uid=diradmin,ou=users,dc=test', :mail
           # ldap.add_attribute 'uid=diradmin,ou=users,dc=test', :mail, 'test@thing.com'
           # ldap.replace_attribute dn, :mail, "newmailaddress@example.com"
@@ -21,9 +22,11 @@ module ROM
 
           # ldap.modify dn: dn, operations: ops
 
-          binding.pry
 
-          relation.each { |tuple| tuple.update(attributes) }
+          tuples.each do |tuple|
+            relation.edit(tuple[:dn], tuples.except(:dn))
+          end
+
         end
       end
     end

@@ -16,14 +16,14 @@ module ROM
       end
 
       def call(filter = nil)
-        unless cache
+        #unless cache
           query_directory(filter)
-        else
-          return cache.get(filter.to_s) if cache.touch(filter.to_s)
-          dataset = query_directory(filter)
-          cache.set(filter.to_s, dataset)
-          dataset
-        end
+        #else
+          #return cache.get(filter.to_s) if cache.touch(filter.to_s)
+          #dataset = query_directory(filter)
+          #cache.set(filter.to_s, dataset)
+          #dataset
+        #end
       end
 
       alias :[] :call

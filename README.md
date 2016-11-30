@@ -3,6 +3,13 @@
 # -----------------
 
 
+
+add_ldap_image(
+dn: 'uid=test0,ou=users,dc=test',
+url: 'https://avatars2.githubusercontent.com/u/795488?v=3&s=52'
+)
+
+
 # Chainable method interface
 #     relation read methods just build filters
 #     filters are then chained together and summed

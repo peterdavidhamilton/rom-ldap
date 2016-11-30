@@ -17,7 +17,10 @@ module ROM
 
       adapter :ldap
 
-      def self.create_filters
+      # rename the image attribute used by imcoming params
+      option :image, type: Symbol, reader: true, default: :jpegphoto
+
+      def self.create_filters!
         FILTERS.each { |name| alias_method name, :filter }
       end
 
@@ -38,7 +41,7 @@ module ROM
         __new__(dataset)
       end
 
-      create_filters
+      create_filters!
 
       def adapter
         Gateway.instance
@@ -64,6 +67,14 @@ module ROM
         Lookup.new(self, Filter.new)
       end
 
+      private
+
+      # check whether submitted attributes include the jpegphoto key
+      #
+      # @api private
+      def image?(attrs)
+        attrs.key?(options[:image])
+      end
     end
   end
 end
