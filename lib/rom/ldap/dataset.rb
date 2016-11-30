@@ -12,7 +12,7 @@ module ROM
 
       def initialize(connection = nil, cache = nil)
         @connection = connection || Gateway.instance.connection
-             @cache = cache      || Dalli::Client.new('localhost:11211', compress: true)
+        # @cache = cache   || Dalli::Client.new('localhost:11211', compress: true)
       end
 
       def call(filter = nil)
