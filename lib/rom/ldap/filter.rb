@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+# require 'uber/delegates'
+require 'rom/ldap/constants'
 
 module ROM
   module Ldap
@@ -9,32 +11,12 @@ module ROM
       class Filter
         class FilterError < ::StandardError; end
 
-        # extend Uber::Delegates
         extend Forwardable
+        delegate METHODS => Net::LDAP::Filter
 
-        LDAP_METHODS = [:begins,
-                        :construct,
-                        :contains,
-                        :ends,
-                        :escape,
-                        :equals,
-                        :ge,
-                        :le,
-                        :negate,
-                        :present]
+        # extend Uber::Delegates
+        # delegates Net::LDAP::Filter, METHODS
 
-        delegate LDAP_METHODS => Net::LDAP::Filter
-
-        # delegates Net::LDAP::Filter, :begins,
-        #                              :construct,
-        #                              :contains,
-        #                              :ends,
-        #                              :escape,
-        #                              :equals,
-        #                              :ge,
-        #                              :le,
-        #                              :negate,
-        #                              :present
 
         def chain(args)
           filters = args.each_with_object([]) do |(method, params), obj|
