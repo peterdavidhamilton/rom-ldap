@@ -21,6 +21,17 @@ module ROM
           end
         end
 
+
+        # ops = [
+        #   [:add, :mail, "aliasaddress@example.com"],
+        #   [:replace, :mail, ["old", "new"]],
+        #   [:delete, :jpegphoto, nil]
+        # ]
+        def bulk_update(dn, ops)
+          directory.modify(dn: dn, operations: ops)
+        end
+
+
         # Wrapper for net-ldap add method
         #
         # @api public

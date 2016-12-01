@@ -4,18 +4,18 @@
 require 'dry-initializer'
 require 'uber/delegates'
 
-# Chainable interface for lazy filtering
-
 module ROM
   module Ldap
     class Lookup < ::Hash
 
       extend Dry::Initializer::Mixin
-      extend Uber::Delegates
-
       param :relation
       param :filter
 
+      # extend Forwardable
+      # delegate [:search, :__new__] => :relation
+
+      extend Uber::Delegates
       delegates :relation, :search, :__new__
       delegates :filter,   :chain
       delegates :search!,  :as, :order, :to_a, :one, :one!

@@ -15,6 +15,7 @@ module ROM
       end
 
       Attributes = Types::Strict::Array.member(Types::Strict::String)
+
       Field = Attribute | Attributes
     end
   end

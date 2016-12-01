@@ -12,36 +12,16 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
 
+      adapter :ldap
+
       include Reading
       include Writing
 
-      adapter :ldap
-
-      # rename the image attribute used by imcoming params
+      # rename the image attribute used by incoming params
       option :image, type: Symbol, reader: true, default: :jpegphoto
 
-      def self.create_filters!
-        FILTERS.each { |name| alias_method name, :filter }
-      end
 
-      FILTERS = [ :above,
-                  :below,
-                  :between,
-                  :exclude,
-                  :match,
-                  :not,
-                  :prefix,
-                  :suffix,
-                  :where,
-                  :with_attribute ].freeze
 
-      def filter(args)
-        filter  = Filter.new.send(__callee__, args)
-        dataset = search(filter)
-        __new__(dataset)
-      end
-
-      create_filters!
 
       def adapter
         Gateway.instance
@@ -55,20 +35,37 @@ module ROM
         directory.host
       end
 
+
+
+      # @return Dataset from a single filter
+      #
+      # @api public
       def op_status
         directory.get_operation_result
       end
 
+      # @return Dataset from a single filter
+      #
+      # @api public
       def search(filter)
         Dataset.new[filter]
       end
 
+      # @return Dataset from a chain of filters
+      #
+      # @api public
       def lookup
         Lookup.new(self, Filter.new)
       end
 
+# from ROM::Plugins::Relation::KeyInference
+# use :key_inference
+# def base_name
+# end
+
       private
 
+      # @return Boolean
       # check whether submitted attributes include the jpegphoto key
       #
       # @api private
