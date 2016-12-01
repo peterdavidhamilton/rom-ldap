@@ -15,8 +15,8 @@ module ROM
           #   validator.call(attributes)
           #   attributes.to_h
           # end
-
           # coerce tuple using mapper
+
           Array.wrap(tuples).each do |tuple|
             dn = dn(tuple['uid'])
             relation.insert dn, tuple
