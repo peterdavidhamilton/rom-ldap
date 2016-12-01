@@ -9,25 +9,12 @@ module ROM
         adapter :ldap
 
         def execute(tuples)
-
-          # insert_tuples = with_input_tuples(tuples) do |tuple|
-          #   attributes = input[tuple]
-          #   validator.call(attributes)
-          #   attributes.to_h
-          # end
-          # coerce tuple using mapper
-
           Array.wrap(tuples).each do |tuple|
-            dn = dn(tuple['uid'])
-            relation.insert dn, tuple
+
+            tuple.merge!(relation.default_attrs){|key, oldval, newval| oldval }
+
+            relation.create(tuple[:dn], tuple.except(:dn))
           end
-        end
-
-        private
-
-        # should be done by a mapper - to preprocess
-        def dn(uid)
-          "uid=#{uid},ou=users,dc=test"
         end
 
       end

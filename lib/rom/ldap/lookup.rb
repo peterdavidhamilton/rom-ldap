@@ -11,11 +11,10 @@ module ROM
     class Lookup < ::Hash
 
       extend Dry::Initializer::Mixin
-      extend Uber::Delegates
-
       param :relation
       param :filter
 
+      extend Uber::Delegates
       delegates :relation, :search, :__new__
       delegates :filter,   :chain
       delegates :search!,  :as, :order, :to_a, :one, :one!

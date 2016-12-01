@@ -41,6 +41,7 @@ module ROM
         __new__(dataset)
       end
 
+      #
       create_filters!
 
       def adapter
@@ -67,14 +68,54 @@ module ROM
         Lookup.new(self, Filter.new)
       end
 
-      private
 
-      # check whether submitted attributes include the jpegphoto key
+      # ROM::Relation::Name(entries)
       #
       # @api private
-      def image?(attrs)
-        attrs.key?(options[:image])
+      def base_name
+        name
       end
+
+      # return array of attributes as symbol except those containing dashes
+      #
+      # @api private
+      def attributes
+        # keys = []
+        # dataset.each { |entry| keys.push *entry.keys }
+        # keys.uniq.sort.reject { |key| key.to_s.include?('-') }
+        [:dn, :uid, :givenname, :sn, :cn, :objectclass]
+      end
+
+      def known_attributes
+        binding.pry
+        [:mail, :jpegphoto]
+      end
+
+      # merged before commiting to ensure minimum standard of entry
+      def default_attrs
+        {
+        #          dn: '',
+        #         uid: '',
+        #   givenname: '',
+        #          sn: '',
+        #          cn: '',
+        #   jpegphoto: 'file://../../../../../Dropbox/vi-vim-cheat-sheet.svg',
+        # objectclass: ['top', 'inetorgperson', 'person']
+
+             dn: 'uid=fallback,ou=users,dc=test',
+            uid: 'fallback',
+             cn: 'Mister Tester Example',
+      givenname: 'Tester',
+             sn: 'Example',
+           mail: 'fallback@user.com',
+    objectclass: ['extensibleObject',
+                  'top',
+                  'organizationalPerson',
+                  'inetOrgPerson',
+                  'person']
+        }
+      end
+
     end
   end
 end

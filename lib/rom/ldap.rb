@@ -2,6 +2,10 @@
 # frozen_string_literal: true
 
 require 'net/ldap'
+require 'dalli'
+require 'dragonfly'
+
+
 require 'rom'
 require 'rom/ldap/relation'
 require 'rom/ldap/gateway'

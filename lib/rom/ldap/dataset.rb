@@ -1,8 +1,6 @@
 # encoding: utf-8
 # frozen_string_literal: true
 
-require 'net/ldap'
-
 module ROM
   module Ldap
     class Dataset
@@ -39,6 +37,8 @@ module ROM
       end
 
       # convert Net::LDAP::Entry to hash
+      #
+      # @api private
       def entries_to_hashes(array=[])
         array.map(&->(entry){entry.instance_variable_get(:@myhash)} )
       end

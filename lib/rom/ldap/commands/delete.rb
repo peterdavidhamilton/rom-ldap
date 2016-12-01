@@ -9,7 +9,9 @@ module ROM
         adapter :ldap
 
         def execute(tuples)
-          tuples.each { |tuple| relation.delete(tuple[:dn]) }
+          Array.wrap(tuples).each do |tuple|
+            relation.delete(tuple[:dn])
+          end
         end
       end
     end

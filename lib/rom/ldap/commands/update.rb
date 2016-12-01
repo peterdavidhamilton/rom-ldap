@@ -9,6 +9,19 @@ module ROM
         adapter :ldap
 
         def execute(tuples)
+          Array.wrap(tuples).each do |tuple|
+
+            tuple.merge!(relation.default_attrs){|key, oldval, newval| oldval }
+
+            relation.update(tuple[:dn], tuples.except(:dn))
+          end
+
+          # insert_tuples = with_input_tuples(tuples) do |tuple|
+          #   attributes = input[tuple]
+          #   validator.call(attributes)
+          #   attributes.to_h
+          # end
+
           # ldap.delete_attribute 'uid=diradmin,ou=users,dc=test', :mail
           # ldap.add_attribute 'uid=diradmin,ou=users,dc=test', :mail, 'test@thing.com'
           # ldap.replace_attribute dn, :mail, "newmailaddress@example.com"
@@ -21,12 +34,6 @@ module ROM
           # ]
 
           # ldap.modify dn: dn, operations: ops
-
-
-          tuples.each do |tuple|
-            relation.edit(tuple[:dn], tuples.except(:dn))
-          end
-
         end
       end
     end
