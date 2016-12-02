@@ -10,14 +10,16 @@ module ROM
         #
         # @api public
         def create(dn, attrs)
-          if image_attribute?(attrs)
-            txt = without_image(attrs)
-            binding.pry
-            directory.add(dn: dn, attributes: txt)
-            upload_image(dn, attrs)
-          else
-            directory.add(dn: dn, attributes: attrs)
-          end
+          directory.add(dn: dn, attributes: attrs.except(options[:image]))
+          upload_image(dn, attrs) if attrs.key?(options[:image])
+        end
+
+        # Wrapper for net-ldap modify method
+        #
+        # @api public
+        def update(dn, attrs)
+          directory.modify(dn: dn, attributes: attrs.except(options[:image]))
+          upload_image(dn, attrs) if attrs.key?(options[:image])
         end
 
         # ops = [
@@ -29,20 +31,6 @@ module ROM
           directory.modify(dn: dn, operations: ops)
         end
 
-
-        # Wrapper for net-ldap modify method
-        #
-        # @api public
-        def update(dn, attrs)
-          if image_attribute?(attrs)
-            txt = without_image(attrs)
-            directory.modify(dn: dn, attributes: txt)
-            upload_image(dn, attrs)
-          else
-            directory.modify(dn: dn, attributes: attrs)
-          end
-        end
-
         # Wrapper for net-ldap delete method
         #
         # @api public
@@ -52,26 +40,11 @@ module ROM
 
         private
 
-        # Check whether submitted attributes include the jpegphoto key
-        #
-        # @api private
-        def image_attribute?(attrs)
-          attrs.key?(options[:image])
-        end
-
-        def without_image(attrs)
-          attrs.except(options[:image])
-        end
-
-        def just_image(attrs)
-          attrs.fetch(options[:image])
-        end
-
         # Change jpegphoto attribute using a file's fully qualified path
         #
         # @api private
         def upload_image(dn, attrs)
-              url = just_image(attrs)
+              url = attrs.fetch(options[:image])
           payload = get_image_as_utf8_string(url)
 
           directory.replace_attribute(dn, options[:image], payload)

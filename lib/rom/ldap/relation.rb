@@ -67,39 +67,22 @@ module ROM
       end
 
 
-      private
-
-
       # @api private
       def attributes
-        # keys = []
-        # dataset.each { |entry| keys.push *entry.keys }
-        # keys.uniq.sort.reject { |key| key.to_s.include?('-') }
-        [:dn, :uid, :givenname, :sn, :cn, :objectclass]
+        [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
       end
 
-      # def known_attributes
-      #   binding.pry
-      #   [:mail, :jpegphoto]
-      # end
-
-      # merged before commiting to ensure minimum standard of entry
+      # Default attributes hash
+      #
+      # @api private
       def default_attrs
         {
-        #          dn: '',
-        #         uid: '',
-        #   givenname: '',
-        #          sn: '',
-        #          cn: '',
-        #   jpegphoto: 'file://../../../../../Dropbox/vi-vim-cheat-sheet.svg',
-        # objectclass: ['top', 'inetorgperson', 'person']
-
-             dn: 'uid=fallback,ou=users,dc=test',
-            uid: 'fallback',
-             cn: 'Mister Tester Example',
-      givenname: 'Tester',
-             sn: 'Example',
-           mail: 'fallback@user.com',
+             dn: '',
+            uid: '',
+             cn: '',
+      givenname: '',
+             sn: '',
+           mail: '',
     objectclass: ['extensibleObject',
                   'top',
                   'organizationalPerson',

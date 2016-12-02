@@ -23,6 +23,13 @@ module ROM
           end
         end
 
+        # Called by changeset
+        #
+        # @api private
+        def fetch(dn)
+          where(dn: dn)
+        end
+
         # @return Integer
         #
         # @api public

@@ -8,6 +8,14 @@ module ROM
 
         adapter :ldap
 
+        # dn: 'uid=unique,ou=users,dc=test', uid: 'blaster', givenname: 'essential', sn: 'master', cn:  'help'
+
+        # insert_tuples = with_input_tuples(tuples) do |tuple|
+        #   attributes = input[tuple]
+        #   validator.call(attributes)
+        #   attributes.to_h
+        # end
+
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
 
