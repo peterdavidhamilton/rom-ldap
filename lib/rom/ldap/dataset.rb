@@ -32,14 +32,15 @@ module ROM
         begin
           entries_to_hashes connection.search(filter: filter)
         rescue ::Net::LDAP::Error
-          logger.error 'ROM::Ldap::Dataset connection failed'
+          logger.error 'rom-ldap failed to connect to server'
+          return [] # return empty array as result to dataset
         end
       end
 
       # convert Net::LDAP::Entry to hash
       #
       # @api private
-      def entries_to_hashes(array=[])
+      def entries_to_hashes(array = [])
         array.map(&->(entry){entry.instance_variable_get(:@myhash)} )
       end
 

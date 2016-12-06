@@ -21,9 +21,11 @@ module ROM
         self.class.instance = self
       end
 
-      def [](filter)
+      def call(filter)
         dataset(filter)
       end
+
+      alias :[] :call
 
       def dataset(filter)
         Dataset.new[filter]
