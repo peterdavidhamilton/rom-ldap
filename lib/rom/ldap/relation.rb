@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'rom/ldap/types'
+require 'rom/ldap/schema'
 require 'rom/ldap/lookup'
 require 'rom/ldap/filter'
 require 'rom/ldap/dataset'
@@ -20,7 +21,27 @@ module ROM
       # rename the image attribute used by incoming params
       # option :image, type: Symbol, reader: true, default: :jpegphoto
 
+      # Set default dataset for a relation sub-class
+      #
+      # @api private
+      def self.inherited(klass)
+        super
 
+        klass.class_eval do
+          schema_class  Ldap::Schema
+          schema_dsl    Ldap::Schema::DSL
+
+          # schema_inferrer -> (name, gateway) do
+          #   inferrer_for_db = ROM::SQL::Schema::Inferrer.get(gateway.connection.database_type.to_sym)
+          #   begin
+          #     inferrer_for_db.new.call(name, gateway)
+          #   rescue Sequel::Error => e
+          #     ROM::Schema::DEFAULT_INFERRER.()
+          #   end
+          # end
+
+        end
+      end
 
 
       def adapter

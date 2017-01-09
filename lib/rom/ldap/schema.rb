@@ -9,13 +9,17 @@ module ROM
     class Schema < ROM::Schema
 
       def initialize(*)
-        binding.pry
-        super
+        # binding.pry
+        super # returned {}
       end
 
       # @api private
       def finalize!(*)
-        binding.pry
+        # binding.pry
+
+        # super returned
+        #<ROM::Ldap::Schema name=ROM::Relation::Name(entries on persistence_relations_people) attributes=[] associations=#<ROM::AssociationSet elements={}>>
+
         super do
 
         end
