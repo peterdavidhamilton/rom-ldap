@@ -18,7 +18,7 @@ module ROM
       include Writing
 
       # rename the image attribute used by incoming params
-      option :image, type: Symbol, reader: true, default: :jpegphoto
+      # option :image, type: Symbol, reader: true, default: :jpegphoto
 
 
 
