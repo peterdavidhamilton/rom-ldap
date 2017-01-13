@@ -15,15 +15,19 @@ module ROM
 
       # @api private
       def finalize!(*)
-        # binding.pry
 
+      # def finalize!({gateway: xxx, relations: xxx })
+        # binding.pry
         # super returned
         #<ROM::Ldap::Schema name=ROM::Relation::Name(entries on persistence_relations_people) attributes=[] associations=#<ROM::AssociationSet elements={}>>
 
+        # binding.pry
         super do
-
+          # rename({})
         end
       end
+
+
     end
   end
 end

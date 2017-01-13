@@ -2,8 +2,9 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-# require 'uber/delegates'
 require 'rom/ldap/constants'
+
+# delegate to Net::LDAP::Filter in order to chain
 
 module ROM
   module Ldap
@@ -13,9 +14,6 @@ module ROM
 
         extend Forwardable
         delegate METHODS => Net::LDAP::Filter
-
-        # extend Uber::Delegates
-        # delegates Net::LDAP::Filter, METHODS
 
 
         def chain(args)

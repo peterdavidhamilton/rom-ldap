@@ -14,8 +14,7 @@ module ROM
           # @api public
           def filter(args)
              filter = Filter.new.send(__callee__, args)
-            dataset = search(filter)
-            __new__(dataset)
+            new(search(filter))
           end
 
           klass.class_eval do
@@ -62,24 +61,23 @@ module ROM
         #
         # @api public
         def first
-          __new__(dataset.first)
+          # __new__(dataset.first) # 'new' not '__new__' in module
+          new(dataset.first)
         end
 
         # @return Array
         #
         # @api public
         def last
-          __new__(dataset.last)
+          new(dataset.last)
         end
 
         # @return Array
         #
         # @api public
         def order(attribute)
-          sorted = dataset.sort do |p1, p2|
-            p1[attribute] <=> p2[attribute]
-          end
-          __new__(sorted)
+          sorted = dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] }
+          new(sorted)
         end
 
       end

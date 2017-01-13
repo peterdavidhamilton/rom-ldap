@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'dry-initializer'
-require 'uber/delegates'
+require 'forwardable'
 
 module ROM
   module Ldap
@@ -12,19 +12,21 @@ module ROM
       param :relation
       param :filter
 
-      # extend Forwardable
-      # delegate [:search, :__new__] => :relation
+      extend Forwardable
+      def_delegators :relation, :new, :search
+      def_delegators :filter,   :chain
+      def_delegators :search!,  :as, :order, :to_a, :one, :one!
 
-      extend Uber::Delegates
-      delegates :relation, :search, :__new__
-      delegates :filter,   :chain
-      delegates :search!,  :as, :order, :to_a, :one, :one!
-
+      # delegate new to Relation
       def search!
-        __new__(dataset)
+        binding.pry
+        # __new__(dataset)
+        new(dataset)
       end
 
+      # delegate search to Relation
       def dataset
+        binding.pry
         search chain(self)
       end
 

@@ -3,9 +3,10 @@
 
 require 'rom/ldap/types'
 require 'rom/ldap/schema'
+require 'rom/ldap/schema/inferrer'
 require 'rom/ldap/lookup'
-require 'rom/ldap/filter'
 require 'rom/ldap/dataset'
+require 'rom/ldap/relation/filter'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
 
@@ -32,12 +33,7 @@ module ROM
           schema_dsl    Ldap::Schema::DSL
 
           # schema_inferrer -> (name, gateway) do
-          #   inferrer_for_db = ROM::SQL::Schema::Inferrer.get(gateway.connection.database_type.to_sym)
-          #   begin
-          #     inferrer_for_db.new.call(name, gateway)
-          #   rescue Sequel::Error => e
-          #     ROM::Schema::DEFAULT_INFERRER.()
-          #   end
+          #   ROM::Ldap::Schema::Inferrer.new.call(name, gateway)
           # end
 
         end
@@ -91,25 +87,6 @@ module ROM
       # @api private
       def attributes
         [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
-      end
-
-      # Default attributes hash
-      #
-      # @api private
-      def default_attrs
-        {
-             dn: '',
-            uid: '',
-             cn: '',
-      givenname: '',
-             sn: '',
-           mail: '',
-    objectclass: ['extensibleObject',
-                  'top',
-                  'organizationalPerson',
-                  'inetOrgPerson',
-                  'person']
-        }
       end
 
     end
