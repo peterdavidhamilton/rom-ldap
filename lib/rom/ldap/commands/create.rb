@@ -16,12 +16,19 @@ module ROM
         #   attributes.to_h
         # end
 
+
+
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
 
-            tuple.merge!(relation.default_attrs){|key, oldval, newval| oldval }
+            entry = relation.default_attrs.merge!(tuple)
+               dn = "uid=#{entry[:uid]},#{relation.base}"
 
-            relation.create(tuple[:dn], tuple.except(:dn))
+            # binding.pry
+            # entry = AttributeSchema.(tuple).to_h
+            # relation.create(entry[:dn], entry.except(:dn))
+
+            relation.create(dn, entry)
           end
         end
 

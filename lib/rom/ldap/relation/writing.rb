@@ -12,6 +12,7 @@ module ROM
         def create(dn, attrs)
           directory.add(dn: dn, attributes: attrs.except(options[:image]))
           upload_image(dn, attrs) if attrs.key?(options[:image])
+          # op_status.message
         end
 
         # Wrapper for net-ldap modify method

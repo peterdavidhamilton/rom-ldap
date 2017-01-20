@@ -50,7 +50,8 @@ module ROM
         end
 
         def exclude(args)
-          negate match(args)
+          # negate match(args)
+          negate present(args)
         end
 
         # TODO: match_all match_any
@@ -86,6 +87,8 @@ module ROM
           if args.respond_to?(:each)
             args.each do |attribute, values|
               next if values.nil?
+              # return stash << send(type, attribute) if values.nil?
+
               case values
               when Array
                 values.each { |value| stash << send(type, attribute, escape(value)) }

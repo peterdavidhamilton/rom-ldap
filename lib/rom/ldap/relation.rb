@@ -52,7 +52,13 @@ module ROM
         directory.host
       end
 
+      def base
+        directory.base
+      end
 
+      def auth
+        directory.instance_variable_get(:@auth)
+      end
 
       # @return Dataset from a single filter
       #
@@ -87,6 +93,25 @@ module ROM
       # @api private
       def attributes
         [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
+      end
+
+      # called inside commands - merged into tuples
+      #
+      # @api private
+      def default_attrs
+        {
+             # dn: 'uid=fallback,ou=users,dc=test',
+            uid: 'fallback',
+             cn: 'fallback',
+      givenname: 'fallback',
+             sn: 'fallback',
+           # mail: '',
+    objectclass: ['extensibleObject',
+                  'top',
+                  'organizationalPerson',
+                  'inetOrgPerson',
+                  'person']
+        }
       end
 
     end
