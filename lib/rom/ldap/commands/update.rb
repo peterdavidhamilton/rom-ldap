@@ -11,9 +11,11 @@ module ROM
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
 
-            tuple.merge!(relation.default_attrs){|key, oldval, newval| oldval }
+            # :remove if v nil
+            # :add if v present
+            ops = tuple.except(:dn).map { |k, v| [:add, k, v] }
 
-            relation.update(tuple[:dn], tuples.except(:dn))
+            relation.update(tuple[:dn], ops)
           end
         end
 

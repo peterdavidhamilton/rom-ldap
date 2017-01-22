@@ -13,20 +13,13 @@ module ROM
           #
           # @api public
           def filter(args)
-             filter = Filter.new.send(__callee__, args)
+            filter = Filter.new.send(__callee__, args)
             new(search(filter))
           end
 
           klass.class_eval do
             FILTERS.each { |f| alias_method f, :filter }
           end
-        end
-
-        # Called by changeset
-        #
-        # @api private
-        def fetch(dn)
-          where(dn: dn)
         end
 
         # @return Integer
@@ -61,7 +54,6 @@ module ROM
         #
         # @api public
         def first
-          # __new__(dataset.first) # 'new' not '__new__' in module
           new(dataset.first)
         end
 

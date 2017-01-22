@@ -12,22 +12,17 @@ module ROM
       param :relation
       param :filter
 
+      # when finishing the method in repo that begins with lookup
+      # it fires #search
       extend Forwardable
-      def_delegators :relation, :new, :search
-      def_delegators :filter,   :chain
-      def_delegators :search!,  :as, :order, :to_a, :one, :one!
+      def_delegators :search, :as, :order, :to_a, :one, :one!
 
-      # delegate new to Relation
-      def search!
-        binding.pry
-        # __new__(dataset)
-        new(dataset)
+      def search
+        relation.new(dataset)
       end
 
-      # delegate search to Relation
       def dataset
-        binding.pry
-        search chain(self)
+        Dataset.new[filter.chain(self)]
       end
 
       def build_lookup(key, *args)

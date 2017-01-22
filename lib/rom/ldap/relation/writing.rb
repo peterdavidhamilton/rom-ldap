@@ -11,24 +11,12 @@ module ROM
         # @api public
         def create(dn, attrs)
           directory.add(dn: dn, attributes: attrs.except(options[:image]))
-          upload_image(dn, attrs) if attrs.key?(options[:image])
-          # op_status.message
         end
 
         # Wrapper for net-ldap modify method
         #
         # @api public
-        def update(dn, attrs)
-          directory.modify(dn: dn, attributes: attrs.except(options[:image]))
-          upload_image(dn, attrs) if attrs.key?(options[:image])
-        end
-
-        # ops = [
-        #   [:add, :mail, "aliasaddress@example.com"],
-        #   [:replace, :mail, ["old", "new"]],
-        #   [:delete, :jpegphoto, nil]
-        # ]
-        def bulk_update(dn, ops)
+        def update(dn, ops)
           directory.modify(dn: dn, operations: ops)
         end
 

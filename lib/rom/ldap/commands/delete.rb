@@ -13,6 +13,7 @@ module ROM
             relation.delete(tuple[:dn])
           end
         end
+
       end
     end
   end

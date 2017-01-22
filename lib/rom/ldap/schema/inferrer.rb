@@ -17,10 +17,10 @@ module ROM
           givenname:    Types::Attribute,
           sn:           Types::Attribute,
           cn:           Types::Attribute,
-          mail:         Types::Attributes,
+          mail:         Types::Attribute,
           userpassword: Types::Attribute,
-          jpegphoto:    Types::Image,
-          objectclass:  Types::Attributes,
+          jpegphoto:    Types::Attribute,
+          objectclass:  Types::ObjectClasses,
         ).freeze
 
 

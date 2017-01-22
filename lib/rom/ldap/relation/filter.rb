@@ -15,11 +15,17 @@ module ROM
         extend Forwardable
         delegate METHODS => Net::LDAP::Filter
 
+        # def fetch(dn)
+        #   where(dn: dn)
+        # end
 
         def chain(args)
+          # filters is array of Net::LDAP::Filters
           filters = args.each_with_object([]) do |(method, params), obj|
             obj << send(method, params)
           end
+
+          # filter.join becomes "(mail=*.com*)(jpegphoto=*)(!({:cn=>[\"mr.\", \"miss\"]}=*))"
           _join filters.join
         end
 
@@ -50,8 +56,8 @@ module ROM
         end
 
         def exclude(args)
-          # negate match(args)
-          negate present(args)
+          negate match(args)
+          # negate present(args)
         end
 
         # TODO: match_all match_any

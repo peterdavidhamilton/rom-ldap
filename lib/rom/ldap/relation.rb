@@ -39,6 +39,12 @@ module ROM
         end
       end
 
+      # #fetch called by changeset, #where added by Reading is type of filter
+      #
+      # alias_method :fetch, :where
+      def fetch(dn)
+        where(dn: dn)
+      end
 
       def adapter
         Gateway.instance
@@ -81,7 +87,6 @@ module ROM
         Lookup.new(self, Filter.new)
       end
 
-
       # ROM::Relation::Name(entries)
       #
       # @api private
@@ -89,29 +94,10 @@ module ROM
         name
       end
 
-
       # @api private
       def attributes
-        [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
-      end
-
-      # called inside commands - merged into tuples
-      #
-      # @api private
-      def default_attrs
-        {
-             # dn: 'uid=fallback,ou=users,dc=test',
-            uid: 'fallback',
-             cn: 'fallback',
-      givenname: 'fallback',
-             sn: 'fallback',
-           # mail: '',
-    objectclass: ['extensibleObject',
-                  'top',
-                  'organizationalPerson',
-                  'inetOrgPerson',
-                  'person']
-        }
+        binding.pry
+        # [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
       end
 
     end
