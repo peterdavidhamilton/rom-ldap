@@ -39,12 +39,17 @@ module ROM
         end
       end
 
-      # #fetch called by changeset, #where added by Reading is type of filter
-      #
-      # alias_method :fetch, :where
+      # fetch and by_pk are prerequisites for using changesets
       def fetch(dn)
         where(dn: dn)
       end
+
+      def by_pk(dn)
+        where(dn: dn)
+      end
+
+
+
 
       def adapter
         Gateway.instance
