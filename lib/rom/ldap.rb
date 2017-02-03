@@ -2,8 +2,7 @@
 # frozen_string_literal: true
 
 require 'net/ldap'
-require 'dragonfly'
-
+# require 'dragonfly'
 
 require 'rom'
 require 'rom/ldap/relation'

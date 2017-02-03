@@ -10,7 +10,11 @@ module ROM
         def call
           Ldap::Schema.define(
             relation,
-            { inferrer: inferrer }.merge(attributes: attributes.values, type_class: Ldap::Type)
+
+            { inferrer: inferrer }.merge(
+              attributes: attributes.values,
+              type_class: Ldap::Type
+            )
           )
         end
       end

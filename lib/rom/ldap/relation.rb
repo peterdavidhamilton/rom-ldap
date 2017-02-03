@@ -9,12 +9,15 @@ require 'rom/ldap/dataset'
 require 'rom/ldap/relation/filter'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
+require 'rom/plugins/relation/key_inference'
 
 module ROM
   module Ldap
     class Relation < ROM::Relation
 
       adapter :ldap
+
+      use :key_inference
 
       include Reading
       include Writing
@@ -30,7 +33,7 @@ module ROM
 
         klass.class_eval do
           schema_class  Ldap::Schema
-          schema_dsl    Ldap::Schema::DSL
+          # schema_dsl    Ldap::Schema::DSL
 
           # schema_inferrer -> (name, gateway) do
           #   ROM::Ldap::Schema::Inferrer.new.call(name, gateway)
@@ -90,13 +93,6 @@ module ROM
       # @api public
       def lookup
         Lookup.new(self, Filter.new)
-      end
-
-      # ROM::Relation::Name(entries)
-      #
-      # @api private
-      def base_name
-        name
       end
 
       # @api private

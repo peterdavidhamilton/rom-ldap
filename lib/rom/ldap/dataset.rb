@@ -14,7 +14,7 @@ module ROM
       # or filter class
       def call(filter)
         begin
-          results = filter.present? ? connection.search(filter: filter) : connection.search
+          results = filter ? connection.search(filter: filter) : connection.search
           entries_to_hashes(results)
         rescue ::Net::LDAP::Error
           logger.error 'rom-ldap failed to connect to server'
@@ -35,7 +35,7 @@ module ROM
       end
 
       def logger
-        Gateway.instance.logger || Logger.new(STDOUT)
+        Gateway.instance.logger
       end
 
       def connection

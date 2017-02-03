@@ -2,12 +2,11 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'rom',         github: 'rom-rb/rom',         branch: 'master'
-gem 'rom-support', github: 'rom-rb/rom-support', branch: 'master'
-
+gem 'rom'
 gem 'dry-initializer'
+gem 'dry-core'
 gem 'net-ldap'
-gem 'dragonfly'
+# gem 'dragonfly'
 
 group :test do
   gem 'byebug', platforms: :mri

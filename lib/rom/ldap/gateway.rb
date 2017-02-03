@@ -1,12 +1,15 @@
 # encoding: utf-8
 # frozen_string_literal: true
 
+require 'dry/core/cache'
 require 'rom/gateway'
 require 'rom/ldap/dataset'
 
 module ROM
   module Ldap
     class Gateway < ROM::Gateway
+
+      extend Dry::Core::Cache
 
       class << self
         attr_accessor :instance
@@ -15,26 +18,18 @@ module ROM
       attr_reader :connection
       attr_reader :logger
       attr_reader :options
-      attr_reader :cache
 
-      # cache must respond to fetch
       def initialize(ldap_params, options = {})
         @connection = connect(ldap_params)
         @options    = options
-        @logger     = options[:logger]
-        @cache      = options[:cache] #|| Dalli::Client.new
+        @logger     = options[:logger] || Logger.new(STDOUT)
 
         self.class.instance = self
       end
 
       # filter = "(groupid=1025)"
       def call(filter)
-        if cache
-          binding.pry
-          cache.fetch(filter.hash) { dataset(filter) }
-        else
-          dataset(filter)
-        end
+        fetch_or_store(filter.hash) { dataset(filter) }
       end
 
       alias :[] :call
