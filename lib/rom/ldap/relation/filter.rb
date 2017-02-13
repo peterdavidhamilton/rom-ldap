@@ -41,7 +41,7 @@ module ROM
           _join generate(:equals, args)
         end
 
-        alias :filter :where
+        alias filter where
 
         def match(args)
           _join generate(:contains, args)
@@ -67,19 +67,19 @@ module ROM
           upper = range.to_a.first
         end
 
-        alias :between :within
+        alias between within
 
         def above(args)
           _join generate(:ge, args)
         end
 
-        alias :gte :above
+        alias gte above
 
         def below(args)
           _join generate(:le, args)
         end
 
-        alias :lte :below
+        alias lte below
 
         def prefix
           _join generate(:begins, args)
@@ -107,7 +107,7 @@ module ROM
           end
 
           msg = 'Relation::Filter#generate received no valid arguments'
-          fail FilterError, msg if stash.none?
+          raise FilterError, msg if stash.none?
 
           stash.one? ? stash.first : stash.join
         end

@@ -7,7 +7,6 @@ require 'forwardable'
 module ROM
   module Ldap
     class Lookup < ::Hash
-
       extend Dry::Initializer::Mixin
       param :relation
       param :filter
@@ -33,7 +32,6 @@ module ROM
       def method_missing(name, *args)
         args.any? ? build_lookup(name, *args) : super
       end
-
     end
   end
 end

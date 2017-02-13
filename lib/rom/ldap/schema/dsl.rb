@@ -6,7 +6,6 @@ module ROM
   module Ldap
     class Schema < ROM::Schema
       class DSL < ROM::Schema::DSL
-
         def call
           Ldap::Schema.define(
             relation,

@@ -5,7 +5,6 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
       module Writing
-
         # Wrapper for net-ldap add method
         #
         # @api public
@@ -33,7 +32,7 @@ module ROM
         #
         # @api private
         def upload_image(dn, attrs)
-              url = attrs.fetch(options[:image])
+          url = attrs.fetch(options[:image])
           payload = get_image_as_utf8_string(url)
 
           directory.replace_attribute(dn, options[:image], payload)
@@ -43,7 +42,7 @@ module ROM
         #
         # @api private
         def get_image_as_utf8_string(url)
-          file = ->(url) do
+          file = lambda do |url|
             case url.split(':').first
             when 'http'  then processor.fetch_url(url)
             when 'https' then processor.fetch_url(url)

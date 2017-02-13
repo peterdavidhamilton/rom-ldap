@@ -8,7 +8,6 @@ require 'rom/ldap/dataset'
 module ROM
   module Ldap
     class Gateway < ROM::Gateway
-
       extend Dry::Core::Cache
 
       class << self
@@ -32,7 +31,7 @@ module ROM
         fetch_or_store(filter.hash) { dataset(filter) }
       end
 
-      alias :[] :call
+      alias [] call
 
       # {
       #   host: ldap.host,
@@ -60,10 +59,8 @@ module ROM
 
       # what is this?
       def dataset?(name)
-        binding.pry
         dataset.key?(name)
       end
-
     end
   end
 end

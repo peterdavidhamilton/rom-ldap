@@ -5,7 +5,6 @@ module ROM
   module Ldap
     module Commands
       class Delete < ROM::Commands::Delete
-
         adapter :ldap
 
         def execute(tuples)
@@ -13,7 +12,6 @@ module ROM
             relation.delete(tuple[:dn])
           end
         end
-
       end
     end
   end

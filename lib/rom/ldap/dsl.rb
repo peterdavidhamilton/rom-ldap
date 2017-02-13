@@ -8,13 +8,11 @@ module ROM
 
       # @api private
       def initialize(schema)
-        binding.pry
         @schema = schema
       end
 
       # @api private
       def respond_to_missing?(name, include_private = false)
-        binding.pry
         super || schema.key?(name)
       end
     end

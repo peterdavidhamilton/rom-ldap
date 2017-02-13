@@ -5,12 +5,10 @@ module ROM
   module Ldap
     module Commands
       class Update < ROM::Commands::Update
-
         adapter :ldap
 
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
-
             # :remove if v nil
             # :add if v present
             ops = tuple.except(:dn).map { |k, v| [:add, k, v] }
@@ -18,7 +16,6 @@ module ROM
             relation.update(tuple[:dn], ops)
           end
         end
-
       end
     end
   end

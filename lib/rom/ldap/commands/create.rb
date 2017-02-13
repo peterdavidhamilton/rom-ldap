@@ -5,7 +5,6 @@ module ROM
   module Ldap
     module Commands
       class Create < ROM::Commands::Create
-
         adapter :ldap
 
         def execute(tuples)
@@ -19,7 +18,6 @@ module ROM
         def create_dn(uid)
           "uid=#{uid},#{relation.base}"
         end
-
       end
     end
   end

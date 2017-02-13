@@ -7,7 +7,6 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
       module Reading
-
         def self.included(klass)
           # @return Dataset
           #
@@ -71,7 +70,6 @@ module ROM
           sorted = dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] }
           new(sorted)
         end
-
       end
     end
   end

@@ -3,7 +3,6 @@
 
 module ROM
   module Ldap
-
     FILTERS = [
       :above,
       :below,
@@ -29,6 +28,5 @@ module ROM
       :negate,
       :present
     ].freeze
-
   end
 end

@@ -2,12 +2,13 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'rom'
-gem 'dry-initializer'
 gem 'dry-core'
+gem 'dry-initializer'
 gem 'net-ldap'
-# gem 'dragonfly'
+gem 'rom'
 
 group :test do
   gem 'byebug', platforms: :mri
+  gem 'faker'
+  gem 'ladle'
 end

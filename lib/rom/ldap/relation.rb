@@ -14,7 +14,6 @@ require 'rom/plugins/relation/key_inference'
 module ROM
   module Ldap
     class Relation < ROM::Relation
-
       adapter :ldap
 
       use :key_inference
@@ -32,13 +31,12 @@ module ROM
         super
 
         klass.class_eval do
-          schema_class  Ldap::Schema
+          schema_class Ldap::Schema
           # schema_dsl    Ldap::Schema::DSL
 
           # schema_inferrer -> (name, gateway) do
           #   ROM::Ldap::Schema::Inferrer.new.call(name, gateway)
           # end
-
         end
       end
 
@@ -50,9 +48,6 @@ module ROM
       def by_pk(dn)
         where(dn: dn)
       end
-
-
-
 
       def adapter
         Gateway.instance
@@ -97,10 +92,8 @@ module ROM
 
       # @api private
       def attributes
-        binding.pry
         # [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
       end
-
     end
   end
 end

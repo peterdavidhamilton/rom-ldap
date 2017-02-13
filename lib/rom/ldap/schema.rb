@@ -7,11 +7,10 @@ require 'rom/ldap/types'
 module ROM
   module Ldap
     class Schema < ROM::Schema
-
       def finalize!(gateway:, relations:)
         # binding.pry
         # super returned
-        #<ROM::Ldap::Schema name=ROM::Relation::Name(entries on persistence_relations_people) attributes=[] associations=#<ROM::AssociationSet elements={}>>
+        # <ROM::Ldap::Schema name=ROM::Relation::Name(entries on persistence_relations_people) attributes=[] associations=#<ROM::AssociationSet elements={}>>
 
         super do
           # binding.pry
@@ -23,10 +22,7 @@ module ROM
         # binding.pry
         relation.new(relation.dataset.select(*self), schema: self)
       end
-
-
     end
-
   end
 end
 
