@@ -66,9 +66,22 @@ module ROM
         # @return Array
         #
         # @api public
+        def limit(number)
+          new(dataset.take(number))
+        end
+
+        # @return Array
+        #
+        # @api public
+        def random
+          new(dataset.shuffle)
+        end
+
+        # @return Array
+        #
+        # @api public
         def order(attribute)
-          sorted = dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] }
-          new(sorted)
+          new(dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] })
         end
       end
     end
