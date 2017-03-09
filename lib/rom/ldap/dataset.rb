@@ -13,10 +13,9 @@ module ROM
       def call(filter)
         results = filter ? connection.search(filter: filter) : connection.search
         entries_to_hashes(results)
-      rescue ::Net::LDAP::Error, ::Net::LDAP::ConnectionRefused
+      rescue ::Net::LDAP::Error, ::Net::LDAP::ConnectionRefusedError, ::Errno::ECONNREFUSED
         logger.error 'rom-ldap failed to connect to server'
-        # return empty array as result to dataset
-        return []
+        []  # return empty array as result to dataset
       end
 
       alias [] call
