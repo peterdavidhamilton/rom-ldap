@@ -43,6 +43,10 @@ module ROM
         when ::Net::LDAP
           params
         else
+          # encryption: {
+          #   method: :simple_tls,
+          #   tls_options: OpenSSL::SSL::SSLContext::DEFAULT_PARAMS,
+          # }
           ::Net::LDAP.new(params)
         end
       end
