@@ -8,13 +8,13 @@ module ROM
       class Populator
         extend Dry::Initializer::Mixin
 
-        PERSON_CLASSES = %w[
+        PERSON_CLASSES = %w(
           extensibleObject
           inetOrgPerson
           organizationalPerson
           person
           top
-        ].to_enum
+        ).to_enum
 
         option :schema,   default: proc { 'test.ldif' }
         option :domain,   default: proc { 'example.com' }
@@ -95,13 +95,14 @@ module ROM
             @counter += 1
 
             yield create_entry(
-                    dn:           dn,
-                    uid:          name,
-                    cn:           name,
-                    givenname:    name,
-                    sn:           name,
-                    mail:         email,
-                    userpassword: passwd)
+              dn:           dn,
+              uid:          name,
+              cn:           name,
+              givenname:    name,
+              sn:           name,
+              mail:         email,
+              userpassword: passwd
+            )
           end
         end
 
@@ -130,7 +131,7 @@ module ROM
         def domain_ou
           entry               = Net::LDAP::Entry.new(base)
           entry[:ou]          = ou
-          entry[:objectclass] = %w[top organizationalUnit]
+          entry[:objectclass] = %w(top organizationalUnit)
           entry.to_ldif
         end
 

@@ -3,17 +3,22 @@ require 'ladle'
 require 'tmpdir'
 require 'rom/ldap/tasks/populator'
 
+# ldap
+# ----
+# thor ldap:populate  # Populate LDIF schema for test LDAP server
+# thor ldap:start     # Start test directory service
+# thor ldap:stop      # Stop test directory service
+#
 module ROM
   module Ldap
     module Tasks
       class Sandbox < Thor
-
         include Thor::Actions
 
         namespace :ldap
 
         # Usage:
-        #   toolbox populate
+        #   thor ldap:populate
         #
         # Options:
         #   -f, [--fake=N]
@@ -23,18 +28,16 @@ module ROM
         #       [--append], [--no-append]
         #
         # Populate LDIF schema for test LDAP server
-        desc 'populate', 'Populate LDIF schema for test LDAP server'
+        desc 'populate', 'Populate LDIF schema for directory service'
         method_option :fake,   type: :numeric, default: 20,    aliases: '-f'
         method_option :test,   type: :numeric, default: 10,    aliases: '-t'
         method_option :append, type: :boolean, default: false, optional: true
-        #  long description
-        #
         def populate
           start  = Time.now
           schema = populator_options[:schema]
-          populator.(fake:   options[:fake],
-                     test:   options[:test],
-                     append: options[:append])
+          populator.call(fake:   options[:fake],
+                         test:   options[:test],
+                         append: options[:append])
 
           completed = Time.now - start
           say "#{schema} generated in #{completed}", :green
@@ -61,10 +64,7 @@ module ROM
 
         no_tasks do
           def server_options
-            {
-              domain: 'dc=example,dc=com',
-              ldif:   'test.ldif'
-            }
+            { domain: 'dc=example,dc=com', ldif: 'test.ldif' }
           end
 
           def server
@@ -83,7 +83,6 @@ module ROM
             Dir.tmpdir + '/ladle.pid'
           end
         end
-
       end
     end
   end

@@ -15,4 +15,3 @@
 *.a
 mkmf.log
 log/*.log
-test.ldif
