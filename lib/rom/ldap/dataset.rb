@@ -14,21 +14,26 @@ module ROM
       def call(filter)
         results = search_ldap(filter)
         entries_to_hashes(results)
+
+        # connection.paged_searches_supported?
       end
 
       alias [] call
 
       private
 
+      # return enumerable collection, empty if connection fails
+      #
+      # @api private
       def search_ldap(filter)
         begin
-          filter ? connection.search(filter: filter) : connection.search
+          results = filter ? connection.search(filter: filter) : connection.search
         rescue ::Net::LDAP::Error,
                ::Net::LDAP::ConnectionRefusedError,
                ::Errno::ECONNREFUSED
           logger.error 'rom-ldap failed to connect to server'
-          return []
         end
+        connection.bind ? results : []
       end
 
       # coerce Net::LDAP::Entry to hash
