@@ -8,37 +8,48 @@
 module ROM
   module Ldap
     class Dataset
-      # receive string or filter class
+
+      # @param [String, Net::LDAP::Filter]
+      #
+      # @return [Array<Hash>] - empty if no results or connection fails
       #
       # @api public
+      #
       def call(filter)
-        results = search_ldap(filter)
-        entries_to_hashes(results)
+        begin
+          logger.debug(filter)
+          connection.bind                           # check connection
+        rescue ::Net::LDAP::ConnectionRefusedError, # server down (DEPRECATED)
+               ::Errno::ECONNREFUSED,               # server down
+               ::Net::LDAP::Error => error          # timeouts
 
-        # connection.paged_searches_supported?
+          logger.error(error)
+          []
+        else
+          entries_to_hashes search_ldap(filter)
+        end
       end
 
       alias [] call
 
       private
 
-      # return enumerable collection, empty if connection fails
+      # @param [String, Net::LDAP::Filter]
+      #
+      # @return [Array<Net::LDAP::Entry>]
       #
       # @api private
+      #
       def search_ldap(filter)
-        begin
-          results = filter ? connection.search(filter: filter) : connection.search
-        rescue ::Net::LDAP::Error,
-               ::Net::LDAP::ConnectionRefusedError,
-               ::Errno::ECONNREFUSED
-          logger.error 'rom-ldap failed to connect to server'
-        end
-        connection.bind ? results : []
+        filter ? connection.search(filter: filter) : connection.search
       end
 
-      # coerce Net::LDAP::Entry to hash
+      # @param [Array<Net::LDAP::Entry>]
+      #
+      # @return [Array<Hash>]
       #
       # @api private
+      #
       def entries_to_hashes(results)
         results.map(&->(entry) { entry.instance_variable_get(:@myhash) })
       end

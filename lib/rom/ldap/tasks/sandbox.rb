@@ -29,9 +29,11 @@ module ROM
         #
         # Populate LDIF schema for test LDAP server
         desc 'populate', 'Populate LDIF schema for directory service'
+
         method_option :fake,   type: :numeric, default: 20,    aliases: '-f'
         method_option :test,   type: :numeric, default: 10,    aliases: '-t'
         method_option :append, type: :boolean, default: false, optional: true
+
         def populate
           start  = Time.now
           schema = populator_options[:schema]
@@ -44,6 +46,7 @@ module ROM
         end
 
         desc 'start', 'Start test directory service'
+
         def start
           Process.daemon(true, true)
           create_file(pid, force: true) { Process.pid }
@@ -56,6 +59,7 @@ module ROM
         end
 
         desc 'stop', 'Stop test directory service'
+
         def stop
           server.stop
           run "pkill -F #{pid}"

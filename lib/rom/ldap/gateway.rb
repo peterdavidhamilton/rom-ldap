@@ -53,7 +53,7 @@ module ROM
 
       # fallback to Ladle
       def default_params
-        Hash[host: '0.0.0.0', port: 3897, base: 'dc=test']
+        { host: '0.0.0.0', port: 3897, base: 'dc=test' }
       end
 
       # filter = "(groupid=1025)"
