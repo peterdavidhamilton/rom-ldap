@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/rom-rb/rom
-  revision: 0483351bcb2f8d4b2428f3e03123ce800d65970a
+  revision: c258edacc12b997b8bca6f02f7038eb9fb9f9f7f
   specs:
     rom (3.1.0)
       concurrent-ruby (~> 1.0)
@@ -70,6 +70,7 @@ PLATFORMS
 DEPENDENCIES
   bundler
   byebug
+  dry-initializer
   faker
   rake
   rom!

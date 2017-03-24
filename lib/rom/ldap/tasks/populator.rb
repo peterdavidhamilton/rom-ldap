@@ -8,21 +8,22 @@ module ROM
       class Populator
         extend Dry::Initializer::Mixin
 
-        PERSON_CLASSES = %w(
-          extensibleObject
-          inetOrgPerson
-          organizationalPerson
-          person
-          top
-        ).to_enum
-
-        option :schema,   default: proc { 'test.ldif' }
-        option :domain,   default: proc { 'example.com' }
-        option :base,     default: proc { 'ou=users,dc=example,dc=com' }
-        option :diradmin, default: proc { 'diradmin' }
-        option :password, default: proc { 'password' }
-        option :uid,      default: proc { 'uid' }
-        option :ou,       default: proc { 'users' }
+        option :schema,      default: proc { 'test.ldif' }
+        option :domain,      default: proc { 'example.com' }
+        option :base,        default: proc { 'ou=users,dc=example,dc=com' }
+        option :diradmin,    default: proc { 'diradmin' }
+        option :password,    default: proc { 'password' }
+        option :uid,         default: proc { 'uid' }
+        option :ou,          default: proc { 'users' }
+        option :personclass, default: proc {
+                                          %w(
+                                            extensibleObject
+                                            inetOrgPerson
+                                            organizationalPerson
+                                            person
+                                            top
+                                          ).to_enum
+                                        }
 
         def call(fake: 20, test: 10, append: false)
           test_list = test_factory.take(test).join("\n")
@@ -138,7 +139,7 @@ module ROM
         def administrator
           dn                   = distinguished(diradmin)
           entry                = Net::LDAP::Entry.new(dn)
-          entry[:objectclass]  = PERSON_CLASSES
+          entry[:objectclass]  = personclass
           entry[:uid]          = diradmin
           entry[:userpassword] = encrypt_password(password)
           entry[:cn]           = 'Directory Administrator'
@@ -151,12 +152,13 @@ module ROM
         # :sha or :md5 encryption
         #
         def encrypt_password(password, encryption = :sha)
+          return if password.nil?
           Net::LDAP::Password.generate(encryption, password)
         end
 
         def create_entry(attributes)
           entry               = Net::LDAP::Entry.new
-          entry[:objectclass] = PERSON_CLASSES
+          entry[:objectclass] = personclass
           attributes.keys.each { |key| entry[key] = attributes[key] }
           entry.to_ldif
         end

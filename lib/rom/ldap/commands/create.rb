@@ -14,6 +14,7 @@ module ROM
           end
         end
 
+        # TODO: create Distinguishing Name
         # creates a DN based on UID and BASE
         def create_dn(uid)
           "uid=#{uid},#{relation.base}"
