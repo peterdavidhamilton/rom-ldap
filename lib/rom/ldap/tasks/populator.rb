@@ -70,9 +70,9 @@ module ROM
 
         # read in from LDIF file
         #
-        # def load(ldif)
-        #   Net::LDAP::Dataset.read_ldif(ldif)
-        # end
+        def load(ldif)
+          Net::LDAP::Dataset.read_ldif(ldif)
+        end
 
         def fake_factory
           return to_enum(__callee__) unless block_given?
@@ -87,7 +87,7 @@ module ROM
 
         def test_factory
           return to_enum(__callee__) unless block_given?
-          @counter = 1
+          @counter = 0
           loop do
             name   = "test#{@counter}"
             dn     = distinguished(name)
@@ -97,12 +97,15 @@ module ROM
 
             yield create_entry(
               dn:           dn,
+              uidnumber:    @counter,
+              gidnumber:    1001,
               uid:          name,
               cn:           name,
               givenname:    name,
               sn:           name,
               mail:         email,
               userpassword: passwd
+              # 'apple-imhandle': name
             )
           end
         end
@@ -120,6 +123,8 @@ module ROM
 
           {
             dn:           dn,
+            uidnumber:    @counter += 1,
+            gidnumber:    1001,
             uid:          name,
             cn:           display,
             givenname:    first,
@@ -139,6 +144,8 @@ module ROM
         def administrator
           dn                   = distinguished(diradmin)
           entry                = Net::LDAP::Entry.new(dn)
+          entry[:uidnumber]    = 1001
+          entry[:gidnumber]    = 1001
           entry[:objectclass]  = personclass
           entry[:uid]          = diradmin
           entry[:userpassword] = encrypt_password(password)

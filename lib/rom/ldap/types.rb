@@ -8,6 +8,8 @@ module ROM
     module Types
       include ROM::Types
 
+      Input = Types::Coercible::String.optional
+
       Attribute = Types::String.constructor do |v|
         if v.is_a?(Enumerable)
           v.one? ? v.first.to_s : v.map(&:to_s)

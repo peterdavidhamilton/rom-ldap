@@ -15,10 +15,6 @@ module ROM
         extend Forwardable
         delegate METHODS => Net::LDAP::Filter
 
-        # def fetch(dn)
-        #   where(dn: dn)
-        # end
-
         def chain(args)
           # filters is array of Net::LDAP::Filters
           filters = args.each_with_object([]) do |(method, params), obj|
@@ -94,16 +90,17 @@ module ROM
             args.each do |attribute, values|
               next if values.nil?
               # return stash << send(type, attribute) if values.nil?
-
               case values
               when Array
-                values.each { |value| stash << send(type, attribute, escape(value)) }
+                values.each do |value|
+                  stash << send(type, attribute, Types::Input[values])
+                end
               else
-                stash << send(type, attribute, escape(values))
+                stash << send(type, attribute, Types::Input[values])
               end
             end
           else
-            stash << send(type, args)
+            stash << send(type, Types::Input[args])
           end
 
           msg = 'Relation::Filter#generate received no valid arguments'

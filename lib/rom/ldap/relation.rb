@@ -45,9 +45,7 @@ module ROM
         where(dn: dn)
       end
 
-      def by_pk(dn)
-        where(dn: dn)
-      end
+      alias by_pk fetch
 
       def adapter
         Gateway.instance
