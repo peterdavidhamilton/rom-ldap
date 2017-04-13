@@ -8,7 +8,14 @@ module ROM
     module Types
       include ROM::Types
 
-      Input = Types::Coercible::String.optional
+      Input = Types::Coercible::String
+
+      ObjectClasses = Types::Strict::Array
+                      # extensibleObject
+                      # top
+                      # organizationalPerson
+                      # inetOrgPerson
+                      # person
 
       Attribute = Types::String.constructor do |v|
         if v.is_a?(Enumerable)
@@ -23,12 +30,6 @@ module ROM
         ['data:image/jpeg;base64,', Base64.strict_encode64(binary[0])].join
       end
 
-      ObjectClasses = Types::Strict::Array
-      # extensibleObject
-      # top
-      # organizationalPerson
-      # inetOrgPerson
-      # person
     end
   end
 end

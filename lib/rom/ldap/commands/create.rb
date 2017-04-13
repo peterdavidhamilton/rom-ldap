@@ -7,6 +7,7 @@ module ROM
       class Create < ROM::Commands::Create
         adapter :ldap
 
+        # TODO: Remove Array.wrap now decoupled from Active Support
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
             dn = create_dn(tuple[:uid])

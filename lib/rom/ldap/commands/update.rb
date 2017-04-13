@@ -7,6 +7,7 @@ module ROM
       class Update < ROM::Commands::Update
         adapter :ldap
 
+        # TODO: Remove Array.wrap now decoupled from Active Support
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
             # :remove if v nil

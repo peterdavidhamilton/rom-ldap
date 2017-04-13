@@ -59,8 +59,7 @@ module ROM
         # TODO: match_all match_any
         # TODO: search ranges lt and gt etc
         def within(range)
-          upper = range.to_a.last
-          upper = range.to_a.first
+          lower, upper = range.to_a.first, range.to_a.last
         end
 
         alias between within
@@ -77,22 +76,23 @@ module ROM
 
         alias lte below
 
-        def prefix
+        def prefix(args)
           _join generate(:begins, args)
         end
 
-        def suffix
+        def suffix(args)
           _join generate(:ends, args)
         end
 
         def generate(type, args, stash = [])
-          if args.respond_to?(:each)
+          if args.is_a?(Enumerable)
             args.each do |attribute, values|
-              next if values.nil?
-              # return stash << send(type, attribute) if values.nil?
-              case values
-              when Array
+              case
+              when (values.nil? or values.empty?)
+                stash << send(:present, attribute)
+              when values.is_a?(Enumerable)
                 values.each do |value|
+                  next if value.nil?
                   stash << send(type, attribute, Types::Input[values])
                 end
               else

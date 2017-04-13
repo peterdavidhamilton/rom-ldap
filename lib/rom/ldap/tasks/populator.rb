@@ -87,13 +87,12 @@ module ROM
 
         def test_factory
           return to_enum(__callee__) unless block_given?
-          @counter = 0
+          @counter = 1
           loop do
             name   = "test#{@counter}"
             dn     = distinguished(name)
             email  = local_email(name)
             passwd = encrypt_password(name)
-            @counter += 1
 
             yield create_entry(
               dn:           dn,
@@ -107,6 +106,8 @@ module ROM
               userpassword: passwd
               # 'apple-imhandle': name
             )
+
+            @counter += 1
           end
         end
 
