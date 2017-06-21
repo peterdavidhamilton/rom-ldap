@@ -7,19 +7,28 @@ require 'rom/ldap/types'
 module ROM
   module Ldap
     class Schema < ROM::Schema
-      def finalize!(gateway:, relations:)
-        # binding.pry
-        # super returned
-        # <ROM::Ldap::Schema name=ROM::Relation::Name(entries on persistence_relations_people) attributes=[] associations=#<ROM::AssociationSet elements={}>>
 
-        super do
-          # binding.pry
-          # rename({})
-        end
+      # @api private
+      # def initialize(*)
+      #   binding.pry
+      #   super
+      # end
+
+      # @api private
+      def finalize_attributes!(options = EMPTY_HASH)
+        # binding.pry
+        super
       end
 
-      def call(relation)
+      # @api private
+      def finalize_associations!(relations:)
         # binding.pry
+        super
+      end
+
+
+
+      def call(relation)
         relation.new(relation.dataset.select(*self), schema: self)
       end
     end

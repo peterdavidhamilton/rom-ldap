@@ -7,86 +7,115 @@ module ROM
       class Inferrer
         extend Dry::Core::ClassAttributes
 
-        defines :ruby_type_mapping, :db_type, :db_registry # , :numeric_pk_type
+        defines :ruby_type_mapping,
+                :directory_type,
+                :directory_registry,
+                :numeric_pk_type
 
+        # known types - unknown could be derived from class lookup
         ruby_type_mapping(
-          ou:           Types::Attribute,
-          dn:           Types::Attribute,
-          uid:          Types::Attribute,
-          givenname:    Types::Attribute,
-          sn:           Types::Attribute,
-          cn:           Types::Attribute,
-          mail:         Types::Attribute,
-          userpassword: Types::Attribute,
-          jpegphoto:    Types::Image,
-          objectclass:  Types::ObjectClasses
+          default:                Types::Attribute,
+
+          "apple-company":        Types::Array.member(Types::String),
+          "apple-generateduid":   Types::Array.member(Types::String),
+          "apple-imhandle":       Types::Array.member(Types::String),
+          "apple-mcxflags":       Types::Array.member(Types::String),
+          "apple-mcxsettings":    Types::Array.member(Types::String),
+          "apple-user-homequota": Types::Array.member(Types::String),
+          "apple-user-homeurl":   Types::Array.member(Types::String),
+          altsecurityidentities:  Types::Array.member(Types::String),
+          authauthority:          Types::Array.member(Types::String),
+          c:                      Types::Array.member(Types::String),
+          cn:                     Types::Array.member(Types::String),
+          description:            Types::Array.member(Types::String),
+          dn:                     Types::Array.member(Types::String),
+          gidnumber:              Types::Array.member(Types::Int),
+          givenname:              Types::Array.member(Types::String),
+          homedirectory:          Types::Array.member(Types::String),
+          jpegphoto:              Types::Image,
+          l:                      Types::Array.member(Types::String),
+          labeleduri:             Types::Array.member(Types::String),
+          loginshell:             Types::Array.member(Types::String),
+          mail:                   Types::Array.member(Types::String),
+          mobile:                 Types::Array.member(Types::String),
+          objectclass:            Types::ObjectClasses,
+          postalcode:             Types::Array.member(Types::String),
+          shadowexpire:           Types::Array.member(Types::Date),
+          shadowlastchange:       Types::Array.member(Types::Date),
+          sn:                     Types::Array.member(Types::String),
+          st:                     Types::Array.member(Types::String),
+          street:                 Types::Array.member(Types::String),
+          uid:                    Types::Array.member(Types::String),
+          uidnumber:              Types::Array.member(Types::Int),
+          userpassword:           Types::Array.member(Types::String)
         ).freeze
 
-        db_registry Hash.new(self)
+        directory_registry Hash.new(self)
+
+        numeric_pk_type Types::Int
+        # numeric_pk_type Types::Serial
 
         def self.get(type)
-          db_registry[type]
+          directory_registry[type]
+        end
+
+        def self.inherited(klass)
+          super
+
+          Inferrer.db_registry[klass.directory_type] = klass unless klass.name.nil?
         end
 
         def self.[](type)
-          Class.new(self) { db_type(type) }
+          Class.new(self) { directory_type(type) }
+        end
+
+        def self.on_error(relation, e)
+          warn "[#{relation}] failed to infer schema. " \
+               "This LDAP territory" \
+               "(#{e.message})"
         end
 
         # # @api private
         def call(source, gateway)
-          # [
-          #   [0] :dn,
-          #   [1] :sn,
-          #   [2] :cn,
-          #   [3] :objectclass,
-          #   [4] :givenname,
-          #   [5] :uid,
-          #   [6] :mail,
-          #   [7] :jpegphoto,
-          #   [8] :userpassword,
-          #   [9] :ou
-          # ]
-          attributes = gateway.connection.search.map(&:attribute_names).flatten.uniq
+          # objectclasses  ||= schema_entries(gateway, :objectclasses)
+          # attributetypes ||= schema_entries(gateway, :attributetypes)
+          # all_attributes ||= parse_entries(attributetypes)
+          attributes = used_attributes(gateway, source.dataset)
 
-          # gateway.connection.search_subschema_entry[:attributetypes].to_a
-          # gateway.connection.search_subschema_entry[:objectclasses].to_a
-
-          inferred = attributes.each_with_object({}) do |name, attrs|
+          inferred = attributes.map do |name|
             type = map_type(name)
-            attrs[name] = type.meta(name: name, source: source)
+            type.meta(name: name, source: source)
           end
 
-          # [inferred, attributes.map(&:first) - inferred.map { |attr| attr.meta[:name] }]
-
-          [*inferred, attributes]
-
-          # inferred.to_a
+          [inferred, attributes - inferred.map { |attr| attr.meta[:name] }]
         end
 
-        # def build_type(primary_key:, db_type:, type:, allow_null:, foreign_key:, **rest)
-        #    if primary_key
-        #      map_pk_type(type, db_type)
-        #    else
-        #      mapped_type = map_type(type, db_type, rest)
+        private
 
-        #      if mapped_type
-        #        read_type = mapped_type.meta[:read]
-        #        mapped_type = mapped_type.optional if allow_null
-        #        mapped_type = mapped_type.meta(foreign_key: true, target: foreign_key) if foreign_key
-        #        if read_type && allow_null
-        #          mapped_type.meta(read: read_type.optional)
-        #        elsif read_type
-        #          mapped_type.meta(read: read_type)
-        #        else
-        #          mapped_type
-        #        end
-        #      end
-        #    end
-        #  end
-
-        def map_type(ruby_type)
-          self.class.ruby_type_mapping.fetch(ruby_type)
+        def map_type(name)
+          mappings = self.class.ruby_type_mapping
+          mappings[name] or mappings[:default]
         end
+
+        def used_attributes(gateway, filter)
+          gateway.connection.search(filter: filter)
+            .map(&:attribute_names).flatten.uniq
+        end
+
+        # def all_attributes(gateway)
+        #   gateway.connection.search
+        #     .map(&:attribute_names).flatten.uniq
+        # end
+
+        # def schema_entries(gateway, schema_entry)
+        #   gateway.connection.search_subschema_entry[schema_entry].to_a
+        # end
+
+        # def parse_entries(entries)
+        #   entries.map do |entry|
+        #     entry.split(' ')[3].tr("'", '').to_sym
+        #   end
+        # end
       end
     end
   end

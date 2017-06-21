@@ -9,17 +9,19 @@ require 'rom/ldap/dataset'
 require 'rom/ldap/relation/filter'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
-require 'rom/plugins/relation/key_inference'
 
 module ROM
   module Ldap
     class Relation < ROM::Relation
       adapter :ldap
 
-      use :key_inference
-
       include Reading
       include Writing
+
+      schema_class Ldap::Schema
+      # schema_attr_class SQL::Attribute
+      # wrap_class SQL::Wrap
+
 
       # rename the image attribute used by incoming params
       # option :image, type: Symbol, reader: true, default: :jpegphoto
@@ -31,14 +33,50 @@ module ROM
         super
 
         klass.class_eval do
-          schema_class Ldap::Schema
-          # schema_dsl    Ldap::Schema::DSL
+          schema_inferrer -> (name, gateway) do
+            inferrer_for_ldap = ROM::Ldap::Schema::Inferrer.new
+            # begin
+              inferrer_for_ldap.call(name, gateway)
+            # rescue Sequel::Error => e
+            #   inferrer_for_ldap.on_error(klass, e)
+            #   ROM::Schema::DEFAULT_INFERRER.()
+            # end
 
-          # schema_inferrer -> (name, gateway) do
-          #   ROM::Ldap::Schema::Inferrer.new.call(name, gateway)
-          # end
+          end
+
+          dataset do
+             # TODO: feels strange to do it here - we need a new hook for this during finalization
+
+            # binding.pry
+
+            # klass.define_default_views!
+            schema = klass.schema
+
+            # table = opts[:from].first
+
+            # if table
+            #   if schema
+            #     select(*schema.map(&:to_sql_name)).order(*schema.project(*schema.primary_key_names).qualified.map(&:to_sql_name))
+            #   else
+            #     select(*columns).order(*klass.primary_key_columns(db, table))
+            #   end
+            # else
+            #   self
+            # end
+
+            self
+          end
+
+
         end
       end
+
+      # @api private
+      def self.associations
+        schema.associations
+      end
+
+
 
       # fetch and by_pk are prerequisites for using changesets
       def fetch(dn)
