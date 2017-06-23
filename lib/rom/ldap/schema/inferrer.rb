@@ -69,12 +69,6 @@ module ROM
           Class.new(self) { directory_type(type) }
         end
 
-        def self.on_error(relation, e)
-          warn "[#{relation}] failed to infer schema. " \
-               "This LDAP territory" \
-               "(#{e.message})"
-        end
-
         # # @api private
         def call(source, gateway)
           # objectclasses  ||= schema_entries(gateway, :objectclasses)
@@ -98,8 +92,22 @@ module ROM
         end
 
         def used_attributes(gateway, filter)
-          gateway.connection.search(filter: filter)
+          begin
+            gateway.connection.bind
+          rescue ::Net::LDAP::ConnectionRefusedError,
+                 ::Errno::ECONNREFUSED,
+                 ::Net::LDAP::Error => error
+            on_error(filter, error)
+          else
+            gateway.connection.search(filter: filter)
             .map(&:attribute_names).flatten.uniq
+          end
+        end
+
+        # Abort if a relation schema uses inference.
+        # Unlike the dataset which will rescue with an empty array
+        def on_error(relation, e)
+          abort "ROM::Ldap::Relation[#{relation}] failed to infer schema. (#{e.message})"
         end
 
         # def all_attributes(gateway)

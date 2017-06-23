@@ -26,6 +26,8 @@ module ROM
         self.class.instance = self
       end
 
+      # filter = "(uid=*)"
+      # filter = "(uidnumber>1000)"
       # filter = "(groupid=1025)"
       def call(filter)
         fetch_or_store(filter.hash) { dataset(filter) }
