@@ -127,9 +127,41 @@ module ROM
       end
 
       # @api private
-      def attributes
-        # [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
+      # def attributes
+      #   # [:dn, :uid, :givenname, :sn, :cn, :mail, :objectclass]
+      # end
+
+
+      def primary_key
+        attribute = schema.find(&:primary_key?)
+
+        if attribute
+          attribute.alias || attribute.name
+        else
+          :id
+        end
       end
+
+      def project(*names)
+        with(schema: schema.project(*names.flatten))
+      end
+
+      def exclude(*names)
+        with(schema: schema.exclude(*names.flatten))
+      end
+
+      def rename(mapping)
+        with(schema: schema.rename(mapping))
+      end
+
+      def prefix(prefix)
+        with(schema: schema.prefix(prefix))
+      end
+
+      def wrap(prefix = dataset.name)
+        with(schema: schema.wrap(prefix))
+      end
+
     end
   end
 end

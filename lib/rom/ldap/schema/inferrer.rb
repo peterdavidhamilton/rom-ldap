@@ -13,42 +13,42 @@ module ROM
                 :numeric_pk_type
 
         # known types - unknown could be derived from class lookup
-        ruby_type_mapping(
-          default:                Types::Attribute,
+        # ruby_type_mapping(
+        #   default:                Types::StringArray,
 
-          "apple-company":        Types::Array.member(Types::String),
-          "apple-generateduid":   Types::Array.member(Types::String),
-          "apple-imhandle":       Types::Array.member(Types::String),
-          "apple-mcxflags":       Types::Array.member(Types::String),
-          "apple-mcxsettings":    Types::Array.member(Types::String),
-          "apple-user-homequota": Types::Array.member(Types::String),
-          "apple-user-homeurl":   Types::Array.member(Types::String),
-          altsecurityidentities:  Types::Array.member(Types::String),
-          authauthority:          Types::Array.member(Types::String),
-          c:                      Types::Array.member(Types::String),
-          cn:                     Types::Array.member(Types::String),
-          description:            Types::Array.member(Types::String),
-          dn:                     Types::Array.member(Types::String),
-          gidnumber:              Types::Array.member(Types::Int),
-          givenname:              Types::Array.member(Types::String),
-          homedirectory:          Types::Array.member(Types::String),
-          jpegphoto:              Types::Image,
-          l:                      Types::Array.member(Types::String),
-          labeleduri:             Types::Array.member(Types::String),
-          loginshell:             Types::Array.member(Types::String),
-          mail:                   Types::Array.member(Types::String),
-          mobile:                 Types::Array.member(Types::String),
-          objectclass:            Types::ObjectClasses,
-          postalcode:             Types::Array.member(Types::String),
-          shadowexpire:           Types::Array.member(Types::Date),
-          shadowlastchange:       Types::Array.member(Types::Date),
-          sn:                     Types::Array.member(Types::String),
-          st:                     Types::Array.member(Types::String),
-          street:                 Types::Array.member(Types::String),
-          uid:                    Types::Array.member(Types::String),
-          uidnumber:              Types::Array.member(Types::Int),
-          userpassword:           Types::Array.member(Types::String)
-        ).freeze
+        #   "apple-company":        Types::StringArray,
+        #   "apple-generateduid":   Types::StringArray,
+        #   "apple-imhandle":       Types::StringArray,
+        #   "apple-mcxflags":       Types::StringArray,
+        #   "apple-mcxsettings":    Types::StringArray,
+        #   "apple-user-homequota": Types::StringArray,
+        #   "apple-user-homeurl":   Types::StringArray,
+        #   altsecurityidentities:  Types::StringArray,
+        #   authauthority:          Types::StringArray,
+        #   c:                      Types::StringArray,
+        #   cn:                     Types::StringArray,
+        #   description:            Types::StringArray,
+        #   dn:                     Types::StringArray,
+        #   gidnumber:              Types::StringArray,
+        #   givenname:              Types::StringArray,
+        #   homedirectory:          Types::StringArray,
+        #   jpegphoto:              Types::Image,
+        #   l:                      Types::StringArray,
+        #   labeleduri:             Types::StringArray,
+        #   loginshell:             Types::StringArray,
+        #   mail:                   Types::StringArray,
+        #   mobile:                 Types::StringArray,
+        #   objectclass:            Types::StringArray,
+        #   postalcode:             Types::StringArray,
+        #   shadowexpire:           Types::StringArray,
+        #   shadowlastchange:       Types::StringArray,
+        #   sn:                     Types::StringArray,
+        #   st:                     Types::StringArray,
+        #   street:                 Types::StringArray,
+        #   uid:                    Types::StringArray,
+        #   uidnumber:              Types::StringArray,
+        #   userpassword:           Types::StringArray
+        # ).freeze
 
         directory_registry Hash.new(self)
 
@@ -77,8 +77,9 @@ module ROM
           attributes = used_attributes(gateway, source.dataset)
 
           inferred = attributes.map do |name|
-            type = map_type(name)
-            type.meta(name: name, source: source)
+            # NB: inference disabled if coercion is handled outside this adapter and all incoming datasets are arrays of strings.
+            # type = map_type(name)
+            Types::Attribute.meta(name: name, source: source)
           end
 
           [inferred, attributes - inferred.map { |attr| attr.meta[:name] }]
@@ -86,10 +87,10 @@ module ROM
 
         private
 
-        def map_type(name)
-          mappings = self.class.ruby_type_mapping
-          mappings[name] or mappings[:default]
-        end
+        # def map_type(name)
+        #   mappings = self.class.ruby_type_mapping
+        #   mappings[name] || mappings[:default]
+        # end
 
         def used_attributes(gateway, filter)
           begin

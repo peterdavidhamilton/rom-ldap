@@ -83,6 +83,23 @@ module ROM
         def order(attribute)
           new(dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] })
         end
+
+
+        # Qualifies all columns in a relation
+        #
+        # This method is intended to be used internally within a relation object
+        #
+        # @example
+        #   users.qualified.dataset.sql
+        #   # SELECT "users"."id", "users"."name" ...
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def qualified
+          binding.pry
+          schema.qualified.(self)
+        end
       end
     end
   end

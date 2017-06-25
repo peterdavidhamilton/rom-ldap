@@ -10,7 +10,8 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
       class Filter
-        class FilterError < ::StandardError; end
+        # class FilterError < ::StandardError; end
+        FilterError = Class.new(StandardError)
 
         extend Forwardable
         delegate METHODS => Net::LDAP::Filter
