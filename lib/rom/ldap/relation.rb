@@ -112,6 +112,11 @@ module ROM
         directory.get_operation_result
       end
 
+
+      # Other adapters call class level forward
+      # forward :join, :project, :restrict, :order
+
+
       # @return Dataset from a single filter
       #
       # @api public

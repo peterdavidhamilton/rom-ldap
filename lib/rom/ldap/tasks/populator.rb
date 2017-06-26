@@ -25,7 +25,8 @@ module ROM
                                           ).to_enum
                                         }
 
-        def call(fake: 20, test: 10, append: false)
+        def call(fake: 20, test: 10, append: false, uidnumber: 1)
+          @counter  = uidnumber
           test_list = test_factory.take(test).join("\n")
           fake_list = fake_factory.take(fake).join("\n")
 
@@ -87,7 +88,7 @@ module ROM
 
         def test_factory
           return to_enum(__callee__) unless block_given?
-          @counter = 1
+          # @counter = 1
           loop do
             name   = "test#{@counter}"
             dn     = distinguished(name)
