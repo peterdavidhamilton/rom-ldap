@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 require 'dry/core/cache'
+require 'dry/core/constants'
+
 require 'rom/gateway'
 require 'rom/ldap/dataset'
 
@@ -9,6 +11,7 @@ module ROM
   module Ldap
     class Gateway < ROM::Gateway
       extend Dry::Core::Cache
+      include Dry::Core::Constants
 
       class << self
         attr_accessor :instance

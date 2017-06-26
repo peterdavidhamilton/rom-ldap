@@ -1,130 +1,53 @@
-require 'dry/core/class_attributes'
+require 'rom/ldap/schema/attributes_inferrer'
+require 'rom/ldap/attribute'
 
 module ROM
   module Ldap
     class Schema < ROM::Schema
       # @api private
-      class Inferrer
-        extend Dry::Core::ClassAttributes
+      class Inferrer < ROM::Schema::Inferrer
 
-        defines :ruby_type_mapping,
-                :directory_type,
-                :directory_registry,
-                :numeric_pk_type
+        attributes_inferrer -> (schema, gateway, options) do
+          # TODO: differentiate between different directory backends
 
-        # known types - unknown could be derived from class lookup
-        # ruby_type_mapping(
-        #   default:                Types::StringArray,
+          # AttributesInferrer.get(gateway.database_type).with(options).(schema, gateway)
 
-        #   "apple-company":        Types::StringArray,
-        #   "apple-generateduid":   Types::StringArray,
-        #   "apple-imhandle":       Types::StringArray,
-        #   "apple-mcxflags":       Types::StringArray,
-        #   "apple-mcxsettings":    Types::StringArray,
-        #   "apple-user-homequota": Types::StringArray,
-        #   "apple-user-homeurl":   Types::StringArray,
-        #   altsecurityidentities:  Types::StringArray,
-        #   authauthority:          Types::StringArray,
-        #   c:                      Types::StringArray,
-        #   cn:                     Types::StringArray,
-        #   description:            Types::StringArray,
-        #   dn:                     Types::StringArray,
-        #   gidnumber:              Types::StringArray,
-        #   givenname:              Types::StringArray,
-        #   homedirectory:          Types::StringArray,
-        #   jpegphoto:              Types::Image,
-        #   l:                      Types::StringArray,
-        #   labeleduri:             Types::StringArray,
-        #   loginshell:             Types::StringArray,
-        #   mail:                   Types::StringArray,
-        #   mobile:                 Types::StringArray,
-        #   objectclass:            Types::StringArray,
-        #   postalcode:             Types::StringArray,
-        #   shadowexpire:           Types::StringArray,
-        #   shadowlastchange:       Types::StringArray,
-        #   sn:                     Types::StringArray,
-        #   st:                     Types::StringArray,
-        #   street:                 Types::StringArray,
-        #   uid:                    Types::StringArray,
-        #   uidnumber:              Types::StringArray,
-        #   userpassword:           Types::StringArray
-        # ).freeze
-
-        directory_registry Hash.new(self)
-
-        numeric_pk_type Types::Int
-        # numeric_pk_type Types::Serial
-
-        def self.get(type)
-          directory_registry[type]
+          AttributesInferrer.new(options).(schema, gateway)
         end
 
-        def self.inherited(klass)
-          super
+        attr_class Ldap::Attribute
 
-          Inferrer.db_registry[klass.directory_type] = klass unless klass.name.nil?
+        option :silent, default: -> { false }
+
+        option :raise_on_error, default: -> { true }
+
+        FALLBACK_SCHEMA = { attributes: EMPTY_ARRAY, indexes: EMPTY_SET }.freeze
+
+        # @api private
+        def call(schema, gateway)
+          inferred = super
+
+          # indexes = get_indexes(gateway, schema.name.dataset, inferred[:attributes])
+          # { **inferred, indexes: indexes }
+
+          { **inferred }
+
+        rescue ::Net::LDAP::ConnectionRefusedError,
+               ::Errno::ECONNREFUSED,
+               ::Net::LDAP::Error => error
+
+          on_error(schema.name, error)
+          FALLBACK_SCHEMA
         end
 
-        def self.[](type)
-          Class.new(self) { directory_type(type) }
+        def suppress_errors
+          with(raise_on_error: false, silent: true)
         end
 
-        # # @api private
-        def call(source, gateway)
-          # objectclasses  ||= schema_entries(gateway, :objectclasses)
-          # attributetypes ||= schema_entries(gateway, :attributetypes)
-          # all_attributes ||= parse_entries(attributetypes)
-          attributes = used_attributes(gateway, source.dataset)
-
-          inferred = attributes.map do |name|
-            # NB: inference disabled if coercion is handled outside this adapter and all incoming datasets are arrays of strings.
-            # type = map_type(name)
-            Types::Attribute.meta(name: name, source: source)
-          end
-
-          [inferred, attributes - inferred.map { |attr| attr.meta[:name] }]
+        def on_error(relation, e = nil)
+          abort "ROM::Ldap::Relation[#{relation}] failed to infer schema. \
+                (#{e.message})"
         end
-
-        private
-
-        # def map_type(name)
-        #   mappings = self.class.ruby_type_mapping
-        #   mappings[name] || mappings[:default]
-        # end
-
-        def used_attributes(gateway, filter)
-          begin
-            gateway.connection.bind
-          rescue ::Net::LDAP::ConnectionRefusedError,
-                 ::Errno::ECONNREFUSED,
-                 ::Net::LDAP::Error => error
-            on_error(filter, error)
-          else
-            gateway.connection.search(filter: filter)
-            .map(&:attribute_names).flatten.uniq
-          end
-        end
-
-        # Abort if a relation schema uses inference.
-        # Unlike the dataset which will rescue with an empty array
-        def on_error(relation, e)
-          abort "ROM::Ldap::Relation[#{relation}] failed to infer schema. (#{e.message})"
-        end
-
-        # def all_attributes(gateway)
-        #   gateway.connection.search
-        #     .map(&:attribute_names).flatten.uniq
-        # end
-
-        # def schema_entries(gateway, schema_entry)
-        #   gateway.connection.search_subschema_entry[schema_entry].to_a
-        # end
-
-        # def parse_entries(entries)
-        #   entries.map do |entry|
-        #     entry.split(' ')[3].tr("'", '').to_sym
-        #   end
-        # end
       end
     end
   end

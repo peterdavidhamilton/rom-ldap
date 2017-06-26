@@ -8,36 +8,34 @@ module ROM
   module Ldap
     class Schema < ROM::Schema
 
-      # @api private
-      # def initialize(*)
-      #   binding.pry
-      #   super
+      # # Return a new schema with attributes marked as qualified
+      # #
+      # # @return [Schema]
+      # #
+      # # @api public
+      # def qualified
+      #   new(map(&:qualified))
+
+      #   # qualified method used when attempting to aggregate from inside sql repo, this is called from Ldap::relation #qualified
       # end
 
-      # Return a new schema with attributes marked as qualified
+
+
+      # Return an empty schema
       #
       # @return [Schema]
       #
       # @api public
-      def qualified
-        new(map(&:qualified))
-
-        # qualified method used when attempting to aggregate from inside sql repo, this is called from Ldap::relation #qualified
+      def empty
+        new(EMPTY_ARRAY)
       end
 
 
       # @api private
       def finalize_attributes!(options = EMPTY_HASH)
-
-        # options { gateway: ROM::Ldap::Gateway, relations: (all 29) }
-
-        # binding.pry
         super do
           initialize_primary_key_names
         end
-
-        # super #gives
-        #<ROM::Ldap::Schema name=ROM::Relation::Name(colleagues on (groupid=1025)) attributes=[] associations=#<ROM::AssociationSet elements={}>>
       end
 
       # @api private
@@ -49,11 +47,10 @@ module ROM
         end
       end
 
+
       def call(relation)
         relation.new(relation.dataset.select(*self), schema: self)
       end
     end
   end
 end
-
-# require 'rom/ldap/schema/dsl'

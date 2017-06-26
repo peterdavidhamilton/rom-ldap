@@ -8,7 +8,7 @@ module ROM
         # @api public
         def call(target: self.target)
           binding.pry
-          schema = target.schema.qualified
+          schema   = target.schema.qualified
           relation = target.join(source_table, join_keys)
 
           if view
