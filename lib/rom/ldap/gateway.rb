@@ -1,74 +1,74 @@
-# encoding: utf-8
-# frozen_string_literal: true
-
-require 'dry/core/cache'
-require 'dry/core/constants'
-
 require 'rom/gateway'
 require 'rom/ldap/dataset'
-
+#
+# responsible for connecting to the directory and handling failure
+#
 module ROM
   module Ldap
     class Gateway < ROM::Gateway
-      extend Dry::Core::Cache
+
       include Dry::Core::Constants
 
-      class << self
-        attr_accessor :instance
-      end
-
-      attr_reader :connection
-      attr_reader :logger
-      attr_reader :options
-
-      def initialize(ldap_params, options = {})
-        @connection = connect(ldap_params)
-        @options    = options
-        @logger     = options[:logger] || Logger.new(STDOUT)
-
-        self.class.instance = self
-      end
-
-      # filter = "(uid=*)"
-      # filter = "(uidnumber>1000)"
-      # filter = "(groupid=1025)"
-      def call(filter)
-        fetch_or_store(filter.hash) { dataset(filter) }
-      end
-
-      alias [] call
-
-      # {
-      #   host: ldap.host,
-      #   port: ldap.port,
-      #   base: ldap.base
-      # }
-      def connect(params = default_params)
+      def self.client(params = {})
         case params
         when ::Net::LDAP
           params
         else
-          # encryption: {
-          #   method: :simple_tls,
-          #   tls_options: OpenSSL::SSL::SSLContext::DEFAULT_PARAMS,
-          # }
           ::Net::LDAP.new(params)
         end
       end
 
-      # fallback to Ladle
-      def default_params
-        { host: '0.0.0.0', port: 3897, base: 'dc=test' }
+      attr_reader :client
+
+      # @!attribute [r] logger
+      #   @return [Object] configured gateway logger
+      attr_reader :logger
+
+      # @!attribute [r] options
+      #   @return [Hash] Options used for connection
+      attr_reader :options
+
+
+      def initialize(ldap_params, options = {})
+        @client  = self.class.client(ldap_params)
+        @options = options
+        @logger  = options[:logger] || Logger.new(STDOUT)
+
+        super()
       end
 
-      # filter = "(groupid=1025)"
-      def dataset(filter)
-        Dataset.new[filter]
+      # chains methods for the api to eventually call
+      # name of table not applicable
+      #
+      def dataset(_name)
+        Dataset::Composers::Criteria.new(api)
       end
 
-      # what is this?
-      def dataset?(name)
-        dataset.key?(name)
+      # raw ldap search used by attribute_inferrer
+      #
+      # @api public
+      def [](name)
+        api.raw(name)
+      end
+
+      private
+
+      def api
+        Dataset::API.new(connection, logger)
+      end
+
+      def connection
+        begin
+          client.bind
+        rescue ::Net::LDAP::ConnectionRefusedError,
+               ::Errno::ECONNREFUSED,
+               ::Net::LDAP::Error => e
+
+          logger.error(e)
+          abort "ROM::Ldap::Gateway failed to bind - #{e.message}"
+        else
+          client
+        end
       end
     end
   end

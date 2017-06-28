@@ -9,7 +9,6 @@ module ROM
 
         attributes_inferrer -> (schema, gateway, options) do
           # TODO: differentiate between different directory backends
-
           # AttributesInferrer.get(gateway.database_type).with(options).(schema, gateway)
 
           AttributesInferrer.new(options).(schema, gateway)
@@ -34,9 +33,9 @@ module ROM
 
         rescue ::Net::LDAP::ConnectionRefusedError,
                ::Errno::ECONNREFUSED,
-               ::Net::LDAP::Error => error
+               ::Net::LDAP::Error => e
 
-          on_error(schema.name, error)
+          on_error(schema.name, e)
           FALLBACK_SCHEMA
         end
 
@@ -45,8 +44,8 @@ module ROM
         end
 
         def on_error(relation, e = nil)
-          abort "ROM::Ldap::Relation[#{relation}] failed to infer schema. \
-                (#{e.message})"
+          abort "ROM::Ldap::Relation[#{relation}] \
+                failed to infer schema. #{e.message}"
         end
       end
     end

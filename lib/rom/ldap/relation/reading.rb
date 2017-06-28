@@ -1,24 +1,12 @@
-# encoding: utf-8
-# frozen_string_literal: true
-
-require 'rom/ldap/constants'
-
 module ROM
   module Ldap
     class Relation < ROM::Relation
       module Reading
-        def self.included(klass)
-          # @return Dataset
-          #
-          # @api public
-          def filter(args)
-            filter = Filter.new.send(__callee__, args)
-            new(search(filter))
-          end
-
-          klass.class_eval do
-            FILTERS.each { |f| alias_method f, :filter }
-          end
+        # @return Array
+        #
+        # @api public
+        def order(attribute)
+          new(dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] })
         end
 
         # @return Integer
@@ -77,12 +65,6 @@ module ROM
           new(dataset.shuffle)
         end
 
-        # @return Array
-        #
-        # @api public
-        def order(attribute)
-          new(dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] })
-        end
 
 
         # Qualifies all columns in a relation

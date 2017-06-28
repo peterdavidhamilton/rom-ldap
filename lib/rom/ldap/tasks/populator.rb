@@ -1,6 +1,7 @@
 require 'dry-initializer'
 require 'net/ldap'
 require 'faker'
+# require 'securerandom'
 
 module ROM
   module Ldap
@@ -25,8 +26,11 @@ module ROM
                                           ).to_enum
                                         }
 
-        def call(fake: 20, test: 10, append: false, uidnumber: 1)
-          @counter  = uidnumber
+        attr_reader :counter, :gid
+
+        def call(fake: 20, test: 10, append: false, uid: 1, gid: 80)
+          @gid      = gid
+          @counter  = uid
           test_list = test_factory.take(test).join("\n")
           fake_list = fake_factory.take(fake).join("\n")
 
@@ -88,27 +92,28 @@ module ROM
 
         def test_factory
           return to_enum(__callee__) unless block_given?
-          # @counter = 1
+
           loop do
-            name   = "test#{@counter}"
+            name   = "test_#{counter}"
             dn     = distinguished(name)
             email  = local_email(name)
             passwd = encrypt_password(name)
 
             yield create_entry(
-              dn:           dn,
-              uidnumber:    @counter,
-              gidnumber:    1001,
-              uid:          name,
-              cn:           name,
-              givenname:    name,
-              sn:           name,
-              mail:         email,
-              userpassword: passwd
-              # 'apple-imhandle': name
+              dn:                   dn,
+              uidnumber:            counter,
+              gidnumber:            gid,
+              uid:                  name,
+              cn:                   name,
+              givenname:            name,
+              sn:                   name,
+              mail:                 email,
+              userpassword:         passwd,
+              'apple-imhandle':     name,
+              # 'apple-generateduid': SecureRandom.uuid,
             )
 
-            @counter += 1
+            increment!
           end
         end
 
@@ -125,8 +130,8 @@ module ROM
 
           {
             dn:           dn,
-            uidnumber:    @counter += 1,
-            gidnumber:    1001,
+            uidnumber:    increment!,
+            gidnumber:    gid,
             uid:          name,
             cn:           display,
             givenname:    first,
@@ -134,6 +139,10 @@ module ROM
             mail:         email,
             userpassword: passwd
           }
+        end
+
+        def increment!
+          @counter += 1
         end
 
         def domain_ou

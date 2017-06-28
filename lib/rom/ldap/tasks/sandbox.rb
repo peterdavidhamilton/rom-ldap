@@ -30,10 +30,11 @@ module ROM
         # Populate LDIF schema for test LDAP server
         desc 'populate', 'Populate LDIF schema for directory service'
 
-        method_option :fake,      type: :numeric, default: 20,    aliases: '-f'
-        method_option :test,      type: :numeric, default: 10,    aliases: '-t'
-        method_option :uidnumber, type: :numeric, optional: true, aliases: '-u'
-        method_option :append,    type: :boolean, default: false
+        method_option :fake,   type: :numeric, default: 20,    aliases: '-f'
+        method_option :test,   type: :numeric, default: 10,    aliases: '-t'
+        method_option :append, type: :boolean, default: false
+        method_option :uid,    type: :numeric, optional: true, aliases: '-u'
+        method_option :gid,    type: :numeric, optional: true, aliases: '-g'
 
         # OPTIMIZE: dependency on symolize_keys hash method
         def populate

@@ -1,6 +1,3 @@
-# encoding: utf-8
-# frozen_string_literal: true
-
 module ROM
   module Ldap
     module Commands
@@ -11,6 +8,7 @@ module ROM
         def execute(tuples)
           Array.wrap(tuples).each do |tuple|
             dn = create_dn(tuple[:uid])
+            binding.pry
             relation.create(dn, tuple)
           end
         end
