@@ -7,8 +7,6 @@ module ROM
   module Ldap
     class Gateway < ROM::Gateway
 
-      include Dry::Core::Constants
-
       def self.client(params = {})
         case params
         when ::Net::LDAP
@@ -32,7 +30,7 @@ module ROM
       def initialize(ldap_params, options = {})
         @client  = self.class.client(ldap_params)
         @options = options
-        @logger  = options[:logger] || Logger.new(STDOUT)
+        @logger  = options[:logger] || ::Logger.new(STDOUT)
 
         super()
       end
@@ -41,7 +39,7 @@ module ROM
       # name of table not applicable
       #
       def dataset(_name)
-        Dataset::Composers::Criteria.new(api)
+        Dataset.new(api)
       end
 
       # raw ldap search used by attribute_inferrer
@@ -65,7 +63,7 @@ module ROM
                ::Net::LDAP::Error => e
 
           logger.error(e)
-          abort "ROM::Ldap::Gateway failed to bind - #{e.message}"
+          abort "#{self.class.name} failed to bind - #{e.message}"
         else
           client
         end

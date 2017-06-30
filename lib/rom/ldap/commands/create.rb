@@ -6,9 +6,10 @@ module ROM
 
         # TODO: Remove Array.wrap now decoupled from Active Support
         def execute(tuples)
+          binding.pry
+
           Array.wrap(tuples).each do |tuple|
             dn = create_dn(tuple[:uid])
-            binding.pry
             relation.create(dn, tuple)
           end
         end

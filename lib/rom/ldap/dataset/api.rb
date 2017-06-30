@@ -1,11 +1,11 @@
 require 'rom/initializer'
 require 'dry/core/cache'
 #
-# responsible for using connection and logging
+# responsible for use of connection and logging
 #
 module ROM
   module Ldap
-    module Dataset
+    class Dataset
       class API
 
         extend Initializer
@@ -15,29 +15,27 @@ module ROM
         param :logger
 
         def search(filter)
-          logger.debug("ROM::Ldap::Dataset::API #{filter}")
+          logger.debug("#{self.class.name} filter: #{filter}")
 
-          # fetch_or_store(filter.hash) do
+          fetch_or_store(filter.hash) do
             raw(filter).map { |entry| extract_tuple(entry) }
-          # end
+          end
         end
 
-        def raw(filter)
+        def raw(filter=nil)
           result = connection.search(filter: filter)
           log_status
           result
         end
 
+        # reveal Hash from Net::LDAP::Entry
+        #
         def extract_tuple(entry)
           entry.instance_variable_get(:@myhash)
         end
 
         def log_status
-          logger.debug("ROM::Ldap::Dataset::API \
-            host: '#{host}' \
-            port: '#{port}' \
-            base: '#{base}' \
-            result: '#{status.message}'")
+          logger.debug("#{self.class.name} host: '#{host}' port: '#{port}' base: '#{base}' result: '#{status.message}'")
         end
 
         private
@@ -54,7 +52,7 @@ module ROM
           connection.base
         end
 
-        # NB: TBC
+        # TODO: TBC access Net::LDAP connection auth info
         def auth
           connection.instance_variable_get(:@auth)
         end

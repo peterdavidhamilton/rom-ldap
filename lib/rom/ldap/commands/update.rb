@@ -6,6 +6,8 @@ module ROM
 
         # TODO: Remove Array.wrap now decoupled from Active Support
         def execute(tuples)
+          binding.pry
+
           Array.wrap(tuples).each do |tuple|
             # :remove if v nil
             # :add if v present

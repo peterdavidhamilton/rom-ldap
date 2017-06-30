@@ -30,8 +30,9 @@ module ROM
         end
       end
 
+      # used by Relation#view
       def call(relation)
-        relation.new(relation.dataset.select(*self), schema: self)
+        relation.new(relation.dataset, schema: self)
       end
     end
   end

@@ -2,69 +2,148 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
       module Reading
-        # @return Array
-        #
-        # @api public
-        def order(attribute)
-          new(dataset.sort { |p1, p2| p1[attribute] <=> p2[attribute] })
-        end
 
-        # @return Integer
+        # @return [Integer]
         #
         # @api public
+        #
         def count
-          dataset.size
+          dataset.count
         end
 
-        # @return Boolean
+        # @return [Boolean]
         #
         # @api public
+        #
         def unique?
           dataset.one?
         end
 
-        # @return Boolean
+        # @return [Boolean]
         #
         # @api public
+        #
         def any?
-          !dataset.empty?
+          dataset.any?
         end
 
-        # @return Boolean
+        # @return [Boolean]
         #
         # @api public
+        #
         def none?
           dataset.none?
         end
 
-        # @return Array
+        # Find tuple by primary_key - required by commands
         #
-        # @api public
+        # Selects on certain attributes from tuples
+        #
+        # @example
+        #   ROM.container(config).relations[:ninjas].fetch(1001)
+        #
+        # @return [Relation]
+        #
+        def by_pk(pk)
+          where(primary_key => pk)
+        end
+
+        alias_method :fetch, :by_pk
+
+        # First tuple from dataset
+        #
+        # @example
+        #   ROM.container(config).relations[:ninjas].where(sn: 'smith').first
+        #
+        # @return [Relation]
+        #
         def first
-          new(dataset.first)
+          new([dataset.take(1)])
         end
 
-        # @return Array
+        # Last tuple from dataset
         #
-        # @api public
+        # @example
+        #   ROM.container(config).relations[:ninjas].where(sn: 'smith').last
+        #
+        # @return [Relation]
+        #
         def last
-          new(dataset.last)
+          new([dataset.reverse_each.take(1)])
         end
 
-        # @return Array
+        # Orders the dataset by a given attribute
         #
-        # @api public
+        # @example
+        #   ROM.container(config).relations[:ninjas].order(:givenname)
+        #
+        # @return [Relation]
+        #
+        def order(attribute)
+          new(dataset.sort_by { |e| e[attribute] })
+        end
+
+        # Limits the dataset to a number of tuples
+        #
+        # @example
+        #   ROM.container(config).relations[:ninjas].limit(6)
+        #
+        # @return [Relation]
+        #
         def limit(number)
           new(dataset.take(number))
         end
 
-        # @return Array
+        # Shuffles the dataset
         #
-        # @api public
+        # @example
+        #   ROM.container(config).relations[:ninjas].random
+        #
+        # @return [Relation]
+        #
         def random
-          new(dataset.shuffle)
+          new(dataset.to_a.force.shuffle)
         end
 
+        # Reverses the dataset
+        #
+        # @example
+        #   ROM.container(config).relations[:ninjas].reverse
+        #
+        # @return [Relation]
+        #
+        def reverse
+          new(dataset.reverse_each.to_a)
+        end
+
+        # Selects on certain attributes from tuples
+        #
+        # @example
+        #   ROM.container(config).relations[:ninjas].where(sn: 'smith').select(:dn, :sn, :uid)
+        #
+        # @return [Relation]
+        #
+        def select(*args)
+          new(dataset.map { |e| e.select { |k,v| args.include?(k) } })
+        end
+
+        # Filters by regexp
+        #
+        # @example
+        #   ROM.container(config).relations[:ninjas].grep(sn: /regexp/)
+        #
+        # @return [Relation]
+        #
+        # def grep(options)
+        #   new(
+        #     dataset.map do |e|
+        #       attribute = options.keys.first
+        #       regexp    = options.values.first
+        #       e[attribute].grep(regex)
+        #     end
+        #   )
+          # .detect {|f| f["age"] > 35 }
+        # end
 
 
         # Qualifies all columns in a relation

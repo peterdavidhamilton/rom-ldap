@@ -9,32 +9,19 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
       adapter :ldap
-      # gateway :default
-
-      # auto_map true
-      # auto_struct false
-      # struct_namespace ROM::Struct
 
       include Reading
       include Writing
 
-      schema_class      Ldap::Schema
-      schema_attr_class Ldap::Attribute
-      schema_inferrer   Ldap::Schema::Inferrer.new.freeze
+      schema_class      Schema
+      schema_attr_class Attribute
+      schema_inferrer   Schema::Inferrer.new.freeze
+
       # wrap_class      SQL::Wrap
 
-      # methods the relation responds to which are sent to the dataset
-      #
-      forward *Ldap::Dataset::Composers::Filter.query_methods
 
-      # fetch and by_pk are prerequisites for using changesets
-      # FIXME: use dn or uidnumber for pk?
-      #
-      # def fetch(dn)
-      #   where(dn: dn)
-      # end
+      forward *Dataset::DSL.query_methods
 
-      # alias by_pk fetch
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -44,6 +31,20 @@ module ROM
         else
           :id
         end
+      end
+
+
+      # available methods provided by DSL
+      #
+      def query_methods
+        Dataset::DSL.query_methods.sort
+      end
+
+
+      # current query build on the relation - will materialise on iteration
+      #
+      def query_string
+        dataset.to_filter.to_s
       end
 
       # NB: watch for clashes with dataset methods
