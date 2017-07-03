@@ -4,13 +4,10 @@ module ROM
       class Delete < ROM::Commands::Delete
         adapter :ldap
 
-        # TODO: Remove Array.wrap now decoupled from Active Support
-        def execute(tuples)
-          binding.pry
-
-          Array.wrap(tuples).each do |tuple|
-            relation.delete(tuple[:dn])
-          end
+        def execute
+          tuples = relation.dataset.entries
+          relation.dataset.delete(tuples)
+          tuples
         end
       end
     end

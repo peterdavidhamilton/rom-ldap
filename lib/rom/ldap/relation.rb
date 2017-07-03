@@ -19,9 +19,7 @@ module ROM
 
       # wrap_class      SQL::Wrap
 
-
       forward *Dataset::DSL.query_methods
-
 
       def primary_key
         attribute = schema.find(&:primary_key?)

@@ -22,10 +22,35 @@ module ROM
           end
         end
 
-        def raw(filter=nil)
-          result = connection.search(filter: filter)
+        def raw(filter=nil, &block)
+          result = connection.search(filter: filter, &block)
           log_status
           result
+        end
+
+
+        # @return [Struct]
+        #
+        def add(tuple)
+          connection.add(dn: tuple.delete(:dn), attributes: tuple)
+          log_status
+        end
+
+        def modify(dn, operations)
+          connection.modify(dn: dn, operations: operations)
+          log_status
+        end
+
+        def delete(dn)
+          connection.delete(dn: dn)
+          log_status
+        end
+
+        private
+
+
+        def log_status
+          logger.debug("#{self.class} host: '#{host}' port: '#{port}' base: '#{base}' result: '#{status.message}'")
         end
 
         # reveal Hash from Net::LDAP::Entry
@@ -34,11 +59,9 @@ module ROM
           entry.instance_variable_get(:@myhash)
         end
 
-        def log_status
-          logger.debug("#{self.class.name} host: '#{host}' port: '#{port}' base: '#{base}' result: '#{status.message}'")
+        def capabilities
+          connection.search_root_dse
         end
-
-        private
 
         def host
           connection.host

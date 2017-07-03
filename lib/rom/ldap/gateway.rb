@@ -37,16 +37,22 @@ module ROM
 
       # chains methods for the api to eventually call
       # name of table not applicable
+      # functional style - equivalent of sequel::dataset
       #
-      def dataset(_name)
-        Dataset.new(api)
+      def dataset(_)
+        @dataset ||= Dataset.new(api)
       end
 
       # raw ldap search used by attribute_inferrer
       #
       # @api public
-      def [](name)
-        api.raw(name)
+      def [](filter)
+        api.raw(filter)
+      end
+
+      # @api public
+      def use_logger(logger)
+        @logger = logger
       end
 
       private
@@ -63,7 +69,7 @@ module ROM
                ::Net::LDAP::Error => e
 
           logger.error(e)
-          abort "#{self.class.name} failed to bind - #{e.message}"
+          abort "#{self.class} failed to bind - #{e.message}"
         else
           client
         end

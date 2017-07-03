@@ -8,7 +8,7 @@ module ROM
       include Enumerable
 
       DEFAULT_CRITERIA = {
-        '_where' => { objectclass: 'inetorgperson' }
+        '_where' => { objectclass: 'top' }
       }.freeze
 
       attr_reader :api, :criteria, :generator
@@ -20,6 +20,11 @@ module ROM
       end
 
       private :api, :criteria, :generator
+
+      # FIXME: hack to work well with rom-sql when it loads command classes
+      def db
+        ::OpenStruct.new(db: ::OpenStruct.new(database_type: :ldap) )
+      end
 
       def build(args, &block)
         criteria.deep_merge!({"_#{__callee__}" => args})
@@ -34,7 +39,7 @@ module ROM
 
       # hit directory,
       # reset criteria,
-      # return an lazy enumerator unless block
+      # return a lazy enumerator unless block
       # iterate over results,
       # pass on relation methods
       #
@@ -47,9 +52,6 @@ module ROM
 
       # Respond to repository methods by first calling #each
       #
-      # [:as, :map_to, :map_with, :one!, :one, :to_a, :with].each do |m|
-      #   alias_method m, :each
-      # end
       alias_method :as,       :each
       alias_method :map_to,   :each
       alias_method :map_with, :each
@@ -79,28 +81,50 @@ module ROM
         generator[criteria]
       end
 
-      # reveal current filter criteria
-      # string
+      # Inspect dataset revealing current filter criteria
+      #
+      # @return [String]
       #
       def inspect
-        "#<#{self.class.name}:#{self.object_id} filter: #{to_filter} >"
+        %(#<#{self.class} filter='#{to_filter}'>)
       end
 
+
+      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:add
       #
+      def add(tuple)
+        api.add(tuple)
+      end
+
+      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:modify
+      #
+      def modify(tuples, ast)
+        operations = ast[0].map { |k, v| [:replace, k, v] }
+
+        tuples.each { |t| api.modify(t[:dn], operations) }
+      end
+
+      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:delete
+      #
+      def delete(tuples)
+        tuples.each { |t| api.delete(t[:dn]) }
+      end
+
+      # Output the dataset as an LDIF string.
+      #
+      # @return [String]
+      #
+      def to_ldif
+        api.raw(to_filter).map(&:to_ldif).join("\n")
+      end
+
+      # @return [Lazy Enumerator]of[Hash]
       #
       def search
         api.search(to_filter)
       end
 
       private :search
-
-      #
-      #
-      def to_ldif
-        api.raw(to_filter).to_ldif
-      end
-
     end
-
   end
 end

@@ -4,18 +4,22 @@ module ROM
       class Update < ROM::Commands::Update
         adapter :ldap
 
-        # TODO: Remove Array.wrap now decoupled from Active Support
-        def execute(tuples)
-          binding.pry
+        after :finalize
 
-          Array.wrap(tuples).each do |tuple|
-            # :remove if v nil
-            # :add if v present
-            ops = tuple.except(:dn).map { |k, v| [:add, k, v] }
-
-            relation.update(tuple[:dn], ops)
-          end
+        def execute(tuple)
+          update(input[tuple].to_h)
         end
+
+        private
+
+        def finalize(tuples, *)
+          tuples.map { |t| relation.output_schema[t] }
+        end
+
+        def update(*args)
+          relation.update(*args)
+        end
+
       end
     end
   end

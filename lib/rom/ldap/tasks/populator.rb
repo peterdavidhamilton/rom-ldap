@@ -148,7 +148,7 @@ module ROM
         def domain_ou
           entry               = Net::LDAP::Entry.new(base)
           entry[:ou]          = ou
-          entry[:objectclass] = %w(top organizationalUnit)
+          entry[:objectclass] = %w(top organizationalunit)
           entry.to_ldif
         end
 

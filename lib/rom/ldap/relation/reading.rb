@@ -102,7 +102,7 @@ module ROM
         # @return [Relation]
         #
         def random
-          new(dataset.to_a.force.shuffle)
+          new(dataset.entries.shuffle)
         end
 
         # Reverses the dataset
@@ -113,7 +113,7 @@ module ROM
         # @return [Relation]
         #
         def reverse
-          new(dataset.reverse_each.to_a)
+          new(dataset.reverse_each.entries)
         end
 
         # Selects on certain attributes from tuples

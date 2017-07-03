@@ -2,63 +2,46 @@ module ROM
   module Ldap
     class Relation < ROM::Relation
       module Writing
-        # Wrapper for net-ldap add method
+
+        # repo.create(dn: 'uid=batman,cn=users,dc=pdh,dc=private', cn: 'The Dark Knight', uid: 'batman', sn: 'Wayne', uidnumber: '1003', gidnumber: '1050', 'apple-imhandle': 'bruce-wayne', objectclass: %w(extensibleobject inetorgperson apple-user))
+
+
+        # @example repo.create(
+        #                     dn:               'uid=batman,ou=users,dc=test',
+        #                     cn:               'The Dark Knight',
+        #                     uid:              'batman',
+        #                     sn:               'Wayne',
+        #                     uidnumber:        '1003',
+        #                     gidnumber:        '1050',
+        #                     'apple-imhandle': 'bruce-wayne',
+        #                     objectclass:      [
+        #                                         'extensibleobject',
+        #                                         'inetorgperson',
+        #                                         'apple-user'
+        #                                       ]
+        #                     )
         #
-        # @api public
-        def create(dn, attrs)
-          binding.pry
-          # relation no longer has #driectory
-          directory.add(dn: dn, attributes: attrs.except(options[:image]))
+        # @param [Hash]
+        # @return [Struct]
+        #
+        def create(*args)
+          dataset.add(*args)
         end
 
-        # Wrapper for net-ldap modify method
+        # @example  repo.update(2000, mail: 'fear_the_bat@gotham.com')
         #
-        # @api public
-        def update(dn, ops)
-          binding.pry
-          directory.modify(dn: dn, operations: ops)
+        def update(*args)
+          tuples = dataset.entries
+          dataset.modify(tuples, args)
         end
 
-        # Wrapper for net-ldap delete method
+        # @example  repo.delete(2000)
         #
-        # @api public
-        def delete(dn)
-          binding.pry
-          directory.delete(dn: dn)
+        def delete
+          tuples = dataset.entries
+          dataset.delete(tuples)
         end
 
-        # private
-
-        # # Change jpegphoto attribute using a file's fully qualified path
-        # #
-        # # @api private
-        # def upload_image(dn, attrs)
-        #   url = attrs.fetch(options[:image])
-        #   payload = get_image_as_utf8_string(url)
-
-        #   directory.replace_attribute(dn, options[:image], payload)
-        # end
-
-        # # Use Dragonfly to prepare image data from URL
-        # #
-        # # @api private
-        # def get_image_as_utf8_string(url)
-        #   file = lambda do |url|
-        #     case url.split(':').first
-        #     when 'http'  then processor.fetch_url(url)
-        #     when 'https' then processor.fetch_url(url)
-        #     when 'file'  then processor.fetch_file(url)
-        #     else
-        #       adapter.logger.debug 'unknown url'
-        #     end
-        #   end
-
-        #   file[url].encode('jpg').data.force_encoding('utf-8')
-        # end
-
-        # def processor
-        #   Dragonfly.app
-        # end
       end
     end
   end
