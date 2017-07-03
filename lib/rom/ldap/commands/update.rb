@@ -1,3 +1,11 @@
+# user_repo = UserRepo.new(rom)
+# user      = user_repo.create(name: "Jane")
+# changeset = user_repo.changeset(user.id, name: "Jane Doe")
+# changeset.diff?         # => true
+# changeset.diff          # => {name: "Jane Doe"}
+# user_repo.update(user.id, changeset)
+# user_repo.delete(user.id)
+
 module ROM
   module Ldap
     module Commands
