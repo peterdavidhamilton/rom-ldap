@@ -1,4 +1,4 @@
-require 'facets/hash/deep_merge' # TODO: replace facets with transproc
+require 'transproc'
 require 'rom/ldap/dataset/dsl'
 require 'rom/ldap/dataset/api'
 
@@ -22,7 +22,10 @@ module ROM
       private :api, :criteria, :generator
 
       def build(args, &block)
-        criteria.deep_merge!({"_#{__callee__}" => args})
+        binding.pry
+        Transproc[:deep_merge][criteria, {"_#{__callee__}" => args}]
+
+        # criteria.deep_merge!({"_#{__callee__}" => args})
         self
       end
 
