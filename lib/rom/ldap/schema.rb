@@ -2,7 +2,7 @@ require 'rom/schema'
 require 'rom/ldap/types'
 
 module ROM
-  module Ldap
+  module LDAP
     class Schema < ROM::Schema
 
       # Return an empty schema
@@ -25,7 +25,7 @@ module ROM
       def finalize_associations!(relations:)
         super do
           associations.map do |definition|
-            Ldap::Associations.const_get(definition.type).new(definition, relations)
+            LDAP::Associations.const_get(definition.type).new(definition, relations)
           end
         end
       end

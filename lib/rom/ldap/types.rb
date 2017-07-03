@@ -1,7 +1,7 @@
 require 'rom/types'
 
 module ROM
-  module Ldap
+  module LDAP
     module Types
       include ROM::Types
 

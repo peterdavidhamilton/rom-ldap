@@ -2,7 +2,7 @@ require 'rom/ldap/schema/attributes_inferrer'
 require 'rom/ldap/attribute'
 
 module ROM
-  module Ldap
+  module LDAP
     class Schema < ROM::Schema
       # @api private
       class Inferrer < ROM::Schema::Inferrer
@@ -14,7 +14,7 @@ module ROM
           AttributesInferrer.new(options).(schema, gateway)
         end
 
-        attr_class Ldap::Attribute
+        attr_class LDAP::Attribute
 
         option :silent, default: -> { false }
 
@@ -44,8 +44,7 @@ module ROM
         end
 
         def on_error(relation, e = nil)
-          abort "ROM::Ldap::Relation[#{relation}] \
-                failed to infer schema. #{e.message}"
+          abort "ROM::LDAP::Relation[#{relation}] failed to infer schema. #{e.message}"
         end
       end
     end

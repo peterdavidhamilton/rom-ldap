@@ -7,7 +7,7 @@
 # user_repo.delete(user.id)
 
 module ROM
-  module Ldap
+  module LDAP
     module Commands
       class Update < ROM::Commands::Update
         adapter :ldap

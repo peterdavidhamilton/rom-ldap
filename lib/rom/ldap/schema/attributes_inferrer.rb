@@ -1,7 +1,7 @@
 require 'rom/initializer'
 
 module ROM
-  module Ldap
+  module LDAP
     class Schema < ROM::Schema
       # @api private
       class AttributesInferrer

@@ -1,5 +1,5 @@
 module ROM
-  module Ldap
+  module LDAP
     module Commands
       class Delete < ROM::Commands::Delete
         adapter :ldap

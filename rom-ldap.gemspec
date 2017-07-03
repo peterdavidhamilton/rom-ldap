@@ -8,7 +8,7 @@ require 'rom/ldap/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'rom-ldap'
-  spec.version       = ROM::Ldap::VERSION.dup
+  spec.version       = ROM::LDAP::VERSION.dup
   spec.authors       = ['Peter Hamilton']
   spec.email         = ['pete@peterdavidhamilton.com']
   spec.summary       = 'LDAP directory support for ROM'

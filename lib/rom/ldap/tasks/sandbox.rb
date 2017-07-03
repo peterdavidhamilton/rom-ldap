@@ -10,7 +10,7 @@ require 'rom/ldap/tasks/populator'
 # thor ldap:stop      # Stop test directory service
 #
 module ROM
-  module Ldap
+  module LDAP
     module Tasks
       class Sandbox < Thor
         include Thor::Actions
@@ -82,7 +82,7 @@ module ROM
           end
 
           def populator
-            @populator ||= ::ROM::Ldap::Tasks::Populator.new(populator_options)
+            @populator ||= ::ROM::LDAP::Tasks::Populator.new(populator_options)
           end
 
           def pid

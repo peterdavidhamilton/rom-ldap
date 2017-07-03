@@ -1,7 +1,7 @@
 require 'transproc'
 
 module ROM
-  module Ldap
+  module LDAP
     module Functions
 
       extend Transproc::Registry

@@ -1,5 +1,5 @@
 module ROM
-  module Ldap
+  module LDAP
     class Relation < ROM::Relation
       module Writing
 
@@ -30,7 +30,7 @@ module ROM
 
         # @example  repo.update(2000, mail: 'fear_the_bat@gotham.com')
         #
-        def update(*args)
+        def update(args)
           tuples = dataset.entries
           dataset.modify(tuples, args)
         end

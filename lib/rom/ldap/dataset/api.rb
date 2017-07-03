@@ -4,7 +4,7 @@ require 'dry/core/cache'
 # responsible for use of connection and logging
 #
 module ROM
-  module Ldap
+  module LDAP
     class Dataset
       class API
 

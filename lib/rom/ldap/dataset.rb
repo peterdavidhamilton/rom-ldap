@@ -3,7 +3,7 @@ require 'rom/ldap/dataset/dsl'
 require 'rom/ldap/dataset/api'
 
 module ROM
-  module Ldap
+  module LDAP
     class Dataset
       include Enumerable
 
@@ -28,7 +28,7 @@ module ROM
 
       def build(args, &block)
         new_criteria = {"_#{__callee__}" => args}
-        @criteria    = Ldap::Functions[:deep_merge][criteria, new_criteria]
+        @criteria    = Functions[:deep_merge][criteria, new_criteria]
         self
       end
 
@@ -63,7 +63,7 @@ module ROM
 
       # Reset the current criteria
       #
-      # @return [ROM::Ldap::Dataset]
+      # @return [ROM::LDAP::Dataset]
       #
       # @public
       #
@@ -99,16 +99,16 @@ module ROM
 
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:modify
       #
-      def modify(tuples, ast)
-        operations = ast[0].map { |k, v| [:replace, k, v] }
+      def modify(tuples, args)
+        operations = args.map { |k, v| [:replace, k, v] }
 
-        tuples.each { |t| api.modify(t[:dn], operations) }
+        tuples.each { |t| api.modify(*t[:dn], operations) }
       end
 
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:delete
       #
       def delete(tuples)
-        tuples.each { |t| api.delete(t[:dn]) }
+        tuples.each { |t| api.delete(*t[:dn]) }
       end
 
       # Output the dataset as an LDIF string.

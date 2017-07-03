@@ -1,11 +1,43 @@
-# ROM::SQL::Relation::Reading#methods:
-#   avg       exclude  first            group_append  invert  left_join  map  offset  prefix     qualified_columns  reverse     select_append  union
-#   count     exist?   group            having        join    limit      max  order   project    read               right_join  select_group   unique?
-#   distinct  fetch    group_and_count  inner_join    last    lock       min  pluck   qualified  rename             select      sum            where
-
+# avg
+# distinct
+# exclude
+# exist?
+# fetch
+# first
+# group
+# group_and_count
+# group_append
+# having
+# inner_join
+# invert
+# join
+# last
+# left_join
+# limit
+# lock
+# map
+# max
+# min
+# offset
+# order
+# pluck
+# prefix
+# project
+# qualified
+# qualified_columns
+# read
+# rename
+# reverse
+# right_join
+# select_append
+# select_group
+# sum
+# union
+# unt
+# where
 
 module ROM
-  module Ldap
+  module LDAP
     class Relation < ROM::Relation
       module Reading
 

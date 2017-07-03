@@ -6,7 +6,7 @@ require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
 
 module ROM
-  module Ldap
+  module LDAP
     class Relation < ROM::Relation
       adapter :ldap
 

@@ -1,5 +1,5 @@
 module ROM
-  module Ldap
+  module LDAP
     VERSION = '0.0.5'.freeze
   end
 end

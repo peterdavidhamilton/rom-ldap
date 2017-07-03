@@ -20,7 +20,7 @@
 require 'forwardable'
 
 module ROM
-  module Ldap
+  module LDAP
     class Dataset
       class DSL
         DSLError = Class.new(StandardError)

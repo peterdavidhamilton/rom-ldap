@@ -4,7 +4,7 @@ require 'rom/ldap/dataset'
 # responsible for connecting to the directory and handling failure
 #
 module ROM
-  module Ldap
+  module LDAP
     class Gateway < ROM::Gateway
 
       def self.client(params = {})

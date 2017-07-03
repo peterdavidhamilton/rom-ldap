@@ -1,7 +1,7 @@
 require 'rom/associations/one_to_many'
 
 module ROM
-  module Ldap
+  module LDAP
     module Associations
       class OneToMany < ROM::Associations::OneToMany
 

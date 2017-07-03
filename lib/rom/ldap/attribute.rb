@@ -1,7 +1,7 @@
 require 'rom/schema/attribute'
 
 module ROM
-  module Ldap
+  module LDAP
     # Extended schema attributes tailored for LDAP directories
     #
     # @api public
@@ -13,20 +13,20 @@ module ROM
       # @example
       #   users[:id].aliased(:user_id)
       #
-      # @return [Ldap::Attribute]
+      # @return [LDAP::Attribute]
       #
       # @api public
       def qualified(table_alias = nil)
         binding.pry
-        return self if qualified?
+        # return self if qualified?
 
-        case sql_expr
-        when Sequel::SQL::AliasedExpression, Sequel::SQL::Identifier
-          type = meta(qualified: table_alias || true)
-          type.meta(sql_expr: type.to_sql_name)
-        else
-          raise QualifyError, "can't qualify #{name.inspect} (#{sql_expr.inspect})"
-        end
+        # case sql_expr
+        # when Sequel::SQL::AliasedExpression, Sequel::SQL::Identifier
+        #   type = meta(qualified: table_alias || true)
+        #   type.meta(sql_expr: type.to_sql_name)
+        # else
+        #   raise QualifyError, "can't qualify #{name.inspect} (#{sql_expr.inspect})"
+        # end
       end
 
     end

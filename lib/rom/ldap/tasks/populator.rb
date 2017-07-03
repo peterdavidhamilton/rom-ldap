@@ -4,7 +4,7 @@ require 'faker'
 # require 'securerandom'
 
 module ROM
-  module Ldap
+  module LDAP
     module Tasks
       class Populator
         extend Dry::Initializer::Mixin
