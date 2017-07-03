@@ -1,4 +1,4 @@
-require 'transproc'
+require 'rom/ldap/functions'
 require 'rom/ldap/dataset/dsl'
 require 'rom/ldap/dataset/api'
 
@@ -22,10 +22,8 @@ module ROM
       private :api, :criteria, :generator
 
       def build(args, &block)
-        binding.pry
-        Transproc[:deep_merge][criteria, {"_#{__callee__}" => args}]
-
-        # criteria.deep_merge!({"_#{__callee__}" => args})
+        new_criteria = {"_#{__callee__}" => args}
+        @criteria    = Ldap::Functions[:deep_merge][criteria, new_criteria]
         self
       end
 
