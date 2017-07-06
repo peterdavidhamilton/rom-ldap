@@ -32,12 +32,12 @@ PATH
   specs:
     rom-ldap (0.0.5)
       dry-core
-      dry-initializer
       dry-types
       ladle
       net-ldap
       rom
       thor
+      transproc
 
 GEM
   remote: https://rubygems.org/
@@ -96,6 +96,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-darwin-15
 
 DEPENDENCIES
   bundler

@@ -14,7 +14,7 @@
 # :equals    | :where,          | 'column=value'
 # :not       | :missing,        | '~column=value'
 # :contains  | :matches,        | 'column=*value*'
-# :excludes  |                  | '~column=*value*'
+# :exclude   |                  | '~column=*value*'
 #
 
 require 'forwardable'
@@ -62,7 +62,7 @@ module ROM
         # Parses raw ldap_filter_string
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].filter('uid=*est*')
+        #   relation.filter('uid=*est*')
         #
         # @return [Net::LDAP::Filter]
         #
@@ -120,7 +120,7 @@ module ROM
 
         alias_method :_matches, :_contains
 
-        def _excludes(args)
+        def _exclude(args)
           negate(_contains(args))
         end
 

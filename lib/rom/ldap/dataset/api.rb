@@ -15,42 +15,50 @@ module ROM
         param :logger
 
         def search(filter)
-          logger.debug("#{self.class.name} filter: #{filter}")
-
           fetch_or_store(filter.hash) do
-            raw(filter).map { |entry| extract_tuple(entry) }
+            raw(filter: filter).map { |entry| extract_tuple(entry) }
           end
         end
 
-        def raw(filter=nil, &block)
-          result = connection.search(filter: filter, &block)
-          log_status
+        def raw(options, &block)
+          logger.debug("#{self.class} #{options[:filter]}")
+          result = connection.search(options, &block)
+          log_status(__callee__)
           result
         end
 
+        def exist?(filter)
+          raw(filter: filter, return_result: false)
+        end
 
         # @return [Struct]
         #
         def add(tuple)
-          connection.add(dn: tuple.delete(:dn), attributes: tuple)
-          log_status
+          params = tuple.dup
+          connection.add(dn: params.delete(:dn), attributes: params)
+          log_status(__callee__)
         end
 
         def modify(dn, operations)
           connection.modify(dn: dn, operations: operations)
-          log_status
+          log_status(__callee__)
         end
 
         def delete(dn)
           connection.delete(dn: dn)
-          log_status
+          log_status(__callee__)
         end
 
         private
 
-
-        def log_status
-          logger.debug("#{self.class} host: '#{host}' port: '#{port}' base: '#{base}' result: '#{status.message}'")
+        def log_status(caller=nil)
+          logger.debug("#{self.class}##{caller}
+            server: '#{host}:#{port}'
+            base: '#{base}'
+            code: #{status.code}
+            result: '#{status.message}'
+            ")
+          logger.error("#{self.class}##{caller} error: '#{error}'") unless error.empty?
         end
 
         # reveal Hash from Net::LDAP::Entry
@@ -82,6 +90,10 @@ module ROM
 
         def status
           connection.get_operation_result
+        end
+
+        def error
+          status.error_message
         end
 
         def pageable?

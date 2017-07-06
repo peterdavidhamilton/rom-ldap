@@ -79,7 +79,11 @@ module ROM
       #
       def to_filter
         @criteria = DEFAULT_CRITERIA if criteria.empty?
-        generator[criteria]
+        begin
+          generator[criteria]
+        rescue Net::LDAP::FilterSyntaxInvalidError
+          reset!
+        end
       end
 
       # Inspect dataset revealing current filter criteria
@@ -90,6 +94,11 @@ module ROM
         %(#<#{self.class} filter='#{to_filter}'>)
       end
 
+      def exist?
+        results = api.exist?(to_filter)
+        reset!
+        results
+      end
 
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:add
       #
@@ -116,7 +125,9 @@ module ROM
       # @return [String]
       #
       def to_ldif
-        api.raw(to_filter).map(&:to_ldif).join("\n")
+        results = api.raw(filter: to_filter).map(&:to_ldif).join("\n")
+        reset!
+        results
       end
 
       # @return [Lazy Enumerator]of[Hash]
@@ -126,6 +137,7 @@ module ROM
       end
 
       private :search
+
     end
   end
 end

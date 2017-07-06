@@ -123,7 +123,7 @@ module ROM
           last    = Faker::Name.last_name
           full    = [first, last].join(' ')
           name    = Faker::Internet.user_name(full, %w(. _))
-          email   = Faker::Internet.email(name)
+          email   = Faker::Internet.safe_email(name)
           display = [title, first, last].join(' ')
           dn      = distinguished(name)
           passwd  = encrypt_password(name)

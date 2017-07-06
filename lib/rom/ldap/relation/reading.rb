@@ -1,9 +1,4 @@
 # avg
-# distinct
-# exclude
-# exist?
-# fetch
-# first
 # group
 # group_and_count
 # group_append
@@ -11,7 +6,6 @@
 # inner_join
 # invert
 # join
-# last
 # left_join
 # limit
 # lock
@@ -27,14 +21,12 @@
 # qualified_columns
 # read
 # rename
-# reverse
 # right_join
 # select_append
 # select_group
 # sum
 # union
 # unt
-# where
 
 module ROM
   module LDAP
@@ -57,20 +49,24 @@ module ROM
           dataset.one?
         end
 
+        alias_method :distinct?, :unique?
+
         # @return [Boolean]
         #
         # @api public
         #
-        def any?
-          dataset.any?
+        def exist?
+          dataset.exist?
         end
+
+        alias_method :any?, :exist?
 
         # @return [Boolean]
         #
         # @api public
         #
         def none?
-          dataset.none?
+          !exist?
         end
 
         # Find tuple by primary_key - required by commands
@@ -78,7 +74,7 @@ module ROM
         # Selects on certain attributes from tuples
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].fetch(1001)
+        #   relation.fetch(1001)
         #
         # @return [Relation]
         #
@@ -88,10 +84,24 @@ module ROM
 
         alias_method :fetch, :by_pk
 
+
+        # raw filter to LDIF
+        #
+        # @param [String] LDAP filter
+        #
+        # @example
+        #   relation.read("uid=batman")
+        #
+        # @return [String]
+        #
+        def to_ldif
+          dataset.to_ldif
+        end
+
         # First tuple from dataset
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].where(sn: 'smith').first
+        #   relation.where(sn: 'smith').first
         #
         # @return [Relation]
         #
@@ -102,7 +112,7 @@ module ROM
         # Last tuple from dataset
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].where(sn: 'smith').last
+        #   relation.where(sn: 'smith').last
         #
         # @return [Relation]
         #
@@ -113,7 +123,7 @@ module ROM
         # Orders the dataset by a given attribute
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].order(:givenname)
+        #   relation.order(:givenname)
         #
         # @return [Relation]
         #
@@ -124,7 +134,7 @@ module ROM
         # Limits the dataset to a number of tuples
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].limit(6)
+        #   relation.limit(6)
         #
         # @return [Relation]
         #
@@ -135,7 +145,7 @@ module ROM
         # Shuffles the dataset
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].random
+        #   relation.random
         #
         # @return [Relation]
         #
@@ -146,7 +156,7 @@ module ROM
         # Reverses the dataset
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].reverse
+        #   relation.reverse
         #
         # @return [Relation]
         #
@@ -157,7 +167,7 @@ module ROM
         # Selects on certain attributes from tuples
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].where(sn: 'smith').select(:dn, :sn, :uid)
+        #   relation.where(sn: 'smith').select(:dn, :sn, :uid)
         #
         # @return [Relation]
         #
@@ -168,7 +178,7 @@ module ROM
         # Filters by regexp
         #
         # @example
-        #   ROM.container(config).relations[:ninjas].grep(sn: /regexp/)
+        #   relation.grep(sn: /regexp/)
         #
         # @return [Relation]
         #
@@ -198,6 +208,10 @@ module ROM
         def qualified
           binding.pry
           schema.qualified.(self)
+        end
+
+        def join(*args)
+          binding.pry
         end
       end
     end

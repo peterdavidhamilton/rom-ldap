@@ -47,7 +47,7 @@ module ROM
       #
       # @api public
       def [](filter)
-        api.raw(filter)
+        api.raw(filter: filter)
       end
 
       # @api public
