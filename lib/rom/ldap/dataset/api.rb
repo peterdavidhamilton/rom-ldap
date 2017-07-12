@@ -27,6 +27,10 @@ module ROM
           result
         end
 
+        def bind_as(args)
+          connection.bind_as(args)
+        end
+
         def exist?(filter)
           raw(filter: filter, return_result: false)
         end

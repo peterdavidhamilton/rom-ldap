@@ -83,6 +83,7 @@ module ROM
           generator[criteria]
         rescue Net::LDAP::FilterSyntaxInvalidError
           reset!
+          generator[DEFAULT_CRITERIA]
         end
       end
 
@@ -92,6 +93,14 @@ module ROM
       #
       def inspect
         %(#<#{self.class} filter='#{to_filter}'>)
+      end
+
+      # True if password binds for the filtered dataset
+      #
+      # @return [Boolean]
+      #
+      def authenticated?(password)
+        api.bind_as(filter: to_filter, password: password)
       end
 
       def exist?

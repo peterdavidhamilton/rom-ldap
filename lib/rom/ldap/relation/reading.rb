@@ -7,14 +7,11 @@
 # invert
 # join
 # left_join
-# limit
 # lock
 # map
 # max
 # min
 # offset
-# order
-# pluck
 # prefix
 # project
 # qualified
@@ -32,6 +29,18 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
+
+        # Returns empty dataset if the filtered entity cannot bind.
+        #
+        # @return [Relation]
+        #
+        def authenticate(password)
+          if dataset.authenticated?(password)
+            new(dataset)
+          else
+            new([])
+          end
+        end
 
         # @return [Integer]
         #
@@ -174,6 +183,9 @@ module ROM
         def select(*args)
           new(dataset.map { |e| e.select { |k,v| args.include?(k) } })
         end
+
+        alias_method :pluck, :select
+
 
         # Filters by regexp
         #
