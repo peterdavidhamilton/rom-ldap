@@ -25,10 +25,14 @@ module ROM
       class DSL
         DSLError = Class.new(StandardError)
 
+        # public instance methods prefixed with underscore
+        #
         def self.internals
           new.public_methods.select { |m| /^_[a-z]+$/.match?(m) }
         end
 
+        # @return [Array <Symbol>]
+        #
         def self.query_methods
           internals.map { |m| m.to_s.tr('_','').to_sym }
         end

@@ -56,16 +56,13 @@ module ROM
         private
 
         def log_status(caller=nil)
-          logger.debug("#{self.class}##{caller}
-            server: '#{host}:#{port}'
-            base: '#{base}'
-            code: #{status.code}
-            result: '#{status.message}'
-            ")
+          logger.debug("#{self.class}##{caller} server: '#{host}:#{port}' base: '#{base}' code: #{status.code} result: '#{status.message}'")
           logger.error("#{self.class}##{caller} error: '#{error}'") unless error.empty?
         end
 
         # reveal Hash from Net::LDAP::Entry
+        #
+        # @return [Hash]
         #
         def extract_tuple(entry)
           entry.instance_variable_get(:@myhash)
