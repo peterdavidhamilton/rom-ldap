@@ -1,8 +1,9 @@
 # encoding: utf-8
 
-require 'bundler'
+require 'bundler/setup'
 Bundler.setup
 
+require 'minitest/spec'
 require 'rom-ldap'
 
 # if RUBY_ENGINE == 'rbx'
@@ -10,11 +11,9 @@ require 'rom-ldap'
 #   CodeClimate::TestReporter.start
 # end
 
-# begin
-#   require 'byebug'
-# rescue LoadError
-# end
+require 'pry'
 
-# root = Pathname(__FILE__).dirname
+require 'pathname'
+SPEC_ROOT = root = Pathname(__FILE__).dirname
 
-# Dir[root.join('shared/*.rb').to_s].each { |f| require f }
+Dir[root.join('shared/*.rb').to_s].each { |f| require f }
