@@ -1,19 +1,12 @@
-# encoding: utf-8
-
 require 'bundler/setup'
 Bundler.setup
 
+require 'pry'
 require 'minitest/spec'
 require 'rom-ldap'
-
-# if RUBY_ENGINE == 'rbx'
-#   require "codeclimate-test-reporter"
-#   CodeClimate::TestReporter.start
-# end
-
-require 'pry'
-
 require 'pathname'
-SPEC_ROOT = root = Pathname(__FILE__).dirname
 
-Dir[root.join('shared/*.rb').to_s].each { |f| require f }
+SPEC_ROOT = Pathname(__FILE__).dirname
+
+Dir[SPEC_ROOT.join('support/*.rb')].each(&method(:require))
+Dir[SPEC_ROOT.join('shared/*.rb')].each(&method(:require))
