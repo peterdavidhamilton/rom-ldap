@@ -42,6 +42,14 @@ module ROM
           end
         end
 
+        # Returns True if the filtered entity can bind.
+        #
+        # @return [Boolean]
+        #
+        def authenticated?(password)
+          !!dataset.authenticated?(password)
+        end
+
         # @return [Integer]
         #
         # @api public
