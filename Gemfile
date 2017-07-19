@@ -10,8 +10,6 @@ end
 
 group :test do
   gem 'pry-byebug', platforms: :mri
-  gem 'faker'
-  gem 'codeclimate-test-reporter', require: false
-  gem 'simplecov', require: false
-  gem 'ladle'
+  # gem 'codeclimate-test-reporter', require: false
+  # gem 'simplecov', require: false
 end

@@ -6,7 +6,7 @@ module ROM
 
         def execute(tuples)
           # Array([tuples]).flatten
-          [tuples].flatten.each { |tuple| relation.create(tuple) }
+          [tuples].flatten.each { |tuple| relation.insert(tuple) }
         end
       end
     end

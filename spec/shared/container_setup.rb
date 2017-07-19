@@ -1,7 +1,3 @@
-class Module
-  include Minitest::Spec::DSL
-end
-
 module ContainerSetup
 
   let(:params) do
@@ -15,27 +11,25 @@ module ContainerSetup
   let(:conf)      { ROM::Configuration.new(:ldap, conn) }
   let(:container) { ROM.container(conf) }
   let(:relations) { container.relations }
+  let(:factories) { ROM::Factory.configure { |config| config.rom = container }}
 
   before do
     conf.relation(:accounts) do
-      schema('(uid=*)', infer: true)
+      schema('(uid=*)', infer: true) do
+        attribute :uidnumber, ROM::LDAP::Types::Serial
+      end
     end
 
-    conf.relation(:users) do
-      schema('(gidnumber=1050)', as: :customers, infer: true)
+    conf.relation(:group1050) do
+      schema('(gidnumber=1050)', as: :customers, infer: true) do
+        attribute :uidnumber, ROM::LDAP::Types::Serial
+      end
     end
 
     conf.relation(:staff) do
-      schema('(uidnumber>=1000)', as: :colleagues, infer: true)
+      schema('(uidnumber>=1000)', as: :colleagues, infer: true) do
+        attribute :uidnumber, ROM::LDAP::Types::Serial
+      end
     end
   end
-end
-
-
-module RelationSetup
-  include ContainerSetup
-
-  let(:accounts) { container.relations[:accounts] }
-  let(:staff)    { container.relations[:staff]    }
-  let(:users)    { container.relations[:users]    }
 end

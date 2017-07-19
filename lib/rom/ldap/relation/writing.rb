@@ -6,7 +6,7 @@ module ROM
         # repo.create(dn: 'uid=batman,cn=users,dc=pdh,dc=private', cn: 'The Dark Knight', uid: 'batman', sn: 'Wayne', uidnumber: '1003', gidnumber: '1050', 'apple-imhandle': 'bruce-wayne', objectclass: %w(extensibleobject inetorgperson apple-user))
 
 
-        # @example repo.create(
+        # @example repo.insert(
         #                     dn:               'uid=batman,ou=users,dc=test',
         #                     cn:               'The Dark Knight',
         #                     uid:              'batman',
@@ -24,7 +24,7 @@ module ROM
         # @param [Hash]
         # @return [Struct]
         #
-        def create(*args)
+        def insert(*args)
           dataset.add(*args)
         end
 
