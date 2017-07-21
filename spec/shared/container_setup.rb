@@ -11,6 +11,7 @@ module ContainerSetup
   let(:conf)      { ROM::Configuration.new(:ldap, conn) }
   let(:container) { ROM.container(conf) }
   let(:relations) { container.relations }
+  # let(:commands)  { container.commands }
   let(:factories) { ROM::Factory.configure { |config| config.rom = container }}
 
   before do

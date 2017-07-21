@@ -13,7 +13,8 @@ module ROM
         # @api private
         def call(schema, gateway)
           dataset = schema.name.dataset
-          columns = filter_columns(gateway, dataset)
+          columns = dataset_columns(gateway, dataset)
+          columns = known_columns(gateway) if columns.size.zero?
 
           inferred = columns.map do |name|
             attr_class.new(default_type.meta(name: name, source: schema.name))
@@ -31,8 +32,19 @@ module ROM
 
         private
 
-        def filter_columns(gateway, dataset)
+        # attributes used by filtered entries
+        def dataset_columns(gateway, dataset)
           gateway[dataset].map(&:attribute_names).flatten.uniq
+        end
+
+        # all attribute types used by any entry
+        def used_columns(gateway)
+          gateway[nil].map(&:attribute_names).flatten.uniq
+        end
+
+        # all possible attribute types
+        def known_columns(gateway)
+          gateway.attribute_types.map { |a| a.scan(/NAME '(\S+)'/) }.flatten.uniq.sort.map(&:to_sym)
         end
 
         def default_type

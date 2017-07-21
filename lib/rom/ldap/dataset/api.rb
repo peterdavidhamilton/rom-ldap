@@ -38,19 +38,35 @@ module ROM
         # @return [Struct]
         #
         def add(tuple)
-          params = tuple.dup
-          connection.add(dn: params.delete(:dn), attributes: params)
-          log_status(__callee__)
+          begin
+            params = LDAP::Functions[:ldap_compatible][tuple.dup]
+            connection.add(dn: params.delete(:dn), attributes: params)
+            log_status(__callee__)
+          rescue Net::LDAP::ResponseMissingOrInvalidError
+            logger.error("ROM::LDAP Failed to insert '#{tuple[:dn]}'")
+          end
         end
 
+        # @return [Struct]
+        #
         def modify(dn, operations)
-          connection.modify(dn: dn, operations: operations)
-          log_status(__callee__)
+          begin
+            connection.modify(dn: dn, operations: operations)
+            log_status(__callee__)
+          rescue Net::LDAP::ResponseMissingOrInvalidError
+            logger.error("ROM::LDAP Failed to update '#{dn}'")
+          end
         end
 
+        # @return [Struct]
+        #
         def delete(dn)
-          connection.delete(dn: dn)
-          log_status(__callee__)
+          begin
+            connection.delete(dn: dn)
+            log_status(__callee__)
+          rescue Net::LDAP::ResponseMissingOrInvalidError
+            logger.error("ROM::LDAP Failed to delete '#{dn}'")
+          end
         end
 
         private

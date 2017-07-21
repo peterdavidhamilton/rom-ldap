@@ -3,25 +3,21 @@ module ROM
     class Relation < ROM::Relation
       module Writing
 
-        # repo.create(dn: 'uid=batman,cn=users,dc=pdh,dc=private', cn: 'The Dark Knight', uid: 'batman', sn: 'Wayne', uidnumber: '1003', gidnumber: '1050', 'apple-imhandle': 'bruce-wayne', objectclass: %w(extensibleobject inetorgperson apple-user))
-
-
-        # @example repo.insert(
-        #                     dn:               'uid=batman,ou=users,dc=test',
-        #                     cn:               'The Dark Knight',
-        #                     uid:              'batman',
-        #                     sn:               'Wayne',
-        #                     uidnumber:        '1003',
-        #                     gidnumber:        '1050',
-        #                     'apple-imhandle': 'bruce-wayne',
-        #                     objectclass:      [
-        #                                         'extensibleobject',
-        #                                         'inetorgperson',
-        #                                         'apple-user'
-        #                                       ]
-        #                     )
+        # @example
+        #
+        # repo.insert(
+        #   dn: 'uid=batman,ou=users,dc=test',
+        #   cn: 'The Dark Knight',
+        #   uid: 'batman',
+        #   sn: 'Wayne',
+        #   uidnumber: 1003,
+        #   gidnumber: 1050,
+        #   'apple-imhandle': 'bruce-wayne',
+        #   objectclass: %w[extensibleobject inetorgperson apple-user]
+        # )
         #
         # @param [Hash]
+        #
         # @return [Struct]
         #
         def insert(*args)

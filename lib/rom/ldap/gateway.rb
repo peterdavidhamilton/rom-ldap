@@ -55,6 +55,17 @@ module ROM
         @logger = logger
       end
 
+      #
+      def object_classes
+        connection.search_subschema_entry[:objectclasses]
+      end
+
+      # used by AttributesInferrer
+      #
+      def attribute_types
+        connection.search_subschema_entry[:attributetypes]
+      end
+
       private
 
       def api
