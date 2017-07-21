@@ -26,9 +26,6 @@ module ROM
         def call(schema, gateway)
           inferred = super
 
-          # indexes = get_indexes(gateway, schema.name.dataset, inferred[:attributes])
-          # { **inferred, indexes: indexes }
-
           { **inferred }
 
         rescue ::Net::LDAP::ConnectionRefusedError,

@@ -1,11 +1,11 @@
-require 'rom/schema/attribute'
+require 'rom/attribute'
 
 module ROM
   module LDAP
     # Extended schema attributes tailored for LDAP directories
     #
     # @api public
-    class Attribute < ROM::Schema::Attribute
+    class Attribute < ROM::Attribute
 
 
       # Return a new attribute marked as qualified

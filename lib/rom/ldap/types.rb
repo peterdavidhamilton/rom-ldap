@@ -23,7 +23,7 @@ module ROM
 
       Input     = Types::Coercible::String
 
-      Attribute = Types::Coercible::Array.member(Input)
+      Entry     = Types::Coercible::Array.member(Input)
 
       Jpeg      = Definition(::String).constructor ->(input) {
         input.map do |image|

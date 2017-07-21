@@ -48,7 +48,7 @@ module ROM
         end
 
         def default_type
-          Types::Attribute
+          Types::Entry
         end
 
       end
