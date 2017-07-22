@@ -1,5 +1,8 @@
 require 'net/ldap'
-require 'rom'
+
+require 'rom/core'
+
+require 'rom/ldap/errors'
 require 'rom/ldap/gateway'
 require 'rom/ldap/relation'
 require 'rom/ldap/associations'

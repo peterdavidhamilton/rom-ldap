@@ -58,7 +58,7 @@ module ROM
           filters = args.each_with_object([]) do |(command, params), array|
             array << submit(command, params)
           end
-
+          # TODO: add OR join using DSL
           _and(filters)
         end
 

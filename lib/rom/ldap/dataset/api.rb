@@ -8,7 +8,8 @@ module ROM
     class Dataset
       class API
 
-        extend Initializer
+        # extend Initializer
+        extend Dry::Initializer
         extend Dry::Core::Cache
 
         param :connection
@@ -38,35 +39,42 @@ module ROM
         # @return [Struct]
         #
         def add(tuple)
-          begin
+          # begin
             params = LDAP::Functions[:ldap_compatible][tuple.dup]
             connection.add(dn: params.delete(:dn), attributes: params)
             log_status(__callee__)
-          rescue Net::LDAP::ResponseMissingOrInvalidError
-            logger.error("ROM::LDAP Failed to insert '#{tuple[:dn]}'")
-          end
+          # rescue Net::LDAP::ResponseMissingOrInvalidError
+          #   logger.error("ROM::LDAP Failed to insert '#{tuple[:dn]}'")
+          # end
+
+          rescue *ERROR_MAP.keys => e
+            raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         # @return [Struct]
         #
         def modify(dn, operations)
-          begin
+          # begin
             connection.modify(dn: dn, operations: operations)
             log_status(__callee__)
-          rescue Net::LDAP::ResponseMissingOrInvalidError
-            logger.error("ROM::LDAP Failed to update '#{dn}'")
-          end
+          # rescue Net::LDAP::ResponseMissingOrInvalidError
+          #   logger.error("ROM::LDAP Failed to update '#{dn}'")
+          # end
+          rescue *ERROR_MAP.keys => e
+            raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         # @return [Struct]
         #
         def delete(dn)
-          begin
+          # begin
             connection.delete(dn: dn)
             log_status(__callee__)
-          rescue Net::LDAP::ResponseMissingOrInvalidError
-            logger.error("ROM::LDAP Failed to delete '#{dn}'")
-          end
+          # rescue Net::LDAP::ResponseMissingOrInvalidError
+          #   logger.error("ROM::LDAP Failed to delete '#{dn}'")
+          # end
+          rescue *ERROR_MAP.keys => e
+            raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         private
