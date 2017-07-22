@@ -7,7 +7,7 @@ module ROM
   module LDAP
     class Gateway < ROM::Gateway
 
-      def self.client(params = {})
+      def self.client(params={})
         case params
         when ::Net::LDAP
           params
@@ -27,7 +27,7 @@ module ROM
       attr_reader :options
 
 
-      def initialize(ldap_params, options = {})
+      def initialize(ldap_params, options={})
         @client  = self.class.client(ldap_params)
         @options = options
         @logger  = options[:logger] || ::Logger.new(STDOUT)
@@ -35,12 +35,8 @@ module ROM
         super()
       end
 
-      # chains methods for the api to eventually call
-      # name of table not applicable
-      # functional style - equivalent of sequel::dataset
-      #
-      def dataset(_)
-        @dataset ||= Dataset.new(api)
+      def dataset(table)
+        Dataset.new(api, table)
       end
 
       # raw ldap search used by attribute_inferrer
@@ -68,19 +64,23 @@ module ROM
 
       private
 
+      # wrapper for Net::LDAP client
+      #
       def api
-        Dataset::API.new(connection, logger)
+        @api ||= Dataset::API.new(connection, logger)
       end
 
       def connection
         begin
           client.bind
-        rescue ::Net::LDAP::ConnectionRefusedError,
-               ::Errno::ECONNREFUSED,
-               ::Net::LDAP::Error => e
+        # rescue ::Net::LDAP::ConnectionRefusedError,
+        #        ::Errno::ECONNREFUSED,
+        #        ::Net::LDAP::Error => e
 
-          logger.error(e)
-          abort "#{self.class} failed to bind - #{e.message}"
+        rescue *ERROR_MAP.keys => e
+          raise ERROR_MAP.fetch(e.class, Error), e
+          # logger.error(e)
+          # abort "#{self.class} failed to bind - #{e.message}"
         else
           client
         end

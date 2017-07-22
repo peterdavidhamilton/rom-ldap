@@ -5,26 +5,29 @@ require 'rom/ldap/dataset/api'
 module ROM
   module LDAP
     class Dataset
+
       include Enumerable
+      extend  Dry::Initializer
 
-      DEFAULT_CRITERIA = {
-        '_where' => { objectclass: 'top' }
-      }.freeze
+      param  :api
+      param  :table_name
+      option :criteria,  default: proc { {} }
+      option :generator, default: proc { DSL.new }
 
-      attr_reader :api, :criteria, :generator
+      private :api,
+              :criteria,
+              :generator,
+              :table_name
 
-      def initialize(api)
-        @api = api
-        @criteria ||= {}
-        @generator = DSL.new
-      end
 
-      private :api, :criteria, :generator
 
       # FIXME: hack to work well with rom-sql when it loads command classes
       def db
         ::OpenStruct.new(db: ::OpenStruct.new(database_type: :ldap) )
       end
+
+
+
 
       def build(args, &block)
         new_criteria = {"_#{__callee__}" => args}
@@ -38,12 +41,7 @@ module ROM
         alias_method m, :build
       end
 
-      # hit directory,
-      # reset criteria,
-      # return a lazy enumerator unless block
-      # iterate over results,
-      # pass on relation methods
-      #
+
       def each(*args, &block)
         results = search
         reset!
@@ -72,18 +70,15 @@ module ROM
         self
       end
 
-      # query string for current criteria
-      # fallback to all results
-      # object
+
       # Net::LDAP::Filter
       #
       def to_filter
-        @criteria = DEFAULT_CRITERIA if criteria.empty?
         begin
           generator[criteria]
         rescue Net::LDAP::FilterSyntaxInvalidError
           reset!
-          generator[DEFAULT_CRITERIA]
+          table_name
         end
       end
 
