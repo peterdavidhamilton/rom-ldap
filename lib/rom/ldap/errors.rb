@@ -13,9 +13,10 @@ module ROM
 
     ERROR_MAP = {
       Errno::ECONNREFUSED => DirectoryConnectionError,
+      Net::LDAP::AlreadyOpenedError => DirectoryConnectionError,
       Net::LDAP::ConnectionRefusedError => DirectoryConnectionError,
       Net::LDAP::Error => DirectoryConnectionError,
-      Net::LDAP::ResponseMissingOrInvalidError => DirectoryFilterError
+      Net::LDAP::ResponseMissingOrInvalidError => DirectoryFilterError,
     }.freeze
   end
 end

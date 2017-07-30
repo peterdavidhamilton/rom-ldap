@@ -1,3 +1,4 @@
+# require 'rom/initializer'
 require 'rom/ldap/functions'
 require 'rom/ldap/dataset/dsl'
 require 'rom/ldap/dataset/api'
@@ -6,8 +7,9 @@ module ROM
   module LDAP
     class Dataset
 
-      include Enumerable
-      extend  Dry::Initializer
+      include ::Enumerable
+      extend  ::Dry::Initializer
+      include ::Dry::Equalizer(:criteria)
 
       param  :api
       param  :table_name

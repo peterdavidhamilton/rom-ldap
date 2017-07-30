@@ -10,7 +10,7 @@ module RelationSetup
 
     factories.define(:account) do |f|
       f.uid           user_name
-      f.dn            "uid=#{user_name},ou=users,dc=test"
+      f.dn            "uid=#{user_name},ou=users,dc=example,dc=com"
       f.userpassword  Net::LDAP::Password.generate(:sha, user_name)
       f.uidnumber     { fake(:number, :number, 4) }
       f.gidnumber     { fake(:number, :number, 4) }

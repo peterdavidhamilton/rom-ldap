@@ -1,9 +1,9 @@
 module ContainerSetup
 
   let(:params) do
-    Hash[host: '10.0.1.199',
-         port: 389,
-         base: 'cn=users,dc=pdh,dc=private']
+    Hash[host: '127.0.0.1',
+         port: 10389,
+         base: 'cn=users,dc=example,dc=com']
   end
 
   # let(:conf)      { TestConfiguration.new(:ldap, conn) }

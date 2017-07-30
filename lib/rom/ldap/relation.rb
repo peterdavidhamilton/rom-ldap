@@ -45,27 +45,27 @@ module ROM
         dataset.to_filter.to_s
       end
 
-      # NB: watch for clashes with dataset methods
-      #
-      # def project(*names)
-      #   with(schema: schema.project(*names.flatten))
-      # end
 
-      # def exclude(*names)
-      #   with(schema: schema.exclude(*names.flatten))
-      # end
 
-      # def rename(mapping)
-      #   with(schema: schema.rename(mapping))
-      # end
+      def project(*names)
+        with(schema: schema.project(*names.flatten))
+      end
 
-      # def prefix(prefix)
-      #   with(schema: schema.prefix(prefix))
-      # end
+      def exclude(*names)
+        with(schema: schema.exclude(*names.flatten))
+      end
 
-      # def wrap(prefix = dataset.name)
-      #   with(schema: schema.wrap(prefix))
-      # end
+      def rename(mapping)
+        with(schema: schema.rename(mapping))
+      end
+
+      def prefix(prefix)
+        with(schema: schema.prefix(prefix))
+      end
+
+      def wrap(prefix=dataset.name)
+        with(schema: schema.wrap(prefix))
+      end
 
     end
   end
