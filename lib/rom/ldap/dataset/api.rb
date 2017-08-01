@@ -22,7 +22,7 @@ module ROM
         end
 
         def raw(options, &block)
-          logger.debug("#{self.class} #{options[:filter]}")
+          logger.info("#{self.class} #{options[:filter]}")
           result = connection.search(options, &block)
           log_status(__callee__)
           result
@@ -54,12 +54,8 @@ module ROM
         # @return [Struct]
         #
         def modify(dn, operations)
-          # begin
             connection.modify(dn: dn, operations: operations)
             log_status(__callee__)
-          # rescue Net::LDAP::ResponseMissingOrInvalidError
-          #   logger.error("ROM::LDAP Failed to update '#{dn}'")
-          # end
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
         end
@@ -67,12 +63,8 @@ module ROM
         # @return [Struct]
         #
         def delete(dn)
-          # begin
             connection.delete(dn: dn)
             log_status(__callee__)
-          # rescue Net::LDAP::ResponseMissingOrInvalidError
-          #   logger.error("ROM::LDAP Failed to delete '#{dn}'")
-          # end
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
         end
@@ -80,7 +72,7 @@ module ROM
         private
 
         def log_status(caller=nil)
-          logger.debug("#{self.class}##{caller} server: '#{host}:#{port}' base: '#{base}' code: #{status.code} result: '#{status.message}'")
+          logger.info("#{self.class}##{caller} server: '#{host}:#{port}' base: '#{base}' code: #{status.code} result: '#{status.message}'")
           logger.error("#{self.class}##{caller} error: '#{error}'") unless error.empty?
         end
 

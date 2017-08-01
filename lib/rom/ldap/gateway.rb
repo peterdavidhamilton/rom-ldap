@@ -30,7 +30,8 @@ module ROM
       def initialize(ldap_params, options={})
         @client  = self.class.client(ldap_params)
         @options = options
-        @logger  = options[:logger] || ::Logger.new(STDOUT)
+        # @logger  = options[:logger] || ::Logger.new(STDOUT)
+        @logger  = options.fetch(:logger]) { ::Logger.new(STDOUT) }
 
         super()
       end
@@ -73,14 +74,8 @@ module ROM
       def connection
         begin
           client.bind
-        # rescue ::Net::LDAP::ConnectionRefusedError,
-        #        ::Errno::ECONNREFUSED,
-        #        ::Net::LDAP::Error => e
-
         rescue *ERROR_MAP.keys => e
           raise ERROR_MAP.fetch(e.class, Error), e
-          # logger.error(e)
-          # abort "#{self.class} failed to bind - #{e.message}"
         else
           client
         end
