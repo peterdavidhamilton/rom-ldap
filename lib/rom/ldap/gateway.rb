@@ -16,6 +16,8 @@ module ROM
         end
       end
 
+      # @!attribute [r] client
+      #   @return [Object] Net::LDAP cient
       attr_reader :client
 
       # @!attribute [r] logger
@@ -30,8 +32,7 @@ module ROM
       def initialize(ldap_params, options={})
         @client  = self.class.client(ldap_params)
         @options = options
-        # @logger  = options[:logger] || ::Logger.new(STDOUT)
-        @logger  = options.fetch(:logger]) { ::Logger.new(STDOUT) }
+        @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
 
         super()
       end
