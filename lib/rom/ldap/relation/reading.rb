@@ -91,7 +91,7 @@ module ROM
         # Selects on certain attributes from tuples
         #
         # @example
-        #   relation.fetch(1001)
+        #   relation.by_pk(1001)
         #
         # @return [Relation]
         #
@@ -107,7 +107,7 @@ module ROM
         # @param [String] LDAP filter
         #
         # @example
-        #   relation.read("uid=batman")
+        #   relation.to_ldif
         #
         # @return [String]
         #
