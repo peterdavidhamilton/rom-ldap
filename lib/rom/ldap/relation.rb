@@ -17,9 +17,9 @@ module ROM
       schema_attr_class Attribute
       schema_inferrer   Schema::Inferrer.new.freeze
 
-      # wrap_class      SQL::Wrap
+      # wrap_class      SQL::Wrap # TODO: research relevance
 
-      forward *Dataset::DSL.query_methods
+      forward(*Dataset::DSL.query_methods)
 
       def primary_key
         attribute = schema.find(&:primary_key?)

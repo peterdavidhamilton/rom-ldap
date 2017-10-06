@@ -1,9 +1,11 @@
-require 'bundler/setup'
-Bundler.setup
+begin
+  require 'pry-byebug'
+rescue LoadError
+end if ENV['DEBUG']
 
-require 'pry'
 require 'rom-ldap'
 
+require 'minitest/autorun'
 require 'minitest/spec'
 class Module
   include Minitest::Spec::DSL

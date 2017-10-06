@@ -1,4 +1,4 @@
-require_relative '../spec_helper'
+require 'spec_helper'
 
 describe ROM::LDAP::Types do
 
@@ -13,9 +13,9 @@ describe ROM::LDAP::Types do
     end
   end
 
-  describe 'ROM::LDAP::Types::Attribute' do
+  describe 'ROM::LDAP::Types::Entry' do
     it 'coerces input to array of strings' do
-      klass  = ROM::LDAP::Types::Attribute
+      klass  = ROM::LDAP::Types::Entry
       input  = [nil, 'string', :symbol, Object]
       output = klass[input]
 

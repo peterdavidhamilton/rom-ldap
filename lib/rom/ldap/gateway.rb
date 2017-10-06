@@ -45,7 +45,7 @@ module ROM
       #
       # @api public
       def [](filter)
-        api.raw(filter: filter)
+        api.raw(filter: filter) || EMPTY_ARRAY
       end
 
       # @api public

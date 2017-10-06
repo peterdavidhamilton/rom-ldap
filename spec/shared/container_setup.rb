@@ -1,9 +1,11 @@
+# NB: run 'rake test:setup' before tests
+#
 module ContainerSetup
 
   let(:params) do
     Hash[host: '127.0.0.1',
          port: 10389,
-         base: 'cn=users,dc=example,dc=com']
+         base: 'ou=users,dc=example,dc=com']
   end
 
   # let(:conf)      { TestConfiguration.new(:ldap, conn) }
@@ -21,13 +23,13 @@ module ContainerSetup
       end
     end
 
-    conf.relation(:group1050) do
-      schema('(gidnumber=1050)', as: :customers, infer: true) do
+    conf.relation(:group9998) do
+      schema('(gidnumber=9998)', as: :customers, infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
     end
 
-    conf.relation(:staff) do
+    conf.relation(:staff) do # or group=9999
       schema('(uidnumber>=1000)', as: :colleagues, infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end

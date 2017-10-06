@@ -17,7 +17,7 @@ module ROM
       #
       # @api public
       def qualified(table_alias = nil)
-        binding.pry
+        # binding.pry
         # return self if qualified?
 
         # case sql_expr
