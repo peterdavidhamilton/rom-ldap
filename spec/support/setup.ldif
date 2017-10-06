@@ -1,0 +1,193 @@
+version: 1
+dn: ou=users,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+#
+# Groups
+#
+dn: cn=empty,ou=groups,dc=example,dc=com
+cn: Empty Group
+objectClass: top
+objectClass: posixGroup
+gidNumber: 9997
+
+# 10 'test' customers below are members
+dn: cn=customers,ou=groups,dc=example,dc=com
+cn: Test Customers
+objectClass: top
+objectClass: posixGroup
+gidNumber: 9998
+
+# static group available for generated users
+dn: cn=staff,ou=groups,dc=example,dc=com
+cn: Factory Staff
+objectClass: top
+objectClass: posixGroup
+gidNumber: 9999
+
+
+#
+# Admin
+#
+dn: uid=diradmin,ou=users,dc=example,dc=com
+cn: Directory Administrator
+givenName: Directory
+mail: diradmin@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: Administrator
+uid: diradmin
+userPassword:: e1NIQX1XNnBoNU1tNVB6OEdnaVVMYlBnekczN21qOWc9
+
+#
+# Customers
+#
+dn: uid=test1,ou=users,dc=example,dc=com
+cn: test1
+givenName: test1
+mail: test1@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test1
+uid: test1
+userPassword:: e1NIQX10RVNzQm1FL3lOWTNsYjZhMEw2dlZRRVpOcXc9
+gidNumber: 9998
+
+dn: uid=test2,ou=users,dc=example,dc=com
+cn: test2
+givenName: test2
+mail: test2@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test2
+uid: test2
+userPassword:: e1NIQX1FSjlMUEZEWHNOOXluU21ieHZqcDc1Qm1seDg9
+gidNumber: 9998
+
+dn: uid=test3,ou=users,dc=example,dc=com
+cn: test3
+givenName: test3
+mail: test3@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test3
+uid: test3
+userPassword:: e1NIQX1QcitqQWR4WkdXOFlXVHhGNVJrb2VpTXBkWWs9
+gidNumber: 9998
+
+dn: uid=test4,ou=users,dc=example,dc=com
+cn: test4
+givenName: test4
+mail: test4@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test4
+uid: test4
+userPassword:: e1NIQX1IL0t6Y0VydDRFN3N0UjVReW1tTy9WQ2hONXM9
+gidNumber: 9998
+
+dn: uid=test5,ou=users,dc=example,dc=com
+cn: test5
+givenName: test5
+mail: test5@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test5
+uid: test5
+userPassword:: e1NIQX1rUjNjTzQrYUU3VkptMnZFWTRvclR6OW92eU09
+gidNumber: 9998
+
+dn: uid=test6,ou=users,dc=example,dc=com
+cn: test6
+givenName: test6
+mail: test6@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test6
+uid: test6
+userPassword:: e1NIQX1wbTN5WVJJTGJDTVJ4dThMRzZ0T1dEcjh2TUE9
+gidNumber: 9998
+
+dn: uid=test7,ou=users,dc=example,dc=com
+cn: test7
+givenName: test7
+mail: test7@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test7
+uid: test7
+userPassword:: e1NIQX02akpERXkxbE96a0NXcFJPY1BQczMzRHVPWlE9
+gidNumber: 9998
+
+dn: uid=test8,ou=users,dc=example,dc=com
+cn: test8
+givenName: test8
+mail: test8@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test8
+uid: test8
+userPassword:: e1NIQX0wRCtkTkJsRGt3R2ViUkxYeVVLQ2ZyMXBSRU09
+gidNumber: 9998
+
+dn: uid=test9,ou=users,dc=example,dc=com
+cn: test9
+givenName: test9
+mail: test9@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test9
+uid: test9
+userPassword:: e1NIQX1VOVVsZzJ6SmJRaWFXa0lZdEdUOXBUTDMzcjQ9
+gidNumber: 9998
+
+dn: uid=test10,ou=users,dc=example,dc=com
+cn: test10
+givenName: test10
+mail: test10@example.com
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+sn: test10
+uid: test10
+userPassword:: e1NIQX1GbzlBS2ZRVzdnWldYeExtbDkvQlUwcm1uVEk9
+gidNumber: 9998
