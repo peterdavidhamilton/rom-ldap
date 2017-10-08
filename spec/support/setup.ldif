@@ -1,4 +1,8 @@
 version: 1
+
+#
+# Top Levels
+#
 dn: ou=users,dc=example,dc=com
 objectClass: top
 objectClass: organizationalUnit
@@ -36,17 +40,17 @@ gidNumber: 9999
 #
 # Admin
 #
-dn: uid=diradmin,ou=users,dc=example,dc=com
+dn: uid=root,ou=users,dc=example,dc=com
 cn: Directory Administrator
 givenName: Directory
-mail: diradmin@example.com
+mail: root@example.com
 objectClass: extensibleObject
 objectClass: inetOrgPerson
 objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 sn: Administrator
-uid: diradmin
+uid: root
 userPassword:: e1NIQX1XNnBoNU1tNVB6OEdnaVVMYlBnekczN21qOWc9
 
 #
