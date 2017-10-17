@@ -8,15 +8,16 @@ module ROM
     #   rescue *ERROR_MAP.keys => e
     #     raise ERROR_MAP.fetch(e.class, Error), e
 
-    DirectoryConnectionError = Class.new(StandardError)
-    DirectoryFilterError     = Class.new(StandardError)
+    ConnectionError = Class.new(StandardError)
+    FilterError     = Class.new(StandardError)
 
     ERROR_MAP = {
-      Errno::ECONNREFUSED => DirectoryConnectionError,
-      Net::LDAP::AlreadyOpenedError => DirectoryConnectionError,
-      Net::LDAP::ConnectionRefusedError => DirectoryConnectionError,
-      Net::LDAP::Error => DirectoryConnectionError,
-      Net::LDAP::ResponseMissingOrInvalidError => DirectoryFilterError,
+      Errno::ECONNREFUSED                       => ConnectionError,
+      Net::LDAP::AlreadyOpenedError             => ConnectionError,
+      Net::LDAP::ConnectionRefusedError         => ConnectionError,
+      Net::LDAP::Error                          => ConnectionError,
+      Net::LDAP::BindingInformationInvalidError => ConnectionError,
+      Net::LDAP::ResponseMissingOrInvalidError  => FilterError,
     }.freeze
   end
 end

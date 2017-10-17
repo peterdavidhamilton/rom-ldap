@@ -34,6 +34,8 @@ module ROM
         #
         # @return [Relation]
         #
+        # @api public
+        #
         def authenticate(password)
           if dataset.authenticated?(password)
             new(dataset)
@@ -45,6 +47,8 @@ module ROM
         # Returns True if the filtered entity can bind.
         #
         # @return [Boolean]
+        #
+        # @api public
         #
         def authenticated?(password)
           !!dataset.authenticated?(password)
@@ -123,7 +127,7 @@ module ROM
         # @return [Relation]
         #
         def first
-          new([dataset.take(1)])
+          new(dataset.take(1))
         end
 
         # Last tuple from dataset
@@ -134,7 +138,7 @@ module ROM
         # @return [Relation]
         #
         def last
-          new([dataset.reverse_each.take(1)])
+          new(dataset.reverse_each.take(1))
         end
 
         # Orders the dataset by a given attribute

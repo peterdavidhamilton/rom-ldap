@@ -9,8 +9,7 @@ module ROM
 
       def self.client(params={})
         case params
-        when ::Net::LDAP
-          params
+        when ::Net::LDAP then params
         else
           ::Net::LDAP.new(params)
         end
@@ -43,12 +42,17 @@ module ROM
 
       # raw ldap search used by attribute_inferrer
       #
+      # @param filter [String,  Net::LDAP::Filter]
+      # @return [Array<Hash>]
       # @api public
+      #
       def [](filter)
         api.raw(filter: filter) || EMPTY_ARRAY
       end
 
+      # @param logger [Logger]
       # @api public
+      #
       def use_logger(logger)
         @logger = logger
       end

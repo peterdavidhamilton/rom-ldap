@@ -16,7 +16,6 @@ module ROM
         when Hash       then attribute.to_json
         when String     then attribute
         else
-          # binding.pry
           nil
         end
       end

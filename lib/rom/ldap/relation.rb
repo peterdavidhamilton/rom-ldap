@@ -33,10 +33,12 @@ module ROM
 
 
       # available methods provided by DSL
+      # @api private
       #
       def query_methods
         Dataset::DSL.query_methods.sort
       end
+      private :query_methods
 
 
       # current query build on the relation - will materialise on iteration
