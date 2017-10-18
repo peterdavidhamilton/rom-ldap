@@ -1,11 +1,11 @@
 PATH
   remote: .
   specs:
-    rom-ldap (0.0.5)
+    rom-ldap (0.0.6)
       dry-core (~> 0.3)
       dry-types (~> 0.12)
       net-ldap
-      rom-core (~> 4.0.0.rc)
+      rom-core (~> 4.0)
       transproc
 
 GEM
@@ -37,7 +37,7 @@ GEM
       dry-equalizer (~> 0.2)
       dry-types (~> 0.9, >= 0.9.0)
       ice_nine (~> 0.11)
-    dry-types (0.12.0)
+    dry-types (0.12.1)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.1)
       dry-container (~> 0.3)
@@ -47,7 +47,8 @@ GEM
       inflecto (~> 0.0.0, >= 0.0.2)
     faker (1.8.4)
       i18n (~> 0.5)
-    i18n (0.8.6)
+    i18n (0.9.0)
+      concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     inflecto (0.0.2)
     json (2.1.0)
@@ -66,21 +67,21 @@ GEM
       pry (~> 0.10)
     rainbow (2.2.2)
       rake
-    rake (10.5.0)
-    rom-core (4.0.0.rc1)
+    rake (12.1.0)
+    rom-core (4.0.0)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.6)
       dry-core (~> 0.3)
       dry-equalizer (~> 0.2)
       dry-initializer (~> 2.0)
-      dry-types (~> 0.12)
-      rom-mapper (~> 1.0.0.beta)
+      dry-types (~> 0.12, >= 0.12.1)
+      rom-mapper (~> 1.0)
     rom-factory (0.4.0)
       dry-configurable (~> 0.1)
       dry-core (~> 0.2)
       dry-struct (~> 0.2)
       faker (~> 1.7)
-    rom-mapper (1.0.0.rc1)
+    rom-mapper (1.0.0)
       dry-core (~> 0.3, >= 0.3.1)
       dry-equalizer (~> 0.2)
       transproc (~> 1.0)
@@ -110,7 +111,7 @@ DEPENDENCIES
   minitest
   pry
   pry-byebug
-  rake (~> 10.0)
+  rake
   rom-factory (~> 0.4.0)
   rom-ldap!
   rubocop

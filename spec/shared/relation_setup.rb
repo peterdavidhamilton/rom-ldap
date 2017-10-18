@@ -1,9 +1,10 @@
 module RelationSetup
   include ContainerSetup
 
-  let(:accounts)   { container.relations[:accounts] }
-  let(:customers)  { container.relations[:customers]    }
-  let(:colleagues) { container.relations[:colleagues]    }
+  let(:accounts)   { container.relations[:accounts]   }
+  let(:customers)  { container.relations[:customers]  }
+  let(:colleagues) { container.relations[:colleagues] }
+  let(:sandbox)    { container.relations[:sandbox]    }
 
   before do
     user_name = Faker::Internet.unique.user_name

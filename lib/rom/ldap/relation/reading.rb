@@ -108,12 +108,11 @@ module ROM
 
         # raw filter to LDIF
         #
-        # @param [String] LDAP filter
-        #
         # @example
         #   relation.to_ldif
         #
         # @return [String]
+        # @api public
         #
         def to_ldif
           dataset.to_ldif

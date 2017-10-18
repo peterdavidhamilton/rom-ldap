@@ -1,6 +1,5 @@
 require 'rom/initializer'
-require 'dry/core/cache'
-#
+
 # responsible for use of connection and logging
 #
 module ROM
@@ -8,39 +7,39 @@ module ROM
     class Dataset
       class API
         extend Initializer
-        extend Dry::Core::Cache
 
         param :connection
         param :logger
 
+        # Query results as array of hashes ordered by Distinguishing Name
+        #
         # @param filter [String, Net::LDAP::Filter]
+        # @param block
         # @return [Array <Hash>]
         # @api public
         #
-        def search(filter)
-          fetch_or_store(filter.to_s) do
-            raw(
-              filter: filter,
-              return_referrals: true,
-              return_result: true,
-              paged_searches_supported: pageable?,
-              # FIXME: not working on AD and breaks apacheds
-              # sort_controls: ['dn', 'cn'],
-            ).sort_by(&:dn).map { |t| extract_tuple(t) }
-          end
+        def search(filter, &block)
+          options = {
+            filter: filter,
+            return_referrals: true,
+            return_result: true,
+            paged_searches_supported: pageable?
+          }
+          results = directory(options).sort_by(&:dn).map(&method(:extract))
+          log(__callee__, filter)
+
+          block_given? ? yield(results) : results
         end
 
-        # Net::LDAP::Client search returning raw results ordered by DN
+        # Wrapper for Net::LDAP::Connection#search directory results
         #
         # @param options [Hash]
         # @return [Array <Net::LDAP::Entry>]
         # @api public
         #
-        def raw(options, &block)
-          logger.info("#{self.class} #{options[:filter]}")
-          result = connection.search(options, &block)
-          log_status(__callee__)
-          result or raise(LDAP::FilterError, 'dataset could not be found')
+        def directory(options, &block)
+          connection.search(options, &block) or
+            raise LDAP::FilterError, 'dataset could not be found'
         end
 
         def bind_as(args)
@@ -51,55 +50,86 @@ module ROM
         # @api public
         #
         def exist?(filter)
-          raw(filter: filter, return_result: false)
+          directory(filter: filter, return_result: false)
         end
 
+        # Wrapper for Net::LDAP::Connection#add
+        #
         # @param tuple [Hash]
-        # @return [Struct]
+        # @return [Boolean]
         # @api public
         #
         def add(tuple)
-          params = LDAP::Functions[:ldap_compatible][tuple.dup]
-          connection.add(dn: params.delete(:dn), attributes: params)
-          log_status(__callee__)
+          dn, args = prepare(tuple)
+          connection.add(dn: dn, attributes: args)
+          log(__callee__, dn)
+          success?
+
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
         end
 
-        # @return [Struct]
+        # Wrapper for Net::LDAP::Connection#modify
+        #
+        # @return [Boolean]
         # @api public
         #
         def modify(dn, operations)
           connection.modify(dn: dn, operations: operations)
-          log_status(__callee__)
+          log(__callee__, dn)
+          success?
+
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
         end
 
-        # @return [Struct]
+        # Wrapper for Net::LDAP::Connection#delete
+        #
+        # @param dn [String]
+        # @return [Boolean]
         # @api public
         #
         def delete(dn)
           connection.delete(dn: dn)
-          log_status(__callee__)
+          log(__callee__, dn)
+          success?
+
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         private
 
-        def log_status(caller=nil)
-          logger.info("#{self.class}##{caller} server: '#{host}:#{port}' base: '#{base}' code: #{status.code} result: '#{status.message}'")
-          logger.error("#{self.class}##{caller} error: '#{error}'") unless error.empty?
+        def log(caller = nil, message = nil)
+          logger.error("#{self.class}##{caller} error: '#{error}'") unless success?
+
+          logger.info("#{self.class}##{caller} #{message}")
+
+          logger.debug("#{self.class}##{caller} code: #{status.code} result: '#{status.message}'") if ENV['DEBUG']
         end
 
-        # reveal Hash from Net::LDAP::Entry
+        # Convenience method to prepare a tuple for #add
+        #
+        # @example
+        #   prepare({'dn' => X, 'sn' => Y}) #=> [X, sn: Y]
+        #
+        # @param tuple [Hash]
+        # @return [Array, <String> <Hash>]
+        # @api private
+        #
+        def prepare(tuple)
+          args = LDAP::Functions[:ldap_compatible][tuple.dup]
+          dn   = args.delete(:dn)
+          [dn, args]
+        end
+
+        # Reveal Hash from Net::LDAP::Entry
         #
         # @param entry [Net::LDAP::Entry]
         # @return [Hash]
         # @api private
         #
-        def extract_tuple(entry)
+        def extract(entry)
           entry.instance_variable_get(:@myhash)
         end
 
@@ -134,6 +164,10 @@ module ROM
 
         def status
           connection.get_operation_result
+        end
+
+        def success?
+          status.code.zero?
         end
 
         def error

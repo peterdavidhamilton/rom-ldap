@@ -3,17 +3,11 @@ require 'spec_helper'
 describe ROM::LDAP::Relation, 'reading module' do
   include RelationSetup
 
-  let(:user_name) { Faker::Internet.unique.user_name }
+  let(:uid) { Faker::Internet.unique.user_name }
+  let(:dn)  { "uid=#{uid},ou=users,dc=example,dc=com" }
 
-  before do
-    factories[:account,
-      uid: user_name,
-      dn: "uid=#{user_name},ou=users,dc=example,dc=com"]
-  end
-
-  after do
-    accounts.where(uid: user_name).delete
-  end
+  before { factories[:account, uid: uid, dn: dn] }
+  after  { accounts.where(uid: uid).delete }
 
   it 'default order by dn' do
     names = customers.to_a.collect { |t| t[:givenname] }
@@ -41,29 +35,26 @@ describe ROM::LDAP::Relation, 'reading module' do
 
   it '#limit' do
     names = customers.limit(2).to_a.collect { |t| t[:givenname] }
-    names.must_equal([ ['test1'], ['test10'] ])
+    names.must_equal [['test1'], ['test10']]
   end
 
   it '#first' do
     names = customers.first.to_a.collect { |t| t[:givenname] }
-    names.must_equal([ ['test1'] ])
+    names.must_equal [['test1']]
   end
 
   it '#last' do
     names = customers.last.to_a.collect { |t| t[:givenname] }
-    names.must_equal([ ['test9'] ])
+    names.must_equal [['test9']]
   end
 
   it '#select' do
-    result = [{
-                dn:  ["uid=#{user_name},ou=users,dc=example,dc=com"],
-                uid: [user_name]
-              }]
-    accounts.where(uid: user_name).select(:dn, :uid).to_a.must_equal(result)
+    result = accounts.where(uid: uid).select(:dn, :uid).to_a
+    result.must_equal [{ dn: [dn], uid: [uid] }]
   end
 
   it '#unique?' do
-    accounts.where(uid: user_name).unique?.must_equal(true)
+    accounts.where(uid: uid).unique?.must_equal(true)
   end
 
   it '#exist?' do
@@ -73,7 +64,7 @@ describe ROM::LDAP::Relation, 'reading module' do
   it '#count' do
     colleagues.count.must_equal(1)
     customers.count.must_equal(10)
-    accounts.where(uid: user_name).count.must_equal(1)
+    accounts.where(uid: uid).count.must_equal(1)
   end
 
   it '#to_ldif' do

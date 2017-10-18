@@ -47,7 +47,7 @@ module ROM
       # @api public
       #
       def [](filter)
-        api.raw(filter: filter) || EMPTY_ARRAY
+        api.directory(filter: filter) || EMPTY_ARRAY
       end
 
       # @param logger [Logger]

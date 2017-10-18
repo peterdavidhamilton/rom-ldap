@@ -13,30 +13,36 @@ module ROM
         #     gidnumber: 1050,
         #     'apple-imhandle': 'bruce-wayne',
         #     objectclass: %w[extensibleobject inetorgperson apple-user]
-        #   )
+        #   ) #=> true
         #
-        # @param [Hash]
+        # @param args [Hash]
+        # @return [Boolean]
+        # @api public
         #
-        # @return [Struct]
-        #
-        def insert(*args)
-          dataset.add(*args)
+        def insert(args)
+          dataset.add(args)
         end
 
         # @example
-        #   repo.update(2000, mail: 'fear_the_bat@gotham.com')
+        #   repo.update(2000, mail: 'fear_the_bat@gotham.com') #=> ??
+        #
+        # @param args [Hash]
+        # @return [Array, <Hash>]
+        # @api public
         #
         def update(args)
-          tuples = dataset.entries
-          dataset.modify(tuples, args)
+          dataset.modify(dataset.entries, args)
         end
 
         # @example
-        #   repo.delete(2000)
+        #   repo.delete(2000) #=> true
         #
-        def delete
-          tuples = dataset.entries
-          dataset.delete(tuples)
+        # @param args [Hash]
+        # @return [Array, <Hash>]
+        # @api public
+        #
+        def delete(*args)
+          dataset.delete(dataset.entries)
         end
 
       end

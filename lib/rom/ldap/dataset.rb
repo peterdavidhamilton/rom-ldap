@@ -8,8 +8,8 @@ module ROM
     class Dataset
 
       extend  Initializer
-      include ::Enumerable
-      include ::Dry::Equalizer(:criteria)
+      include Enumerable
+      include Dry::Equalizer(:criteria)
 
       param  :api
       param  :table_name
@@ -104,7 +104,7 @@ module ROM
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:add
       #
       # @param tuple [Hash]
-      # @return [Struct]
+      # @return [Boolean]
       #
       def add(tuple)
         api.add(tuple)
@@ -129,17 +129,17 @@ module ROM
       # @return [String]
       #
       def to_ldif
-        results = api.raw(filter: to_filter).map(&:to_ldif).join("\n")
+        results = api.directory(filter: to_filter)
         reset!
-        results
+        results.map(&:to_ldif).join("\n")
       end
 
       # @return [Lazy Enumerator<Hash>]
+      # @api private
       #
-      def search
-        api.search(to_filter)
+      def search(&block)
+        api.search(to_filter, &block)
       end
-
       private :search
 
     end

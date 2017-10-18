@@ -1,5 +1,3 @@
-# NB: run 'rake test:setup' before tests
-#
 module ContainerSetup
 
   let(:params) do
@@ -17,14 +15,22 @@ module ContainerSetup
   let(:factories) { ROM::Factory.configure { |config| config.rom = container }}
 
   before do
+    # everyone
     conf.relation(:accounts) do
       schema('(uid=*)', infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
     end
 
+    # test1..test10
     conf.relation(:group9998) do
       schema('(gidnumber=9998)', as: :customers, infer: true) do
+        attribute :uidnumber, ROM::LDAP::Types::Serial
+      end
+    end
+
+    conf.relation(:group9997) do
+      schema('(gidnumber=9997)', as: :sandbox, infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
     end

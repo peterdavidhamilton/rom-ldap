@@ -25,15 +25,23 @@ module ROM
       class DSL
         DSLError = Class.new(StandardError)
 
-        # public instance methods prefixed with underscore
-        # @private
+        # Public instance methods prefixed with underscore
+        #
+        # @return [Array <String>]
+        # @api private
         #
         def self.internals
           new.public_methods.select { |m| /^_[a-z]+$/.match?(m) }
         end
 
+        # Strip and symbolize public DSL query methods
+        #   '_filter' to :filter
+        #
+        # @example
+        #   ROM::LDAP::Dataset.query_methods => [:filter, :equals, :not]
+        #
         # @return [Array <Symbol>]
-        # @public
+        # @api public
         #
         def self.query_methods
           internals.map { |m| m.to_s.tr('_','').to_sym }
@@ -55,6 +63,8 @@ module ROM
                   ] => Net::LDAP::Filter
 
         # @return Net::LDAP::Filter
+        # @param args [Array] ?
+        # @api public
         #
         def [](args)
           filters = args.each_with_object([]) do |(command, params), array|
@@ -65,10 +75,10 @@ module ROM
         end
 
 
-        # Parses raw ldap_filter_string
+        # Parse a raw ldap_filter_string
         #
         # @example
-        #   relation.filter('uid=*est*')
+        #   relation.filter('uid=*est*') =>
         #
         # @param args [String]
         # @return [Net::LDAP::Filter]
