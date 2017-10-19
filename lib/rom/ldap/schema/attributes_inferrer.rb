@@ -1,4 +1,5 @@
 require 'rom/initializer'
+require 'dry/core/cache'
 
 module ROM
   module LDAP
@@ -7,6 +8,7 @@ module ROM
       class AttributesInferrer
 
         extend Initializer
+        extend Dry::Core::Cache
 
         option :attr_class, optional: true
 
@@ -34,17 +36,23 @@ module ROM
 
         # attributes used by filtered entries
         def dataset_columns(gateway, dataset)
-          gateway[dataset].map(&:attribute_names).flatten.uniq
+          fetch_or_store(gateway, dataset) do
+            gateway[dataset].map(&:attribute_names).flatten.uniq.sort
+          end
         end
 
         # all attribute types used by any entry
         def used_columns(gateway)
-          gateway[nil].map(&:attribute_names).flatten.uniq
+          fetch_or_store(gateway, nil) do
+            gateway[nil].map(&:attribute_names).flatten.uniq.sort
+          end
         end
 
         # all possible attribute types
         def known_columns(gateway)
-          gateway.attribute_types.map { |a| a.scan(/NAME '(\S+)'/) }.flatten.uniq.sort.map(&:to_sym)
+          fetch_or_store(gateway) do
+            gateway.attribute_types.map { |a| a.scan(/NAME '(\S+)'/) }.flatten.uniq.sort.map(&:to_sym)
+          end
         end
 
         def default_type

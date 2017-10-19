@@ -23,10 +23,9 @@ module ROM
         def call(schema, gateway)
           inferred = super
           { **inferred }
+
         rescue *ERROR_MAP.keys => e
-          # raise ERROR_MAP.fetch(e.class, Error), e
-          # on_error(schema.name, e)
-          on_error(schema.name, ERROR_MAP.fetch(e.class, Error))
+          raise ERROR_MAP.fetch(e.class, Error), e
           FALLBACK_SCHEMA
         end
 
@@ -34,9 +33,6 @@ module ROM
           with(raise_on_error: false, silent: true)
         end
 
-        def on_error(relation, e=nil)
-          abort "ROM::LDAP::Relation[#{relation}] failed to infer schema. #{e.message}"
-        end
       end
     end
   end
