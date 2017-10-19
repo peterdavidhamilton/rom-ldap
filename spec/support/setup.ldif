@@ -52,6 +52,7 @@ objectClass: top
 sn: Administrator
 uid: root
 userPassword:: e1NIQX1XNnBoNU1tNVB6OEdnaVVMYlBnekczN21qOWc9
+uidNumber: 0
 
 #
 # Customers
@@ -69,6 +70,7 @@ sn: test1
 uid: test1
 userPassword:: e1NIQX10RVNzQm1FL3lOWTNsYjZhMEw2dlZRRVpOcXc9
 gidNumber: 9998
+uidNumber: 1
 
 dn: uid=test2,ou=users,dc=example,dc=com
 cn: test2
@@ -83,6 +85,7 @@ sn: test2
 uid: test2
 userPassword:: e1NIQX1FSjlMUEZEWHNOOXluU21ieHZqcDc1Qm1seDg9
 gidNumber: 9998
+uidNumber: 2
 
 dn: uid=test3,ou=users,dc=example,dc=com
 cn: test3
@@ -97,6 +100,7 @@ sn: test3
 uid: test3
 userPassword:: e1NIQX1QcitqQWR4WkdXOFlXVHhGNVJrb2VpTXBkWWs9
 gidNumber: 9998
+uidNumber: 3
 
 dn: uid=test4,ou=users,dc=example,dc=com
 cn: test4
@@ -111,6 +115,7 @@ sn: test4
 uid: test4
 userPassword:: e1NIQX1IL0t6Y0VydDRFN3N0UjVReW1tTy9WQ2hONXM9
 gidNumber: 9998
+uidNumber: 4
 
 dn: uid=test5,ou=users,dc=example,dc=com
 cn: test5
@@ -125,6 +130,7 @@ sn: test5
 uid: test5
 userPassword:: e1NIQX1rUjNjTzQrYUU3VkptMnZFWTRvclR6OW92eU09
 gidNumber: 9998
+uidNumber: 5
 
 dn: uid=test6,ou=users,dc=example,dc=com
 cn: test6
@@ -139,6 +145,7 @@ sn: test6
 uid: test6
 userPassword:: e1NIQX1wbTN5WVJJTGJDTVJ4dThMRzZ0T1dEcjh2TUE9
 gidNumber: 9998
+uidNumber: 6
 
 dn: uid=test7,ou=users,dc=example,dc=com
 cn: test7
@@ -153,6 +160,7 @@ sn: test7
 uid: test7
 userPassword:: e1NIQX02akpERXkxbE96a0NXcFJPY1BQczMzRHVPWlE9
 gidNumber: 9998
+uidNumber: 7
 
 dn: uid=test8,ou=users,dc=example,dc=com
 cn: test8
@@ -167,6 +175,7 @@ sn: test8
 uid: test8
 userPassword:: e1NIQX0wRCtkTkJsRGt3R2ViUkxYeVVLQ2ZyMXBSRU09
 gidNumber: 9998
+uidNumber: 8
 
 dn: uid=test9,ou=users,dc=example,dc=com
 cn: test9
@@ -181,6 +190,7 @@ sn: test9
 uid: test9
 userPassword:: e1NIQX1VOVVsZzJ6SmJRaWFXa0lZdEdUOXBUTDMzcjQ9
 gidNumber: 9998
+uidNumber: 9
 
 dn: uid=test10,ou=users,dc=example,dc=com
 cn: test10
@@ -195,3 +205,4 @@ sn: test10
 uid: test10
 userPassword:: e1NIQX1GbzlBS2ZRVzdnWldYeExtbDkvQlUwcm1uVEk9
 gidNumber: 9998
+uidNumber: 10

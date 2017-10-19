@@ -81,6 +81,7 @@ describe ROM::LDAP::Relation, 'reading module' do
       objectclass: extensibleObject
       sn: test1
       uid: test1
+      uidnumber: 1
       userpassword:: e1NIQX10RVNzQm1FL3lOWTNsYjZhMEw2dlZRRVpOcXc9
     LDIF
 
