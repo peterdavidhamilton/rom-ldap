@@ -103,7 +103,20 @@ module ROM
           where(primary_key => pk)
         end
 
-        alias_method :fetch, :by_pk
+        # Fetch a tuple identified by the pk
+        #
+        # @example
+        #   users.fetch(1001)
+        #   # {:id => 1, name: "Jane"}
+        #
+        # @return [Hash]
+        #
+        # @raise [ROM::TupleCountMismatchError] When 0 or more than 1 tuples were found
+        #
+        # @api public
+        def fetch(pk)
+          by_pk(pk).one!
+        end
 
 
         # raw filter to LDIF
@@ -118,26 +131,26 @@ module ROM
           dataset.to_ldif
         end
 
-        # First tuple from dataset
+        # First tuple from the relation
         #
         # @example
         #   relation.where(sn: 'smith').first
         #
-        # @return [Relation]
+        # @return [Hash]
         #
         def first
-          new(dataset.take(1))
+          dataset.take(1)
         end
 
-        # Last tuple from dataset
+        # Last tuple from the relation
         #
         # @example
         #   relation.where(sn: 'smith').last
         #
-        # @return [Relation]
+        # @return [Hash]
         #
         def last
-          new(dataset.reverse_each.take(1))
+          dataset.reverse_each.take(1)
         end
 
         # Orders the dataset by a given attribute
