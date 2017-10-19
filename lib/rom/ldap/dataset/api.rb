@@ -18,13 +18,18 @@ module ROM
         # @return [Array <Hash>]
         # @api public
         #
-        def search(filter, &block)
+        def search(filter, scope=nil, &block)
           options = {
             filter: filter,
             return_referrals: true,
             return_result: true,
+            size: 10,
+            time: 3,
             paged_searches_supported: pageable?
           }
+
+          options.merge!(scope: scope)
+
           results = directory(options).sort_by(&:dn).map(&method(:extract))
           log(__callee__, filter)
 
@@ -39,11 +44,21 @@ module ROM
         #
         def directory(options, &block)
           connection.search(options, &block) or
-            raise LDAP::FilterError, 'dataset could not be found'
+            raise(LDAP::ConnectionError, 'directory returned nil')
+
+          rescue *ERROR_MAP.keys => e
+            raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         def bind_as(args)
           connection.bind_as(args)
+        end
+
+        # @return [Integer]
+        # @api public
+        #
+        def count(filter)
+          directory(filter: filter, attributes_only: true).count
         end
 
         # @return [Boolean]

@@ -40,8 +40,10 @@ module ROM
       def each(*args, &block)
         results = search
         reset!
-        return results.to_enum.lazy unless block_given?
-        results.each(&block).send(__callee__, *args)
+        # binding.pry
+        return results.lazy unless block_given?
+        # results.lazy.each(&block).send(__callee__, *args)
+        results.lazy.send(__callee__, *args, &block)
       end
 
       # Respond to repository methods by first calling #each
@@ -53,6 +55,16 @@ module ROM
       alias_method :one,      :each
       alias_method :to_a,     :each
       alias_method :with,     :each
+
+
+      # Reset the current criteria
+      #
+      # @return [Integer]
+      # @public
+      #
+      def count
+        api.count(to_filter)
+      end
 
       # Reset the current criteria
       #
@@ -134,11 +146,11 @@ module ROM
         results.map(&:to_ldif).join("\n")
       end
 
-      # @return [Lazy Enumerator<Hash>]
+      # @return [Array<Hash>]
       # @api private
       #
-      def search(&block)
-        api.search(to_filter, &block)
+      def search(scope=nil, &block)
+        api.search(to_filter, scope, &block)
       end
       private :search
 
