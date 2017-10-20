@@ -63,6 +63,14 @@ module ROM
         end
 
         # @return [Boolean]
+        # @param key
+        # @api public
+        #
+        def include?(key)
+          dataset.include?(key)
+        end
+
+        # @return [Boolean]
         #
         # @api public
         #

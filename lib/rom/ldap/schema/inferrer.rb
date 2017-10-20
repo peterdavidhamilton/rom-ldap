@@ -17,7 +17,10 @@ module ROM
 
         option :raise_on_error, default: -> { true }
 
-        FALLBACK_SCHEMA = { attributes: EMPTY_ARRAY, indexes: EMPTY_SET }.freeze
+        FALLBACK_SCHEMA = {
+          attributes: EMPTY_ARRAY,
+          indexes:    EMPTY_SET
+        }.freeze
 
         # @api private
         def call(schema, gateway)

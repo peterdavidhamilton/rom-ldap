@@ -40,7 +40,6 @@ module ROM
       def each(*args, &block)
         results = search
         reset!
-        # binding.pry
         return results.lazy unless block_given?
         # results.lazy.each(&block).send(__callee__, *args)
         results.lazy.send(__callee__, *args, &block)
@@ -56,16 +55,6 @@ module ROM
       alias_method :to_a,     :each
       alias_method :with,     :each
 
-
-      # Reset the current criteria
-      #
-      # @return [Integer]
-      # @public
-      #
-      def count
-        api.count(to_filter)
-      end
-
       # Reset the current criteria
       #
       # @return [ROM::LDAP::Dataset]
@@ -79,7 +68,7 @@ module ROM
 
       # @return [Net::LDAP::Filter]
       #
-      def to_filter
+      def filter
         begin
           generator[criteria]
         rescue Net::LDAP::FilterSyntaxInvalidError
@@ -93,22 +82,42 @@ module ROM
       # @return [String]
       #
       def inspect
-        %(#<#{self.class} filter='#{to_filter}'>)
+        %(#<#{self.class} filter='#{filter}'>)
       end
 
       # True if password binds for the filtered dataset
       #
       # @param password [String]
       # @return [Boolean]
+      # @public
       #
       def authenticated?(password)
-        api.bind_as(filter: to_filter, password: password)
+        api.bind_as(filter: filter, password: password)
       end
 
       # @return [Boolean]
+      # @public
       #
       def exist?
-        results = api.exist?(to_filter)
+        results = api.exist?(filter)
+        reset!
+        results
+      end
+
+      # @return [Integer]
+      # @public
+      #
+      def count
+        results = api.count(filter)
+        reset!
+        results
+      end
+
+      # @return [Boolean]
+      # @public
+      #
+      def include?(key)
+        results = api.include?(filter, key)
         reset!
         results
       end
@@ -141,7 +150,7 @@ module ROM
       # @return [String]
       #
       def to_ldif
-        results = api.directory(filter: to_filter)
+        results = api.directory(filter: filter)
         reset!
         results.map(&:to_ldif).join("\n")
       end
@@ -150,7 +159,7 @@ module ROM
       # @api private
       #
       def search(scope=nil, &block)
-        api.search(to_filter, scope, &block)
+        api.search(filter, scope, &block)
       end
       private :search
 

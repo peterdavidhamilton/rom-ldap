@@ -16,7 +16,7 @@ module ROM
       end
 
       # @!attribute [r] client
-      #   @return [Object] Net::LDAP cient
+      #   @return [Object, Hash] Net::LDAP client instance
       attr_reader :client
 
       # @!attribute [r] logger
@@ -24,7 +24,7 @@ module ROM
       attr_reader :logger
 
       # @!attribute [r] options
-      #   @return [Hash] Options used for connection
+      #   @return [Hash] Options passed to API search
       attr_reader :options
 
 
@@ -46,9 +46,9 @@ module ROM
       # @return [Array<Hash>]
       # @api public
       #
-      def [](filter)
-        api.directory(filter: filter) || EMPTY_ARRAY
-      end
+      # def [](filter)
+      #   api.directory(filter: filter, attributes_only: true) || EMPTY_ARRAY
+      # end
 
       # @param logger [Logger]
       # @api public
@@ -73,7 +73,7 @@ module ROM
       # wrapper for Net::LDAP client
       #
       def api
-        @api ||= Dataset::API.new(connection, logger)
+        @api ||= Dataset::API.new(connection, logger, options)
       end
 
       def connection

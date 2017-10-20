@@ -6,10 +6,21 @@ module ROM
   module LDAP
     class Dataset
       class API
+
+        # PAGED_RESULTS = '1.2.840.113556.1.4.319'
+        # SORT_REQUEST  = '1.2.840.113556.1.4.473'
+        # SORT_RESPONSE = '1.2.840.113556.1.4.474'
+        # DELETE_TREE   = '1.2.840.113556.1.4.805'
+        # LDAP_MATCHING_RULE_BIT_AND = '1.2.840.113556.1.4.803'
+        # LDAP_MATCHING_RULE_BIT_OR  = '1.2.840.113556.1.4.804'
+
         extend Initializer
 
         param :connection
         param :logger
+
+        option :size, reader: :private, default: proc { 100 }
+        option :time, reader: :private, default: proc { 3 }
 
         # Query results as array of hashes ordered by Distinguishing Name
         #
@@ -21,11 +32,11 @@ module ROM
         def search(filter, scope=nil, &block)
           options = {
             filter: filter,
+            size: size,
+            time: time,
+						deref: Net::LDAP::DerefAliases_Always,
             return_referrals: true,
             return_result: true,
-            size: 10,
-            time: 3,
-            paged_searches_supported: pageable?
           }
 
           options.merge!(scope: scope)
@@ -33,7 +44,7 @@ module ROM
           results = directory(options).sort_by(&:dn).map(&method(:extract))
           log(__callee__, filter)
 
-          block_given? ? yield(results) : results
+					block_given? ? results.each(&block) : results
         end
 
         # Wrapper for Net::LDAP::Connection#search directory results
@@ -58,7 +69,17 @@ module ROM
         # @api public
         #
         def count(filter)
-          directory(filter: filter, attributes_only: true).count
+          directory(filter: filter, attributes: 'dn').count
+        end
+
+        # @return [Boolean]
+        # @api public
+        #
+        def include?(filter, key)
+          directory(filter: filter, attributes_only: true) do |e|
+            binding.pry
+            e.send(key)
+          end
         end
 
         # @return [Boolean]
@@ -67,6 +88,7 @@ module ROM
         def exist?(filter)
           directory(filter: filter, return_result: false)
         end
+
 
         # Wrapper for Net::LDAP::Connection#add
         #
@@ -117,9 +139,7 @@ module ROM
 
         def log(caller = nil, message = nil)
           logger.error("#{self.class}##{caller} error: '#{error}'") unless success?
-
           logger.info("#{self.class}##{caller} #{message}")
-
           logger.debug("#{self.class}##{caller} code: #{status.code} result: '#{status.message}'") if ENV['DEBUG']
         end
 
@@ -180,6 +200,10 @@ module ROM
         def status
           connection.get_operation_result
         end
+
+				def	detailed_status
+					status.extended_response[0][0]
+				end
 
         def success?
           status.code.zero?

@@ -33,21 +33,14 @@ module ROM
 
 
       # available methods provided by DSL
+      #
+      # @return [Array]
       # @api private
       #
       def query_methods
         Dataset::DSL.query_methods.sort
       end
       private :query_methods
-
-
-      # current query build on the relation - will materialise on iteration
-      #
-      def query_string
-        dataset.to_filter.to_s
-      end
-
-
 
       def project(*names)
         with(schema: schema.project(*names.flatten))
