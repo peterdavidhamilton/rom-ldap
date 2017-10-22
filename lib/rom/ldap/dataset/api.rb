@@ -235,8 +235,10 @@ module ROM
         # Build hash from attribute definition
         #
         # @example
+        #   parse_attribute_type("...")
+        #     #=> { name: :uidnumber, description: '', single: true)
         #
-        # @param entry [String]
+        # @param type [String]
         #
         # @return [Hash]
         #

@@ -26,6 +26,7 @@ module ROM
         ::OpenStruct.new(db: ::OpenStruct.new(database_type: :ldap) )
       end
 
+      # @api private
       def build(args, &block)
         new_criteria = {"_#{__callee__}" => args}
         @criteria    = Functions[:deep_merge][criteria, new_criteria]
@@ -37,6 +38,7 @@ module ROM
         alias_method m, :build
       end
 
+      # @api public
       def each(*args, &block)
         results = search
         reset!
@@ -58,8 +60,8 @@ module ROM
       # Reset the current criteria
       #
       # @return [ROM::LDAP::Dataset]
-      # @private
       #
+      # @api private
       def reset!
         @criteria = {}
         self
@@ -68,6 +70,7 @@ module ROM
 
       # @return [Net::LDAP::Filter]
       #
+      # @api public
       def filter
         begin
           generator[criteria]
@@ -81,6 +84,7 @@ module ROM
       #
       # @return [String]
       #
+      # @api public
       def inspect
         %(#<#{self.class} filter='#{filter}'>)
       end
@@ -88,16 +92,17 @@ module ROM
       # True if password binds for the filtered dataset
       #
       # @param password [String]
-      # @return [Boolean]
-      # @public
       #
+      # @return [Boolean]
+      #
+      # @api public
       def authenticated?(password)
         api.bind_as(filter: filter, password: password)
       end
 
       # @return [Boolean]
-      # @public
       #
+      # @api public
       def exist?
         results = api.exist?(filter)
         reset!
@@ -105,8 +110,8 @@ module ROM
       end
 
       # @return [Integer]
-      # @public
       #
+      # @api public
       def count
         results = api.count(filter)
         reset!
@@ -114,8 +119,8 @@ module ROM
       end
 
       # @return [Boolean]
-      # @public
       #
+      # @api public
       def include?(key)
         results = api.include?(filter, key)
         reset!
@@ -125,14 +130,17 @@ module ROM
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:add
       #
       # @param tuple [Hash]
+      #
       # @return [Boolean]
       #
+      # @api public
       def add(tuple)
         api.add(tuple)
       end
 
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:modify
       #
+      # @api public
       def modify(tuples, args)
         tuples.each do |t|
           api.modify(*t[:dn], args.map { |k, v| [:replace, k, v] })
@@ -141,6 +149,7 @@ module ROM
 
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:delete
       #
+      # @api public
       def delete(tuples)
         tuples.each { |t| api.delete(*t[:dn]) }
       end
@@ -149,6 +158,7 @@ module ROM
       #
       # @return [String]
       #
+      # @api public
       def to_ldif
         results = api.directory(filter: filter)
         reset!
@@ -156,8 +166,8 @@ module ROM
       end
 
       # @return [Array<Hash>]
-      # @api private
       #
+      # @api private
       def search(scope=nil, &block)
         api.search(filter, scope, &block)
       end
