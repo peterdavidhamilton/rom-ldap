@@ -22,6 +22,8 @@ require 'forwardable'
 module ROM
   module LDAP
     class Dataset
+      # LDAP Connection Query DSL
+      #
       class DSL
         DSLError = Class.new(StandardError)
 
@@ -40,9 +42,9 @@ module ROM
         # @example
         #   ROM::LDAP::Dataset.query_methods => [:filter, :equals, :not]
         #
-        # @return [Array <Symbol>]
-        # @api public
+        # @return [Array<Symbol>]
         #
+        # @api public
         def self.query_methods
           internals.map { |m| m.to_s.tr('_','').to_sym }
         end

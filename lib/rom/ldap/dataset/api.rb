@@ -1,18 +1,41 @@
 require 'rom/initializer'
 
-# responsible for use of connection and logging
-#
 module ROM
   module LDAP
     class Dataset
+      # LDAP Connection DSL
+      #
       class API
+        # LDAP Controls
+        PAGED_RESULTS         = '1.2.840.113556.1.4.319'.freeze
+        SORT_REQUEST          = '1.2.840.113556.1.4.473'.freeze
+        SORT_RESPONSE         = '1.2.840.113556.1.4.474'.freeze
+        DELETE_TREE           = '1.2.840.113556.1.4.805'.freeze
 
-        # PAGED_RESULTS = '1.2.840.113556.1.4.319'
-        # SORT_REQUEST  = '1.2.840.113556.1.4.473'
-        # SORT_RESPONSE = '1.2.840.113556.1.4.474'
-        # DELETE_TREE   = '1.2.840.113556.1.4.805'
-        # LDAP_MATCHING_RULE_BIT_AND = '1.2.840.113556.1.4.803'
-        # LDAP_MATCHING_RULE_BIT_OR  = '1.2.840.113556.1.4.804'
+        MATCHING_RULE_BIT_AND = '1.2.840.113556.1.4.803'.freeze
+        MATCHING_RULE_BIT_OR  = '1.2.840.113556.1.4.804'.freeze
+
+        # X = '1.2.840.113556.1.4.417'.freeze
+        # X = '1.2.840.113556.1.4.528'.freeze
+        # X = '1.2.840.113556.1.4.841'.freeze
+        # X = '1.2.840.113556.1.4.1413'.freeze
+
+        # X = '1.3.6.1.4.1.42.2.27.8.5.1'.freeze
+        # X = '1.3.6.1.4.1.4203.1.10.1'.freeze
+        # X = '1.3.6.1.4.1.18060.0.0.1'.freeze
+
+        # X = '1.3.6.1.4.1.4203.1.9.1.1'.freeze
+        # X = '1.3.6.1.4.1.4203.1.9.1.2'.freeze
+        # X = '1.3.6.1.4.1.4203.1.9.1.3'.freeze
+        # X = '1.3.6.1.4.1.4203.1.9.1.4'.freeze
+
+        # X = '2.16.840.1.113730.3.4.2'.freeze
+        # X = '2.16.840.1.113730.3.4.3'.freeze
+        # X = '2.16.840.1.113730.3.4.7'.freeze
+        # X = '2.16.840.1.113730.3.4.9'.freeze
+        # X = '2.16.840.1.113730.3.4.10'.freeze
+        # X = '2.16.840.1.113730.3.4.18'.freeze
+
 
         extend Initializer
 
@@ -24,17 +47,20 @@ module ROM
 
         # Query results as array of hashes ordered by Distinguishing Name
         #
-        # @param filter [String, Net::LDAP::Filter]
-        # @param block
-        # @return [Array <Hash>]
-        # @api public
+        # @param filter [String,Net::LDAP::Filter]
         #
+        # @param scope
+        #
+        # @return [Array<Hash>]
+        #
+        # @api public
         def search(filter, scope=nil, &block)
           options = {
             filter: filter,
             size: size,
             time: time,
-						deref: Net::LDAP::DerefAliases_Always,
+            deref: Net::LDAP::DerefAliases_Always,
+            paged_searches_supported: pageable?,
             return_referrals: true,
             return_result: true,
           }
@@ -50,9 +76,10 @@ module ROM
         # Wrapper for Net::LDAP::Connection#search directory results
         #
         # @param options [Hash]
-        # @return [Array <Net::LDAP::Entry>]
-        # @api public
         #
+        # @return [Array <Net::LDAP::Entry>]
+        #
+        # @api public
         def directory(options, &block)
           connection.search(options, &block) or
             raise(LDAP::ConnectionError, 'directory returned nil')
@@ -65,26 +92,40 @@ module ROM
           connection.bind_as(args)
         end
 
-        # @return [Integer]
-        # @api public
+        # Used by gateway[filter]
         #
+        # @return [Integer]
+        #
+        # @api public
+        def attributes(filter, &block)
+          options = {
+            filter: filter,
+            size: size,
+            time: time,
+            # sort_controls: ['dn'],
+            attributes_only: true
+          }
+
+          directory(options, &block)
+        end
+
+        # @return [Integer]
+        #
+        # @api public
         def count(filter)
           directory(filter: filter, attributes: 'dn').count
         end
 
         # @return [Boolean]
-        # @api public
         #
-        def include?(filter, key)
-          directory(filter: filter, attributes_only: true) do |e|
-            binding.pry
-            e.send(key)
-          end
-        end
+        # @api public
+        # def include?(filter, key)
+        #   attributes(filter) { |e| e.send(key) }
+        # end
 
         # @return [Boolean]
-        # @api public
         #
+        # @api public
         def exist?(filter)
           directory(filter: filter, return_result: false)
         end
@@ -93,9 +134,10 @@ module ROM
         # Wrapper for Net::LDAP::Connection#add
         #
         # @param tuple [Hash]
-        # @return [Boolean]
-        # @api public
         #
+        # @return [Boolean]
+        #
+        # @api public
         def add(tuple)
           dn, args = prepare(tuple)
           connection.add(dn: dn, attributes: args)
@@ -109,8 +151,8 @@ module ROM
         # Wrapper for Net::LDAP::Connection#modify
         #
         # @return [Boolean]
-        # @api public
         #
+        # @api public
         def modify(dn, operations)
           connection.modify(dn: dn, operations: operations)
           log(__callee__, dn)
@@ -123,9 +165,10 @@ module ROM
         # Wrapper for Net::LDAP::Connection#delete
         #
         # @param dn [String]
-        # @return [Boolean]
-        # @api public
         #
+        # @return [Boolean]
+        #
+        # @api public
         def delete(dn)
           connection.delete(dn: dn)
           log(__callee__, dn)
@@ -135,23 +178,43 @@ module ROM
             raise ERROR_MAP.fetch(e.class, Error), e
         end
 
+        # Disconnect from the gateway's directory
+        #
+        # @api public
+        def disconnect
+          connection.close
+        end
+
+        # Directory attributes identifiers and descriptions
+        #
+        # @return [Array<Hash>]
+        #
+        # @api public
+        def attribute_types
+          all_attributes.flat_map { |type|
+            parse_attribute_type(type)
+          }.reject(&:nil?).sort_by { |a| a[:name] }
+        end
+
         private
 
         def log(caller = nil, message = nil)
-          logger.error("#{self.class}##{caller} error: '#{error}'") unless success?
           logger.info("#{self.class}##{caller} #{message}")
-          logger.debug("#{self.class}##{caller} code: #{status.code} result: '#{status.message}'") if ENV['DEBUG']
+          logger.error("#{self.class}##{caller} #{status.message}") unless success?
+          logger.debug("#{self.class}##{caller} #{status.message}") if ENV['DEBUG']
         end
 
         # Convenience method to prepare a tuple for #add
         #
         # @example
-        #   prepare({'dn' => X, 'sn' => Y}) #=> [X, sn: Y]
+        #   prepare({'dn' => X, 'sn' => Y})
+        #     # => [X, sn: Y]
         #
         # @param tuple [Hash]
-        # @return [Array, <String> <Hash>]
-        # @api private
         #
+        # @return [Array, <String> <Hash>]
+        #
+        # @api private
         def prepare(tuple)
           args = LDAP::Functions[:ldap_compatible][tuple.dup]
           dn   = args.delete(:dn)
@@ -161,34 +224,108 @@ module ROM
         # Reveal Hash from Net::LDAP::Entry
         #
         # @param entry [Net::LDAP::Entry]
-        # @return [Hash]
-        # @api private
         #
+        # @return [Hash]
+        #
+        # @api private
         def extract(entry)
           entry.instance_variable_get(:@myhash)
         end
 
-        def capabilities
-          connection.search_root_dse
+        # Build hash from attribute definition
+        #
+        # @example
+        #
+        # @param entry [String]
+        #
+        # @return [Hash]
+        #
+        # @api private
+        def parse_attribute_type(type)
+          return unless name = type[/NAME '(\S+)'/, 1]
+          {
+            name:        name.to_sym,
+            description: type[/DESC '(.+)' [A-Z]+/, 1],
+            oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
+            matcher:     type[/EQUALITY (\S+)/, 1],
+            substr:      type[/SUBSTR (\S+)/, 1],
+            ordering:    type[/ORDERING (\S+)/, 1],
+            single:      !type.scan(/SINGLE-VALUE/).empty?,
+            modifiable:  !type.scan(/NO-USER-MODIFICATION/).empty?,
+            usage:       type[/USAGE (\S+)/, 1],
+            source:      type[/X-SCHEMA '(\S+)'/, 1],
+          }
+        end
+
+
+        # @return [Array<String>]
+        #
+        # @api private
+        def extensions
+          connection.search_root_dse.supportedextension
+        end
+
+        # @return [Array<String>]
+        #
+        # @api private
+        def controls
+          connection.search_root_dse.supportedcontrol
+        end
+
+        # @return [Array<String>]
+        #
+        # @api private
+        def mechanisms
+          connection.search_root_dse.supportedsaslmechanisms
+        end
+
+        # @return [Array<String>]
+        #
+        # @api private
+        def features
+          connection.search_root_dse.supportedfeatures
+        end
+
+        # @return [Integer]
+        #
+        # @api private
+        def ldap_version
+          connection.search_root_dse.supportedldapversion.first.to_i
+        end
+
+        # @return [Array<String>] Object classes known by directory
+        #
+        # @api private
+        def object_classes
+          connection.search_subschema_entry[:objectclasses]
+        end
+
+        # Query directory for all known attribute types
+        #
+        # @return [Array<String>] Attribute types known by directory
+        #
+        # @api private
+        def all_attributes
+          connection.search_subschema_entry[:attributetypes]
         end
 
         # @return [String]
-        # @api private
         #
+        # @api private
         def host
           connection.host
         end
 
         # @return [String]
-        # @api private
         #
+        # @api private
         def port
           connection.port
         end
 
         # @return [String]
-        # @api private
         #
+        # @api private
         def base
           connection.base
         end
@@ -201,38 +338,31 @@ module ROM
           connection.get_operation_result
         end
 
-				def	detailed_status
-					status.extended_response[0][0]
-				end
+        def	detailed_status
+          status.extended_response[0][0]
+        end
 
+        # @return [Boolean]
+        #
+        # @api private
         def success?
           status.code.zero?
         end
 
-        def error
-          status.error_message
-        end
-
         # @return [Boolean]
-        # @api private
         #
+        # @api private
         def sortable?
-          controls.include?(Net::LDAP::LDAPControls::SORT_RESPONSE)
+          controls.include?(SORT_RESPONSE)
         end
 
         # @return [Boolean]
-        # @api private
         #
+        # @api private
         def pageable?
           connection.paged_searches_supported?
         end
 
-        # @return [Hash]
-        # @api private
-        #
-        def controls
-          connection.instance_variable_get(:@server_caps)[:supportedcontrol]
-        end
       end
     end
   end

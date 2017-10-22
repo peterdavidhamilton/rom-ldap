@@ -1,7 +1,11 @@
 require 'rom/ldap/types'
+
 require 'rom/ldap/schema'
 require 'rom/ldap/schema/inferrer'
+
+require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
+
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
 
@@ -34,9 +38,9 @@ module ROM
 
       # available methods provided by DSL
       #
-      # @return [Array]
-      # @api private
+      # @return [Array<Symbol>]
       #
+      # @api private
       def query_methods
         Dataset::DSL.query_methods.sort
       end

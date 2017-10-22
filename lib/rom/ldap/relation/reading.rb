@@ -35,7 +35,6 @@ module ROM
         # @return [Relation]
         #
         # @api public
-        #
         def authenticate(password)
           if dataset.authenticated?(password)
             new(dataset)
@@ -49,23 +48,25 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        #
         def authenticated?(password)
           !!dataset.authenticated?(password)
         end
 
+        # Count the number of entries in the dataset.
+        #   Not restricted by the gateway search limit.
+        #
         # @return [Integer]
         #
         # @api public
-        #
         def count
           dataset.count
         end
 
         # @return [Boolean]
-        # @param key
-        # @api public
         #
+        # @param key
+        #
+        # @api public
         def include?(key)
           dataset.include?(key)
         end
@@ -73,7 +74,6 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        #
         def unique?
           dataset.one?
         end
@@ -83,7 +83,6 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        #
         def exist?
           dataset.exist?
         end
@@ -93,7 +92,6 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        #
         def none?
           !exist?
         end
@@ -106,7 +104,6 @@ module ROM
         #   relation.by_pk(1001)
         #
         # @return [Relation]
-        #
         def by_pk(pk)
           where(primary_key => pk)
         end
@@ -133,8 +130,8 @@ module ROM
         #   relation.to_ldif
         #
         # @return [String]
-        # @api public
         #
+        # @api public
         def to_ldif
           dataset.to_ldif
         end
@@ -146,8 +143,9 @@ module ROM
         #
         # @return [Hash]
         #
+        # @api public
         def first
-          dataset.take(1)
+          dataset.first
         end
 
         # Last tuple from the relation
@@ -157,8 +155,9 @@ module ROM
         #
         # @return [Hash]
         #
+        # @api public
         def last
-          dataset.reverse_each.take(1)
+          dataset.reverse_each.first
         end
 
         # Orders the dataset by a given attribute
@@ -168,6 +167,7 @@ module ROM
         #
         # @return [Relation]
         #
+        # @api public
         def order(attribute)
           new(dataset.sort_by { |e| e[attribute] })
         end
@@ -179,6 +179,7 @@ module ROM
         #
         # @return [Relation]
         #
+        # @api public
         def limit(number)
           new(dataset.take(number))
         end
@@ -190,6 +191,7 @@ module ROM
         #
         # @return [Relation]
         #
+        # @api public
         def random
           new(dataset.entries.shuffle)
         end
@@ -201,8 +203,9 @@ module ROM
         #
         # @return [Relation]
         #
+        # @api public
         def reverse
-          new(dataset.reverse_each.entries)
+          new(dataset.reverse_each)
         end
 
         # Selects on certain attributes from tuples
@@ -212,10 +215,10 @@ module ROM
         #
         # @return [Relation]
         #
+        # @api public
         def select(*args)
           new(dataset.map { |e| e.select { |k,v| args.include?(k) } })
         end
-
         alias_method :pluck, :select
 
 

@@ -3,6 +3,19 @@ require 'spec_helper'
 describe ROM::LDAP::ConnectionError do
   include ContainerSetup
 
+
+  describe 'downed host' do
+    let(:params) do
+      { host: '255.255.255.255', port: 10389, base: 'ou=users,dc=example,dc=com' }
+    end
+
+    it 'times out' do
+      err = -> { container.relations }.must_raise ROM::LDAP::ConnectionError
+      err.message.must_match /permission denied/i
+    end
+  end
+
+
   describe 'incorrect host' do
     let(:params) do
       { host: '9.9.9.9', port: 10389, base: 'ou=users,dc=example,dc=com' }
@@ -10,7 +23,7 @@ describe ROM::LDAP::ConnectionError do
 
     it 'times out' do
       err = -> { container.relations }.must_raise ROM::LDAP::ConnectionError
-      err.message.must_match /operation timed out/i
+      err.message.must_match /connection refused/i
     end
   end
 

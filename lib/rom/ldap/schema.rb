@@ -5,6 +5,11 @@ module ROM
   module LDAP
     class Schema < ROM::Schema
 
+      # used by Relation#view
+      def call(relation)
+        relation.new(relation.dataset, schema: self)
+      end
+
       # Return an empty schema
       #
       # @return [Schema]
@@ -30,10 +35,6 @@ module ROM
         end
       end
 
-      # used by Relation#view
-      def call(relation)
-        relation.new(relation.dataset, schema: self)
-      end
     end
   end
 end

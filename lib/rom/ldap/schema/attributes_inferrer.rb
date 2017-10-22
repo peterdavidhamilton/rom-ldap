@@ -1,4 +1,6 @@
 require 'rom/initializer'
+require 'rom/ldap/types'
+require 'dry/core/cache'
 
 module ROM
   module LDAP
@@ -6,25 +8,27 @@ module ROM
       # @api private
       class AttributesInferrer
         extend Initializer
+        extend Dry::Core::Cache
 
         option :attr_class, optional: true
 
         # @api private
         def call(schema, gateway)
-          dataset = schema.name.dataset
-          columns = columns(gateway)
+          dataset  = schema.name.dataset
+          columns  = dataset_attributes(gateway, dataset)
 
-          # [
-          #   [0] "1.2.840.113556.1.4.7000.102.51233",
-          #   [1] "msExchFedMetadataPollInterval",
-          #   [2] "1.3.6.1.4.1.1466.115.121.1.27",
-          #   [3] "SINGLE-VALUE"
-          # ],
+          inferred = columns.map do |name|
 
-          inferred = columns.map do |code, name, oid, type|
-          # inferred = columns.map do |name|
-            # attr_class.new(default_type.meta(name: name, source: schema.name))
-            attr_class.new(default_type.meta(name: name.to_sym, source: schema.name))
+            attribute = definition(gateway, name)
+            meta = Hash[name: name, source: schema.name]
+            type = Types::Entry
+
+            if attribute
+              meta.merge!(description: attribute[:description]) if attribute[:description]
+              meta.merge!(oid: attribute[:oid], multiple: !attribute[:single])
+            end
+
+            attr_class.new(type.meta(meta))
           end
 
           missing = columns - inferred.map { |attr| attr.meta[:name] }
@@ -39,16 +43,30 @@ module ROM
 
         private
 
-        TYPE_REGEX = %r"^\( (\S+) NAME '(\S+)' SYNTAX '(\S+)' (\S+){0,} \)$"
-
-        # all possible attribute types
-        def columns(gateway)
-          gateway.attribute_types.map { |a| a.scan(TYPE_REGEX) }.reject(&:empty?).map(&:flatten)
-          # .flatten.uniq.sort.map(&:to_sym)
+        # Attributes used by filtered entries
+        #
+        # @example
+        #   dataset_attributes(ROM::LDAP::Gateway, "(cn=*)")
+        #     # =>  [:cn, :dn, :givenname, :mail, :objectclass, :sn]
+        #
+        # @return [Array<Symbol>]
+        #
+        # @api private
+        def dataset_attributes(gateway, dataset)
+          fetch_or_store(gateway, dataset) do
+            gateway[dataset].flat_map(&:attribute_names).uniq.sort
+          end
         end
 
-        def default_type
-          Types::Entry
+        def directory_attributes(gateway)
+          fetch_or_store(gateway, 'types') { gateway.attribute_types }
+        end
+
+        # @return [Hash]
+        #
+        # @api private
+        def definition(gateway, name)
+          directory_attributes(gateway).select { |a| a[:name].eql?(name) }.first
         end
 
       end

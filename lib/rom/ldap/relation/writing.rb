@@ -16,9 +16,10 @@ module ROM
         #   ) #=> true
         #
         # @param args [Hash]
-        # @return [Boolean]
-        # @api public
         #
+        # @return [Boolean]
+        #
+        # @api public
         def insert(args)
           dataset.add(args)
         end
@@ -27,9 +28,10 @@ module ROM
         #   repo.update(2000, mail: 'fear_the_bat@gotham.com') #=> ??
         #
         # @param args [Hash]
-        # @return [Array, <Hash>]
-        # @api public
         #
+        # @return [Array, <Hash>]
+        #
+        # @api public
         def update(args)
           dataset.modify(dataset.entries, args)
         end
@@ -38,9 +40,10 @@ module ROM
         #   repo.delete(2000) #=> true
         #
         # @param args [Hash]
-        # @return [Array, <Hash>]
-        # @api public
         #
+        # @return [Array, <Hash>]
+        #
+        # @api public
         def delete(*args)
           dataset.delete(dataset.entries)
         end

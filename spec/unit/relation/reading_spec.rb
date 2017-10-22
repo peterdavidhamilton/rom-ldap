@@ -39,13 +39,11 @@ describe ROM::LDAP::Relation, 'reading module' do
   end
 
   it '#first' do
-    names = customers.first.to_a.collect { |t| t[:givenname] }
-    names.must_equal [['test1']]
+    customers.first[:givenname].must_equal ['test1']
   end
 
   it '#last' do
-    names = customers.last.to_a.collect { |t| t[:givenname] }
-    names.must_equal [['test9']]
+    customers.last[:givenname].must_equal ['test9']
   end
 
   it '#select' do
