@@ -6,36 +6,33 @@ module ROM
       # LDAP Connection DSL
       #
       class API
-        # LDAP Controls
-        PAGED_RESULTS         = '1.2.840.113556.1.4.319'.freeze
-        SORT_REQUEST          = '1.2.840.113556.1.4.473'.freeze
-        SORT_RESPONSE         = '1.2.840.113556.1.4.474'.freeze
-        DELETE_TREE           = '1.2.840.113556.1.4.805'.freeze
+        #
+        # LDAP OID Controls
+        #
+        MICROSOFT_OID_PREFIX       = '1.2.840.113556'.freeze
+        PAGED_RESULTS              = '1.2.840.113556.1.4.319'.freeze
+        SHOW_DELETED               = '1.2.840.113556.1.4.417'.freeze
+        SORT_REQUEST               = '1.2.840.113556.1.4.473'.freeze
+        SORT_RESPONSE              = '1.2.840.113556.1.4.474'.freeze
+        NOTIFICATION_OID           = '1.2.840.113556.1.4.528'.freeze
+        MATCHING_RULE_BIT_AND      = '1.2.840.113556.1.4.803'.freeze
+        MATCHING_RULE_BIT_OR       = '1.2.840.113556.1.4.804'.freeze
+        DELETE_TREE                = '1.2.840.113556.1.4.805'.freeze
+        DIRSYNC_OID                = '1.2.840.113556.1.4.841'.freeze
+        PERMISSIVE_MODIFY          = '1.2.840.113556.1.4.1413'.freeze
+        PASSWORD_POLICY_REQUEST    = '1.3.6.1.4.1.42.2.27.8.5.1'.freeze
+        SUBENTRIES                 = '1.3.6.1.4.1.4203.1.10.1'.freeze
+        MANAGED_SA_IT              = '2.16.840.1.113730.3.4.2'.freeze
+        PERSISTENT_SEARCH          = '2.16.840.1.113730.3.4.3'.freeze
+        VIRTUAL_LIST_VIEW_REQUEST  = '2.16.840.1.113730.3.4.9'.freeze
+        VIRTUAL_LIST_VIEW_RESPONSE = '2.16.840.1.113730.3.4.10'.freeze
+        PROXIED_AUTHORIZATION      = '2.16.840.1.113730.3.4.18'.freeze
 
-        MATCHING_RULE_BIT_AND = '1.2.840.113556.1.4.803'.freeze
-        MATCHING_RULE_BIT_OR  = '1.2.840.113556.1.4.804'.freeze
-
-        # X = '1.2.840.113556.1.4.417'.freeze
-        # X = '1.2.840.113556.1.4.528'.freeze
-        # X = '1.2.840.113556.1.4.841'.freeze
-        # X = '1.2.840.113556.1.4.1413'.freeze
-
-        # X = '1.3.6.1.4.1.42.2.27.8.5.1'.freeze
-        # X = '1.3.6.1.4.1.4203.1.10.1'.freeze
-        # X = '1.3.6.1.4.1.18060.0.0.1'.freeze
-
-        # X = '1.3.6.1.4.1.4203.1.9.1.1'.freeze
-        # X = '1.3.6.1.4.1.4203.1.9.1.2'.freeze
-        # X = '1.3.6.1.4.1.4203.1.9.1.3'.freeze
-        # X = '1.3.6.1.4.1.4203.1.9.1.4'.freeze
-
-        # X = '2.16.840.1.113730.3.4.2'.freeze
-        # X = '2.16.840.1.113730.3.4.3'.freeze
-        # X = '2.16.840.1.113730.3.4.7'.freeze
-        # X = '2.16.840.1.113730.3.4.9'.freeze
-        # X = '2.16.840.1.113730.3.4.10'.freeze
-        # X = '2.16.840.1.113730.3.4.18'.freeze
-
+        #
+        # Default Global Filters
+        #
+        GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
+        USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
 
         extend Initializer
 
@@ -70,7 +67,7 @@ module ROM
           results = directory(options).sort_by(&:dn).map(&method(:extract))
           log(__callee__, filter)
 
-					block_given? ? results.each(&block) : results
+          block_given? ? results.each(&block) : results
         end
 
         # Wrapper for Net::LDAP::Connection#search directory results
@@ -340,7 +337,7 @@ module ROM
           connection.get_operation_result
         end
 
-        def	detailed_status
+        def detailed_status
           status.extended_response[0][0]
         end
 

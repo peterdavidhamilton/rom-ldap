@@ -21,6 +21,7 @@ describe ROM::LDAP::Relation, 'dataset dsl' do
 
     it '#equals' do
       sandbox.equals(uid: 'billy').count.must_equal(1)
+      # sandbox.equals(mail: 'test*.com').count.must_equal(10)
     end
 
     it '#not' do
