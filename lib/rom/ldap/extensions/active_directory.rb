@@ -2,7 +2,50 @@ module ROM
   module LDAP
     # Microsoft Active Directory
     module ActiveDirectory
+      #
       # NB: Use the AD Forest configuration container as a search base.
+      # @see https://msdn.microsoft.com/en-us/library/ms684291(v=vs.85).aspx
+      #
+      # RootDSE domainFunctionality
+      # RootDSE domainControllerFunctionality
+      # RootDSE forestFunctionality
+      #
+      VERSION_NAMES = {
+        0 => 'Windows Server 2000 (5.0)',
+        1 => 'Windows Server 2003 (5.2)',
+        2 => 'Windows Server 2003 R2 (5.2)',
+        3 => 'Windows Server 2008 (6.0)',
+        4 => 'Windows Server 2008 R2 (6.1)',
+        5 => 'Windows Server 2012 (6.2)',
+        6 => 'Windows Server 2012 R2 (6.3)',
+        7 => 'Windows Server 2016 (10.0)',
+        8 => 'Windows Server Latest Version (?)'
+      }.freeze
+
+      #
+      # RootDSE supportedLDAPPolicies
+      #
+      POLICIES = %w[
+        InitRecvTimeout
+        MaxBatchReturnMessages
+        MaxConnections
+        MaxConnIdleTime
+        MaxDatagramRecv
+        MaxNotificationPerConn
+        MaxPageSize
+        MaxPercentDirSyncRequests
+        MaxPoolThreads
+        MaxQueryDuration
+        MaxReceiveBuffer
+        MaxResultSetSize
+        MaxResultSetsPerConn
+        MaxTempTableSize
+        MaxValRange
+        MaxValRangeTransitive
+        MinResultSets
+        SystemMemoryLimitPercent
+        ThreadMemoryLimit
+      ].freeze
 
       #
       # Integer Codes
@@ -54,18 +97,19 @@ module ROM
       #
       # Users and Accounts
       #
+      USERS                        = '(sAMAccountType=805306368)'.freeze
+      USERS_WITH_EMAIL             = '(&(sAMAccountType=805306368)(mailNickname=*))'.freeze
+
       DISABLED_ACCOUNT             = '(userAccountControl:1.2.840.113556.1.4.803:=2)'.freeze
       ENABLED_ACCOUNT              = '(!userAccountControl:1.2.840.113556.1.4.803:=2)'.freeze
+
+      PASSWORDLESS_ACCOUNT         = '(&(sAMAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=32))'.freeze
+      PASSWORD_NEVER_EXPIRES       = '(userAccountControl:1.2.840.113556.1.4.803:=65536)'.freeze
+
+      EXCHANGE_SERVERS             = '(&(objectClass=msExchExchangeServer)(!(objectClass=msExchExchangeServerPolicy)))'.freeze
       EXCHANGE_RECIPIENTS          = '(mailNickname=*)'.freeze
       EXCHANGE_RECIPIENTS_HIDDEN   = '(&(msExchHideFromAddressLists=TRUE)(!objectClass=publicFolder))'.freeze
       EXCHANGE_RECIPIENTS_WITH_FAX = '(proxyAddresses=FAX:*)'.freeze
-      EXCHANGE_SERVERS             = '(&(objectClass=msExchExchangeServer)(!(objectClass=msExchExchangeServerPolicy)))'.freeze
-      PASSWORD_NEVER_EXPIRES       = '(userAccountControl:1.2.840.113556.1.4.803:=65536)'.freeze
-      PASSWORD_NOT_REQUIRED        = '(&(sAMAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=32))'.freeze
-      USERS                        = '(sAMAccountType=805306368)'.freeze
-      USERS_PASSWORD_NEVER_EXPIRES = '(&(sAMAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=65536))'.freeze
-      USERS_WITH_EMAIL             = '(&(sAMAccountType=805306368)(mailNickname=*))'.freeze
-
 
     end
   end
