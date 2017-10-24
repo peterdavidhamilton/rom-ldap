@@ -21,9 +21,14 @@ module ROM
               :generator,
               :table_name
 
-      # FIXME: hack to work well with rom-sql when it loads command classes
+      # OPTIMIZE:
+      # Strange return structs to mirror Sequel behaviour for rom-sql
+      #
+      # @example
+      #   api.db.db.database_type => :apacheds
+      #
       def db
-        ::OpenStruct.new(db: ::OpenStruct.new(database_type: :ldap) )
+        ::OpenStruct.new(db: ::OpenStruct.new(database_type: api.directory_type) )
       end
 
       # @api private

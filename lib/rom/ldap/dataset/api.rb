@@ -1,4 +1,5 @@
 require 'rom/initializer'
+# require 'rom/support/memoizable'
 
 module ROM
   module LDAP
@@ -6,34 +7,7 @@ module ROM
       # LDAP Connection DSL
       #
       class API
-        #
-        # LDAP OID Controls
-        #
-        MICROSOFT_OID_PREFIX       = '1.2.840.113556'.freeze
-        PAGED_RESULTS              = '1.2.840.113556.1.4.319'.freeze
-        SHOW_DELETED               = '1.2.840.113556.1.4.417'.freeze
-        SORT_REQUEST               = '1.2.840.113556.1.4.473'.freeze
-        SORT_RESPONSE              = '1.2.840.113556.1.4.474'.freeze
-        NOTIFICATION_OID           = '1.2.840.113556.1.4.528'.freeze
-        MATCHING_RULE_BIT_AND      = '1.2.840.113556.1.4.803'.freeze
-        MATCHING_RULE_BIT_OR       = '1.2.840.113556.1.4.804'.freeze
-        DELETE_TREE                = '1.2.840.113556.1.4.805'.freeze
-        DIRSYNC_OID                = '1.2.840.113556.1.4.841'.freeze
-        PERMISSIVE_MODIFY          = '1.2.840.113556.1.4.1413'.freeze
-        PASSWORD_POLICY_REQUEST    = '1.3.6.1.4.1.42.2.27.8.5.1'.freeze
-        SUBENTRIES                 = '1.3.6.1.4.1.4203.1.10.1'.freeze
-        MANAGED_SA_IT              = '2.16.840.1.113730.3.4.2'.freeze
-        PERSISTENT_SEARCH          = '2.16.840.1.113730.3.4.3'.freeze
-        VIRTUAL_LIST_VIEW_REQUEST  = '2.16.840.1.113730.3.4.9'.freeze
-        VIRTUAL_LIST_VIEW_RESPONSE = '2.16.840.1.113730.3.4.10'.freeze
-        PROXIED_AUTHORIZATION      = '2.16.840.1.113730.3.4.18'.freeze
-
-        #
-        # Default Global Filters
-        #
-        GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
-        USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
-
+        # include Memoizable
         extend Initializer
 
         param :connection
@@ -42,32 +16,11 @@ module ROM
         option :size, reader: :private, default: proc { 100 }
         option :time, reader: :private, default: proc { 3 }
 
-        # Query results as array of hashes ordered by Distinguishing Name
-        #
-        # @param filter [String,Net::LDAP::Filter]
-        #
-        # @param scope
-        #
-        # @return [Array<Hash>]
-        #
-        # @api public
-        def search(filter, scope=nil, &block)
-          options = {
-            filter: filter,
-            size: size,
-            time: time,
-            deref: Net::LDAP::DerefAliases_Always,
-            paged_searches_supported: pageable?,
-            return_referrals: true,
-            return_result: true,
-          }
+        attr_reader :directory_type
 
-          options.merge!(scope: scope)
-
-          results = directory(options).sort_by(&:dn).map(&method(:extract))
-          log(__callee__, filter)
-
-          block_given? ? results.each(&block) : results
+        def initialize(*)
+          super
+          inspect_server!
         end
 
         # Wrapper for Net::LDAP::Connection#search directory results
@@ -85,9 +38,41 @@ module ROM
             raise ERROR_MAP.fetch(e.class, Error), e
         end
 
+
+        # Query results as array of hashes ordered by Distinguishing Name
+        #
+        # @param filter [String,Net::LDAP::Filter]
+        #
+        # @param scope
+        #
+        # @return [Array<Hash>]
+        #
+        # @api public
+        def search(filter, scope=nil, &block)
+          options = {
+            filter: filter,
+            size: size,
+            time: time,
+            deref: DEREF_ALWAYS,
+            paged_searches_supported: pageable?,
+            return_referrals: true,
+            return_result: true,
+          }
+
+          options.merge!(scope: scope)
+
+          results = directory(options).sort_by(&:dn).map(&method(:extract))
+          log(__callee__, filter)
+
+          block_given? ? results.each(&block) : results
+        end
+
+
+        # @api public
         def bind_as(args)
           connection.bind_as(args)
         end
+
 
         # Used by gateway[filter]
         #
@@ -113,12 +98,14 @@ module ROM
           directory(filter: filter, attributes: 'dn').count
         end
 
-        # @return [Boolean]
-        #
-        # @api public
-        # def include?(filter, key)
-        #   attributes(filter) { |e| e.send(key) }
-        # end
+
+            # @return [Boolean]
+            #
+            # @api public
+            # def include?(filter, key)
+            #   attributes(filter) { |e| e.send(key) }
+            # end
+
 
         # @return [Boolean]
         #
@@ -175,6 +162,17 @@ module ROM
             raise ERROR_MAP.fetch(e.class, Error), e
         end
 
+        # @result [Array<String>]
+        #
+        # @example
+        #   [ "Apple", "510.30" ]
+        #   [ "Apache Software Foundation", "2.0.0-M24" ]
+        #
+        # @api public
+        def vendor
+          [vendor_name, vendor_version]
+        end
+
         # Disconnect from the gateway's directory
         #
         # @api public
@@ -188,12 +186,91 @@ module ROM
         #
         # @api public
         def attribute_types
-          all_attributes.flat_map { |type|
+          schema_attribute_types.flat_map { |type|
             parse_attribute_type(type)
           }.reject(&:nil?).sort_by { |a| a[:name] }
         end
 
         private
+
+
+        #
+        # @api private
+        def inspect_server!
+          case vendor_name
+          when /Apache/
+            @directory_type = :apacheds
+          when /Apple/
+            @directory_type = :open_directory
+          when /Novell/
+            @directory_type = :e_directory
+          when /389/
+            @directory_type = :three_eight_nine
+          when nil
+            # Query MS Active Directory details
+            caps = root.fetch(:supportedcapabilities, EMPTY_ARRAY).sort
+
+            unless caps.empty?
+              dc     = root.fetch(:domaincontrollerfunctionality).first.to_i
+              forest = root.fetch(:forestfunctionality).first.to_i
+              dom    = root.fetch(:domainfunctionality).first.to_i
+
+              @supported_capabilities   = caps
+              @controller_functionality = dc
+              @forest_functionality     = forest
+              @domain_functionality     = dom
+
+              require 'rom/ldap/extensions/active_directory'
+
+              @vendor_name    = 'Microsoft'
+              @vendor_version = ActiveDirectory::VERSION_NAMES[dom]
+              @directory_type = :active_directory
+            else
+              log(__callee__, 'Active Directory version is unknown')
+            end
+
+          else
+            log(__callee__, "LDAP implementation #{vendor_name} is unknown")
+            @directory_type = :unknown
+          end
+        end
+
+
+
+        # Returns all known attributes if no param provided
+        #
+        # @return [Array<String>]
+        #
+        # @param attrs [Array<Symbol>] optional array of desired attributes
+        #
+        # @api private
+        def root(*attrs)
+          attrs = attrs.empty? ? ROOT_DSE_ATTRS : attrs
+
+          directory(
+            base: EMPTY_BASE,
+            scope: SCOPE_BASE_OBJECT,
+            attributes: attrs,
+            ignore_server_caps: true
+
+          # favour real hashes over Entry classes
+          ).first.instance_variable_get(:@myhash)
+        end
+
+
+        def sub_schema
+          @sub_schema ||= directory(
+            base: sub_schema_entry,
+            scope: SCOPE_BASE_OBJECT,
+            filter: 'objectclass=subschema',
+            attributes: %w[objectclasses attributetypes],
+            ignore_server_caps: true,
+
+          # favour real hashes over Entry classes
+          ).first.instance_variable_get(:@myhash)
+        end
+
+
 
         def log(caller = nil, message = nil)
           logger.info("#{self.class}##{caller} #{message}")
@@ -219,6 +296,7 @@ module ROM
         end
 
         # Reveal Hash from Net::LDAP::Entry
+        #   TODO: replace use of Entry class with a dry-struct
         #
         # @param entry [Net::LDAP::Entry]
         #
@@ -257,46 +335,90 @@ module ROM
         end
 
 
-        # @return [Array<String>]
+        # @result [String]
         #
         # @api private
-        def extensions
-          connection.search_root_dse.supportedextension
+        def vendor_name
+          @vendor_name ||= root.fetch(:vendorname, EMPTY_ARRAY).first
+        end
+        # memoize :vendor_name
+
+        # @result [String]
+        #
+        # @api private
+        def vendor_version
+          @vendor_version ||= root.fetch(:vendorversion, EMPTY_ARRAY).first
         end
 
         # @return [Array<String>]
         #
         # @api private
-        def controls
-          connection.search_root_dse.supportedcontrol
+        def supported_extensions
+          @supported_extensions ||= root.fetch(:supportedextension).sort
         end
 
         # @return [Array<String>]
         #
         # @api private
-        def mechanisms
-          connection.search_root_dse.supportedsaslmechanisms
+        def supported_controls
+          @supported_controls ||= root.fetch(:supportedcontrol).sort
         end
 
         # @return [Array<String>]
         #
         # @api private
-        def features
-          connection.search_root_dse.supportedfeatures
+        def supported_mechanisms
+          @supported_mechanisms ||= root.fetch(:supportedsaslmechanisms).sort
+        end
+
+        # @return [Array<String>]
+        #
+        # @api private
+        def supported_features
+          @supported_features ||= root.fetch(:supportedfeatures).sort
+        end
+
+        # @return [Array<Integer>]
+        #
+        # @api private
+        def supported_versions
+          @supported_versions ||= root.fetch(:supportedldapversion).sort.map(&:to_i)
         end
 
         # @return [Integer]
         #
         # @api private
-        def ldap_version
-          connection.search_root_dse.supportedldapversion.first.to_i
+        attr_reader :controller_functionality
+
+        # @return [Integer]
+        #
+        # @api private
+        attr_reader :domain_functionality
+
+        # @return [Integer]
+        #
+        # @api private
+        attr_reader :forest_functionality
+
+        # @return [Array<String>]
+        #
+        # @api private
+        attr_reader :supported_capabilities
+
+
+        # @return [String]
+        #
+        # @api private
+        def sub_schema_entry
+          @sub_schema_entry ||= root.fetch(:subschemasubentry, EMPTY_ARRAY).first
         end
+
 
         # @return [Array<String>] Object classes known by directory
         #
         # @api private
-        def object_classes
-          connection.search_subschema_entry[:objectclasses]
+        def schema_object_classes
+          sub_schema[:objectclasses].sort
         end
 
         # Query directory for all known attribute types
@@ -304,8 +426,17 @@ module ROM
         # @return [Array<String>] Attribute types known by directory
         #
         # @api private
-        def all_attributes
-          connection.search_subschema_entry[:attributetypes]
+        def schema_attribute_types
+          sub_schema[:attributetypes].sort
+        end
+
+        # TODO: docs for known_attributes
+        # @api private
+        def known_attributes
+          directory(
+            filter: '(objectclass=*)',
+            base: EMPTY_BASE
+          ).flat_map { |a| a.attribute_names }.uniq.sort
         end
 
         # @return [String]
@@ -333,7 +464,9 @@ module ROM
           connection.instance_variable_get(:@auth)
         end
 
+        # deprecate
         def status
+          # connection.instance_variable_get(:@result) # wrapped in struct
           connection.get_operation_result
         end
 
@@ -345,23 +478,47 @@ module ROM
         #
         # @api private
         def success?
-          status.code.zero?
+          # status.code.zero?
+          result.result_code.to_i
+        end
+
+        # WIP - uncouple connection result
+        #
+        # @return [Net::LDAP::PDU]
+        #
+        #<Net::LDAP::PDU:0x00007f811c801318 @message_id=2, @app_tag=5, @ldap_controls=[], @ldap_result={:resultCode=>0, :matchedDN=>"", :errorMessage=>""}>
+        #
+        def result
+          connection.instance_variable_get(:@result)
         end
 
         # @return [Boolean]
         #
         # @api private
         def sortable?
-          controls.include?(SORT_RESPONSE)
+          supported_controls.include?(SORT_RESPONSE)
         end
 
         # @return [Boolean]
         #
         # @api private
         def pageable?
-          connection.paged_searches_supported?
+          supported_controls.include?(PAGED_RESULTS)
         end
 
+        # Active Directory
+        # controls.include?(MATCHING_RULE_IN_CHAIN)
+        # controls.include?(DELETE_TREE)
+
+        # Active Directory only
+        #
+        # @return [Boolean]
+        #
+        # @api private
+        def bitwise?
+          supported_controls.include?(MATCHING_RULE_BIT_AND) &&
+          supported_controls.include?(MATCHING_RULE_BIT_OR)
+        end
       end
     end
   end

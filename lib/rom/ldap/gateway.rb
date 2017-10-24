@@ -1,6 +1,4 @@
 require 'logger'
-require 'dry/core/constants'
-
 require 'rom/gateway'
 require 'rom/ldap/dataset'
 
@@ -10,8 +8,6 @@ module ROM
     #
     # @api public
     class Gateway < ROM::Gateway
-      include Dry::Core::Constants
-
       adapter :ldap
 
       # @!attribute [r] client
@@ -28,16 +24,15 @@ module ROM
 
       # Initialize an LDAP gateway
       #
-      # Gateways are typically initialized via ROM::Configuration object, gateway constructor
-      # arguments such as URI and options are passed directly to this constructor
+      # Gateways are typically initialized via ROM::Configuration object
       #
       # @overload initialize(uri)
-      #   Connects to a database via URI
+      #   Connects to a directory via params hash
       #
       #   @example
       #     ROM.container(:ldap, {})
       #
-      #   @param [String,Symbol] uri connection URI
+      #   @param [Hash]
       #
       # @overload initialize(uri, options)
       #   Connects to a database via URI and options
@@ -45,20 +40,17 @@ module ROM
       #   @example
       #     ROM.container(:ldap, {}, size: 100, time: 3)
       #
-      #   @param [String,Symbol] uri connection URI
+      #   @param [Hash] passed to Net::LDAP#new
       #
-      #   @param [Hash] options connection options
-      #
-      #   @option options [Array<Symbol>] :extensions
-      #     A list of connection extensions supported by Sequel
+      #   @param options [Hash] default server options
       #
       #   @option options [Integer] :time Directory timeout in seconds
       #
       #   @option options [Integer] :size Directory result limit
       #
       # @overload initialize(connection)
-      #   Creates a gateway from an existing database connection. This
-      #   works with Net::LDAP connections exclusively.
+      #   Creates a gateway from an existing directory connection.
+      #   This works with Net::LDAP connections exclusively.
       #
       #   @example
       #     ROM.container(:ldap, Net::LDAP.new)
@@ -67,7 +59,7 @@ module ROM
       #
       # @return [LDAP::Gateway]
       #
-      # @see https://github.com/ruby-ldap/ruby-net-ldap/blob/master/lib/net/ldap.rb Net::LDAP docs
+      # @see https://github.com/ruby-ldap/ruby-net-ldap/blob/master/lib/net/ldap.rb
       #
       # @api public
       def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
@@ -123,6 +115,16 @@ module ROM
         @logger = logger
       end
 
+      # Underlying directory type
+      #
+      # @return [Symbol]
+      #
+      # @api public
+      def database_type
+        api.directory_type
+      end
+
+      alias_method :directory_type, :database_type
 
       private
 

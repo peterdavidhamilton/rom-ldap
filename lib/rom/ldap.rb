@@ -1,8 +1,12 @@
 require 'rom/core'
+
+# TODO: uncouple from net/ldap using 'connection'
 require 'net/ldap'
+# require 'rom/ldap/connection'
 
 require 'rom/ldap/version'
 require 'rom/ldap/errors'
+require 'rom/ldap/constants'
 
 require 'rom/configuration_dsl'
 
@@ -11,7 +15,6 @@ require 'rom/ldap/relation'
 require 'rom/ldap/associations'
 require 'rom/ldap/gateway'
 require 'rom/ldap/commands'
-# require 'rom/sql/migration'
 require 'rom/ldap/extensions'
 
 ROM.register_adapter :ldap, ROM::LDAP
