@@ -1,4 +1,5 @@
 require 'rom/types'
+require 'base64'
 
 module ROM
   module LDAP
@@ -30,6 +31,19 @@ module ROM
           ['data:image/jpeg;base64,', Base64.strict_encode64(image)].join
         end
       }
+
+      # FIXME: give access to types within rom-ldap relation schema block
+      module Single
+        String = Types.Constructor(::String,  -> v { v.first.to_s })
+        Int    = Types.Constructor(::Integer, -> v { v.first.to_s.to_i })
+        Symbol = Types.Constructor(::Symbol,  -> v { v.first.to_s.to_sym })
+			end
+
+      module Multiple
+        String = Types.Constructor(::String,  -> v { v.map(&:to_s) })
+        Int    = Types.Constructor(::Integer, -> v { v.map(&:to_i) })
+        Symbol = Types.Constructor(::Symbol,  -> v { v.map(&:to_sym) })
+      end
 
     end
   end

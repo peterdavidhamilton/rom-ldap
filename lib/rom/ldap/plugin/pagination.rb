@@ -129,3 +129,10 @@ module ROM
     end
   end
 end
+
+
+ROM.plugins do
+  adapter :ldap do
+    register :pagination, ROM::LDAP::Plugin::Pagination, type: :relation
+  end
+end

@@ -1,5 +1,4 @@
 require 'rom/schema'
-require 'rom/ldap/types'
 
 module ROM
   module LDAP

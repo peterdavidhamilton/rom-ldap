@@ -220,6 +220,7 @@ module ROM
               @forest_functionality     = forest
               @domain_functionality     = dom
 
+              # Only load AD extensions if required
               require 'rom/ldap/extensions/active_directory'
 
               @vendor_name    = 'Microsoft'
@@ -384,6 +385,15 @@ module ROM
         def supported_versions
           @supported_versions ||= root.fetch(:supportedldapversion).sort.map(&:to_i)
         end
+
+
+        # memoize :supported_versions,
+        #         :supported_features,
+        #         :supported_mechanisms,
+        #         :supported_controls,
+        #         :supported_extensions,
+        #         :vendor_version,
+        #         :sub_schema
 
         # @return [Integer]
         #

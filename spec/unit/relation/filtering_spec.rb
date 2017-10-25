@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ROM::LDAP::Relation, 'dataset dsl' do
   include RelationSetup
 
-  describe 'test customers' do
+  describe 'test sandbox relation "group9997"' do
 
     let(:uids) { %w[barry billy bobby sally] }
 
@@ -11,6 +11,7 @@ describe ROM::LDAP::Relation, 'dataset dsl' do
       uids.each { |uid|
         factories[:account,
           uid: uid,
+          gidnumber: 9997,
           dn: "uid=#{uid},ou=users,dc=example,dc=com"]
       }
     end
@@ -20,6 +21,7 @@ describe ROM::LDAP::Relation, 'dataset dsl' do
     end
 
     it '#equals' do
+      accounts.equals(uid: 'billy').count.must_equal(1)
       sandbox.equals(uid: 'billy').count.must_equal(1)
       # sandbox.equals(mail: 'test*.com').count.must_equal(10)
     end

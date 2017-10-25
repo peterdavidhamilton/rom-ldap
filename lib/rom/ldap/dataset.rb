@@ -79,16 +79,14 @@ module ROM
       end
       private :reset!
 
+      # Combine original relation filter with search criteria
+      #  Fallback to original table on invalid filter
+      #
       # @return [Net::LDAP::Filter]
       #
       # @api public
-      def filter
-        begin
-          generator[criteria]
-        rescue Net::LDAP::FilterSyntaxInvalidError
-          reset!
-          table_name
-        end
+      def filter_string
+        generator[criteria, table_name] or table_name
       end
 
       # Inspect dataset revealing current filter criteria
@@ -97,7 +95,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(#<#{self.class} filter='#{filter}'>)
+        %(#<#{self.class} filter='#{filter_string}'>)
       end
 
       # True if password binds for the filtered dataset
@@ -108,14 +106,14 @@ module ROM
       #
       # @api public
       def authenticated?(password)
-        api.bind_as(filter: filter, password: password)
+        api.bind_as(filter: filter_string, password: password)
       end
 
       # @return [Boolean]
       #
       # @api public
       def exist?
-        results = api.exist?(filter)
+        results = api.exist?(filter_string)
         reset!
         results
       end
@@ -124,7 +122,7 @@ module ROM
       #
       # @api public
       def count
-        results = api.count(filter)
+        results = api.count(filter_string)
         reset!
         results
       end
@@ -133,7 +131,7 @@ module ROM
       #
       # @api public
       def include?(key)
-        results = api.include?(filter, key)
+        results = api.include?(filter_string, key)
         reset!
         results
       end
@@ -171,7 +169,7 @@ module ROM
       #
       # @api public
       def to_ldif
-        results = api.directory(filter: filter)
+        results = api.directory(filter: filter_string)
         reset!
         results.map(&:to_ldif).join("\n")
       end
@@ -180,7 +178,7 @@ module ROM
       #
       # @api private
       def search(scope=nil, &block)
-        api.search(filter, scope, &block)
+        api.search(filter_string, scope, &block)
       end
       private :search
 

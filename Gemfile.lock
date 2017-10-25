@@ -67,7 +67,7 @@ GEM
       pry (~> 0.10)
     rainbow (2.2.2)
       rake
-    rake (12.1.0)
+    rake (12.2.1)
     rom-core (4.0.1)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.6)
@@ -109,7 +109,6 @@ DEPENDENCIES
   bundler
   codeclimate-test-reporter
   minitest
-  pry
   pry-byebug
   rake
   rom-factory (~> 0.4.0)

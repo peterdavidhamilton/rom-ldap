@@ -1,22 +1,3 @@
-#
-# http://www.rubydoc.info/gems/ruby-net-ldap/Net/LDAP/Filter
-#
-# method     | aliases          | RFC-2254 filter string
-# ______________________________________________________________________
-# :filter    |                  |
-# :present   | :has, :exists    | 'column=*'
-# :lte       | :below,          | 'column<=value'
-# :gte       | :above,          | 'column>=value'
-# :begins    | :prefix,         | 'column=value*'
-# :ends      | :suffix,         | 'column=*value'
-# :within    | :between, :range | '&(('column>=value')('column<=value'))'
-# :outside   |                  | '~&(('column>=value')('column<=value'))'
-# :equals    | :where,          | 'column=value'
-# :not       | :missing,        | '~column=value'
-# :contains  | :matches,        | 'column=*value*'
-# :exclude   |                  | '~column=*value*'
-#
-
 require 'forwardable'
 
 module ROM
@@ -24,6 +5,24 @@ module ROM
     class Dataset
       # LDAP Connection Query DSL
       #
+      # @see http://www.rubydoc.info/gems/ruby-net-ldap/Net/LDAP/Filter
+      #
+      # method     | aliases          | RFC-2254 filter string
+      # ______________________________________________________________________
+      # :filter    |                  |
+      # :present   | :has, :exists    | 'column=*'
+      # :lte       | :below,          | 'column<=value'
+      # :gte       | :above,          | 'column>=value'
+      # :begins    | :prefix,         | 'column=value*'
+      # :ends      | :suffix,         | 'column=*value'
+      # :within    | :between, :range | '&(('column>=value')('column<=value'))'
+      # :outside   |                  | '~&(('column>=value')('column<=value'))'
+      # :equals    | :where,          | 'column=value'
+      # :not       | :missing,        | '~column=value'
+      # :contains  | :matches,        | 'column=*value*'
+      # :exclude   |                  | '~column=*value*'
+      #
+      # @api private
       class DSL
         DSLError = Class.new(StandardError)
 
@@ -36,11 +35,12 @@ module ROM
           new.public_methods.select { |m| /^_[a-z]+$/.match?(m) }
         end
 
-        # Strip and symbolize public DSL query methods
-        #   '_filter' to :filter
+        # Coerce and expose public DSL query methods
+        #   '_exclude' to :exclude
         #
         # @example
-        #   ROM::LDAP::Dataset.query_methods => [:filter, :equals, :not]
+        #   ROM::LDAP::Dataset.query_methods
+        #     => [:unequals, :equals, :present, :missing]
         #
         # @return [Array<Symbol>]
         #
@@ -68,31 +68,20 @@ module ROM
         # @param args [Array] ?
         # @api public
         #
-        def [](args)
-          filters = args.each_with_object([]) do |(command, params), array|
-            array << submit(command, params)
-          end
-          # TODO: add OR join using DSL
-          _and(filters)
-        end
+        def call(params, original)
+          filters = [original]
 
-
-        # Parse a raw ldap_filter_string
-        #
-        # @example
-        #   relation.filter('uid=*est*') =>
-        #
-        # @param args [String]
-        # @return [Net::LDAP::Filter]
-        #
-        def _filter(args)
-          unless args.is_a?(String)
-            raise DSLError, '#filter requires an ldap_filter_string'
+          if params.is_a?(String)
+            filters << params
           else
-            construct(args)
+            params.each { |cmd, args| filters << submit(cmd, args) }
           end
+
+          _and(filters) # TODO: add OR join using DSL
+          rescue Net::LDAP::FilterSyntaxInvalidError
         end
 
+        alias_method :[], :call
 
         #
         # Fields
@@ -103,18 +92,26 @@ module ROM
 
         alias_method :_where, :_equals
 
-        def _not(args)
+        def _unequals(args)
           negate(_equals(args))
         end
 
-        alias_method :_missing, :_not
 
+        #
+        # Attrs
+        #
         def _present(arg)
           g(:present, arg)
         end
 
         alias_method :_has,    :_present
         alias_method :_exists, :_present
+
+        def _missing(args)
+          negate(_present(args))
+        end
+
+        alias_method :_hasnt, :_missing
 
 
 
