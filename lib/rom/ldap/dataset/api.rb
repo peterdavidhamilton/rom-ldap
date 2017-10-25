@@ -478,8 +478,7 @@ module ROM
         #
         # @api private
         def success?
-          # status.code.zero?
-          result.result_code.to_i
+          result.result_code.to_i.zero?
         end
 
         # WIP - uncouple connection result

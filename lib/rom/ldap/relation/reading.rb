@@ -39,7 +39,7 @@ module ROM
           if dataset.authenticated?(password)
             new(dataset)
           else
-            new([])
+            new(EMPTY_ARRAY)
           end
         end
 

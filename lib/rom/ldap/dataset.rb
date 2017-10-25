@@ -7,6 +7,12 @@ module ROM
   module LDAP
     class Dataset
 
+      # include ROM::EnumerableDataset
+
+      # def self.row_proc
+      #   -> tuple { tuple.each_with_object({}) { |(k,v), h| h[k.to_sym] = v } }
+      # end
+
       extend  Initializer
       include Enumerable
       include Dry::Equalizer(:criteria)

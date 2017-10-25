@@ -68,7 +68,7 @@ GEM
     rainbow (2.2.2)
       rake
     rake (12.1.0)
-    rom-core (4.0.0)
+    rom-core (4.0.1)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.6)
       dry-core (~> 0.3)
@@ -81,7 +81,7 @@ GEM
       dry-core (~> 0.2)
       dry-struct (~> 0.2)
       faker (~> 1.7)
-    rom-mapper (1.0.0)
+    rom-mapper (1.0.1)
       dry-core (~> 0.3, >= 0.3.1)
       dry-equalizer (~> 0.2)
       transproc (~> 1.0)
