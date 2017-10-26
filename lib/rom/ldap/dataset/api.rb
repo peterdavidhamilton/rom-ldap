@@ -204,15 +204,18 @@ module ROM
             @directory_type = :apacheds
           when /Apple/
             @directory_type = :open_directory
+            require 'rom/ldap/implementations/open_directory'
           when /Novell/
             @directory_type = :e_directory
+            require 'rom/ldap/implementations/e_directory'
           when /389/
             @directory_type = :three_eight_nine
           when nil
-            # Query MS Active Directory details
             caps = root.fetch(:supportedcapabilities, EMPTY_ARRAY).sort
 
             unless caps.empty?
+              require 'rom/ldap/implementations/active_directory'
+
               dc     = root.fetch(:domaincontrollerfunctionality).first.to_i
               forest = root.fetch(:forestfunctionality).first.to_i
               dom    = root.fetch(:domainfunctionality).first.to_i
@@ -222,8 +225,6 @@ module ROM
               @forest_functionality     = forest
               @domain_functionality     = dom
 
-              # Only load AD extensions if required
-              require 'rom/ldap/extensions/active_directory'
 
               @vendor_name    = 'Microsoft'
               @vendor_version = ActiveDirectory::VERSION_NAMES[dom]
