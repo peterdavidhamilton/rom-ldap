@@ -33,11 +33,16 @@ module ROM
         #
         # @api public
         def directory(options, &block)
-          connection.search(options, &block) or
-            raise(LDAP::ConnectionError, 'directory returned nil')
+          Timeout.timeout(options[:time]) do
+            connection.search(options, &block) or
+              raise(LDAP::ConnectionError, 'no dataset returned')
+          end
 
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
+          rescue Timeout::Error
+            log(__callee__, "timed out after #{time} seconds", :warn)
+            EMPTY_ARRAY
         end
 
 
@@ -50,18 +55,14 @@ module ROM
         # @return [Array<Hash>]
         #
         # @api public
-        def search(filter, scope=nil, &block)
+        def search(filter, scope: nil, timeout: time, &block)
           options = {
             filter: filter,
-            size: size,
-            time: time,
-            deref: DEREF_ALWAYS,
-            paged_searches_supported: pageable?,
-            return_referrals: true,
-            return_result: true,
+            scope:  scope,
+            size:   size,
+            time:   timeout,
+            deref:  DEREF_ALWAYS,
           }
-
-          options.merge!(scope: scope)
 
           results = directory(options).sort_by(&:dn).map(&method(:extract))
           log(__callee__, filter)
@@ -70,8 +71,15 @@ module ROM
         end
 
 
+        # TODO: documentation
+        #
+        # @param args [Hash]
+        #
+        # @return
+        #
         # @api public
         def bind_as(args)
+          # { size: 1 }
           connection.bind_as(args)
         end
 
@@ -82,14 +90,7 @@ module ROM
         #
         # @api public
         def attributes(filter, &block)
-          options = {
-            filter: filter,
-            size: size,
-            time: time,
-            # sort_controls: ['dn'],
-            attributes_only: true
-          }
-
+          options = { filter: filter, size: size, attributes_only: true }
           directory(options, &block)
         end
 
@@ -99,14 +100,6 @@ module ROM
         def count(filter)
           directory(filter: filter, attributes: 'dn').count
         end
-
-
-            # @return [Boolean]
-            #
-            # @api public
-            # def include?(filter, key)
-            #   attributes(filter) { |e| e.send(key) }
-            # end
 
 
         # @return [Boolean]
@@ -276,8 +269,8 @@ module ROM
 
 
 
-        def log(caller = nil, message = nil)
-          logger.info("#{self.class}##{caller} #{message}")
+        def log(caller = nil, message = nil, level = :info)
+          logger.send(level, "#{self.class}##{caller} #{message}")
           logger.error("#{self.class}##{caller} #{status.message}") unless success?
           logger.debug("#{self.class}##{caller} #{status.message}") if ENV['DEBUG']
         end

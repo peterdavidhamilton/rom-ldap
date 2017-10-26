@@ -32,7 +32,6 @@ module ROM
         end
       }
 
-      # FIXME: give access to types within rom-ldap relation schema block
       module Single
         String = Types.Constructor(::String,  -> v { v.first.to_s })
         Int    = Types.Constructor(::Integer, -> v { v.first.to_s.to_i })

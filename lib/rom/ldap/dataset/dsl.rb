@@ -1,4 +1,3 @@
-# uncouple from Net::LDAP::Filter
 require_relative 'filter_dsl'
 
 require 'forwardable'
@@ -27,6 +26,8 @@ module ROM
       # :not       | :missing,        | '~column=value'
       # :contains  | :matches,        | 'column=*value*'
       # :exclude   |                  | '~column=*value*'
+      #
+      # :extensible | :ext             | 'column:=value'
       #
       # @api private
       class DSL
@@ -59,7 +60,6 @@ module ROM
 
         extend Forwardable
 
-        # TODO: start a rewrite of filter building
         delegate [
                   :begins,
                   :construct,
@@ -71,17 +71,18 @@ module ROM
                   :le,
                   :negate,
                   :present
-                  # ] => Net::LDAP::Filter
                   ] => Filter
+                  # ] => Net::LDAP::Filter
 
 
 
 
 
-        # @return Net::LDAP::Filter
-        # @param args [Array] ?
-        # @api public
+        # @return ROM::LDAP::Dataset::Filter
         #
+        # @param args [Array] ?
+        #
+        # @api public
         def call(params, original)
           filters = [original]
 

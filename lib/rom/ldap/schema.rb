@@ -1,4 +1,6 @@
 require 'rom/schema'
+require 'rom/ldap/schema/dsl'
+require 'rom/ldap/schema/inferrer'
 
 module ROM
   module LDAP

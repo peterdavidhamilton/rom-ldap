@@ -1,11 +1,10 @@
 require 'rom/ldap/types'
 
 require 'rom/ldap/schema'
-require 'rom/ldap/schema/inferrer'
 
 require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
-
+require 'rom/ldap/transaction'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
 
@@ -14,14 +13,27 @@ module ROM
     class Relation < ROM::Relation
       adapter :ldap
 
+      # NB: Gives Schema::DSL block access to Types in Relation definitions
+      include LDAP
+
+
       include Reading
       include Writing
 
-      schema_class      Schema
-      schema_attr_class Attribute
-      schema_inferrer   Schema::Inferrer.new.freeze
+      extend Notifications::Listener
 
-      # wrap_class      SQL::Wrap # TODO: research relevance
+
+
+      subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
+        # event[:relation]
+        event[:dataset].filter_string.to_s
+      end
+
+
+      schema_class      LDAP::Schema
+      schema_attr_class LDAP::Attribute
+      schema_inferrer   LDAP::Schema::Inferrer.new.freeze
+      schema_dsl        LDAP::Schema::DSL
 
       forward(*Dataset::DSL.query_methods)
 
@@ -33,6 +45,31 @@ module ROM
         else
           :id
         end
+      end
+
+
+      # @yield [t] Transaction
+      #
+      # @return [Mixed]
+      #
+      # @api public
+      def transaction(opts = EMPTY_HASH, &block)
+        Transaction.new(dataset.db).run(opts, &block)
+      end
+
+      # Return raw query string
+      #
+      # @return [String]
+      #
+      # @api private
+      def filter
+        dataset.filter_string.to_s
+      end
+
+
+      # @api private
+      def self.associations
+        schema.associations
       end
 
 

@@ -39,8 +39,6 @@ module ROM
 
             methods = schema.attributes.each_with_object([]) do |attribute, generated|
 
-              # meth_name = attribute.alias ? :"by_#{attribute.alias}" : :"by_#{attribute.name}"
-
               meth_name = :"by_#{attribute.name}"
 
               next if generated.include?(meth_name)
