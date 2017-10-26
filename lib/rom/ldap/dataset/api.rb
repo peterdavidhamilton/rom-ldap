@@ -6,6 +6,8 @@ module ROM
     class Dataset
       # LDAP Connection DSL
       #
+      # wrapper for Net::LDAP::Connection
+      #
       class API
         # include Memoizable
         extend Initializer

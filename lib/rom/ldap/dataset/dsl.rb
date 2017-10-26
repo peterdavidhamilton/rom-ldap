@@ -1,9 +1,15 @@
+# uncouple from Net::LDAP::Filter
+require_relative 'filter_dsl'
+
 require 'forwardable'
 
 module ROM
   module LDAP
     class Dataset
       # LDAP Connection Query DSL
+      #
+      # a builder of search queries deferring to Net::LDAP::Filter
+      #
       #
       # @see http://www.rubydoc.info/gems/ruby-net-ldap/Net/LDAP/Filter
       #
@@ -49,8 +55,11 @@ module ROM
           internals.map { |m| m.to_s.tr('_','').to_sym }
         end
 
+
+
         extend Forwardable
 
+        # TODO: start a rewrite of filter building
         delegate [
                   :begins,
                   :construct,
@@ -62,7 +71,12 @@ module ROM
                   :le,
                   :negate,
                   :present
-                  ] => Net::LDAP::Filter
+                  # ] => Net::LDAP::Filter
+                  ] => Filter
+
+
+
+
 
         # @return Net::LDAP::Filter
         # @param args [Array] ?
@@ -180,13 +194,15 @@ module ROM
 
         private
 
-        # intersection
+        # union
         #
         def _and(*filters)
           construct("(&#{filters.join})")
+          # binding.pry
+          # Filter.join(filters)
         end
 
-        # union
+        # intersection
         #
         def _or(*filters)
           construct("(|#{filters.join})")
