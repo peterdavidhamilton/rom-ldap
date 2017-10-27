@@ -1,38 +1,33 @@
-require_relative 'ber_converter'
-require_relative 'filter_parser'
-
-
+# require_relative 'ber/refinements'
 require 'dry-types'
 
 module ROM
   module LDAP
     class Dataset
-      class Filter
 
-# Basic Encoding Rules (BER)
-# ber_identifier s
+      EQUAL     = '='.freeze
+      NOT_EQUAL = '!='.freeze
+      LESS_THAN = '<='.freeze
+      MORE_THAN = '>='.freeze
+      EXT_COMP  = ':='.freeze
+      WILDCARD  = '*'.freeze
 
-# const hex  dec
-# ?   = 0x80 128 # context-specific primitive 0, SubstringFilter "initial"
-# ?   = 0x81 129 # context-specific primitive 0, SubstringFilter "any"
-# ?   = 0x82 130 # context-specific primitive 0, SubstringFilter "final"
-# ?   = 0x83 131 # #ex: value=element
-# ?   = 0x84 132 # #ex: dn='dn'
-# ?   = 0x87 135 # context-specific primitive 7, "present"
+      OPERATOR_REGEX = Regexp.union(EQUAL, NOT_EQUAL, LESS_THAN, MORE_THAN, EXT_COMP).freeze
 
-# ?   = 0xa0 160 # context-specific constructed 0, "and"
-# ?   = 0xa1 161 # context-specific constructed 1, "or"
-# ?   = 0xa2 162 # context-specific constructed 2, "not"
+      TOKEN_REGEX    =  %r"[-\w:.]*[\w]".freeze
 
-# ?   = 0xa3 163 # context-specific constructed 3, "equalityMatch"
-# ?   = 0xa4 164 # context-specific constructed 4, "substring"
-# ?   = 0xa5 165 # context-specific constructed 5, "greaterOrEqual"
-# ?   = 0xa6 166 # context-specific constructed 6, "lessOrEqual"
-# ?   = 0xa9 169 # context-specific constructed 9, "extensible comparison"
+      # contains unescape regex
+      VALUE_REGEX    =  /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|\\[a-fA-F\d]{2})+/u.freeze
 
 
-        WILDCARD = '*'.freeze
+      EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/.freeze
 
+
+      WS_REGEX       =  /\s*/.freeze
+
+      UNESCAPE_REGEX = /\\([a-fA-F\d]{2})/.freeze
+
+      class FilterDSL
 
         # extend Initializer
         extend Dry::Initializer
@@ -50,9 +45,9 @@ module ROM
         #   unless FilterTypes.include?(op)
         #     raise Net::LDAP::OperatorError, "Invalid or unsupported operator #{op.inspect} in LDAP Filter."
         #   end
-        #   @op = op
-        #   @left = left
-        #   @right = right
+        #   op = op
+        #   left = left
+        #   right = right
         # end
 
 
@@ -153,150 +148,18 @@ module ROM
 
 
 
-          # another recursive method - should be dedicated class
-          # Basic Encoding Rules (BER)
-          #
           def parse_ber(ber)
-            case ber.ber_identifier
-
-            # context-specific constructed 0, "and"
-            when 0xa0
-              ber.map { |b| parse_ber(b) }.inject { |memo, obj| memo & obj }
-
-            # context-specific constructed 1, "or"
-            when 0xa1
-              ber.map { |b| parse_ber(b) }.inject { |memo, obj| memo | obj }
-
-            # context-specific constructed 2, "not"
-            when 0xa2
-              ~parse_ber(ber.first)
-
-            # context-specific constructed 3, "equalityMatch"
-            when 0xa3
-              if ber.last == WILDCARD
-                # nil implicit here?
-              else
-                eq(ber.first, ber.last)
-              end
-
-            # context-specific constructed 4, "substring"
-            when 0xa4
-              str = ""
-              final = false
-
-              ber.last.each do |b|
-                case b.ber_identifier
-
-                # context-specific primitive 0, SubstringFilter "initial"
-                when 0x80
-
-                  # raise Net::LDAP::SubstringFilterError, "Unrecognized substring filter; bad initial value." if str.length > 0
-                  abort "Unrecognized substring filter; bad initial value." if str.length > 0
-
-                  str += escape(b)
-
-                # context-specific primitive 0, SubstringFilter "any"
-                when 0x81
-                  str += "*#{escape(b)}"
-
-                # context-specific primitive 0, SubstringFilter "final"
-                when 0x82
-                  str += "*#{escape(b)}"
-                  final = true
-                end
-              end
-
-              str += WILDCARD unless final
-              eq(ber.first.to_s, str)
-
-
-            # context-specific constructed 5, "greaterOrEqual"
-            when 0xa5
-              ge(ber.first.to_s, ber.last.to_s)
-
-            # context-specific constructed 6, "lessOrEqual"
-            when 0xa6
-              le(ber.first.to_s, ber.last.to_s)
-
-            # context-specific primitive 7, "present"
-            when 0x87
-              # call to_s to get rid of the BER-identifiedness of the incoming string.
-              present?(ber.to_s)
-
-            # context-specific constructed 9, "extensible comparison"
-            when 0xa9
-
-                    # raise Net::LDAP::SearchFilterError, "Invalid extensible search filter, should be at least two elements" if ber.size < 2
-                    if ber.size < 2
-                      abort "Invalid extensible search filter, should be at least two elements"
-                    end
-
-                    # Reassembles the extensible filter parts
-                    # (["sn", "2.4.6.8.10", "Barbara Jones", '1'])
-                    type = value = dn = rule = nil
-
-                    ber.each do |element|
-                      case element.ber_identifier
-                        # when 0x81 then rule=element
-                        # when 0x82 then type=element
-                        # when 0x83 then value=element
-                        # when 0x84 then dn='dn'
-                        when 0x81
-                          rule = element
-                        when 0x82
-                          type = element
-                        when 0x83
-                          value = element
-                        when 0x84
-                          dn = 'dn'
-                      end
-                    end
-
-                    attribute = ''
-                    attribute << type if type
-                    attribute << ":#{dn}" if dn
-                    attribute << ":#{rule}" if rule
-
-                    ex(attribute, value)
-            else
-
-              # raise Net::LDAP::BERInvalidError, "Invalid BER tag-value (#{ber.ber_identifier}) in search filter."
-              abort "Invalid BER tag-value (#{ber.ber_identifier}) in search filter."
-
-            end
+            BerParser.new(ber).call
           end
 
 
 
-
-
-          # extracted class - end point for the DSL - converted to a callable class
-          #
-          # Converts an LDAP filter-string (in the prefix syntax specified in RFC-2254)
-          # to a Net::LDAP::Filter.
-          #
           def construct(ldap_filter_string)
-            # ::FilterParser.parse(ldap_filter_string)
-            # binding.pry
-            # ::FilterParser.new(ldap_filter_string, self).filter
-            ::FilterParser.new(self).call(ldap_filter_string)
+            FilterParser.new(self).call(ldap_filter_string)
           end
 
-          # alias_method :from_rfc2254, :construct
-          # alias_method :from_rfc4515, :construct
 
 
-
-
-
-
-
-          # Convert an RFC-1777 LDAP/BER "Filter" object to a Net::LDAP::Filter
-          # object.
-          #--
-          # TODO, we're hardcoding the RFC-1777 BER-encodings of the various
-          # filter types. Could pull them out into a constant.
-          #++
           def parse_ldap_filter(obj)
             case obj.ber_identifier
 
@@ -334,24 +197,12 @@ module ROM
           self.class.intersect(self, filter)
         end
 
-        ##
-        # Negates a filter.
-        #
-        #   # Selects only entries that do not have an <tt>objectclass</tt>
-        #   # attribute.
-        #   x = ~Net::LDAP::Filter.present("objectclass")
+
+
         def ~@
           self.class.negate(self)
         end
 
-        ##
-        # Equality operator for filters, useful primarily for constructing unit tests.
-        # 20100320 AZ: We need to come up with a better way of doing this. This
-        # is just nasty.
-        def ==(filter)
-          str = "[@op,@left,@right]"
-          self.instance_eval(str) == filter.instance_eval(str)
-        end
 
 
 
@@ -359,50 +210,42 @@ module ROM
         # a recursive method
         #
         def to_raw_rfc2254
-          case @op
+          case op
           when :ne
-            "!(#{@left}=#{@right})"
+            "!(#{left}=#{right})"
           when :eq, :bineq
-            "#{@left}=#{@right}"
+            "#{left}=#{right}"
           when :ex    # could be useful with Active Directory extension
-            "#{@left}:=#{@right}"
+            "#{left}:=#{right}"
           when :ge
-            "#{@left}>=#{@right}"
+            "#{left}>=#{right}"
           when :le
-            "#{@left}<=#{@right}"
+            "#{left}<=#{right}"
 
             # from here it is recursive
 
           when :and
-            "&(#{@left.to_raw_rfc2254})(#{@right.to_raw_rfc2254})"
+            "&(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
           when :or
-            "|(#{@left.to_raw_rfc2254})(#{@right.to_raw_rfc2254})"
+            "|(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
           when :not
-            "!(#{@left.to_raw_rfc2254})"
+            "!(#{left.to_raw_rfc2254})"
           end
         end
 
 
 
-        # wrap with parentheses
-        ##
-        # Converts the Filter object to an RFC 2254-compatible text format.
+
         def to_rfc2254
           "(#{to_raw_rfc2254})"
         end
 
         alias_method :to_s, :to_rfc2254
 
-        # def to_s
-        #   to_rfc2254
-        # end
 
 
-        # extracted to a separate file.
-        #
         def to_ber
-          ::BerConverter.new(@op, @left, @right).call
-          # ::BerConverter.new(op, left, right).call
+          BerConverter.new(op, left, right).call
         end
 
 
@@ -443,23 +286,23 @@ module ROM
         #     call to #execute with the the same block.
 
         # def execute(&block)
-        #   case @op
+        #   case op
         #   when :eq
-        #     if @right == WILDCARD
-        #       yield :present, @left
-        #     elsif @right.index '*'
-        #       yield :substrings, @left, @right
+        #     if right == WILDCARD
+        #       yield :present, left
+        #     elsif right.index '*'
+        #       yield :substrings, left, right
         #     else
-        #       yield :equalityMatch, @left, @right
+        #       yield :equalityMatch, left, right
         #     end
         #   when :ge
-        #     yield :greaterOrEqual, @left, @right
+        #     yield :greaterOrEqual, left, right
         #   when :le
-        #     yield :lessOrEqual, @left, @right
+        #     yield :lessOrEqual, left, right
         #   when :or, :and
-        #     yield @op, (@left.execute(&block)), (@right.execute(&block))
+        #     yield op, (left.execute(&block)), (right.execute(&block))
         #   when :not
-        #     yield @op, (@left.execute(&block))
+        #     yield op, (left.execute(&block))
         #   end || []
         # end
 
@@ -474,8 +317,8 @@ module ROM
         # coalesce recursively). If they're not, then return an array consisting
         # only of self.
         def coalesce(operator) #:nodoc:
-          if @op == operator
-            [@left.coalesce(operator), @right.coalesce(operator)]
+          if op == operator
+            [left.coalesce(operator), right.coalesce(operator)]
           else
             [self]
           end
@@ -493,16 +336,16 @@ module ROM
         #
         # flow control ------ ! use guard clause?
         def match(entry)
-          case @op
+          case op
           when :eq
-            if @right == WILDCARD
-              l = entry[@left] and l.length > 0
+            if right == WILDCARD
+              l = entry[left] and l.length > 0
             else
-              l = entry[@left] and l = Array(l) and l.index(@right)
+              l = entry[left] and l = Array(l) and l.index(right)
             end
           else
-            # raise Net::LDAP::FilterTypeUnknownError, "Unknown filter type in match: #{@op}"
-            abort "Unknown filter type in match: #{@op}"
+            # raise Net::LDAP::FilterTypeUnknownError, "Unknown filter type in match: #{op}"
+            abort "Unknown filter type in match: #{op}"
           end
         end
 
@@ -517,9 +360,7 @@ module ROM
 
         # private :unescape
 
-
-
-      end # class Net::LDAP::Filter
-    end # Dataset
-  end # LDAP
-end # ROM
+      end
+    end
+  end
+end

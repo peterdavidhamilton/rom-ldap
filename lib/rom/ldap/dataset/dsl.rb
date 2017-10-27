@@ -1,5 +1,7 @@
-# uncouple from Net::LDAP::Filter
 require_relative 'filter_dsl'
+require_relative 'ber_converter'
+require_relative 'ber_parser'
+require_relative 'filter_parser'
 
 require 'forwardable'
 
@@ -71,8 +73,7 @@ module ROM
                   :le,
                   :negate,
                   :present
-                  # ] => Net::LDAP::Filter
-                  ] => Filter
+                  ] => FilterDSL
 
 
 
