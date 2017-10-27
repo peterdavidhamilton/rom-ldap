@@ -51,6 +51,7 @@ module ROM
 
       # @api public
       def each(*args, &block)
+        # results = search(scope: nil)
         results = search
         reset!
         return results.lazy unless block_given?
@@ -177,8 +178,8 @@ module ROM
       # @return [Array<Hash>]
       #
       # @api private
-      def search(scope=nil, &block)
-        api.search(filter_string, scope, &block)
+      def search(scope: nil, &block)
+        api.search(filter_string, scope: scope, &block)
       end
       private :search
 

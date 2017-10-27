@@ -56,6 +56,7 @@ module ROM
               equals('sAMAccountType' => 805306368)
             end
 
+# AD_USER_DISABLED = Net::LDAP::Filter.ex("userAccountControl:1.2.840.113556.1.4.803", "2")
             def ad_accounts_disabled
               ad_accounts_all.equals(UAC => ACCOUNT_DISABLED)
             end

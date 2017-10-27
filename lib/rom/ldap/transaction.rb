@@ -6,6 +6,7 @@ module ROM
       private :connection
 
       def initialize(connection)
+        binding.pry
         @connection = connection
       end
 

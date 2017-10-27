@@ -14,7 +14,7 @@ module ROM
 
               # @api private
               def notification_payload(relation)
-                super.merge(query: relation.dataset.filter)
+                super.merge(query: relation.filter)
               end
             end
           end

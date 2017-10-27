@@ -30,6 +30,8 @@ module ROM
       # :contains  | :matches,        | 'column=*value*'
       # :exclude   |                  | '~column=*value*'
       #
+      # :extensible | :ext             | 'column:=value'
+      #
       # @api private
       class DSL
         DSLError = Class.new(StandardError)
@@ -61,7 +63,6 @@ module ROM
 
         extend Forwardable
 
-        # TODO: start a rewrite of filter building
         delegate [
                   :begins,
                   :construct,
@@ -79,10 +80,11 @@ module ROM
 
 
 
-        # @return Net::LDAP::Filter
-        # @param args [Array] ?
-        # @api public
+        # @return ROM::LDAP::Dataset::FilterDSL
         #
+        # @param args [Array] ?
+        #
+        # @api public
         def call(params, original)
           filters = [original]
 
@@ -235,7 +237,7 @@ module ROM
           end
         end
 
-        # delegate to Net::LDAP::Filter
+        # delegate to ROM::LDAP::Dataset::FilterDSL
         # coerce any value to a string
         #
         def submit(method, attribute, value=nil)
