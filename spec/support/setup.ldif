@@ -206,3 +206,39 @@ uid: test10
 userPassword:: e1NIQX1GbzlBS2ZRVzdnWldYeExtbDkvQlUwcm1uVEk9
 gidNumber: 9998
 uidNumber: 10
+
+
+
+
+# dn: cn=thing1,ou=assets,dc=example,dc=com
+# cn: thing1
+# serialNumber: 12345
+# objectClass: product??
+# objectClass: extensibleObject
+# objectClass: top
+
+
+
+
+# dn: uid=test10,ou=users,dc=example,dc=com
+# cn: test10
+# objectClass: extensibleObject
+# objectClass: computer
+# objectClass: top
+
+
+
+dn: cn=user_group,ou=groups,dc=example,dc=com
+cn: user_group
+objectClass: groupOfNames
+member: uid=test1,ou=users,dc=example,dc=com
+member: uid=test2,ou=users,dc=example,dc=com
+member: uid=test3,ou=users,dc=example,dc=com
+member: uid=test4,ou=users,dc=example,dc=com
+member: uid=test5,ou=users,dc=example,dc=com
+member: uid=test6,ou=users,dc=example,dc=com
+member: uid=test7,ou=users,dc=example,dc=com
+member: uid=test8,ou=users,dc=example,dc=com
+member: uid=test9,ou=users,dc=example,dc=com
+member: uid=test10,ou=users,dc=example,dc=com
+

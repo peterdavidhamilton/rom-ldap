@@ -56,14 +56,55 @@ module ROM
         each.force[args] || EMPTY_ARRAY
       end
 
+      def offset(offset)
+        @offset = offset
+        self
+      end
+
+      def limit(limit)
+        @limit = limit
+        self
+      end
+
       # @api public
       def each(*args, &block)
+
         # results = search(scope: nil)
         results = search
-        reset!
-        return results.lazy unless block_given?
-        # results.lazy.each(&block).send(__callee__, *args)
-        results.lazy.send(__callee__, *args, &block)
+        # reset!
+
+
+        # return results.lazy unless block_given?
+        ## results.lazy.each(&block).send(__callee__, *args)
+        # results.lazy.send(__callee__, *args, &block)
+
+
+        if block_given?
+# binding.pry
+          # results = results.each(&block).send(__callee__, *args)
+          # results  = results.lazy.send(__callee__, *args, &block)
+
+          results = results.send(__callee__, *args, &block)
+
+          if paginated?
+            # binding.pry
+            (results.to_a[page_range] || EMPTY_ARRAY).lazy
+          else
+            # binding.pry
+            results.lazy
+          end
+        else
+          if paginated?
+            # binding.pry
+            results[page_range].lazy
+          else
+            # binding.pry
+            results.lazy
+          end
+        end
+
+
+
       end
 
       # Respond to repository methods by first calling #each
@@ -103,7 +144,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(#<#{self.class} filter='#{filter_string}'>)
+        %(#<#{self.class} filter='#{filter_string}' offset='#{@offset}' limit='#{@limit}' />)
       end
 
       # True if password binds for the filtered dataset
@@ -186,10 +227,21 @@ module ROM
       #
       # @api private
       def search(scope: nil, &block)
-        api.search(filter_string, scope: scope, &block)
+        results = api.search(filter_string, scope: scope, &block)
+        reset!
+        results
       end
       private :search
 
+
+
+      def page_range
+        @offset..(@offset + @limit - 1)
+      end
+
+      def paginated?
+        !!@limit && !!@offset
+      end
     end
   end
 end

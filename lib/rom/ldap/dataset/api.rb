@@ -55,6 +55,7 @@ module ROM
         # @return [Array<Hash>]
         #
         # @api public
+        # NB: scope is likely to always be nil because Dataset#search passes nil
         def search(filter, scope: SCOPE_SUBTREE, timeout: time, &block)
           options = {
             filter: filter,
