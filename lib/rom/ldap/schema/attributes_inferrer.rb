@@ -1,12 +1,13 @@
 require 'rom/initializer'
-require 'rom/ldap/types'
 require 'dry/core/cache'
+require 'rom/ldap/schema/type_builder'
 
 module ROM
   module LDAP
     class Schema < ROM::Schema
       # @api private
       class AttributesInferrer
+
         extend Initializer
         extend Dry::Core::Cache
 
@@ -14,21 +15,15 @@ module ROM
 
         # @api private
         def call(schema, gateway)
-          dataset  = schema.name.dataset
-          columns  = dataset_attributes(gateway, dataset)
+
+          attributes    = directory_attributes(gateway)
+          type_builder  = TypeBuilder.new(attributes)
+          dataset       = schema.name.dataset
+          columns       = dataset_attributes(gateway, dataset)
 
           inferred = columns.map do |name|
-
-            attribute = definition(gateway, name)
-            meta = Hash[name: name, source: schema.name]
-            type = Types::Entry
-
-            if attribute
-              meta.merge!(description: attribute[:description]) if attribute[:description]
-              meta.merge!(oid: attribute[:oid], multiple: !attribute[:single])
-            end
-
-            attr_class.new(type.meta(meta))
+            type = type_builder.(name, schema.name)
+            attr_class.new(type)
           end
 
           missing = columns - inferred.map { |attr| attr.meta[:name] }
@@ -61,14 +56,6 @@ module ROM
         def directory_attributes(gateway)
           fetch_or_store(gateway, 'types') { gateway.attribute_types }
         end
-
-        # @return [Hash]
-        #
-        # @api private
-        def definition(gateway, name)
-          directory_attributes(gateway).select { |a| a[:name].eql?(name) }.first
-        end
-
       end
     end
   end

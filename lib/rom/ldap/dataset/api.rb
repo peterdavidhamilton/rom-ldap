@@ -55,7 +55,7 @@ module ROM
         # @return [Array<Hash>]
         #
         # @api public
-        def search(filter, scope: nil, timeout: time, &block)
+        def search(filter, scope: SCOPE_SUBTREE, timeout: time, &block)
           options = {
             filter: filter,
             scope:  scope,
@@ -181,7 +181,7 @@ module ROM
         #
         # @api public
         def attribute_types
-          schema_attribute_types.flat_map { |type|
+          @attribute_types ||= schema_attribute_types.flat_map { |type|
             parse_attribute_type(type)
           }.reject(&:nil?).sort_by { |a| a[:name] }
         end
@@ -305,6 +305,7 @@ module ROM
         end
 
         # Build hash from attribute definition
+        #   used by TypeBuilder
         #
         # @example
         #   parse_attribute_type("...")
@@ -316,9 +317,9 @@ module ROM
         #
         # @api private
         def parse_attribute_type(type)
-          return unless name = type[/NAME '(\S+)'/, 1]
+          return unless attribute_name = type[/NAME '(\S+)'/, 1]
           {
-            name:        name.to_sym,
+            name:        attribute_name.to_sym,
             description: type[/DESC '(.+)' [A-Z]+/, 1],
             oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
             matcher:     type[/EQUALITY (\S+)/, 1],
@@ -338,7 +339,6 @@ module ROM
         def vendor_name
           @vendor_name ||= root.fetch(:vendorname, EMPTY_ARRAY).first
         end
-        # memoize :vendor_name
 
         # @result [String]
         #
@@ -383,13 +383,16 @@ module ROM
         end
 
 
-        # memoize :supported_versions,
+        # memoize :attribute_types,
+        #         :sub_schema,
+        #         :sub_schema_entry
+        #         :supported_versions,
         #         :supported_features,
         #         :supported_mechanisms,
         #         :supported_controls,
         #         :supported_extensions,
-        #         :vendor_version,
-        #         :sub_schema
+        #         :vendor_name,
+        #         :vendor_version
 
         # @return [Integer]
         #

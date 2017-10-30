@@ -1,27 +1,24 @@
 require 'rom/ldap/types'
-
 require 'rom/ldap/schema'
-
 require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
 require 'rom/ldap/transaction'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
+require 'rom/ldap/relation/defaults'
 
 module ROM
   module LDAP
     class Relation < ROM::Relation
       adapter :ldap
 
-      # NB: Gives Schema::DSL block access to Types in Relation definitions
+      # struct_namespace ::ROM::LDAP::Struct
+
       include LDAP
-
-
       include Reading
       include Writing
 
       extend Notifications::Listener
-
 
 
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
@@ -36,6 +33,13 @@ module ROM
       schema_dsl        LDAP::Schema::DSL
 
       forward(*Dataset::DSL.query_methods)
+
+
+
+      # specify a scope in the relation
+      # defines :scope
+      # defines :filter
+
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -56,6 +60,8 @@ module ROM
       def transaction(opts = EMPTY_HASH, &block)
         Transaction.new(dataset.db).run(opts, &block)
       end
+
+
 
       # Return raw query string
       #

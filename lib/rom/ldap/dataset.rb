@@ -49,6 +49,13 @@ module ROM
         alias_method m, :build
       end
 
+      # @param args [Range]
+      #
+      # @public
+      def [](args)
+        each.force[args] || EMPTY_ARRAY
+      end
+
       # @api public
       def each(*args, &block)
         # results = search(scope: nil)

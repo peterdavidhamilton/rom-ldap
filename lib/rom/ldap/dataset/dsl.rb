@@ -242,7 +242,7 @@ module ROM
         #
         def submit(method, attribute, value=nil)
           if value
-            send(method, attribute, Types::Input[value])
+            send(method, attribute, Types::Coercible::String[value])
           else
             send(method, attribute)
           end

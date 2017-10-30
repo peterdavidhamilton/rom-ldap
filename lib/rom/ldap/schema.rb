@@ -6,9 +6,35 @@ module ROM
   module LDAP
     class Schema < ROM::Schema
 
-      # used by Relation#view
+
+      # Create a new relation based on the schema definition
+      #
+      # @param [Relation] relation The source relation
+      #
+      # @return [Relation]
+      #
+      # @api public
       def call(relation)
         relation.new(relation.dataset, schema: self)
+      end
+
+
+      # Project schema so that it only contains primary key
+      #
+      # @return [Schema]
+      #
+      # @api private
+      def project_pk
+        project(*primary_key_names)
+      end
+
+      # Return a new schema with attributes marked as qualified
+      #
+      # @return [Schema]
+      #
+      # @api public
+      def qualified(table_alias = nil)
+        new(map { |attr| attr.qualified(table_alias) })
       end
 
       # Return an empty schema
@@ -36,6 +62,7 @@ module ROM
         end
       end
 
+      memoize :qualified, :project_pk # :canonical, :joined,
     end
   end
 end

@@ -11,6 +11,7 @@ require 'rom/ldap/constants'
 require 'rom/configuration_dsl'
 
 require 'rom/ldap/plugins'
+require 'rom/ldap/struct'
 require 'rom/ldap/relation'
 require 'rom/ldap/associations'
 require 'rom/ldap/gateway'
