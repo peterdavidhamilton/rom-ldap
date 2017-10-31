@@ -13,19 +13,33 @@ module ROM
     class Relation < ROM::Relation
       adapter :ldap
 
-      # NB: Gives Schema::DSL block access to Types in Relation definitions
       include LDAP
-
-
       include Reading
       include Writing
 
       extend Notifications::Listener
 
+      subscribe('configuration.relations.schema.set', adapter: :ldap) do |event|
+        schema   = event[:schema]
+        relation = event[:relation]
+
+        relation.dataset do
+          binding.pry
+
+          # table = opts[:from].first
+
+          # if db.table_exists?(table)
+          #   select(*schema.map(&:qualified)).order(*schema.project(*schema.primary_key_names).qualified)
+          # else
+            self
+          # end
+        end
+      end
+
+
 
 
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        # event[:relation]
         event[:dataset].filter_string.to_s
       end
 
@@ -70,6 +84,13 @@ module ROM
       # @api private
       def self.associations
         schema.associations
+      end
+
+      # @return [Relation]
+      #
+      # @api public
+      def assoc(name)
+        associations[name].()
       end
 
 

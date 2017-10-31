@@ -1,4 +1,5 @@
 require 'transproc'
+require 'dry/core/inflector'
 
 module ROM
   module LDAP
@@ -23,6 +24,8 @@ module ROM
       def self.ldap_compatible(tuple)
         t(:map_values, t(:string_attribute)).(tuple)
       end
+
+      # Dry::Core::Inflector.underscore('FooBar') # => 'foo_bar'
 
     end
   end
