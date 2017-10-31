@@ -81,36 +81,15 @@ module ROM
       # @api public
       def each(*args, &block)
         # results = search(scope: nil)
-        results = search
-        # reset!
+        results = search.lazy
 
-        # return results.lazy unless block_given?
-        ## results.lazy.each(&block).send(__callee__, *args)
-        # results.lazy.send(__callee__, *args, &block)
+        reset!
 
+        results = paginate(results) if paginated?
 
-        if block_given?
-          # binding.pry
-
-          # results = results.each(&block).send(__callee__, *args)
-          # results  = results.lazy.send(__callee__, *args, &block)
-
-          results = results.send(__callee__, *args, &block)
-
-          if paginated?
-            (results.to_a[page_range] || EMPTY_ARRAY).lazy
-          else
-            results.lazy
-          end
-        else
-          if paginated?
-            results[page_range].lazy
-          else
-            results.lazy
-          end
-        end
-
+        block_given? ? results.send(__callee__, *args, &block) : results
       end
+
 
       # Respond to repository methods by first calling #each
       #
@@ -138,7 +117,14 @@ module ROM
       #
       # @api public
       def inspect
-        %(#<#{self.class} filter="#{filter_string}" offset="#{@offset}" limit="#{@limit}">)
+        <<~DATASET
+        <##{self.class}
+          type="#{api.directory_type}"
+          source="#{filter}"
+          filter="#{filter_string}"
+          per_page="#{@limit}"
+          range="#{page_range}">
+        DATASET
       end
 
       # True if password binds for the filtered dataset
@@ -234,14 +220,9 @@ module ROM
         self
       end
 
-
-      # @return [Array<Hash>]
-      #
       # @api private
-      def search(scope: nil, &block)
-        results = api.search(filter_string, scope: scope, &block)
-        reset!
-        results
+      def paginate(results)
+        results.to_a[page_range] || EMPTY_ARRAY
       end
 
       # @api private
@@ -253,6 +234,16 @@ module ROM
       def paginated?
         !!@limit && !!@offset
       end
+
+      # @return [Array<Hash>]
+      #
+      # @api private
+      def search(scope: nil, &block)
+        results = api.search(filter_string, scope: scope, &block)
+        reset!
+        results
+      end
+
     end
   end
 end
