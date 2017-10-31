@@ -1,7 +1,4 @@
-require_relative 'filter_dsl'
-require_relative 'ber_converter'
-require_relative 'ber_parser'
-require_relative 'filter_parser'
+require_relative 'filter/builder'
 
 require 'forwardable'
 
@@ -15,25 +12,24 @@ module ROM
       #
       # @see http://www.rubydoc.info/gems/ruby-net-ldap/Net/LDAP/Filter
       #
-      # method     | aliases          | RFC-2254 filter string
+      # method      | aliases          | RFC-2254 filter string
       # ______________________________________________________________________
-      # :filter    |                  |
-      # :present   | :has, :exists    | 'column=*'
-      # :lte       | :below,          | 'column<=value'
-      # :gte       | :above,          | 'column>=value'
-      # :begins    | :prefix,         | 'column=value*'
-      # :ends      | :suffix,         | 'column=*value'
-      # :within    | :between, :range | '&(('column>=value')('column<=value'))'
-      # :outside   |                  | '~&(('column>=value')('column<=value'))'
-      # :equals    | :where,          | 'column=value'
-      # :not       | :missing,        | '~column=value'
-      # :contains  | :matches,        | 'column=*value*'
-      # :exclude   |                  | '~column=*value*'
-      #
+      # :filter     |                  |
+      # :present    | :has, :exists    | 'column=*'
+      # :lte        | :below,          | 'column<=value'
+      # :gte        | :above,          | 'column>=value'
+      # :begins     | :prefix,         | 'column=value*'
+      # :ends       | :suffix,         | 'column=*value'
+      # :within     | :between, :range | '&(('column>=value')('column<=value'))'
+      # :outside    |                  | '~&(('column>=value')('column<=value'))'
+      # :equals     | :where,          | 'column=value'
+      # :not        | :missing,        | '~column=value'
+      # :contains   | :matches,        | 'column=*value*'
+      # :exclude    |                  | '~column=*value*'
       # :extensible | :ext             | 'column:=value'
       #
       # @api private
-      class DSL
+      class QueryDSL
         DSLError = Class.new(StandardError)
 
         # Public instance methods prefixed with underscore
@@ -74,15 +70,16 @@ module ROM
                   :le,
                   :negate,
                   :present
-                  ] => FilterDSL
+                  ] => Filter::Builder
 
 
 
 
 
-        # @return ROM::LDAP::Dataset::FilterDSL
+        # @return [String]
         #
-        # @param args [Array] ?
+        # @param params [Array] Chained criteria build by dataset
+        # @param original [Array] Starting table name for relation schema
         #
         # @api public
         def call(params, original)
@@ -94,8 +91,10 @@ module ROM
             params.each { |cmd, args| filters << submit(cmd, args) }
           end
 
-          _and(filters) # TODO: add OR join using DSL
+          _and(filters).to_s # TODO: add OR join using DSL
+
           rescue Net::LDAP::FilterSyntaxInvalidError
+            original
         end
 
         alias_method :[], :call

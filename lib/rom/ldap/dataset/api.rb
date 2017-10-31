@@ -81,7 +81,8 @@ module ROM
         # @api public
         def bind_as(args)
           # { size: 1 }
-          connection.bind_as(args)
+          # connection.bind_as(args)
+          connection.bind_as(size: 1, **args)
         end
 
 
@@ -189,7 +190,9 @@ module ROM
 
         private
 
-
+        # Set instance variables like directory_type
+        #
+        # @return [self]
         #
         # @api private
         def inspect_server!
@@ -231,6 +234,8 @@ module ROM
             log(__callee__, "LDAP implementation #{vendor_name} is unknown")
             @directory_type = :unknown
           end
+
+          self
         end
 
 
@@ -383,18 +388,6 @@ module ROM
           @supported_versions ||= root.fetch(:supportedldapversion).sort.map(&:to_i)
         end
 
-
-        # memoize :attribute_types,
-        #         :sub_schema,
-        #         :sub_schema_entry
-        #         :supported_versions,
-        #         :supported_features,
-        #         :supported_mechanisms,
-        #         :supported_controls,
-        #         :supported_extensions,
-        #         :vendor_name,
-        #         :vendor_version
-
         # @return [Integer]
         #
         # @api private
@@ -528,6 +521,20 @@ module ROM
           supported_controls.include?(MATCHING_RULE_BIT_AND) &&
           supported_controls.include?(MATCHING_RULE_BIT_OR)
         end
+
+
+
+
+        # memoize :attribute_types,
+        #         :sub_schema,
+        #         :sub_schema_entry,
+        #         :supported_versions,
+        #         :supported_features,
+        #         :supported_mechanisms,
+        #         :supported_controls,
+        #         :supported_extensions,
+        #         :vendor_name,
+        #         :vendor_version
       end
     end
   end

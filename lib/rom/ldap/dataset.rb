@@ -1,6 +1,6 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/dataset/dsl'
+require 'rom/ldap/dataset/query_dsl'
 require 'rom/ldap/dataset/api'
 
 module ROM
@@ -17,15 +17,25 @@ module ROM
       include Enumerable
       include Dry::Equalizer(:criteria)
 
-      param  :api
-      param  :table_name
-      option :criteria,  default: proc { {} }
-      option :generator, default: proc { DSL.new }
+      param  :api,      reader: :private
+      param  :filter,   reader: :private # original dataset table name
+      option :criteria, reader: :private, default: proc { {} }
 
-      private :api,
-              :criteria,
-              :generator,
-              :table_name
+      # @return [ROM::LDAP::Dataset, self]
+      #
+      # @param args [Hash] New arguments to chain.
+      #
+      # @api private
+      def merge!(args, &block)
+        @criteria = Functions[:deep_merge][criteria, {"_#{__callee__}" => args}]
+        self
+      end
+
+      private :merge!
+
+      QueryDSL.query_methods.each do |meth|
+        alias_method meth, :merge!
+      end
 
       # OPTIMIZE:
       # Strange return structs to mirror Sequel behaviour for rom-sql
@@ -33,46 +43,46 @@ module ROM
       # @example
       #   api.db.db.database_type => :apacheds
       #
+      # @public
       def db
         ::OpenStruct.new(db: ::OpenStruct.new(database_type: api.directory_type) )
       end
 
-      # @api private
-      def build(args, &block)
-        new_criteria = {"_#{__callee__}" => args}
-        @criteria    = Functions[:deep_merge][criteria, new_criteria]
-        self
-      end
-      private :build
-
-      DSL.query_methods.each do |m|
-        alias_method m, :build
-      end
 
       # @param args [Range]
       #
       # @public
-      def [](args)
-        each.force[args] || EMPTY_ARRAY
-      end
+      # def [](args)
+      #   each.force[args] || EMPTY_ARRAY
+      # end
 
+      # @return [ROM::LDAP::Dataset, self]
+      #
+      # @param offset [Integer] Integer value to start pagination range.
+      #
+      # @api public
       def offset(offset)
         @offset = offset
         self
       end
 
+      # @return [ROM::LDAP::Dataset, self]
+      #
+      # @param limit [Integer] Integer value to calculate pagination range end.
+      #
+      # @api public
       def limit(limit)
         @limit = limit
         self
       end
 
+      # @return [Enumberator::Lazy, Array]
+      #
       # @api public
       def each(*args, &block)
-
         # results = search(scope: nil)
         results = search
         # reset!
-
 
         # return results.lazy unless block_given?
         ## results.lazy.each(&block).send(__callee__, *args)
@@ -80,30 +90,25 @@ module ROM
 
 
         if block_given?
-# binding.pry
+          # binding.pry
+
           # results = results.each(&block).send(__callee__, *args)
           # results  = results.lazy.send(__callee__, *args, &block)
 
           results = results.send(__callee__, *args, &block)
 
           if paginated?
-            # binding.pry
             (results.to_a[page_range] || EMPTY_ARRAY).lazy
           else
-            # binding.pry
             results.lazy
           end
         else
           if paginated?
-            # binding.pry
             results[page_range].lazy
           else
-            # binding.pry
             results.lazy
           end
         end
-
-
 
       end
 
@@ -117,25 +122,14 @@ module ROM
       alias_method :to_a,     :each
       alias_method :with,     :each
 
-      # Reset the current criteria
-      #
-      # @return [ROM::LDAP::Dataset]
-      #
-      # @api private
-      def reset!
-        @criteria = {}
-        self
-      end
-      private :reset!
 
       # Combine original relation filter with search criteria
-      #  Fallback to original table on invalid filter
       #
-      # @return [Net::LDAP::Filter]
+      # @return [String]
       #
       # @api public
       def filter_string
-        generator[criteria, table_name] or table_name
+        query_dsl[criteria, filter]
       end
 
       # Inspect dataset revealing current filter criteria
@@ -144,7 +138,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(#<#{self.class} filter='#{filter_string}' offset='#{@offset}' limit='#{@limit}' />)
+        %(#<#{self.class} filter="#{filter_string}" offset="#{@offset}" limit="#{@limit}">)
       end
 
       # True if password binds for the filtered dataset
@@ -223,6 +217,24 @@ module ROM
         results.map(&:to_ldif).join("\n")
       end
 
+
+      private
+
+      def query_dsl
+        @query_dsl ||= QueryDSL.new
+      end
+
+      # Reset the current criteria
+      #
+      # @return [ROM::LDAP::Dataset]
+      #
+      # @api private
+      def reset!
+        @criteria = {}
+        self
+      end
+
+
       # @return [Array<Hash>]
       #
       # @api private
@@ -231,14 +243,13 @@ module ROM
         reset!
         results
       end
-      private :search
 
-
-
+      # @api private
       def page_range
         @offset..(@offset + @limit - 1)
       end
 
+      # @api private
       def paginated?
         !!@limit && !!@offset
       end
