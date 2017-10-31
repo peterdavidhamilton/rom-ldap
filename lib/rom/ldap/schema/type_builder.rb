@@ -45,6 +45,7 @@ module ROM
         STRING_MATCHERS = %w[
                               caseIgnoreListMatch
                               caseIgnoreMatch
+                              caseExactMatch
                               distinguishedNameMatch
                               objectIdentifierMatch
                               octetStringMatch

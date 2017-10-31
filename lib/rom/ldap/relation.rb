@@ -32,7 +32,7 @@ module ROM
       schema_inferrer   LDAP::Schema::Inferrer.new.freeze
       schema_dsl        LDAP::Schema::DSL
 
-      forward(*Dataset::DSL.query_methods)
+      forward(*Dataset::QueryDSL.query_methods)
 
 
 
