@@ -3,34 +3,13 @@
 # Implements Basic Encoding Rules parsing to be mixed into types as needed.
 module BasicEncodingRules
 
-  primitive = {
-    1 => :boolean,
-    2 => :integer,
-    4 => :string,
-    5 => :null,
-    6 => :oid,
-    10 => :integer,
-    13 => :string # (relative OID)
-  }
+  builtin_syntax = Psych.load_file('./lib/rom/ldap/dataset/ber/builtin_syntax.yaml')
+  BuiltinSyntax = Net::BER.compile_syntax(builtin_syntax).freeze
 
-  constructed = {
-    16 => :array,
-    17 => :array,
-  }
 
-  universal = { :primitive => primitive, :constructed => constructed }
-
-  primitive = { 10 => :integer }
-
-  context =  { :primitive => primitive }
-
-  # The universal, built-in ASN.1 BER syntax.
-  BuiltinSyntax = Net::BER.compile_syntax(:universal => universal,
-                                          :context_specific => context)
-
-  ##
   # This is an extract of our BER object parsing to simplify our
   # understanding of how we parse basic BER object types.
+  #
   def parse_ber_object(syntax, id, data)
     # Find the object type from either the provided syntax lookup table or
     # the built-in syntax lookup table.

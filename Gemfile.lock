@@ -55,6 +55,7 @@ GEM
     method_source (0.9.0)
     minitest (5.10.3)
     net-ldap (0.16.0)
+    net_tcp_client (2.0.1)
     parallel (1.12.0)
     parser (2.4.0.0)
       ast (~> 2.2)
@@ -109,6 +110,7 @@ DEPENDENCIES
   bundler
   codeclimate-test-reporter
   minitest
+  net_tcp_client
   pry-byebug
   rake
   rom-factory (~> 0.4.0)

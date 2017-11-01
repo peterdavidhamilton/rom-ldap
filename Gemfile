@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'net_tcp_client'
+
 group :test do
   gem 'codeclimate-test-reporter', require: false
   gem 'minitest', require: false
