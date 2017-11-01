@@ -21,8 +21,11 @@ module ROM
         super(fix_entity(schema))
       end
 
+      def to_h
+        super.delete_if { |k, v| v.nil? }
+      end
 
-      # TODO: include Person module if objectclasses include 'person' or 'inetorgperson'
+      # TODO: include Person module if objectclasses include 'person' or 'inetorgperson' ?
 
       module Person
         def user_name
