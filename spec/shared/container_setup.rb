@@ -28,9 +28,7 @@ module ContainerSetup
 
     # test1..test10
     conf.relation(:group9998) do
-      schema('(gidnumber=9998)', as: :customers, infer: true) do
-        # attribute :uidnumber, ROM::LDAP::Types::Serial
-      end
+      schema('(gidnumber=9998)', as: :customers, infer: true)
 
       use :auto_restrictions
     end

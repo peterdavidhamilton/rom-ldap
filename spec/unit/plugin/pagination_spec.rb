@@ -53,23 +53,23 @@ describe 'Plugin / Pagination' do
     it 'returns a pager with pagination meta-info' do
       accounts = container.relations[:accounts].page(1)
 
-      accounts.pager.total.must_equal(11)
-      accounts.pager.total_pages.must_equal(3)
+      accounts.pager.total.must_equal 11
+      accounts.pager.total_pages.must_equal 3
 
-      accounts.pager.current_page.must_equal(1)
-      accounts.pager.next_page.must_equal(2)
-      accounts.pager.prev_page.must_equal(nil)
+      accounts.pager.current_page.must_equal 1
+      accounts.pager.next_page.must_equal 2
+      accounts.pager.prev_page.must_equal nil
 
       accounts = container.relations[:accounts].page(2)
 
-      accounts.pager.current_page.must_equal(2)
-      accounts.pager.next_page.must_equal(3)
-      accounts.pager.prev_page.must_equal(1)
+      accounts.pager.current_page.must_equal 2
+      accounts.pager.next_page.must_equal 3
+      accounts.pager.prev_page.must_equal 1
 
       accounts = container.relations[:accounts].page(3)
 
-      accounts.pager.next_page.must_equal(nil)
-      accounts.pager.prev_page.must_equal(2)
+      accounts.pager.next_page.must_equal nil
+      accounts.pager.prev_page.must_equal 2
     end
   end
 end

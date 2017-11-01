@@ -60,7 +60,7 @@ module ROM
           #
           # @api public
           def total
-            dataset.count
+            dataset.total
           end
 
           # Return total number of pages
