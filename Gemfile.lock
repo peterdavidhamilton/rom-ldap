@@ -13,8 +13,8 @@ GEM
   specs:
     ast (2.3.0)
     byebug (9.1.0)
-    codeclimate-test-reporter (1.0.8)
-      simplecov (<= 0.13)
+    codeclimate-test-reporter (1.0.7)
+      simplecov
     coderay (1.1.2)
     concurrent-ruby (1.0.5)
     docile (1.1.5)
@@ -93,7 +93,7 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.9.0)
-    simplecov (0.13.0)
+    simplecov (0.15.1)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
@@ -117,4 +117,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   1.15.4
+   1.16.0

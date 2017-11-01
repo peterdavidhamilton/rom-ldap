@@ -35,7 +35,7 @@ module ROM
         def directory(options, &block)
           Timeout.timeout(options[:time]) do
             connection.search(options, &block) or
-              raise(LDAP::ConnectionError, 'no dataset returned')
+              raise(LDAP::ConnectionError, "no dataset returned: #{options}")
           end
 
           rescue *ERROR_MAP.keys => e
