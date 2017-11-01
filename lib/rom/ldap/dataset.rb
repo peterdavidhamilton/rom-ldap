@@ -121,7 +121,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(<##{self.class} filter="#{filter_string}" range="#{page_range}">)
+        %(<##{self.class} filter="#{filter_string}">)
       end
 
       # True if password binds for the filtered dataset
@@ -144,10 +144,18 @@ module ROM
         results
       end
 
+
       # @return [Integer]
       #
       # @api public
       def count
+        each.size
+      end
+
+      # @return [Integer]
+      #
+      # @api public
+      def total
         results = api.count(filter_string)
         reset!
         results
@@ -224,7 +232,7 @@ module ROM
 
       # @api private
       def page_range
-        @offset..(@offset + @limit - 1)
+        @offset..(@offset + @limit - 1) if paginated?
       end
 
       # @api private
