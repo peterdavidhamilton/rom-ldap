@@ -1,10 +1,12 @@
 require 'rom/core'
 
-require 'net/ldap'
-# require 'rom/ldap/net_ldap'
+# require 'net/ldap'
 
 # TODO: uncouple from net/ldap using 'connection'
-require 'rom/ldap/connection'
+require 'rom/ldap/rewrite/net_ldap'
+# require 'rom/ldap/rewrite/connection'
+require 'rom/ldap/rewrite/connection_two'
+
 
 require 'rom/ldap/version'
 require 'rom/ldap/errors'

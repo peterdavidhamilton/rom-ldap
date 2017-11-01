@@ -208,46 +208,6 @@ module ROM
     # end
 
 
-# ResultCodeSuccess                      = 0
-#   ResultCodeOperationsError              = 1
-#   ResultCodeProtocolError                = 2
-#   ResultCodeTimeLimitExceeded            = 3
-#   ResultCodeSizeLimitExceeded            = 4
-#   ResultCodeCompareFalse                 = 5
-#   ResultCodeCompareTrue                  = 6
-#   ResultCodeAuthMethodNotSupported       = 7
-#   ResultCodeStrongerAuthRequired         = 8
-#   ResultCodeReferral                     = 10
-#   ResultCodeAdminLimitExceeded           = 11
-#   ResultCodeUnavailableCriticalExtension = 12
-#   ResultCodeConfidentialityRequired      = 13
-#   ResultCodeSaslBindInProgress           = 14
-#   ResultCodeNoSuchAttribute              = 16
-#   ResultCodeUndefinedAttributeType       = 17
-#   ResultCodeInappropriateMatching        = 18
-#   ResultCodeConstraintViolation          = 19
-#   ResultCodeAttributeOrValueExists       = 20
-#   ResultCodeInvalidAttributeSyntax       = 21
-#   ResultCodeNoSuchObject                 = 32
-#   ResultCodeAliasProblem                 = 33
-#   ResultCodeInvalidDNSyntax              = 34
-#   ResultCodeAliasDereferencingProblem    = 36
-#   ResultCodeInappropriateAuthentication  = 48
-#   ResultCodeInvalidCredentials           = 49
-#   ResultCodeInsufficientAccessRights     = 50
-#   ResultCodeBusy                         = 51
-#   ResultCodeUnavailable                  = 52
-#   ResultCodeUnwillingToPerform           = 53
-#   ResultCodeNamingViolation              = 64
-#   ResultCodeObjectClassViolation         = 65
-#   ResultCodeNotAllowedOnNonLeaf          = 66
-#   ResultCodeNotAllowedOnRDN              = 67
-#   ResultCodeEntryAlreadyExists           = 68
-#   ResultCodeObjectClassModsProhibited    = 69
-#   ResultCodeAffectsMultipleDSAs          = 71
-#   ResultCodeOther                        = 80
-
-
 
 
 

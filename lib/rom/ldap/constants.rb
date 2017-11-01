@@ -133,6 +133,51 @@ module ROM
 
 
 
+    module ResultCode
+      Success                      = 0.freeze
+      OperationsError              = 1.freeze
+      ProtocolError                = 2.freeze
+      TimeLimitExceeded            = 3.freeze
+      SizeLimitExceeded            = 4.freeze
+      CompareFalse                 = 5.freeze
+      CompareTrue                  = 6.freeze
+      AuthMethodNotSupported       = 7.freeze
+      StrongerAuthRequired         = 8.freeze
+      Referral                     = 10.freeze
+      AdminLimitExceeded           = 11.freeze
+      UnavailableCriticalExtension = 12.freeze
+      ConfidentialityRequired      = 13.freeze
+      SaslBindInProgress           = 14.freeze
+      NoSuchAttribute              = 16.freeze
+      UndefinedAttributeType       = 17.freeze
+      InappropriateMatching        = 18.freeze
+      ConstraintViolation          = 19.freeze
+      AttributeOrValueExists       = 20.freeze
+      InvalidAttributeSyntax       = 21.freeze
+      NoSuchObject                 = 32.freeze
+      AliasProblem                 = 33.freeze
+      InvalidDNSyntax              = 34.freeze
+      AliasDereferencingProblem    = 36.freeze
+      InappropriateAuthentication  = 48.freeze
+      InvalidCredentials           = 49.freeze
+      InsufficientAccessRights     = 50.freeze
+      Busy                         = 51.freeze
+      Unavailable                  = 52.freeze
+      UnwillingToPerform           = 53.freeze
+      NamingViolation              = 64.freeze
+      ObjectClassViolation         = 65.freeze
+      NotAllowedOnNonLeaf          = 66.freeze
+      NotAllowedOnRDN              = 67.freeze
+      EntryAlreadyExists           = 68.freeze
+      ObjectClassModsProhibited    = 69.freeze
+      AffectsMultipleDSAs          = 71.freeze
+      Other                        = 80.freeze
+    end
+
+
+
+
+
 
 # Hex
 # Decimal

@@ -15,10 +15,14 @@ require 'net/ldap/entry'
 require 'net/ldap/instrumentation'
 require 'net/ldap/connection'
 require 'net/ldap/error'
-require 'net/ldap/auth_adapter'
-require 'net/ldap/auth_adapter/simple'
-require 'net/ldap/auth_adapter/sasl'
 
+
+
+require 'net/ldap/auth_adapter'
+
+require 'net/ldap/auth_adapter/simple'
 Net::LDAP::AuthAdapter.register([:simple, :anon, :anonymous], Net::LDAP::AuthAdapter::Simple)
+
+require 'net/ldap/auth_adapter/sasl'
 Net::LDAP::AuthAdapter.register(:sasl, Net::LDAP::AuthAdapter::Sasl)
 
