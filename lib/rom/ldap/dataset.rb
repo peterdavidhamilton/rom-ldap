@@ -21,6 +21,20 @@ module ROM
       param  :filter,   reader: :private # original dataset table name
       option :criteria, reader: :private, default: proc { {} }
 
+      option :offset, reader: false, optional: true
+      option :limit,  reader: false, optional: true
+
+
+      # @api public
+      def opts
+        Hash[
+          offset: @offset,
+          limit: @limit,
+          criteria: @criteria,
+          pagination: paginated?
+        ]
+      end
+
       # @return [ROM::LDAP::Dataset, self]
       #
       # @param args [Hash] New arguments to chain.
@@ -49,13 +63,6 @@ module ROM
       end
 
 
-      # @param args [Range]
-      #
-      # @public
-      # def [](args)
-      #   each.force[args] || EMPTY_ARRAY
-      # end
-
       # @return [ROM::LDAP::Dataset, self]
       #
       # @param offset [Integer] Integer value to start pagination range.
@@ -80,11 +87,8 @@ module ROM
       #
       # @api public
       def each(*args, &block)
-        # results = search(scope: nil)
-        results = search.lazy
-
+        results = search.lazy # search(scope: nil)
         reset!
-
         results = paginate(results) if paginated?
 
         block_given? ? results.send(__callee__, *args, &block) : results
@@ -117,14 +121,7 @@ module ROM
       #
       # @api public
       def inspect
-        <<~DATASET
-        <##{self.class}
-          type="#{api.directory_type}"
-          source="#{filter}"
-          filter="#{filter_string}"
-          per_page="#{@limit}"
-          range="#{page_range}">
-        DATASET
+        %(<##{self.class} filter="#{filter_string}" range="#{page_range}">)
       end
 
       # True if password binds for the filtered dataset

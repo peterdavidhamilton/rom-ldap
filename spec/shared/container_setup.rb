@@ -20,13 +20,19 @@ module ContainerSetup
       schema('(uid=*)', infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
+
+      use :pagination
+
+      per_page 4
     end
 
     # test1..test10
     conf.relation(:group9998) do
       schema('(gidnumber=9998)', as: :customers, infer: true) do
-        attribute :uidnumber, ROM::LDAP::Types::Serial
+        # attribute :uidnumber, ROM::LDAP::Types::Serial
       end
+
+      use :auto_restrictions
     end
 
     conf.relation(:group9997) do
