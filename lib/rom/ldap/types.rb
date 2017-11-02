@@ -33,17 +33,16 @@ module ROM
       }
 
       module Single
-        String = Types.Constructor(::String,  -> v { v.first.to_s })
-        Int    = Types.Constructor(::Integer, -> v { v.first.to_s.to_i })
-        Symbol = Types.Constructor(::Symbol,  -> v { v.first.to_s.to_sym })
-			end
-
-      module Multiple
-        String = Types.Constructor(::String,  -> v { v.map(&:to_s) })
-        Int    = Types.Constructor(::Integer, -> v { v.map(&:to_i) })
-        Symbol = Types.Constructor(::Symbol,  -> v { v.map(&:to_sym) })
+        String = Types.Constructor(::String,  ->(v) { v.first.to_s })
+        Int    = Types.Constructor(::Integer, ->(v) { v.first.to_s.to_i })
+        Symbol = Types.Constructor(::Symbol,  ->(v) { v.first.to_s.to_sym })
       end
 
+      module Multiple
+        String = Types.Constructor(::String,  ->(v) { v.map(&:to_s) })
+        Int    = Types.Constructor(::Integer, ->(v) { v.map(&:to_i) })
+        Symbol = Types.Constructor(::Symbol,  ->(v) { v.map(&:to_sym) })
+      end
     end
   end
 end

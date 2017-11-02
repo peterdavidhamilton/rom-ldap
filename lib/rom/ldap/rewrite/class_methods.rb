@@ -2,10 +2,7 @@ module ROM
   module LDAP
     class Connection
       module ClassMethods
-
-
         MODIFY_OPERATIONS = { add: 0, delete: 1, replace: 2 }.freeze
-
 
         module GetbyteForSSLSocket
           def getbyte
@@ -20,8 +17,8 @@ module ROM
           end
         end
 
-        def self.wrap_with_ssl(io, tls_options = {}, timeout=nil)
-          raise Net::LDAP::NoOpenSSLError, "OpenSSL is unavailable" unless Net::LDAP::HasOpenSSL
+        def self.wrap_with_ssl(io, tls_options = {}, timeout = nil)
+          raise Net::LDAP::NoOpenSSLError, 'OpenSSL is unavailable' unless Net::LDAP::HasOpenSSL
 
           ctx = OpenSSL::SSL::SSLContext.new
 
@@ -36,11 +33,11 @@ module ROM
               conn.connect
             end
           rescue IO::WaitReadable
-            raise Errno::ETIMEDOUT, "OpenSSL connection read timeout" unless
+            raise Errno::ETIMEDOUT, 'OpenSSL connection read timeout' unless
               IO.select([conn], nil, nil, timeout)
             retry
           rescue IO::WaitWritable
-            raise Errno::ETIMEDOUT, "OpenSSL connection write timeout" unless
+            raise Errno::ETIMEDOUT, 'OpenSSL connection write timeout' unless
               IO.select(nil, [conn], nil, timeout)
             retry
           end
@@ -50,10 +47,6 @@ module ROM
 
           conn
         end
-
-
-
-
 
         def self.modify_ops(operations)
           ops = []
@@ -67,8 +60,6 @@ module ROM
           end
           ops
         end
-
-
       end
     end
   end

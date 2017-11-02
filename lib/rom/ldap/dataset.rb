@@ -6,7 +6,6 @@ require 'rom/ldap/dataset/api'
 module ROM
   module LDAP
     class Dataset
-
       # include ROM::EnumerableDataset
 
       # def self.row_proc
@@ -27,19 +26,18 @@ module ROM
               :generator,
               :table_name
 
-      # OPTIMIZE:
-      # Strange return structs to mirror Sequel behaviour for rom-sql
+      # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
       #
       # @example
       #   api.db.db.database_type => :apacheds
       #
       def db
-        ::OpenStruct.new(db: ::OpenStruct.new(database_type: api.directory_type) )
+        ::OpenStruct.new(db: ::OpenStruct.new(database_type: api.directory_type))
       end
 
       # @api private
-      def build(args, &block)
-        new_criteria = {"_#{__callee__}" => args}
+      def build(args)
+        new_criteria = { "_#{__callee__}" => args }
         @criteria    = Functions[:deep_merge][criteria, new_criteria]
         self
       end
@@ -55,19 +53,18 @@ module ROM
         results = search
         reset!
         return results.lazy unless block_given?
-        # results.lazy.each(&block).send(__callee__, *args)
         results.lazy.send(__callee__, *args, &block)
       end
 
       # Respond to repository methods by first calling #each
       #
-      alias_method :as,       :each
-      alias_method :map_to,   :each
-      alias_method :map_with, :each
-      alias_method :one!,     :each
-      alias_method :one,      :each
-      alias_method :to_a,     :each
-      alias_method :with,     :each
+      alias as each
+      alias map_to each
+      alias map_with each
+      alias one! each
+      alias one each
+      alias to_a each
+      alias with each
 
       # Reset the current criteria
       #
@@ -87,7 +84,7 @@ module ROM
       #
       # @api public
       def filter_string
-        generator[criteria, table_name] or table_name
+        generator[criteria, table_name] || table_name
       end
 
       # Inspect dataset revealing current filter criteria
@@ -182,7 +179,6 @@ module ROM
         api.search(filter_string, scope: scope, &block)
       end
       private :search
-
     end
   end
 end

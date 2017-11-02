@@ -1,278 +1,152 @@
-# cwd = File.expand_path(File.join(File.dirname(__FILE__), '../../../lib'))
-# $LOAD_PATH.unshift(cwd)
+require 'dry/core/class_attributes'
 
-require 'rom/ldap/constants'
-
-# Load Core Extensions
-require 'net/ber'
-require 'net/ldap/pdu' # socket ldap read
-require 'psych'
-
-compile_syntax = Psych.load_file('./lib/rom/ldap/syntax.yaml')
-AsnSyntax      = Net::BER.compile_syntax(compile_syntax).freeze
-
-require 'net/tcp_client'
+require_relative 'class_methods'
+require_relative 'default_socket'
 
 module ROM
   module LDAP
-    class Connection < Net::TCPClient
+    class Connection
+      extend Dry::Core::ClassAttributes
+      extend ClassMethods
+      extend Initializer
+
+      defines :connect_timeout
+      defines :ldap_version
+      defines :max_sasl_challenges
+
+      connect_timeout 5
+      ldap_version 3
+      max_sasl_challenges 10
+
+      ResponseMissingOrInvalidError = Class.new(StandardError)
+
+      DELETE_REQUEST = Net::LDAP::PDU::DeleteRequest
+      MODIFY_REQUEST = Net::LDAP::PDU::ModifyRequest
+
+      INVALID_SEARCH = OpenStruct.new(
+        status:      :failure,
+        result_code: ROM::LDAP::ResultCode::OperationsError,
+        message:    'Invalid search'
+      ).freeze
 
 
-      # This is defined in lib/net/ldap.rb but appears in lib/net/ldap/pdu.rb:180
-      ::Net::LDAP::ResultCodeReferral = 10
+      option :host,            default: proc { '127.0.0.1' }
+      option :port,            default: proc { 10389 }
+      option :hosts,           default: proc { [[host, port]] }
+      option :encryption,      default: proc { nil }
+      option :connect_timeout, default: proc { self.class.connect_timeout }
+      option :socket_class,    default: proc { ::DefaultSocket }
+      option :socket,          optional: true
+
+      attr_writer :socket_class
+
+      def initialize(*)
+        yield self if block_given?
+      end
 
 
-      def ldap_search(
-          base:  'ou=users,dc=example,dc=com',
-          filter: 'dn=*',
-          scope: SCOPE_SUBTREE,
-          deref: DEREF_NEVER,
+      def open_connection
+        errors = []
 
-          # scope: SCOPE_BASE_OBJECT,
-          # deref: DEREF_ALWAYS,
+        hosts.each do |host, port|
+          begin
 
-          attrs_only: false,
-          time: 30,
-          # attrs: [:dn, :cn, :sn]
-          attrs: []
-          )
+            @conn = socket_class.new(host, port, { connect_timeout: timeout })
 
-        rfc2696_cookie = [126, '']
-        result_pdu     = nil
-        n_results      = 0
-        message_id     = next_msgid
+            setup_encryption(encryption, timeout) if encryption
 
-        cookie_to_ber  = rfc2696_cookie.map(&:to_ber).to_ber_sequence.to_s.to_ber
-
-        # should collect this into a private helper to clarify the structure
-        loop do
-
-          query_limit = 10
-# binding.pry
-#           if size > 0
-#             query_limit = if paged
-#                             (((size - n_results) < 126) ? (size - n_results) : 0)
-#                           else
-#                             size
-#                           end
-#           end
-
-
-          ber_attrs = attrs.map { |attr| attr.to_s.to_ber }
-
-
-          request = [
-            base.to_ber,                    # ou=users,dc=example,dc=com
-            scope.to_ber_enumerated,        # SCOPE_SUBTREE   or 2
-            deref.to_ber_enumerated,        # DEREF_NEVER     or 0
-            query_limit.to_ber,             # size limit
-            time.to_ber,                    # 30
-            attrs_only.to_ber,              # true/false
-            filter.to_ber,                  # 'objectclass=*' or   Net::LDAP::Filter.eq("objectClass", "*")
-            ber_attrs.to_ber_sequence,      # [:dn, :cn, :sn].map { |attr| attr.to_s.to_ber }.to_ber_sequence
-          # ].to_ber_appsequence(Net::LDAP::PDU::SearchRequest)  # Net::LDAP::PDU::SearchRequest = 3
-          ].to_ber_appsequence(3)  # Net::LDAP::PDU::SearchRequest = 3
-
-          # switch for paged results
-          paged = true
-
-          controls = []
-
-          controls <<
-            [
-              PAGED_RESULTS.to_ber,  # => "\x04\x161.2.840.113556.1.4.319"
-              false.to_ber,          # Criticality MUST be false to interoperate with normal LDAPs.
-
-              # rfc2696_cookie.map(&:to_ber).to_ber_sequence.to_s.to_ber,
-              cookie_to_ber          # => "\x04\a0\x05\x02\x01~\x04\x00"
-            ].to_ber_sequence if paged
-
-          # controls << ber_sort if ber_sort
-
-          # controls become nil or apply to_ber_contextspecific(0)
-          controls = controls.empty? ? nil : controls.to_ber_contextspecific(0)
-
-
-          # binding.pry
-          # request     => "c4\x04\x1Aou=users,dc=example,dc=com\n\x01\x02\n\x01\x00\x02\x01\n\x02\x01\x1E\x01\x01\x00\x04\x05uid=*0\x00"
-          # request     => "cH\x04\x1Aou=users,dc=example,dc=com\n\x01\x02\n\x01\x00\x02\x01\n\x02\x01\x1E\x01\x01\x00\x04\robjectclass=*0\f\x04\x02dn\x04\x02cn\x04\x02sn"
-          # controls    => "\xA0&0$\x04\x161.2.840.113556.1.4.319\x01\x01\x00\x04\a0\x05\x02\x01~\x04\x00"
-          # message_id  => 1
-          #
-          ldap_write(request, controls, message_id) # =>
-
-
-          # reset controls and pdu
-          result_pdu = nil
-          controls   = []
-
-          while pdu = queued_read(message_id)
-            puts "#{self.class}##{__callee__}: while loop #{pdu} "
-
-            case pdu.app_tag
-            when Net::LDAP::PDU::SearchReturnedData
-              n_results += 1
-              if block_given?
-                binding.pry
-                yield pdu.search_entry
+            if encryption
+              if encryption[:tls_options] &&
+                 encryption[:tls_options][:verify_mode] &&
+                 encryption[:tls_options][:verify_mode] == OpenSSL::SSL::VERIFY_NONE
+                warn "not verifying SSL hostname of LDAPS server '#{host}:#{port}'"
+              else
+                @conn.post_connection_check(host)
               end
-            when Net::LDAP::PDU::SearchResultReferral
-              if refs
-                if block_given?
-                  binding.pry
-                  se = Net::LDAP::Entry.new
-                  se[:search_referrals] = (pdu.search_referrals || [])
-                  yield se
-                end
-              end
-            when Net::LDAP::PDU::SearchResult
-              result_pdu = pdu
-              controls = pdu.result_controls
-              if refs && pdu.result_code == 10 # Net::LDAP::ResultCodeReferral
-                if block_given?
-                  binding.pry
-                  se = Net::LDAP::Entry.new
-                  se[:search_referrals] = (pdu.search_referrals || [])
-                  yield se
-                end
-              end
-              break
-            else
-              abort "invalid response-type in search: #{pdu.app_tag}"
             end
-          end # while end
+            return
 
-        # binding.pry
-        end # loop end
+          rescue  Net::LDAP::Error,
+                  SocketError, SystemCallError,
+                  OpenSSL::SSL::SSLError => e
 
-      # rescue Net::TCPClient::ConnectionFailure
-      end
-
-      # private
-
-
-
-    # Defines the Protocol Data Unit (PDU) for LDAP.
-    # An LDAP PDU always looks like a BER SEQUENCE with at least two elements:
-    # an INTEGER message ID number and
-    # an application-specific SEQUENCE.
-
-
-
-
-
-    # Net::LDAP::AuthAdapter::Simple #connection
-    def bind(auth = { method: :anonymous })
-
-      # meth = auth[:method]
-      # adapter = Net::LDAP::AuthAdapter[meth]
-      # adapter.new(self).bind(auth)
-
-
-      # user, psw = if auth[:method] == :simple
-      #               [auth[:username] || auth[:dn], auth[:password]]
-      #             else
-      #               ["", ""]
-      #             end
-
-      user, psw = 'uid=admin,ou=system', 'secret'
-
-      # raise Net::LDAP::BindingInformationInvalidError, "Invalid binding information" unless (user && psw)
-
-      message_id = next_msgid
-
-      request    = [
-        3.to_ber, # Net::LDAP::Connection::LdapVersion.to_ber,   # api.vendor_version = 3
-        user.to_ber,
-        psw.to_ber_contextspecific(0)
-      ].to_ber_appsequence(Net::LDAP::PDU::BindRequest)
-
-      # @connection.send(:write, request, nil, message_id)
-      ldap_write(request, nil, message_id)
-
-      pdu = queued_read(message_id)
-
-      if !pdu || pdu.app_tag != 1 #  Net::LDAP::PDU::BindResult  BindResult = 1
-        abort "no bind result"
-      end
-
-      puts "#{self.class}##{__callee__}: #{pdu} "
-
-      pdu
-    end
-
-
-    # def socket_connect(socket, address, timeout)
-    #   binding.pry
-    #   super
-    # end
-
-
-
-
-
-
-      # Net::LDAP::Connection#write
-      def ldap_write(request, controls = nil, message_id = next_msgid, timeout = write_timeout)
-        packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
-        puts "#{self.class}##{__callee__}: #{packet} "
-
-        # write(packet) # Net::TCPClient#write
-        # socket_write(packet, timeout)
-        socket.write(packet)
-      rescue Exception => exc
-        binding.pry
-        close if close_on_error
-        raise exc
-      end
-
-
-      # def write(data, timeout = write_timeout)
-      #   data = data.to_s
-      #   if respond_to?(:logger)
-      #     payload        = {timeout: timeout}
-      #     # With trace level also log the sent data
-      #     payload[:data] = data if logger.trace?
-      #     logger.benchmark_debug('#write', payload: payload) do
-      #       payload[:bytes] = socket_write(data, timeout)
-      #     end
-      #   else
-      #     socket_write(data, timeout)
-      #   end
-      # rescue Exception => exc
-      #   close if close_on_error
-      #   raise exc
-      # end
-
-
-      # Net::LDAP::Connection#read
-      def ldap_read(syntax = AsnSyntax)
-        # Check out socket read_ber
-        if ber_object = socket.read_ber(syntax)
-          puts "#{self.class}##{__callee__}: #{ber_object} "
-        else
-          return
+            close
+            errors << [e, host, port]
+          end
         end
 
-        # ber_object = [0, [2, "", "PROTOCOL_ERROR: The server will disconnect!", 18400597803079440689678002902069631524796887079072566]]
-
-        foo = Net::LDAP::PDU.new(ber_object)
-        puts "#{self.class}##{__callee__}: #{foo} "
-
-        foo
+        raise Net::LDAP::ConnectionError, errors
       end
 
 
-      # Internal message queue
-      #
-      # @return [whatever you put in]
-      #
-      # @example
-      #   queue[1]       => []
-      #   queue['hello'] => []
-      #   queue          => { 1 => [], "hello" => [] }
-      #
-      # @api private
+      def socket
+        return @conn if defined?(@conn)
+
+        if socket
+          @conn = socket
+          setup_encryption(encryption, timeout) if encryption
+        else
+          open_connection(@server)
+        end
+
+        @conn
+      end
+
+
+      def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)
+
+        case method
+        when :simple_tls
+
+          @conn = self.class.wrap_with_ssl(@conn, tls_options, timeout)
+
+        when :start_tls
+
+          request = [
+            START_TLS.to_ber_contextspecific(0)
+          ].to_ber_appsequence(Net::LDAP::PDU::ExtendedRequest)
+
+          write(request, nil, message_id)
+
+          pdu = queued_read(message_id)
+
+          if pdu.nil? || pdu.app_tag != Net::LDAP::PDU::ExtendedResponse
+            raise Net::LDAP::NoStartTLSResultError, 'no start_tls result'
+          end
+
+          unless pdu.result_code.zero?
+            raise Net::LDAP::StartTLSError,
+                  "start_tls failed: #{pdu.result_code}"
+          end
+
+          @conn = self.class.wrap_with_ssl(@conn, tls_options, timeout)
+
+        else
+          raise Net::LDAP::EncMethodUnsupportedError, "unsupported encryption method #{args[:method]}"
+        end
+      end
+
+      def close
+        return if @conn.nil?
+        @conn.close
+        @conn = nil
+      end
+
+      def queued_read(message_id)
+        if pdu = message_queue[message_id].shift
+          return pdu
+        end
+
+        while pdu = read
+          return pdu if pdu.message_id == message_id
+
+          message_queue[pdu.message_id].push pdu
+          next
+        end
+
+        pdu
+      end
+
       def message_queue
         @message_queue ||= Hash.new { |hash, key| hash[key] = [] }
       end
@@ -282,87 +156,270 @@ module ROM
         @msgid += 1
       end
 
-      def queued_read(message_id)
-        if pdu = message_queue[message_id].shift
-          return pdu
+      def read(syntax = Net::LDAP::AsnSyntax)
+        return unless ber_object = socket.read_ber(syntax)
+
+        Net::LDAP::PDU.new(ber_object)
+      end
+
+      def write(request, controls = nil, message_id = next_msgid)
+        packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
+        socket.write(packet)
+      end
+
+      def bind(method:)
+        adapter = Net::LDAP::AuthAdapter[method]
+        adapter.new(self).bind(auth) # FIXME: where was auth?
+      end
+
+      def encode_sort_controls(sort_definitions)
+        return sort_definitions unless sort_definitions
+
+        sort_control_values = sort_definitions.map do |control|
+          control = Array(control) # if there is only an attribute name as a string then infer the orderinrule and reverseorder
+          control[0] = String(control[0]).to_ber,
+                       control[1] = String(control[1]).to_ber,
+                       control[2] = (control[2] == true).to_ber
+          control.to_ber_sequence
+        end
+        sort_control = [
+          SORT_REQUEST.to_ber,
+          false.to_ber,
+          sort_control_values.to_ber_sequence.to_s.to_ber
+        ].to_ber_sequence
+      end
+
+      def search(
+        base:,
+        size:,
+        filter: Net::LDAP::Filter.eq('objectClass', '*'),
+        scope: SCOPE_SUBTREE,
+        attributes: nil,
+        attributes_only: false,
+        return_referrals: false,
+        deref: DEREF_NEVER,
+        time: nil,
+        paged_searches_supported: nil,
+        sort_controls: false
+      )
+
+        attrs      = Array(attributes)
+        attrs_only = attributes_only
+        refs       = return_referrals
+
+        size   = size.to_i
+        time   = time.to_i
+        paged  = paged_searches_supported
+        sort   = sort_controls
+
+        # raise ArgumentError, "search base is required" unless base
+        # raise ArgumentError, "invalid search-size" unless size >= 0
+        # raise ArgumentError, "invalid search scope" unless Net::LDAP::SearchScopes.include?(scope)
+        # raise ArgumentError, "invalid alias dereferencing value" unless Net::LDAP::DerefAliasesArray.include?(deref)
+
+        filter    = Net::LDAP::Filter.construct(filter) if filter.is_a?(String)
+        ber_attrs = attrs.map { |attr| attr.to_s.to_ber }
+        ber_sort  = encode_sort_controls(sort)
+
+        rfc2696_cookie = [126, '']
+        result_pdu     = nil
+        n_results      = 0
+
+        message_id = next_msgid
+
+        loop do
+          # should collect this into a private helper to clarify the structure
+          query_limit = 0
+          if size > 0
+            query_limit = if paged
+                            ((size - n_results) < 126 ? (size - n_results) : 0)
+                          else
+                            size
+                          end
+          end
+
+          request = [
+            base.to_ber,
+            scope.to_ber_enumerated,
+            deref.to_ber_enumerated,
+            query_limit.to_ber, # size limit
+            time.to_ber,
+            attrs_only.to_ber,
+            filter.to_ber,
+            ber_attrs.to_ber_sequence
+          ].to_ber_appsequence(Net::LDAP::PDU::SearchRequest)
+
+          controls = []
+          if paged
+            controls <<
+              [
+                Net::LDAP::LDAPControls::PAGED_RESULTS.to_ber,
+                false.to_ber,
+                rfc2696_cookie.map(&:to_ber).to_ber_sequence.to_s.to_ber
+              ].to_ber_sequence
+          end
+
+          controls << ber_sort if ber_sort
+          controls = controls.empty? ? nil : controls.to_ber_contextspecific(0)
+
+          write(request, controls, message_id)
+
+          result_pdu = nil
+          controls = []
+
+          while pdu = queued_read(message_id)
+            case pdu.app_tag
+            when Net::LDAP::PDU::SearchReturnedData
+              n_results += 1
+              yield pdu.search_entry if block_given?
+            when Net::LDAP::PDU::SearchResultReferral
+              if refs
+                if block_given?
+                  se = Net::LDAP::Entry.new
+                  se[:search_referrals] = (pdu.search_referrals || [])
+                  yield se
+                end
+              end
+            when Net::LDAP::PDU::SearchResult
+              result_pdu = pdu
+              controls = pdu.result_controls
+              if refs && pdu.result_code == Net::LDAP::ResultCodeReferral
+                if block_given?
+                  se = Net::LDAP::Entry.new
+                  se[:search_referrals] = (pdu.search_referrals || [])
+                  yield se
+                end
+              end
+              break
+            else
+              raise Net::LDAP::ResponseTypeInvalidError, "invalid response-type in search: #{pdu.app_tag}"
+            end
+          end
+
+          more_pages = false
+
+          if (result_pdu.result_code == Net::LDAP::ResultCodeSuccess) && controls
+            controls.each do |c|
+              next unless c.oid == PAGED_RESULTS
+
+              more_pages = false
+              next unless c.value && !c.value.empty?
+              cookie = c.value.read_ber[1]
+              if cookie && !cookie.empty?
+                rfc2696_cookie[1] = cookie
+                more_pages = true
+              end
+            end
+          end
+
+          break unless more_pages
+        end # loop
+
+        result_pdu || INVALID_SEARCH
+      ensure
+        messages = message_queue.delete(message_id)
+      end
+
+      def modify(dn:, message_id: next_msgid, operations: nil)
+        ops = self.class.modify_ops(operations)
+
+        request = [
+          dn.to_ber,
+          ops.to_ber_sequence
+        ].to_ber_appsequence(MODIFY_REQUEST)
+
+        write(request, nil, message_id)
+        pdu = queued_read(message_id)
+
+        if !pdu || pdu.app_tag != Net::LDAP::PDU::ModifyResponse
+          raise 'response missing or invalid'
         end
 
-        # read messages until we have a match for the given message_id
-        while pdu = ldap_read
-          return pdu if pdu.message_id == message_id
+        pdu
+      end
 
-          message_queue[pdu.message_id].push pdu
-          next
+      def password_modify(dn:, old_password: nil, new_password: nil, message_id: next_msgid)
+        ext_seq = [PASSWORD_MODIFY.to_ber_contextspecific(0)]
+
+        unless old_password.nil?
+          pwd_seq = [old_password.to_ber(0x81)]
+          pwd_seq << new_password.to_ber(0x82) unless new_password.nil?
+          ext_seq << pwd_seq.to_ber_sequence.to_ber(0x81)
         end
 
-        puts "#{self.class}##{__callee__}: #{pdu} "
+        request = ext_seq.to_ber_appsequence(Net::LDAP::PDU::ExtendedRequest)
+
+        write(request, nil, message_id)
+
+        pdu = queued_read(message_id)
+
+        if !pdu || pdu.app_tag != Net::LDAP::PDU::ExtendedResponse
+          raise Net::LDAP::ResponseMissingError, 'response missing or invalid'
+        end
+
+        pdu
+      end
+
+      def add(dn:, attributes: EMPTY_ARRAY, message_id: next_msgid)
+        add_attrs = []
+
+        (a = attributes) && a.each do |k, v|
+          add_attrs << [k.to_s.to_ber, Array(v).map(&:to_ber).to_ber_set].to_ber_sequence
+        end
+
+        request = [
+          dn.to_ber,
+          add_attrs.to_ber_sequence
+        ].to_ber_appsequence(Net::LDAP::PDU::AddRequest)
+
+        write(request, nil, message_id)
+
+        pdu = queued_read(message_id)
+
+        if !pdu || pdu.app_tag != Net::LDAP::PDU::AddResponse
+          raise ResponseMissingOrInvalidError, 'response missing or invalid'
+        end
+
+        pdu
+      end
+
+      def rename(old_dn:, new_rdn:, delete_attrs: false, new_superior: nil, message_id: next_msgid)
+        request = [
+          old_dn.to_ber,
+          new_rdn.to_ber,
+          delete_attrs.to_ber
+        ]
+
+        request << new_superior.to_ber_contextspecific(0) if new_superior
+
+        write(request.to_ber_appsequence(MODIFY_RDN_REQUEST), nil, message_id)
+
+        pdu = queued_read(message_id)
+
+        if !pdu || pdu.app_tag != Net::LDAP::PDU::ModifyRDNResponse
+          raise ResponseMissingOrInvalidError, 'response missing or invalid'
+        end
+
+        pdu
+      end
+
+      def delete(dn:, control_codes: nil, message_id: next_msgid)
+        controls = control_codes.to_ber_control if control_codes
+
+        request  = dn.to_s.to_ber_application_string(DELETE_REQUEST)
+
+        write(request, controls, message_id)
+
+        pdu = queued_read(message_id)
+
+        if !pdu || pdu.app_tag != Net::LDAP::PDU::DeleteResponse
+          raise ResponseMissingOrInvalidError, 'response missing or invalid'
+        end
 
         pdu
       end
 
 
-
     end
   end
 end
-
-
- # module GetbyteForSSLSocket
- #    def getbyte
- #      getc.ord
- #    end
- #  end
-
- #  module FixSSLSocketSyncClose
- #    def close
- #      super
- #      io.close
- #    end
- #  end
-
-
-
-
-
-
-
-# use_connection({}) { |e| e.socket.local_address  } # => 2
-
-
-# /lib/net/ldap.rb - move to dataset to create and yield to a connection
-
-# def use_connection(args)
-#     if @open_connection
-#       yield @open_connection
-#     else
-#       begin
-#         conn = new_connection
-#         result = conn.bind(args[:auth] || @auth)
-#         return result unless result.result_code == Net::LDAP::ResultCodeSuccess
-#         yield conn
-#       ensure
-#         conn.close if conn
-#       end
-#     end
-#   end
-
-
-
-$connection = ROM::LDAP::Connection.connect(
-  servers: ['127.0.0.1:10389'],
-  # server: '127.0.0.1:10389',
-  # connect_timeout: 5,
-  write_timeout: -1,
-  read_timeout: -1, # wait forever
-  # proxy_server: nil
-  ) do |c|
-
-# binding.pry
-  puts c.socket.remote_address           # => #<Addrinfo: 127.0.0.1:10389 TCP>
-  puts c.socket.local_address            # => #<Addrinfo: 127.0.0.1:49899 TCP>
-  puts c.bind                            # => #<Net::LDAP::PDU:0x00007ff785391898 @app_tag=1, @ldap_controls=[], @ldap_result={:resultCode=>0, :matchedDN=>"", :errorMessage=>""}, @message_id=1>
-  puts c.ldap_search(filter: '(uid=*)')  # =>
-
-end
-
-# connection # =>

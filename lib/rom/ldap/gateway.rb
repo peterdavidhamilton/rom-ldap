@@ -124,7 +124,7 @@ module ROM
         api.directory_type
       end
 
-      alias_method :directory_type, :database_type
+      alias directory_type database_type
 
       private
 
@@ -159,15 +159,12 @@ module ROM
       #
       # @api private
       def connection
-        begin
-          client.bind
-        rescue *ERROR_MAP.keys => e
-          raise ERROR_MAP.fetch(e.class, Error), e
-        else
-          client
-        end
+        client.bind
+      rescue *ERROR_MAP.keys => e
+        raise ERROR_MAP.fetch(e.class, Error), e
+      else
+        client
       end
-
     end
   end
 end
