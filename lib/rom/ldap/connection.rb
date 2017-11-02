@@ -22,11 +22,12 @@ module ROM
       connect_timeout 5
       ldap_version 3
       max_sasl_challenges 10
-      root Pathname(File.dirname(__FILE__))
+      # root Pathname(File.dirname(__FILE__))
 
 
       # config in YAML
-      compile_syntax = Psych.load_file(root.join('syntax.yaml'))
+      # compile_syntax = Psych.load_file(root.join('syntax.yaml'))
+      compile_syntax = Psych.load_file(ROM::LDAP.root.join('syntax.yaml'))
       ASN_SYNTAX     = Net::BER.compile_syntax(compile_syntax).freeze
 
 

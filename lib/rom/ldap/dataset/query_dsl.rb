@@ -61,14 +61,14 @@ module ROM
 
         delegate [
                   :begins,
-                  :construct,
+                  # :construct,
                   :contains,
                   :ends,
                   :escape,
                   :equals,
                   :ge,
                   :le,
-                  :negate,
+                  # :negate,
                   :present
                   ] => Filter::Builder
 
@@ -109,7 +109,7 @@ module ROM
         alias_method :_where, :_equals
 
         def _unequals(args)
-          negate(_equals(args))
+          Filter::Builder.negate(_equals(args))
         end
 
 
@@ -124,7 +124,7 @@ module ROM
         alias_method :_exists, :_present
 
         def _missing(args)
-          negate(_present(args))
+          Filter::Builder.negate(_present(args))
         end
 
         alias_method :_hasnt, :_missing
@@ -153,7 +153,7 @@ module ROM
         alias_method :_matches, :_contains
 
         def _exclude(args)
-          negate(_contains(args))
+          Filter::Builder.negate(_contains(args))
         end
 
 
@@ -173,7 +173,7 @@ module ROM
         alias_method :_range,   :_within
 
         def _outside(args)
-          negate(_within(args))
+          Filter::Builder.negate(_within(args))
         end
 
 
@@ -199,7 +199,7 @@ module ROM
         # union
         #
         def _and(*filters)
-          construct("(&#{filters.join})")
+          Filter::Builder.construct("(&#{filters.join})")
           # binding.pry
           # Filter.join(filters)
         end
@@ -207,7 +207,7 @@ module ROM
         # intersection
         #
         def _or(*filters)
-          construct("(|#{filters.join})")
+          Filter::Builder.construct("(|#{filters.join})")
         end
 
 

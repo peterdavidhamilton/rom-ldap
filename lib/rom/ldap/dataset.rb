@@ -241,8 +241,8 @@ module ROM
       # @return [Array<Hash>]
       #
       # @api private
-      def search(scope: nil, &block)
-        results = api.search(filter_string, scope: scope, &block)
+      def search(&block)
+        results = api.search(filter_string, &block)
         reset!
         results
       end

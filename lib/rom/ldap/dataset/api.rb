@@ -281,11 +281,11 @@ module ROM
         end
 
 
-
+        # status = #<Net::LDAP::PDU>
         def log(caller = nil, message = nil, level = :info)
           logger.send(level, "#{self.class}##{caller} #{message}")
-          logger.error("#{self.class}##{caller} #{status.message}") unless success?
-          logger.debug("#{self.class}##{caller} #{status.message}") if ENV['DEBUG']
+          logger.error("#{self.class}##{caller} #{status}") unless success?
+          logger.debug("#{self.class}##{caller} #{status}") if ENV['DEBUG']
         end
 
         # Convenience method to prepare a tuple for #add
