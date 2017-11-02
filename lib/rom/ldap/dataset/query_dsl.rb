@@ -1,33 +1,8 @@
-require_relative 'filter/builder'
-
-require 'forwardable'
+require 'rom/ldap/dataset/filter/builder'
 
 module ROM
   module LDAP
     class Dataset
-      # LDAP Connection Query DSL
-      #
-      # a builder of search queries deferring to Net::LDAP::Filter
-      #
-      #
-      # @see http://www.rubydoc.info/gems/ruby-net-ldap/Net/LDAP/Filter
-      #
-      # method      | aliases          | RFC-2254 filter string
-      # ______________________________________________________________________
-      # :filter     |                  |
-      # :present    | :has, :exists    | 'column=*'
-      # :lte        | :below,          | 'column<=value'
-      # :gte        | :above,          | 'column>=value'
-      # :begins     | :prefix,         | 'column=value*'
-      # :ends       | :suffix,         | 'column=*value'
-      # :within     | :between, :range | '&(('column>=value')('column<=value'))'
-      # :outside    |                  | '~&(('column>=value')('column<=value'))'
-      # :equals     | :where,          | 'column=value'
-      # :not        | :missing,        | '~column=value'
-      # :contains   | :matches,        | 'column=*value*'
-      # :exclude    |                  | '~column=*value*'
-      # :extensible | :ext             | 'column:=value'
-      #
       # @api private
       class QueryDSL
         DSLError = Class.new(StandardError)
@@ -56,25 +31,41 @@ module ROM
         end
 
 
+        def begins(*args)
+          Filter::Builder.begins(*args)
+        end
 
-        extend Forwardable
+        def contains(*args)
+          Filter::Builder.contains(*args)
+        end
 
-        delegate [
-                  :begins,
-                  # :construct,
-                  :contains,
-                  :ends,
-                  :escape,
-                  :equals,
-                  :ge,
-                  :le,
-                  # :negate,
-                  :present
-                  ] => Filter::Builder
+        def ends(*args)
+          Filter::Builder.ends(*args)
+        end
 
+        def escape(*args)
+          Filter::Builder.escape(*args)
+        end
 
+        def equals(*args)
+          Filter::Builder.equals(*args)
+        end
 
+        def ge(*args)
+          Filter::Builder.ge(*args)
+        end
 
+        def le(*args)
+          Filter::Builder.le(*args)
+        end
+
+        def equals(*args)
+          Filter::Builder.equals(*args)
+        end
+
+        def present(*args)
+          Filter::Builder.present(*args)
+        end
 
         # @return [String]
         #
@@ -93,7 +84,8 @@ module ROM
 
           _and(filters).to_s # TODO: add OR join using DSL
 
-          rescue Net::LDAP::FilterSyntaxInvalidError
+          rescue => e
+            raise e
             original
         end
 
@@ -200,8 +192,6 @@ module ROM
         #
         def _and(*filters)
           Filter::Builder.construct("(&#{filters.join})")
-          # binding.pry
-          # Filter.join(filters)
         end
 
         # intersection

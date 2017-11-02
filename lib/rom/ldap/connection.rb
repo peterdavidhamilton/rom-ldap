@@ -1,12 +1,11 @@
 require 'net/tcp_client'
 require 'dry/core/class_attributes'
-require 'psych'
+require 'rom/ldap/operations'
 
 # net-ldap - core_exts, ber, pdu, adapter
 # require 'net/ber'
 # require 'net/ldap/pdu'
 
-require 'rom/ldap/operations'
 
 module ROM
   module LDAP
@@ -17,19 +16,13 @@ module ROM
       defines :connect_timeout
       defines :ldap_version
       defines :max_sasl_challenges
-      defines :root
 
       connect_timeout 5
       ldap_version 3
       max_sasl_challenges 10
-      # root Pathname(File.dirname(__FILE__))
 
 
-      # config in YAML
-      # compile_syntax = Psych.load_file(root.join('syntax.yaml'))
-      compile_syntax = Psych.load_file(ROM::LDAP.root.join('syntax.yaml'))
-      ASN_SYNTAX     = Net::BER.compile_syntax(compile_syntax).freeze
-
+      ASN_SYNTAX = Net::BER.compile_syntax(ROM::LDAP.config[:syntax]).freeze
 
       include Search
       include Create
@@ -59,7 +52,6 @@ module ROM
 
         while pdu = ldap_read
           return pdu if pdu.message_id == message_id
-
           message_queue[pdu.message_id].push pdu
           next
         end

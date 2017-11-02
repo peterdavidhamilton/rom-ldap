@@ -9,8 +9,6 @@ module ROM
   module LDAP
     class Dataset
       module Filter
-        # Replacement for Net::LDAP::Filter
-        #
         # @api private
         class Builder
 

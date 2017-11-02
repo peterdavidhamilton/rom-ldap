@@ -3,7 +3,22 @@ module ROM
     class Dataset
 
       module Filter
-        # noop
+        # method      | aliases          | RFC-2254 filter string
+        # ______________________________________________________________________
+        # :filter     |                  |
+        # :present    | :has, :exists    | 'column=*'
+        # :lte        | :below,          | 'column<=value'
+        # :gte        | :above,          | 'column>=value'
+        # :begins     | :prefix,         | 'column=value*'
+        # :ends       | :suffix,         | 'column=*value'
+        # :within     | :between, :range | '&(('column>=value')('column<=value'))'
+        # :outside    |                  | '~&(('column>=value')('column<=value'))'
+        # :equals     | :where,          | 'column=value'
+        # :not        | :missing,        | '~column=value'
+        # :contains   | :matches,        | 'column=*value*'
+        # :exclude    |                  | '~column=*value*'
+        # :extensible | :ext             | 'column:=value'
+        #
       end
 
       EQUAL     = '='.freeze

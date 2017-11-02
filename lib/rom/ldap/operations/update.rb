@@ -12,11 +12,7 @@ module ROM
       MODIFY_RESPONSE     = Net::LDAP::PDU::ModifyResponse
 
 
-      def modify(
-        dn:,
-        operations:,
-        message_id: next_msgid
-      )
+      def modify(dn:, operations:, message_id: next_msgid)
 
         pdu_request  = MODIFY_REQUEST
         pdu_response = MODIFY_RESPONSE
@@ -38,14 +34,7 @@ module ROM
         pdu
       end
 
-      def rename(
-        old_dn:,
-        new_rdn:,
-        delete_attrs: false,
-        new_superior: nil,
-        message_id: next_msgid
-      )
-
+      def rename(old_dn:, new_rdn:, delete_attrs: false, new_superior: nil, message_id: next_msgid)
 
         pdu_request  = MODIFY_RDN_REQUEST
         pdu_response = MODIFY_RDN_RESPONSE
@@ -67,29 +56,15 @@ module ROM
         pdu
       end
 
-      def password_modify(
-        dn:,
-        old_password: nil,
-        new_password: nil,
-        message_id: next_msgid
-      )
-
+      def password_modify(dn:, current:, replacement:, message_id: next_msgid)
 
         pdu_request  = EXTENDED_REQUEST
         pdu_response = EXTENDED_RESPONSE
-        error_klass  = [
-          ResponseMissingError,
-          'response missing or invalid'
-        ]
+        error_klass  = [ ResponseMissingError, 'response missing or invalid' ]
 
-        ext_seq = [PASSWORD_MODIFY.to_ber_contextspecific(0)]
-
-        unless old_password.nil?
-          pwd_seq = [old_password.to_ber(0x81)]
-          pwd_seq << new_password.to_ber(0x82) unless new_password.nil?
-          ext_seq << pwd_seq.to_ber_sequence.to_ber(0x81)
-        end
-
+        context = PASSWORD_MODIFY.to_ber_contextspecific(0)
+        payload = [ current.to_ber(0x81), replacement.to_ber(0x82) ]
+        ext_seq = [ context, payload.to_ber_sequence.to_ber(0x81) ]
         request = ext_seq.to_ber_appsequence(pdu_request)
 
         ldap_write(request, nil, message_id)

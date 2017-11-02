@@ -1,14 +1,13 @@
 require 'rom/core'
 
-require 'net/ldap' # coupled to PDU - required in errors.rb
+require 'net/ldap'
 
 require 'rom/ldap/version'
 require 'rom/ldap/errors'
 require 'rom/ldap/constants'
-
 require 'rom/ldap/connection'
 
-require 'rom/configuration_dsl'
+# require 'rom/configuration_dsl'
 
 require 'rom/ldap/plugins'
 require 'rom/ldap/struct'

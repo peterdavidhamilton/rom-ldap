@@ -22,7 +22,7 @@ module ROM
       #
       # Gateways are typically initialized via ROM::Configuration object
       #
-      # @overload initialize(uri)
+      # @overload initialize(params)
       #   Connects to a directory via params hash
       #
       #   @example
@@ -30,28 +30,19 @@ module ROM
       #
       #   @param [Hash]
       #
-      # @overload initialize(uri, options)
-      #   Connects to a database via URI and options
+      # @overload initialize(params, options)
+      #   Connects to a database via params and options
       #
       #   @example
       #     ROM.container(:ldap, {}, size: 100, time: 3)
       #
-      #   @param [Hash] passed to Net::LDAP#new
+      #   @param [Hash] passed to ROM::LDAP::Connection#new
       #
       #   @param options [Hash] default server options
       #
       #   @option options [Integer] :time Directory timeout in seconds
       #
       #   @option options [Integer] :size Directory result limit
-      #
-      # @overload initialize(connection)
-      #   Creates a gateway from an existing directory connection.
-      #   This works with Net::LDAP connections exclusively.
-      #
-      #   @example
-      #     ROM.container(:ldap, Net::LDAP.new)
-      #
-      #   @param [Net::LDAP] connection a connection instance
       #
       # @return [LDAP::Gateway]
       #

@@ -74,8 +74,7 @@ module ROM
         #
         # @api private
         def oids
-          oid_hash = ROM::LDAP.root.join('oids.yaml')
-          @oids ||= Psych.load_file(oid_hash)
+          @oids ||= ROM::LDAP.config[:oids]
         end
       end
     end

@@ -5,7 +5,6 @@ module ROM
     class Dataset
       module Filter
         class Builder
-
           module InstanceMethods
 
             def &(filter)

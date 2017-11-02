@@ -37,10 +37,28 @@ module ROM
       end
 
 
+
+      def bind_as(filter:, password:)
+        result = false
+
+        open do |me|
+          rs = search(filter: filter, size: 1)
+
+          binding.pry
+          if rs and rs.first and dn = rs.first.dn
+
+            password = password.call if password.respond_to?(:call)
+
+            result = rs if bind(username: password, password: password)
+          end
+        end
+
+        result
+      end
+
+
+
       private
-
-
-
 
 
       # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)

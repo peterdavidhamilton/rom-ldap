@@ -6,7 +6,7 @@ module ROM
 
       INVALID_SEARCH = OpenStruct.new(
         status:      :failure,
-        result_code: ResultCode::OperationsError,
+        result_code: ResultCode['OperationsError'],
         message:    'Invalid search'
       ).freeze
 
@@ -20,19 +20,19 @@ module ROM
 
 
       def search(
-        base: EMPTY_STRING,
-        ignore_server_caps: nil,
-        size: 10_000,
-        filter: '(objectClass=*)',
-        scope: SCOPE_SUBTREE,
-        attributes: nil,
-        attributes_only: false,
-        return_referrals: false,
-        deref: DEREF_NEVER,
-        time: self.class.connect_timeout,
+        base:                     EMPTY_STRING,
+        scope:                    SCOPE_SUBTREE,
+        filter:                   '(objectClass=*)',
+        size:                     10_000,
+        attributes:               nil,
+        attributes_only:          false,
+        return_referrals:         false,
+        deref:                    DEREF_NEVER,
+        time:                     self.class.connect_timeout,
+        ignore_server_caps:       nil,
         paged_searches_supported: nil,
-        sort_controls: false,
-        message_id: next_msgid
+        sort_controls:            false,
+        message_id:               next_msgid
       )
 
         attrs      = Array(attributes)
@@ -118,7 +118,7 @@ module ROM
               result_pdu = pdu
               controls = pdu.result_controls
 
-              if refs && pdu.result_code == ResultCode::Referral # pdu.referral? predicate
+              if refs && pdu.result_code == ResultCode['Referral'] # pdu.referral? predicate
                 if block_given?
                   se = Hash.new
                   se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
@@ -133,8 +133,8 @@ module ROM
 
           more_pages = false
 
-          # if (result_pdu.result_code == ResultCode::Success) && controls
-          if result_pdu.success? && controls
+          if (result_pdu.result_code == ResultCode['Success']) && controls
+          # if result_pdu.success? && controls
 
             controls.each do |c|
               next unless c.oid == PAGED_RESULTS

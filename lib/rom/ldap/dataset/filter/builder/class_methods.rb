@@ -76,12 +76,12 @@ module ROM
               new(:not, filter, nil)
             end
 
-            # def present?(attribute)
-            #   eq(attribute, WILDCARD)
-            # end
+            def present?(attribute)
+              eq(attribute, WILDCARD)
+            end
 
-            # alias_method :present, :present?
-            # alias_method :pres, :present?
+            alias_method :present, :present?
+            alias_method :pres, :present?
 
             def present(attribute)
               eq(attribute, WILDCARD)

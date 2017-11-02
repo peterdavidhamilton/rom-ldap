@@ -1,5 +1,5 @@
-require 'rom/ldap/dataset/ber'
-# require 'rom/ldap/dataset/filter/builder'
+# require 'rom/ldap/dataset/ber'
+require 'rom/ldap/dataset/filter/builder'
 
 module ROM
   module LDAP

@@ -86,10 +86,8 @@ module ROM
         # @return
         #
         # @api public
-        def bind_as(args)
-          # { size: 1 }
-          # connection.bind_as(args)
-          connection.bind_as(size: 1, **args)
+        def bind_as(filter:, password:)
+          connection.bind_as(filter: filter, password: password)
         end
 
 

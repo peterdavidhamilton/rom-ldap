@@ -18,16 +18,8 @@ module ROM
             when :eq
               if right == WILDCARD # presence test
                 left.to_s.to_ber_contextspecific(7)
+
               elsif right =~ /[*]/ # substring
-                # Parsing substrings is a little tricky. We use String#split to
-                # break a string into substrings delimited by the * (star)
-                # character. But we also need to know whether there is a star at the
-                # head and tail of the string, so we use a limit parameter value of
-                # -1: "If negative, there is no limit to the number of fields
-                # returned, and trailing null fields are not suppressed."
-                #
-                # 20100320 AZ: This is much simpler than the previous verison. Also,
-                # unnecessary regex escaping has been removed.
 
                 ary = right.split(/[*]+/, -1)
 

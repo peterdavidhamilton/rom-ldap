@@ -30,24 +30,24 @@ module ROM
 
     ERROR_MAP = {
 
-      ArgumentError                             => ConfigError,
-      Net::LDAP::AuthMethodUnsupportedError     => ConfigError,
-      Net::LDAP::EncMethodUnsupportedError      => ConfigError,
-      Net::LDAP::EncryptionUnsupportedError     => ConfigError,
-      Net::LDAP::NoSearchBaseError              => ConfigError,
-      Net::LDAP::SearchScopeInvalidError        => ConfigError,
+      # ArgumentError                             => ConfigError,
+      # Net::LDAP::AuthMethodUnsupportedError     => ConfigError,
+      # Net::LDAP::EncMethodUnsupportedError      => ConfigError,
+      # Net::LDAP::EncryptionUnsupportedError     => ConfigError,
+      # Net::LDAP::NoSearchBaseError              => ConfigError,
+      # Net::LDAP::SearchScopeInvalidError        => ConfigError,
 
-      Errno::ECONNREFUSED                       => ConnectionError,
-      Net::LDAP::ConnectionRefusedError         => ConnectionError,
-      Net::LDAP::Error                          => ConnectionError,
-      Net::LDAP::AlreadyOpenedError             => ConnectionError,
-      Net::LDAP::BindingInformationInvalidError => ConnectionError,
+      # Errno::ECONNREFUSED                       => ConnectionError,
+      # Net::LDAP::ConnectionRefusedError         => ConnectionError,
+      # Net::LDAP::Error                          => ConnectionError,
+      # Net::LDAP::AlreadyOpenedError             => ConnectionError,
+      # Net::LDAP::BindingInformationInvalidError => ConnectionError,
 
-      Net::LDAP::ResponseMissingOrInvalidError  => FilterError,
-      Net::LDAP::FilterTypeUnknownError         => FilterError,
-      Net::LDAP::FilterSyntaxInvalidError       => FilterError,
-      Net::LDAP::SearchFilterError              => FilterError,
-      Net::LDAP::SearchFilterTypeUnknownError   => FilterError,
+      # Net::LDAP::ResponseMissingOrInvalidError  => FilterError,
+      # Net::LDAP::FilterTypeUnknownError         => FilterError,
+      # Net::LDAP::FilterSyntaxInvalidError       => FilterError,
+      # Net::LDAP::SearchFilterError              => FilterError,
+      # Net::LDAP::SearchFilterTypeUnknownError   => FilterError,
 
       # Net::LDAP::BadAttributeError
       # Net::LDAP::BERInvalidError

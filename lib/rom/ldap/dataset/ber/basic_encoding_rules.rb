@@ -1,23 +1,13 @@
-# require 'stringio'
-
-# Implements Basic Encoding Rules parsing to be mixed into types as needed.
 module BasicEncodingRules
 
-  builtin_syntax = Psych.load_file('./lib/rom/ldap/dataset/ber/builtin_syntax.yaml')
-  BuiltinSyntax = Net::BER.compile_syntax(builtin_syntax).freeze
+  BuiltinSyntax = Net::BER.compile_syntax(ROM::LDAP.config[:builtin_syntax]).freeze
 
+  # == is expensive so sort this so the common cases are at the top.
 
-  # This is an extract of our BER object parsing to simplify our
-  # understanding of how we parse basic BER object types.
-  #
   def parse_ber_object(syntax, id, data)
-    # Find the object type from either the provided syntax lookup table or
-    # the built-in syntax lookup table.
-    #
-    # This exceptionally clever bit of code is verrrry slow.
+
     object_type = (syntax && syntax[id]) || BuiltinSyntax[id]
 
-    # == is expensive so sort this so the common cases are at the top.
     if object_type == :string
       s = Net::BER::BerIdentifiedString.new(data || "")
       s.ber_identifier = id
@@ -35,12 +25,8 @@ module BasicEncodingRules
       else
         int
       end
+
     elsif object_type == :oid
-      # See X.690 pgh 8.19 for an explanation of this algorithm.
-      # This is potentially not good enough. We may need a
-      # BerIdentifiedOid as a subclass of BerIdentifiedArray, to
-      # get the ber identifier and also a to_s method that produces
-      # the familiar dotted notation.
       oid = data.unpack("w*")
       f = oid.shift
       g = if f < 40
@@ -48,7 +34,6 @@ module BasicEncodingRules
           elsif f < 80
             [1, f - 40]
           else
-            # f - 80 can easily be > 80. What a weird optimization.
             [2, f - 80]
           end
       oid.unshift g.last
@@ -75,45 +60,7 @@ module BasicEncodingRules
       raise Net::BER::BerError, "Unsupported object type: id=#{id}"
     end
   end
-  protected :parse_ber_object
 
-  ##
-  # This is an extract of how our BER object length parsing is done to
-  # simplify the primary call. This is defined in X.690 section 8.1.3.
-  #
-  # The BER length will either be a single byte or up to 126 bytes in
-  # length. There is a special case of a BER length indicating that the
-  # content-length is undefined and will be identified by the presence of
-  # two null values (0x00 0x00).
-  #
-  # <table>
-  # <tr>
-  # <th>Range</th>
-  # <th>Length</th>
-  # </tr>
-  # <tr>
-  # <th>0x00 -- 0x7f<br />0b00000000 -- 0b01111111</th>
-  # <td>0 - 127 bytes</td>
-  # </tr>
-  # <tr>
-  # <th>0x80<br />0b10000000</th>
-  # <td>Indeterminate (end-of-content marker required)</td>
-  # </tr>
-  # <tr>
-  # <th>0x81 -- 0xfe<br />0b10000001 -- 0b11111110</th>
-  # <td>1 - 126 bytes of length as an integer value</td>
-  # </tr>
-  # <tr>
-  # <th>0xff<br />0b11111111</th>
-  # <td>Illegal (reserved for future expansion)</td>
-  # </tr>
-  # </table>
-  #
-  #--
-  # This has been modified from the version that was previously inside
-  # #read_ber to handle both the indeterminate terminator case and the
-  # invalid BER length case. Because the "lengthlength" value was not used
-  # inside of #read_ber, we no longer return it.
   def read_ber_length
     n = getbyte
 
@@ -132,24 +79,9 @@ module BasicEncodingRules
       v
     end
   end
-  protected :read_ber_length
 
 
-
-  ##
-  # Reads a BER object from the including object. Requires that #getbyte is
-  # implemented on the including object and that it returns a Fixnum value.
-  # Also requires #read(bytes) to work.
-  #
-  # Yields the object type `id` and the data `content_length` if a block is
-  # given. This is namely to support instrumentation.
-  #
-  # This does not work with non-blocking I/O.
   def read_ber(syntax = nil)
-    # TODO: clean this up so it works properly with partial packets coming
-    # from streams that don't block when we ask for more data (like
-    # StringIOs). At it is, this can throw TypeErrors and other nasties.
-
     id = getbyte or return nil  # don't trash this value, we'll use it later
 
     content_length = read_ber_length
