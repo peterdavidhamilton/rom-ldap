@@ -1,16 +1,12 @@
 require 'rom/core'
 
-# require 'net/ldap'
-
-# TODO: uncouple from net/ldap using 'connection'
-require 'rom/ldap/rewrite/net_ldap'
-# require 'rom/ldap/rewrite/connection'
-require 'rom/ldap/rewrite/connection_two'
-
+require 'net/ldap' # coupled to PDU - required in errors.rb
 
 require 'rom/ldap/version'
 require 'rom/ldap/errors'
 require 'rom/ldap/constants'
+
+require 'rom/ldap/connection'
 
 require 'rom/configuration_dsl'
 

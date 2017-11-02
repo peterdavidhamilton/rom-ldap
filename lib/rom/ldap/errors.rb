@@ -12,6 +12,22 @@ module ROM
     FilterError     = Class.new(StandardError)
     ConfigError     = Class.new(StandardError)
 
+
+
+
+
+    #
+    # Errors
+    #
+    ResponseMissingOrInvalidError = Class.new(StandardError)
+    ResponseMissingError          = Class.new(StandardError)
+    NoBindResultError             = Class.new(StandardError)
+    ResponseTypeInvalidError      = Class.new(StandardError)
+
+
+
+
+
     ERROR_MAP = {
 
       ArgumentError                             => ConfigError,

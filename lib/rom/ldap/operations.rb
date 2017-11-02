@@ -1,0 +1,5 @@
+require_relative 'operations/authenticate'
+require_relative 'operations/create'
+require_relative 'operations/search'
+require_relative 'operations/update'
+require_relative 'operations/delete'

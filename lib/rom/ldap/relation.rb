@@ -24,15 +24,17 @@ module ROM
         relation = event[:relation]
 
         relation.dataset do
-          binding.pry
 
-          # table = opts[:from].first
+          puts to_ldif
+          self #<ROM::LDAP::Dataset filter='(gidnumber=1050)'>
 
-          # if db.table_exists?(table)
-          #   select(*schema.map(&:qualified)).order(*schema.project(*schema.primary_key_names).qualified)
-          # else
-            self
-          # end
+          # db
+          # => OpenStruct {
+          #     :db => OpenStruct {
+          #         :database_type => :apacheds
+          #     }
+          # }
+
         end
       end
 

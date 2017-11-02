@@ -33,10 +33,20 @@ module ROM
         #
         # @api public
         def directory(options, &block)
-          Timeout.timeout(options[:time]) do
-            connection.search(options, &block) or
-              raise(LDAP::ConnectionError, 'no dataset returned')
+          # Timeout.timeout(options[:time]) do
+          #   connection.search(options, &block) or
+          #     raise(LDAP::ConnectionError, 'no dataset returned')
+          # end
+
+
+          result_set = []
+
+          connection.search(options) do |entry|
+            result_set << entry
+            yield entry if block_given?
           end
+
+          result_set
 
           rescue *ERROR_MAP.keys => e
             raise ERROR_MAP.fetch(e.class, Error), e
@@ -44,6 +54,9 @@ module ROM
             log(__callee__, "timed out after #{time} seconds", :warn)
             EMPTY_ARRAY
         end
+
+
+
 
 
         # Query results as array of hashes ordered by Distinguishing Name

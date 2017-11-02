@@ -59,7 +59,7 @@ module ROM
         class << self
 
           # allow access to instance methods
-          # private :new
+          private :new
 
           def eq(attribute, value)
             new(:eq, attribute, value)
@@ -114,12 +114,12 @@ module ROM
             new(:not, filter, nil)
           end
 
-          # def present?(attribute)
-          #   eq(attribute, WILDCARD)
-          # end
+          def present?(attribute)
+            eq(attribute, WILDCARD)
+          end
 
-          # alias_method :present, :present?
-          # alias_method :pres, :present?
+          alias_method :present, :present?
+          alias_method :pres, :present?
 
           def present(attribute)
             eq(attribute, WILDCARD)

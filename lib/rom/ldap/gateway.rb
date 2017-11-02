@@ -10,10 +10,6 @@ module ROM
     class Gateway < ROM::Gateway
       adapter :ldap
 
-      # @!attribute [r] client
-      #   @return [Object, Hash] Net::LDAP client instance
-      attr_reader :client
-
       # @!attribute [r] logger
       #   @return [Object] configured gateway logger
       attr_reader :logger
@@ -62,8 +58,14 @@ module ROM
       # @see https://github.com/ruby-ldap/ruby-net-ldap/blob/master/lib/net/ldap.rb
       #
       # @api public
-      def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
-        @client  = connect(server)
+      def initialize(directory = EMPTY_HASH, options = EMPTY_HASH)
+
+        @username = directory[:username]
+        @password = directory[:password]
+        @base     = directory[:base]
+
+        connect!(directory[:server])
+
         @options = options
         @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
 
@@ -128,7 +130,7 @@ module ROM
 
       private
 
-      # Wrapper for Net::LDAP client
+      # Wrapper for ROM::LDAP::Connection
       #
       # @return [Dataset::API] an api instance
       #
@@ -137,34 +139,27 @@ module ROM
         @api ||= Dataset::API.new(connection, logger, options)
       end
 
-      # Connect to directory or reuse established connection instance
-      #
-      # @return [Net::LDAP] a client instance
-      #
-      # @param server [Hash,Net::LDAP] a client instance or params
-      #
-      # @api private
-      def connect(server)
-        case server
-        when ::Net::LDAP
-          server
+
+      def connect!(ldap_url)
+        @conn = ROM::LDAP::Connection.new(server: ldap_url)
+      end
+
+
+      def connection
+        if @conn
+          # yield @conn
+          @conn
         else
-          ::Net::LDAP.new(server)
+          conn = connect
+          pdu  = conn.bind(username: @username, password: @password)
+
+          # return pdu unless pdu.result_code == Net::LDAP::ResultCodeSuccess
+          return pdu unless pdu.success?
+          # yield conn
+          conn
         end
       end
 
-      # Bind to directory and rescue errors
-      #
-      # @return [Net::LDAP] a client instance
-      #
-      # @api private
-      def connection
-        client.bind
-      rescue *ERROR_MAP.keys => e
-        raise ERROR_MAP.fetch(e.class, Error), e
-      else
-        client
-      end
     end
   end
 end

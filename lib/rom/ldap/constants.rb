@@ -4,6 +4,7 @@ module ROM
   module LDAP
     include Dry::Core::Constants
 
+
     #
     # Search Scope
     #
@@ -11,6 +12,8 @@ module ROM
     SCOPE_SINGLE_LEVEL = 1
     SCOPE_SUBTREE      = 2
     EMPTY_BASE         = EMPTY_STRING
+
+    SearchScopes = [ SCOPE_BASE_OBJECT, SCOPE_SINGLE_LEVEL, SCOPE_SUBTREE ]
 
     #
     # Aliase Dereferencing
