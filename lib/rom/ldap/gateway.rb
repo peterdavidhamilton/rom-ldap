@@ -63,8 +63,9 @@ module ROM
         @username = directory[:username]
         @password = directory[:password]
         @base     = directory[:base]
+        @server   = directory[:server]
 
-        connect!(directory[:server])
+        connect!
 
         @options = options
         @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
@@ -140,24 +141,16 @@ module ROM
       end
 
 
-      def connect!(ldap_url)
-        @conn = ROM::LDAP::Connection.new(server: ldap_url)
+      def connect!
+        @conn = ROM::LDAP::Connection.new(server: @server)
       end
 
 
       def connection
-        if @conn
-          # yield @conn
-          @conn
-        else
-          conn = connect
-          pdu  = conn.bind(username: @username, password: @password)
-
-          # return pdu unless pdu.result_code == Net::LDAP::ResultCodeSuccess
-          return pdu unless pdu.success?
-          # yield conn
-          conn
-        end
+        return @conn if @conn
+        conn = connect!
+        pdu  = conn.bind(username: @username, password: @password)
+        pdu.success? ? conn : pdu
       end
 
     end

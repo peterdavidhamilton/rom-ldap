@@ -52,14 +52,23 @@ module ROM
           !!dataset.authenticated?(password)
         end
 
-        # Count the number of entries in the dataset.
-        #   Not restricted by the gateway search limit.
+        # Count the number of entries selected from the paginated dataset.
         #
         # @return [Integer]
         #
         # @api public
         def count
           dataset.count
+        end
+
+        # Count the number of entries in the dataset.
+        #   Unrestricted by the gateway search limit.
+        #
+        # @return [Integer]
+        #
+        # @api public
+        def total
+          dataset.total
         end
 
         # @return [Boolean]

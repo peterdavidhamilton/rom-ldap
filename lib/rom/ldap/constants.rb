@@ -6,6 +6,21 @@ module ROM
 
 
     #
+    # Schema files
+    #
+    SCHEMA = %w[
+      core
+      cosine
+      inetorgperson
+      misc
+      nis
+      openldap
+    ].freeze
+      # apache
+      # apachemeta
+      # system
+
+    #
     # Search Scope
     #
     SCOPE_BASE_OBJECT  = 0

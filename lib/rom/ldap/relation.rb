@@ -1,17 +1,18 @@
 require 'rom/ldap/types'
-
 require 'rom/ldap/schema'
-
 require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
 require 'rom/ldap/transaction'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
+require 'rom/ldap/relation/defaults'
 
 module ROM
   module LDAP
     class Relation < ROM::Relation
       adapter :ldap
+
+      # struct_namespace ::ROM::LDAP::Struct
 
       include LDAP
       include Reading
@@ -24,20 +25,12 @@ module ROM
         relation = event[:relation]
 
         relation.dataset do
-
-          puts to_ldif
+          # puts to_ldif
           self #<ROM::LDAP::Dataset filter='(gidnumber=1050)'>
 
-          # db
-          # => OpenStruct {
-          #     :db => OpenStruct {
-          #         :database_type => :apacheds
-          #     }
-          # }
-
+          # db => OpenStruct { :db => OpenStruct { :database_type => :apacheds } }
         end
       end
-
 
 
 
@@ -51,7 +44,14 @@ module ROM
       schema_inferrer   LDAP::Schema::Inferrer.new.freeze
       schema_dsl        LDAP::Schema::DSL
 
-      forward(*Dataset::DSL.query_methods)
+      forward(*Dataset::QueryDSL.query_methods)
+
+
+
+      # specify a scope in the relation
+      # defines :scope
+      # defines :filter
+
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -72,6 +72,8 @@ module ROM
       def transaction(opts = EMPTY_HASH, &block)
         Transaction.new(dataset.db).run(opts, &block)
       end
+
+
 
       # Return raw query string
       #

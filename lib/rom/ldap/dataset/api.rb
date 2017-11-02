@@ -33,15 +33,9 @@ module ROM
         #
         # @api public
         def directory(options, &block)
-          # Timeout.timeout(options[:time]) do
-          #   connection.search(options, &block) or
-          #     raise(LDAP::ConnectionError, 'no dataset returned')
-          # end
-
-
           result_set = []
 
-          connection.search(options) do |entry|
+          @result = connection.search(options) do |entry|
             result_set << entry
             yield entry if block_given?
           end
@@ -68,7 +62,8 @@ module ROM
         # @return [Array<Hash>]
         #
         # @api public
-        def search(filter, scope: nil, timeout: time, &block)
+        # NB: scope is likely to always be nil because Dataset#search passes nil
+        def search(filter, scope: SCOPE_SUBTREE, timeout: time, &block)
           options = {
             filter: filter,
             scope:  scope,
@@ -93,7 +88,8 @@ module ROM
         # @api public
         def bind_as(args)
           # { size: 1 }
-          connection.bind_as(args)
+          # connection.bind_as(args)
+          connection.bind_as(size: 1, **args)
         end
 
 
@@ -194,14 +190,16 @@ module ROM
         #
         # @api public
         def attribute_types
-          schema_attribute_types.flat_map { |type|
+          @attribute_types ||= schema_attribute_types.flat_map { |type|
             parse_attribute_type(type)
           }.reject(&:nil?).sort_by { |a| a[:name] }
         end
 
         private
 
-
+        # Set instance variables like directory_type
+        #
+        # @return [self]
         #
         # @api private
         def inspect_server!
@@ -243,6 +241,8 @@ module ROM
             log(__callee__, "LDAP implementation #{vendor_name} is unknown")
             @directory_type = :unknown
           end
+
+          self
         end
 
 
@@ -318,6 +318,7 @@ module ROM
         end
 
         # Build hash from attribute definition
+        #   used by TypeBuilder
         #
         # @example
         #   parse_attribute_type("...")
@@ -329,9 +330,9 @@ module ROM
         #
         # @api private
         def parse_attribute_type(type)
-          return unless name = type[/NAME '(\S+)'/, 1]
+          return unless attribute_name = type[/NAME '(\S+)'/, 1]
           {
-            name:        name.to_sym,
+            name:        attribute_name.to_sym,
             description: type[/DESC '(.+)' [A-Z]+/, 1],
             oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
             matcher:     type[/EQUALITY (\S+)/, 1],
@@ -351,7 +352,6 @@ module ROM
         def vendor_name
           @vendor_name ||= root.fetch(:vendorname, EMPTY_ARRAY).first
         end
-        # memoize :vendor_name
 
         # @result [String]
         #
@@ -394,15 +394,6 @@ module ROM
         def supported_versions
           @supported_versions ||= root.fetch(:supportedldapversion).sort.map(&:to_i)
         end
-
-
-        # memoize :supported_versions,
-        #         :supported_features,
-        #         :supported_mechanisms,
-        #         :supported_controls,
-        #         :supported_extensions,
-        #         :vendor_version,
-        #         :sub_schema
 
         # @return [Integer]
         #
@@ -485,8 +476,8 @@ module ROM
 
         # deprecate
         def status
-          # connection.instance_variable_get(:@result) # wrapped in struct
-          connection.get_operation_result
+          # connection.get_operation_result
+          result
         end
 
         def detailed_status
@@ -500,14 +491,12 @@ module ROM
           result.result_code.to_i.zero?
         end
 
-        # WIP - uncouple connection result
-        #
         # @return [Net::LDAP::PDU]
         #
-        #<Net::LDAP::PDU:0x00007f811c801318 @message_id=2, @app_tag=5, @ldap_controls=[], @ldap_result={:resultCode=>0, :matchedDN=>"", :errorMessage=>""}>
-        #
+        # @api private
         def result
-          connection.instance_variable_get(:@result)
+          # connection.instance_variable_get(:@result)
+          @result
         end
 
         # @return [Boolean]
@@ -537,6 +526,20 @@ module ROM
           supported_controls.include?(MATCHING_RULE_BIT_AND) &&
           supported_controls.include?(MATCHING_RULE_BIT_OR)
         end
+
+
+
+
+        # memoize :attribute_types,
+        #         :sub_schema,
+        #         :sub_schema_entry,
+        #         :supported_versions,
+        #         :supported_features,
+        #         :supported_mechanisms,
+        #         :supported_controls,
+        #         :supported_extensions,
+        #         :vendor_name,
+        #         :vendor_version
       end
     end
   end

@@ -6,10 +6,9 @@ describe ROM::LDAP::ConfigError do
   describe 'invalid search size' do
     let(:params) do
       {
-        host: '127.0.0.1',
-        port: 10389,
-        base: 'ou=users,dc=example,dc=com',
-        size: -10
+        server: '127.0.0.1:10389',
+        base:   'ou=users,dc=example,dc=com',
+        size:   -10
       }
     end
 

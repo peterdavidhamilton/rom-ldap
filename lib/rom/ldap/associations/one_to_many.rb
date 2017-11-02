@@ -7,7 +7,7 @@ module ROM
 
         # @api public
         def call(target: self.target)
-          # binding.pry
+          binding.pry
           schema   = target.schema.qualified
           relation = target.join(source_table, join_keys)
 
@@ -20,7 +20,7 @@ module ROM
 
         # @api public
         def join(type, source = self.source, target = self.target)
-          # binding.pry
+          binding.pry
           source.__send__(type, target.name.dataset, join_keys).qualified
         end
       end

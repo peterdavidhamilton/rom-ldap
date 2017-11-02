@@ -60,7 +60,7 @@ module ROM
           #
           # @api public
           def total
-            dataset.count
+            dataset.total
           end
 
           # Return total number of pages
@@ -75,7 +75,7 @@ module ROM
           # @api private
           def at(dataset, current_page, per_page = self.per_page)
             current_page = current_page.to_i
-            per_page = per_page.to_i
+            per_page     = per_page.to_i
 
             self.class.new(
               dataset.offset((current_page-1)*per_page).limit(per_page),

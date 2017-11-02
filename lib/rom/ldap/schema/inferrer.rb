@@ -35,7 +35,6 @@ module ROM
         def suppress_errors
           with(raise_on_error: false, silent: true)
         end
-
       end
     end
   end

@@ -1,4 +1,4 @@
-require 'net/ldap/entry'
+require 'rom/ldap/dataset/filter/builder'
 
 module ROM
   module LDAP
@@ -17,7 +17,6 @@ module ROM
       SEARCH_RESULT          = Net::LDAP::PDU::SearchResult
       SEARCH_RESULT_REFERRAL = Net::LDAP::PDU::SearchResultReferral
       SEARCH_RETURNED_DATA   = Net::LDAP::PDU::SearchReturnedData
-
 
 
       def search(
@@ -50,8 +49,7 @@ module ROM
         raise ArgumentError, 'invalid alias dereferencing value' unless DerefAliasesArray.include?(deref)
 
 
-        filter    = LDAP::Dataset::FilterDSL.construct(filter) if filter.is_a?(String)
-
+        filter    = build_query(filter)
         ber_attrs = attrs.map { |attr| attr.to_s.to_ber }
         ber_sort  = encode_sort_controls(sort)
 
@@ -110,7 +108,6 @@ module ROM
             when SEARCH_RESULT_REFERRAL
               if refs
                 if block_given?
-                  # se = Net::LDAP::Entry.new
                   se = Hash.new
                   se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
                   yield se
@@ -123,7 +120,6 @@ module ROM
 
               if refs && pdu.result_code == ResultCode::Referral # pdu.referral? predicate
                 if block_given?
-                  # se = Net::LDAP::Entry.new
                   se = Hash.new
                   se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
                   yield se
@@ -164,6 +160,10 @@ module ROM
 
 
       private
+
+      def build_query(filter)
+        LDAP::Dataset::Filter::Builder.construct(filter) if filter.is_a?(String)
+      end
 
       def encode_sort_controls(sort_definitions)
         return sort_definitions unless sort_definitions
