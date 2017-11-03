@@ -1,6 +1,5 @@
 module BER
   refine ::Array do
-
     def to_ber(id = 0)
       to_ber_seq_internal(0x30 + id)
     end

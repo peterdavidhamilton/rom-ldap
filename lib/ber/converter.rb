@@ -4,6 +4,8 @@ require 'dry/initializer'
 
 module BER
   class Converter
+    EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/.freeze
+    UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/.freeze
 
     extend Dry::Initializer
 
@@ -54,7 +56,6 @@ module BER
       when :ex
         seq = []
 
-        # unless left =~ /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/
         unless left =~ EXTENSIBLE_REGEX
           abort "Bad attribute #{left}"
         end
@@ -63,8 +64,8 @@ module BER
 
         seq << rule.to_ber_contextspecific(1) unless rule.to_s.empty? # matchingRule
         seq << type.to_ber_contextspecific(2) unless type.to_s.empty? # type
-        seq << unescape(right).to_ber_contextspecific(3) # matchingValue
-        seq << "1".to_ber_contextspecific(4) unless dn.to_s.empty? # dnAttributes
+        seq << unescape(right).to_ber_contextspecific(3)              # matchingValue
+        seq << "1".to_ber_contextspecific(4) unless dn.to_s.empty?    # dnAttributes
 
         seq.to_ber_contextspecific(9)
       when :ge
@@ -86,15 +87,16 @@ module BER
 
     private
 
-    UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/.freeze
-
-    # Converts escaped characters (e.g., "\\28") to unescaped characters
+    # Converts escaped characters to unescaped characters
+    #
+    # @example
+    #   => "\\28"
+    #
+    # @return [String]
+    #
+    # @api private
     def unescape(right)
-      # right.to_s.gsub(/\\([a-fA-F\d]{2})/) { [$1.hex].pack("U") }
       right.to_s.gsub(UNESCAPE_REGEX) { [$1.hex].pack("U") }
     end
-
   end
-
-
 end

@@ -1,6 +1,5 @@
 require 'dry/core/constants'
 require 'set'
-require 'ber/identified'
 require 'ber/refinements'
 
 # Basic Encoding Rules

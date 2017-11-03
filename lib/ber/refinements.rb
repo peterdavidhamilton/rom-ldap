@@ -1,4 +1,5 @@
-require 'ber/rule_logic'
+# Used in BER::Converter, ROM::LDAP::Connection and its operation modules.
+
 require 'ber/function'
 require 'ber/refinements/array'
 require 'ber/refinements/false_class'
@@ -9,4 +10,3 @@ require 'ber/refinements/string'
 require 'ber/refinements/string_io'
 require 'ber/refinements/true_class'
 
-# Used in BER::Converter, ROM::LDAP::Connection and its operation modules.

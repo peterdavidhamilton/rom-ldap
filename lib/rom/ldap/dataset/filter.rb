@@ -31,11 +31,8 @@ module ROM
 
       TOKEN_REGEX      = %r"[-\w:.]*[\w]".freeze
       WS_REGEX         = /\s*/.freeze
-      EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/.freeze
       UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/.freeze
       VALUE_REGEX    =  /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|\\[a-fA-F\d]{2})+/u.freeze
-
-      # VALUE_REGEX      =  /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|#{UNESCAPE_REGEX})+/u.freeze
 
 
       ESCAPES = {

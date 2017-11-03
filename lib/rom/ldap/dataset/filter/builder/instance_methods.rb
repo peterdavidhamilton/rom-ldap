@@ -1,5 +1,33 @@
 require 'ber/converter'
 
+  # OPERATORS_MAP = {
+  #   :op_plus   => :+@,
+  #   :op_minus  => :-@,
+  #   :op_add    => :+,
+  #   :op_sub    => :-,
+  #   :op_pow    => :**,
+  #   :op_mul    => :*,
+  #   :op_div    => :/,
+  #   :op_mod    => :%,
+  #   :op_tilde  => :~,
+  #   :op_cmp    => :<=>,
+  #   :op_lshift => :<<,
+  #   :op_rshift => :>>,
+  #   :op_lt     => :<,
+  #   :op_gt     => :>,
+  #   :op_case   => :===,
+  #   :op_equal  => :==,
+  #   :op_apply  => :=~,
+  #   :op_lt_eq  => :<=,
+  #   :op_gt_eq  => :>=,
+  #   :op_or     => :|,
+  #   :op_and    => :&,
+  #   :op_xor    => :^,
+  #   :op_store  => :[]=,
+  #   :op_fetch  => :[]
+  # }
+
+
 module ROM
   module LDAP
     class Dataset

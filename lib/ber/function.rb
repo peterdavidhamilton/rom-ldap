@@ -1,3 +1,5 @@
+require 'ber/identified'
+
 module BER
   class Function
 
@@ -36,15 +38,15 @@ module BER
             end
         oid.unshift g.last
         oid.unshift g.first
-        # BerIdentifiedOid.new(oid)
-        oid
+        BerIdentifiedOid.new(oid)
+        # oid
 
       when :array
         seq = BerIdentifiedArray.new
         seq.ber_identifier = id
         sio = StringIO.new(data || EMPTY_STRING)
 
-        while (e = read_ber(sio, syntax)) != nil
+        while !(e = read_ber(sio, syntax)).nil?
           seq << e
         end
         seq

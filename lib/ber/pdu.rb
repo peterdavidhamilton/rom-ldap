@@ -66,7 +66,7 @@ module BER
     end
 
     def status
-      Net::LDAP::ResultCodesNonError.include?(result_code) ? :success : :failure
+      ResultCodesNonError.include?(result_code) ? :success : :failure
     end
 
     def success?
@@ -78,7 +78,8 @@ module BER
     end
 
     def result_server_sasl_creds
-      @ldap_result && @ldap_result[:serverSaslCreds]
+      # @ldap_result && @ldap_result[:serverSaslCreds]
+      @ldap_result && @ldap_result['serverSaslCreds']
     end
 
     private
@@ -92,7 +93,8 @@ module BER
         errorMessage: sequence[2]
       }
 
-      parse_search_referral(sequence[3]) if @ldap_result[:resultCode] == ResultCode['Referral']
+      # parse_search_referral(sequence[3]) if @ldap_result[:resultCode] == ResultCode['Referral']
+      parse_search_referral(sequence[3]) if @ldap_result['resultCode'] == ResultCode['Referral']
     end
 
     def parse_extended_response(sequence)
@@ -110,7 +112,8 @@ module BER
     def parse_bind_response(sequence)
       (sequence.length >= 3) || raise(Error, 'Invalid LDAP Bind Response length.')
       parse_ldap_result(sequence)
-      @ldap_result[:serverSaslCreds] = sequence[3] if sequence.length >= 4
+      # @ldap_result[:serverSaslCreds] = sequence[3] if sequence.length >= 4
+      @ldap_result['serverSaslCreds'] = sequence[3] if sequence.length >= 4
       @ldap_result
     end
 
@@ -118,8 +121,8 @@ module BER
       (sequence.length >= 2) || raise(Error, 'Invalid Search Response length.')
 
       @search_entry = Hash.new(sequence[0])
+      # TODO: replace Entity with a parred down struct/hash
 
-      # @search_entry = Net::LDAP::Entry.new(sequence[0])
       sequence[1].each { |seq| @search_entry[seq[0]] = seq[1] }
     end
 

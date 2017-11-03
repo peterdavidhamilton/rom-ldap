@@ -9,6 +9,8 @@ module BER
     greaterOrEqual  = 0xa5 # context-specific constructed 5, "greaterOrEqual"
     equalityMatch   = 0xa3 # context-specific constructed 3, "equalityMatch"
     lessOrEqual     = 0xa6 # context-specific constructed 6, "lessOrEqual"
+    substring       = 0xa4 # context-specific constructed 4, "substring"
+
 
     def call(ber)
       case ber.ber_identifier
@@ -28,8 +30,8 @@ module BER
           [:eq, ber.first, ber.last]
         end
 
-      # context-specific constructed 4, "substring"
-      when 0xa4
+
+      when substring
         str = ''
         final = false
 
@@ -61,18 +63,14 @@ module BER
 
 
 
-      when greaterOrEqual
-        # Filter::Builder.ge(ber.first.to_s, ber.last.to_s)
-        [:ge, ber.first.to_s, ber.last.to_s]
-
-
-      when lessOrEqual
-        Filter::Builder.le(ber.first.to_s, ber.last.to_s)
+      when greaterOrEqual then [:ge, ber.first.to_s, ber.last.to_s]
+      when lessOrEqual    then [:le, ber.first.to_s, ber.last.to_s]
 
       # context-specific primitive 7, "present"
       when 0x87
         # call to_s to get rid of the BER-identifiedness of the incoming string.
-        Filter::Builder.present?(ber.to_s)
+        # Filter::Builder.present?(ber.to_s)
+        [:present, ber.to_s]
 
       # context-specific constructed 9, "extensible comparison"
       when 0xa9
@@ -100,9 +98,9 @@ module BER
               end
 
               attribute = ''
-              attribute << type if type
-              attribute << ":#{dn}" if dn
-              attribute << ":#{rule}" if rule
+              attribute << type         if type
+              attribute << ":#{dn}"     if dn
+              attribute << ":#{rule}"   if rule
 
               # Filter::Builder.ex(attribute, value)
               [:ex, attribute, value]
