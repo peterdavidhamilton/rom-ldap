@@ -1,26 +1,21 @@
 module ROM
   module LDAP
     module Authenticate
+      # @option username
+      #
+      # @option password
+      #
+      # @option method
+      #
+      # @option message_id
+      #
+      # @api public
+      def bind(username:, password:, method: :simple, message_id: next_msgid)
+        pdu_request  = pdu(:bind_request)
+        pdu_response = pdu(:bind_result)
+        error_klass  = [NoBindResultError, 'no bind result']
 
-      BIND_REQUEST = Net::LDAP::PDU::BindRequest
-      BIND_RESULT  = Net::LDAP::PDU::BindResult
-
-
-      def bind(
-        method: :simple,
-        username:,
-        password:,
-        message_id: next_msgid
-      )
-
-        pdu_request  = BIND_REQUEST
-        pdu_response = BIND_RESULT
-        error_klass  = [
-          NoBindResultError,
-          'no bind result'
-        ]
-
-        request    = [
+        request = [
           self.class.ldap_version.to_ber,
           username.to_ber,
           password.to_ber_contextspecific(0)
@@ -36,8 +31,7 @@ module ROM
         pdu
       end
 
-
-
+      # @api public
       def bind_as(filter:, password:)
         result = false
 
@@ -45,7 +39,7 @@ module ROM
           rs = search(filter: filter, size: 1)
 
           binding.pry
-          if rs and rs.first and dn = rs.first.dn
+          if rs && rs.first && (dn = rs.first.dn)
 
             password = password.call if password.respond_to?(:call)
 
@@ -55,11 +49,6 @@ module ROM
 
         result
       end
-
-
-
-      private
-
 
       # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)
 
@@ -94,9 +83,6 @@ module ROM
       #   end
       # end
 
-
-
-
       # module GetbyteForSSLSocket
       #   def getbyte
       #     getc.ord
@@ -109,9 +95,6 @@ module ROM
       #     io.close
       #   end
       # end
-
-
-
 
       # def wrap_with_ssl(io, tls_options = {}, timeout = nil)
 
@@ -148,11 +131,6 @@ module ROM
 
       #   conn
       # end
-
-
     end
   end
 end
-
-
-

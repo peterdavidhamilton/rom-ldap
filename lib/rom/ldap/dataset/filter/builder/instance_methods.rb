@@ -1,4 +1,4 @@
-require 'rom/ldap/dataset/ber/converter'
+require 'rom/ldap/ber/converter'
 
 module ROM
   module LDAP

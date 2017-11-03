@@ -1,53 +1,51 @@
+using ::BER
+
 require 'rom/ldap/dataset/filter/builder'
 
 module ROM
   module LDAP
     module Search
-
+      # TODO: this is a mock PDU object - handle some other way
       INVALID_SEARCH = OpenStruct.new(
         status:      :failure,
         result_code: ResultCode['OperationsError'],
         message:    'Invalid search'
       ).freeze
 
-
-
-      SEARCH_REQUEST         = Net::LDAP::PDU::SearchRequest
-      SEARCH_REQUEST         = Net::LDAP::PDU::SearchRequest
-      SEARCH_RESULT          = Net::LDAP::PDU::SearchResult
-      SEARCH_RESULT_REFERRAL = Net::LDAP::PDU::SearchResultReferral
-      SEARCH_RETURNED_DATA   = Net::LDAP::PDU::SearchReturnedData
-
-
+      # @option base
+      #
+      # @option scope
+      #
+      # @option filter
+      #
+      # @option size
+      #
+      # @api public
       def search(
-        base:                     EMPTY_STRING,
-        scope:                    SCOPE_SUBTREE,
-        filter:                   '(objectClass=*)',
-        size:                     10_000,
-        attributes:               nil,
-        attributes_only:          false,
-        return_referrals:         false,
-        deref:                    DEREF_NEVER,
-        time:                     self.class.connect_timeout,
-        ignore_server_caps:       nil,
-        paged_searches_supported: nil,
-        sort_controls:            false,
-        message_id:               next_msgid
+        base:               EMPTY_STRING,
+        scope:              SCOPE_SUBTREE,
+        filter:             '(objectClass=*)',
+        size:               10_000, # 126
+        attributes:         nil,
+        attributes_only:    false,
+        return_referrals:   false,
+        deref:              DEREF_NEVER,
+        time:               self.class.connect_timeout,
+        ignore_server_caps: nil,
+        paged:              nil,
+        sort_controls:      false,
+        message_id:         next_msgid
       )
 
-        attrs      = Array(attributes)
-        attrs_only = attributes_only
-        refs       = return_referrals
-
-        size   = size.to_i
-        time   = time.to_i
-        paged  = paged_searches_supported
-        sort   = sort_controls
-
+        attrs       = Array(attributes)
+        attrs_only  = attributes_only
+        refs        = return_referrals
+        size        = size.to_i
+        time        = time.to_i
+        sort        = sort_controls
 
         raise ArgumentError, 'invalid search scope'              unless SearchScopes.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DerefAliasesArray.include?(deref)
-
 
         filter    = build_query(filter)
         ber_attrs = attrs.map { |attr| attr.to_s.to_ber }
@@ -78,7 +76,7 @@ module ROM
             attrs_only.to_ber,
             filter.to_ber,
             ber_attrs.to_ber_sequence
-          ].to_ber_appsequence(SEARCH_REQUEST)
+          ].to_ber_appsequence(pdu(:search_request))
 
           controls = []
 
@@ -101,26 +99,26 @@ module ROM
 
           while pdu = queued_read(message_id)
             case pdu.app_tag
-            when SEARCH_RETURNED_DATA
+            when pdu(:search_returned_data)
               n_results += 1
               yield pdu.search_entry if block_given?
 
-            when SEARCH_RESULT_REFERRAL
+            when pdu(:search_result_referral)
               if refs
                 if block_given?
-                  se = Hash.new
+                  se = {}
                   se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
                   yield se
                 end
               end
 
-            when SEARCH_RESULT
+            when pdu(:search_result)
               result_pdu = pdu
-              controls = pdu.result_controls
+              controls   = pdu.result_controls
 
               if refs && pdu.result_code == ResultCode['Referral'] # pdu.referral? predicate
                 if block_given?
-                  se = Hash.new
+                  se = {}
                   se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
                   yield se
                 end
@@ -134,7 +132,7 @@ module ROM
           more_pages = false
 
           if (result_pdu.result_code == ResultCode['Success']) && controls
-          # if result_pdu.success? && controls
+            # if result_pdu.success? && controls
 
             controls.each do |c|
               next unless c.oid == PAGED_RESULTS
@@ -157,12 +155,10 @@ module ROM
         messages = message_queue.delete(message_id)
       end
 
-
-
       private
 
       def build_query(filter)
-        LDAP::Dataset::Filter::Builder.construct(filter) if filter.is_a?(String)
+        Dataset::Filter::Builder.construct(filter) if filter.is_a?(String)
       end
 
       def encode_sort_controls(sort_definitions)
@@ -172,8 +168,8 @@ module ROM
           control = Array(control)
 
           control[0] = String(control[0]).to_ber,
-          control[1] = String(control[1]).to_ber,
-          control[2] = (control[2] == true).to_ber
+                       control[1] = String(control[1]).to_ber,
+                       control[2] = (control[2] == true).to_ber
 
           control.to_ber_sequence
         end
@@ -184,7 +180,6 @@ module ROM
           sort_control_values.to_ber_sequence.to_s.to_ber
         ].to_ber_sequence
       end
-
     end
   end
 end

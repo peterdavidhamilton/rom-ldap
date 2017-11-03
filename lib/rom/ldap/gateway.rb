@@ -133,7 +133,7 @@ module ROM
 
 
       def connect!
-        @conn = ROM::LDAP::Connection.new(server: @server)
+        @conn = Connection.new(server: @server)
       end
 
 

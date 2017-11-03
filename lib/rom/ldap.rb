@@ -1,9 +1,13 @@
 require 'rom/core'
 
-require 'net/ldap'
-
 require 'rom/ldap/version'
 require 'rom/ldap/errors'
+
+require 'rom/ldap/ber'
+require 'rom/ldap/ber/refinements'
+
+require 'rom/ldap/pdu'
+
 require 'rom/ldap/constants'
 require 'rom/ldap/connection'
 

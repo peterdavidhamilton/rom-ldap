@@ -1,11 +1,8 @@
+using ::BER
+
 require 'net/tcp_client'
 require 'dry/core/class_attributes'
 require 'rom/ldap/operations'
-
-# net-ldap - core_exts, ber, pdu, adapter
-# require 'net/ber'
-# require 'net/ldap/pdu'
-
 
 module ROM
   module LDAP
@@ -22,7 +19,6 @@ module ROM
       max_sasl_challenges 10
 
 
-      ASN_SYNTAX = Net::BER.compile_syntax(ROM::LDAP.config[:syntax]).freeze
 
       include Search
       include Create
@@ -33,10 +29,16 @@ module ROM
 
       private
 
+      # lookup pdu request/response codes
+      def pdu(symbol)
+        LDAP.config[:pdu][symbol]
+      end
+
+
       def ldap_read(syntax = ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)
 
-        Net::LDAP::PDU.new(ber_object)
+        PDU.new(ber_object)
       end
 
       def ldap_write(request, controls = nil, message_id = next_msgid)

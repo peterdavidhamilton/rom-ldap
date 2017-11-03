@@ -13,7 +13,17 @@ module ROM
       Psych.load_file(root.join('ldap.yaml')).freeze
     end
 
-    ResultCode = config[:result_codes].freeze
+    ResultCode = config[:result_code]
+
+
+    # used in connection class #ldap_read
+    ASN_SYNTAX    = BER.compile_syntax(config[:syntax]).freeze
+
+    # used in ber module
+    BuiltinSyntax = BER.compile_syntax(config[:builtin_syntax]).freeze
+
+      WILDCARD  = '*'.freeze
+
 
     #
     # Schema files

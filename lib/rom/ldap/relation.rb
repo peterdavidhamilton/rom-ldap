@@ -12,7 +12,7 @@ module ROM
     class Relation < ROM::Relation
       adapter :ldap
 
-      # struct_namespace ::ROM::LDAP::Struct
+      # struct_namespace LDAP:Struct
 
       include LDAP
       include Reading

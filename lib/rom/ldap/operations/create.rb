@@ -2,25 +2,15 @@ module ROM
   module LDAP
     module Create
 
-      ADD_REQUEST  = Net::LDAP::PDU::AddRequest
-      ADD_RESPONSE = Net::LDAP::PDU::AddResponse
+      def add(dn:, attributes: EMPTY_ARRAY, message_id: next_msgid)
 
-      def add(
-        dn:,
-        attributes: EMPTY_ARRAY,
-        message_id: next_msgid
-      )
-
-        pdu_request  = ADD_REQUEST
-        pdu_response = ADD_RESPONSE
-        error_klass  = [
-          ResponseMissingOrInvalidError,
-          'response missing or invalid'
-        ]
+        pdu_request  = pdu(:add_request)
+        pdu_response = pdu(:add_response)
+        error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         add_attrs = []
 
-        (a = attributes) && a.each do |k, v|
+        attributes.each do |k, v|
           add_attrs << [k.to_s.to_ber, Array(v).map(&:to_ber).to_ber_set].to_ber_sequence
         end
 
@@ -34,7 +24,6 @@ module ROM
 
         pdu
       end
-
 
     end
   end

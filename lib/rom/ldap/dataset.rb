@@ -81,11 +81,11 @@ module ROM
         self
       end
 
-      # @return [Enumberator::Lazy, Array]
+      # @return [Enumerator::Lazy, Array]
       #
       # @api public
       def each(*args, &block)
-        results = search.lazy # search(scope: nil)
+        results = search.lazy
         reset!
         results = paginate(results) if paginated?
 

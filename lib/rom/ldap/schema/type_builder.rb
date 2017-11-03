@@ -64,18 +64,15 @@ module ROM
           when 'generalizedTimeMatch' then 'Time'
           when nil
             type = attribute[:single] ? 'String' : 'Array'
-            oids.fetch(attribute[:oid], type)
+
+            # TODO: move oids to class attribute
+            ROM::LDAP.config[:oid].fetch(attribute[:oid], type)
+
           else
             raise "#{self.class}##{__callee__} #{attribute[:matcher]} not known"
           end
         end
 
-        # @return [Hash]
-        #
-        # @api private
-        def oids
-          @oids ||= ROM::LDAP.config[:oids]
-        end
       end
     end
   end

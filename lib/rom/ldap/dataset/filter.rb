@@ -26,7 +26,7 @@ module ROM
       LESS_THAN = '<='.freeze
       MORE_THAN = '>='.freeze
       EXT_COMP  = ':='.freeze
-      WILDCARD  = '*'.freeze
+      # WILDCARD  = '*'.freeze
 
 
       OPERATOR_REGEX = Regexp.union(EQUAL, NOT_EQUAL, LESS_THAN, MORE_THAN, EXT_COMP).freeze

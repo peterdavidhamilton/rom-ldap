@@ -1,3 +1,5 @@
+# TODO: Divide the API between Gateway and Dataset concerns.
+# Split methods into modules for inclusion in Gateway or Dataset.
 require 'rom/initializer'
 # require 'rom/support/memoizable'
 
@@ -6,7 +8,7 @@ module ROM
     class Dataset
       # LDAP Connection DSL
       #
-      # wrapper for Net::LDAP::Connection
+      # wrapper for ROM::LDAP::Connection
       #
       class API
         # include Memoizable
@@ -42,11 +44,11 @@ module ROM
 
           result_set
 
-          rescue *ERROR_MAP.keys => e
-            raise ERROR_MAP.fetch(e.class, Error), e
-          rescue Timeout::Error
-            log(__callee__, "timed out after #{time} seconds", :warn)
-            EMPTY_ARRAY
+          # rescue *ERROR_MAP.keys => e
+          #   raise ERROR_MAP.fetch(e.class, Error), e
+          # rescue Timeout::Error
+            # log(__callee__, "timed out after #{time} seconds", :warn)
+            # EMPTY_ARRAY
         end
 
 
@@ -130,8 +132,8 @@ module ROM
           log(__callee__, dn)
           success?
 
-          rescue *ERROR_MAP.keys => e
-            raise ERROR_MAP.fetch(e.class, Error), e
+          # rescue *ERROR_MAP.keys => e
+          #   raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         # Wrapper for Net::LDAP::Connection#modify
@@ -144,8 +146,8 @@ module ROM
           log(__callee__, dn)
           success?
 
-          rescue *ERROR_MAP.keys => e
-            raise ERROR_MAP.fetch(e.class, Error), e
+          # rescue *ERROR_MAP.keys => e
+          #   raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         # Wrapper for Net::LDAP::Connection#delete
@@ -160,8 +162,8 @@ module ROM
           log(__callee__, dn)
           success?
 
-          rescue *ERROR_MAP.keys => e
-            raise ERROR_MAP.fetch(e.class, Error), e
+          # rescue *ERROR_MAP.keys => e
+          #   raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         # @result [Array<String>]

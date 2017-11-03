@@ -3,10 +3,25 @@
 module BER
   refine String do
 
-    include ::BasicEncodingRules
+    # include ::ROM::LDAP::BER::InstanceMethods
     # def self.used(mod)
     #   mod.send(:include, ::BasicEncodingRules)
     # end
+
+
+    def read_ber(syntax = nil)
+      rule_logic.read_ber(syntax)
+    end
+
+    def read_ber_length
+      rule_logic.read_ber_length(self)
+    end
+
+    def parse_ber_object(syntax, id, data)
+      rule_logic.parse_ber_object(self, syntax, id, data)
+    end
+
+
 
 
     ##

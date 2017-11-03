@@ -4,22 +4,11 @@ module ROM
 
       MODIFY_OPERATIONS = { add: 0, delete: 1, replace: 2 }.freeze
 
-      EXTENDED_REQUEST    = Net::LDAP::PDU::ExtendedRequest
-      EXTENDED_RESPONSE   = Net::LDAP::PDU::ExtendedResponse
-      MODIFY_RDN_REQUEST  = Net::LDAP::PDU::ModifyRDNRequest
-      MODIFY_RDN_RESPONSE = Net::LDAP::PDU::ModifyRDNResponse
-      MODIFY_REQUEST      = Net::LDAP::PDU::ModifyRequest
-      MODIFY_RESPONSE     = Net::LDAP::PDU::ModifyResponse
-
-
       def modify(dn:, operations:, message_id: next_msgid)
 
-        pdu_request  = MODIFY_REQUEST
-        pdu_response = MODIFY_RESPONSE
-        error_klass  = [
-          ResponseMissingOrInvalidError,
-          'response missing or invalid'
-        ]
+        pdu_request  = pdu(:modify_request)
+        pdu_response = pdu(:modify_response)
+        error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         ops = modify_ops(operations)
 
@@ -36,12 +25,9 @@ module ROM
 
       def rename(old_dn:, new_rdn:, delete_attrs: false, new_superior: nil, message_id: next_msgid)
 
-        pdu_request  = MODIFY_RDN_REQUEST
-        pdu_response = MODIFY_RDN_RESPONSE
-        error_klass  = [
-          ResponseMissingOrInvalidError,
-          'response missing or invalid'
-        ]
+        pdu_request  = pdu(:modify_rdn_request)
+        pdu_response = pdu(:modify_rdn_response)
+        error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         request = [old_dn, new_rdn, delete_attrs].map(&:to_ber)
 
@@ -56,14 +42,14 @@ module ROM
         pdu
       end
 
-      def password_modify(dn:, current:, replacement:, message_id: next_msgid)
+      def password_modify(dn:, old_pwd:, new_pwd:, message_id: next_msgid)
 
-        pdu_request  = EXTENDED_REQUEST
-        pdu_response = EXTENDED_RESPONSE
+        pdu_request  = pdu(:extended_request)
+        pdu_response = pdu(:extended_response)
         error_klass  = [ ResponseMissingError, 'response missing or invalid' ]
 
         context = PASSWORD_MODIFY.to_ber_contextspecific(0)
-        payload = [ current.to_ber(0x81), replacement.to_ber(0x82) ]
+        payload = [ old_pwd.to_ber(0x81), new_pwd.to_ber(0x82) ]
         ext_seq = [ context, payload.to_ber_sequence.to_ber(0x81) ]
         request = ext_seq.to_ber_appsequence(pdu_request)
 

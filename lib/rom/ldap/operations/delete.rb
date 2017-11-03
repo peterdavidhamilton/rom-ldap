@@ -2,22 +2,11 @@ module ROM
   module LDAP
     module Delete
 
-      DELETE_REQUEST   = Net::LDAP::PDU::DeleteRequest
-      DELETE_RESPONSE  = Net::LDAP::PDU::DeleteResponse
+      def delete(dn:, control_codes: nil, message_id: next_msgid)
 
-      def delete(
-        dn:,
-        control_codes: nil,
-        message_id: next_msgid
-      )
-
-
-        pdu_request  = DELETE_REQUEST
-        pdu_response = DELETE_RESPONSE
-        error_klass  = [
-          ResponseMissingOrInvalidError,
-          'response missing or invalid'
-        ]
+        pdu_request  = pdu(:delete_request)
+        pdu_response = pdu(:delete_response)
+        error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         request  = dn.to_s.to_ber_application_string(pdu_request)
 
