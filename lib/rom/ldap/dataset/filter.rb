@@ -26,8 +26,6 @@ module ROM
       LESS_THAN = '<='.freeze
       MORE_THAN = '>='.freeze
       EXT_COMP  = ':='.freeze
-      # WILDCARD  = '*'.freeze
-
 
       OPERATOR_REGEX = Regexp.union(EQUAL, NOT_EQUAL, LESS_THAN, MORE_THAN, EXT_COMP).freeze
 
@@ -35,9 +33,9 @@ module ROM
       WS_REGEX         = /\s*/.freeze
       EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/.freeze
       UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/.freeze
+      VALUE_REGEX    =  /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|\\[a-fA-F\d]{2})+/u.freeze
 
-      # VALUE_REGEX    =  /( ?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]  |  [^\x00-\x7F]  |  \\[a-fA-F\d]{2}  )+/u.freeze
-      VALUE_REGEX      =  /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|#{UNESCAPE_REGEX})+/u.freeze
+      # VALUE_REGEX      =  /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|#{UNESCAPE_REGEX})+/u.freeze
 
 
       ESCAPES = {

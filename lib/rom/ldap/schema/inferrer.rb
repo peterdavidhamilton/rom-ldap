@@ -27,10 +27,7 @@ module ROM
           inferred = super
           { **inferred }
 
-        # rescue *ERROR_MAP.keys => e
-        #   raise ERROR_MAP.fetch(e.class, Error), e
         # rescue
-        #   binding.pry
         #   FALLBACK_SCHEMA
         end
 

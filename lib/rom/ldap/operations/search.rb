@@ -5,12 +5,6 @@ require 'rom/ldap/dataset/filter/builder'
 module ROM
   module LDAP
     module Search
-      # TODO: this is a mock PDU object - handle some other way
-      INVALID_SEARCH = OpenStruct.new(
-        status:      :failure,
-        result_code: ResultCode['OperationsError'],
-        message:    'Invalid search'
-      ).freeze
 
       # @option base
       #
@@ -116,7 +110,7 @@ module ROM
               result_pdu = pdu
               controls   = pdu.result_controls
 
-              if refs && pdu.result_code == ResultCode['Referral'] # pdu.referral? predicate
+              if refs && pdu.result_code == ::BER::ResultCode['Referral'] # pdu.referral? predicate
                 if block_given?
                   se = {}
                   se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
@@ -131,7 +125,7 @@ module ROM
 
           more_pages = false
 
-          if (result_pdu.result_code == ResultCode['Success']) && controls
+          if (result_pdu.result_code == ::BER::ResultCode['Success']) && controls
             # if result_pdu.success? && controls
 
             controls.each do |c|
@@ -150,7 +144,7 @@ module ROM
           break unless more_pages
         end # loop
 
-        result_pdu || INVALID_SEARCH
+        result_pdu || ::BER::PDU::INVALID_SEARCH
       ensure
         messages = message_queue.delete(message_id)
       end

@@ -65,8 +65,7 @@ module ROM
           when nil
             type = attribute[:single] ? 'String' : 'Array'
 
-            # TODO: move oids to class attribute
-            ROM::LDAP.config[:oid].fetch(attribute[:oid], type)
+           ::BER.config[:oid].fetch(attribute[:oid], type)
 
           else
             raise "#{self.class}##{__callee__} #{attribute[:matcher]} not known"

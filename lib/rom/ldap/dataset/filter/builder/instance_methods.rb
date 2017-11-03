@@ -1,4 +1,4 @@
-require 'rom/ldap/ber/converter'
+require 'ber/converter'
 
 module ROM
   module LDAP
@@ -97,12 +97,6 @@ module ROM
                 abort "Unknown filter type in match: #{op}"
               end
             end
-
-
-            # Converts escaped characters (e.g., "\\28") to unescaped characters
-            # def unescape(right)
-            #   right.to_s.gsub(/\\([a-fA-F\d]{2})/) { [$1.hex].pack("U") }
-            # end
           end
 
         end

@@ -1,3 +1,5 @@
+using ::BER
+
 module ROM
   module LDAP
     module Update

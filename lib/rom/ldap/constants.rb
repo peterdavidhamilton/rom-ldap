@@ -5,24 +5,7 @@ module ROM
   module LDAP
     include Dry::Core::Constants
 
-    def self.root
-      Pathname(File.dirname(__dir__))
-    end
-
-    def self.config #(file)
-      Psych.load_file(root.join('ldap.yaml')).freeze
-    end
-
-    ResultCode = config[:result_code]
-
-
-    # used in connection class #ldap_read
-    ASN_SYNTAX    = BER.compile_syntax(config[:syntax]).freeze
-
-    # used in ber module
-    BuiltinSyntax = BER.compile_syntax(config[:builtin_syntax]).freeze
-
-      WILDCARD  = '*'.freeze
+    WILDCARD  = '*'.freeze
 
 
     #

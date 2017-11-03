@@ -29,16 +29,15 @@ module ROM
 
       private
 
-      # lookup pdu request/response codes
       def pdu(symbol)
-        LDAP.config[:pdu][symbol]
+        ::BER.config[:pdu][symbol]
       end
 
 
-      def ldap_read(syntax = ASN_SYNTAX)
+      def ldap_read(syntax = ::BER::ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)
 
-        PDU.new(ber_object)
+        ::BER::PDU.new(ber_object)
       end
 
       def ldap_write(request, controls = nil, message_id = next_msgid)

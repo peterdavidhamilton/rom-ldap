@@ -49,7 +49,7 @@ module ROM
         # @api private
         def dataset_attributes(gateway, dataset)
           fetch_or_store(gateway, dataset) do
-            gateway[dataset].flat_map(&:attribute_names).uniq.sort
+            gateway[dataset].flat_map(&:keys).uniq.sort
           end
         end
 

@@ -1,5 +1,5 @@
 require 'rom/ldap/dataset/filter/parser'
-require 'rom/ldap/ber/parser'
+require 'ber/parser'
 
 module ROM
   module LDAP
@@ -16,7 +16,9 @@ module ROM
 
 
             def parse_ber(ber)
-              BER::Parser.new(ber).call
+              binding.pry
+              meth, attribute, value = BER::Parser.new(ber).call
+              new(meth, attribute, value)
             end
 
             def construct(ldap_filter_string)

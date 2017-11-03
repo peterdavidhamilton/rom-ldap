@@ -1,5 +1,6 @@
 # TODO: Divide the API between Gateway and Dataset concerns.
 # Split methods into modules for inclusion in Gateway or Dataset.
+
 require 'rom/initializer'
 # require 'rom/support/memoizable'
 
@@ -36,19 +37,11 @@ module ROM
         # @api public
         def directory(options, &block)
           result_set = []
-
           @result = connection.search(options) do |entry|
             result_set << entry
             yield entry if block_given?
           end
-
           result_set
-
-          # rescue *ERROR_MAP.keys => e
-          #   raise ERROR_MAP.fetch(e.class, Error), e
-          # rescue Timeout::Error
-            # log(__callee__, "timed out after #{time} seconds", :warn)
-            # EMPTY_ARRAY
         end
 
 
@@ -74,7 +67,7 @@ module ROM
             deref:  DEREF_ALWAYS,
           }
 
-          results = directory(options).sort_by(&:dn).map(&method(:extract))
+          results = directory(options)
           log(__callee__, filter)
 
           block_given? ? results.each(&block) : results
@@ -131,12 +124,9 @@ module ROM
           connection.add(dn: dn, attributes: args)
           log(__callee__, dn)
           success?
-
-          # rescue *ERROR_MAP.keys => e
-          #   raise ERROR_MAP.fetch(e.class, Error), e
         end
 
-        # Wrapper for Net::LDAP::Connection#modify
+
         #
         # @return [Boolean]
         #
@@ -145,12 +135,8 @@ module ROM
           connection.modify(dn: dn, operations: operations)
           log(__callee__, dn)
           success?
-
-          # rescue *ERROR_MAP.keys => e
-          #   raise ERROR_MAP.fetch(e.class, Error), e
         end
 
-        # Wrapper for Net::LDAP::Connection#delete
         #
         # @param dn [String]
         #
@@ -161,9 +147,6 @@ module ROM
           connection.delete(dn: dn)
           log(__callee__, dn)
           success?
-
-          # rescue *ERROR_MAP.keys => e
-          #   raise ERROR_MAP.fetch(e.class, Error), e
         end
 
         # @result [Array<String>]
@@ -215,6 +198,8 @@ module ROM
           when /389/
             @directory_type = :three_eight_nine
           when nil
+            binding.pry
+
             caps = root.fetch(:supportedcapabilities, EMPTY_ARRAY).sort
 
             unless caps.empty?
@@ -262,9 +247,7 @@ module ROM
             scope: SCOPE_BASE_OBJECT,
             attributes: attrs,
             ignore_server_caps: true
-
-          # favour real hashes over Entry classes
-          ).first.instance_variable_get(:@myhash)
+          ).first
         end
 
 
@@ -275,9 +258,7 @@ module ROM
             filter: 'objectclass=subschema',
             attributes: %w[objectclasses attributetypes],
             ignore_server_caps: true,
-
-          # favour real hashes over Entry classes
-          ).first.instance_variable_get(:@myhash)
+          ).first
         end
 
 
@@ -303,18 +284,6 @@ module ROM
           args = LDAP::Functions[:ldap_compatible][tuple.dup]
           dn   = args.delete(:dn)
           [dn, args]
-        end
-
-        # Reveal Hash from Net::LDAP::Entry
-        #   TODO: replace use of Entry class with a dry-struct
-        #
-        # @param entry [Net::LDAP::Entry]
-        #
-        # @return [Hash]
-        #
-        # @api private
-        def extract(entry)
-          entry.instance_variable_get(:@myhash)
         end
 
         # Build hash from attribute definition
@@ -350,49 +319,49 @@ module ROM
         #
         # @api private
         def vendor_name
-          @vendor_name ||= root.fetch(:vendorname, EMPTY_ARRAY).first
+          @vendor_name ||= root.fetch('vendorName', EMPTY_ARRAY).first
         end
 
         # @result [String]
         #
         # @api private
         def vendor_version
-          @vendor_version ||= root.fetch(:vendorversion, EMPTY_ARRAY).first
+          @vendor_version ||= root.fetch('vendorVersion', EMPTY_ARRAY).first
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_extensions
-          @supported_extensions ||= root.fetch(:supportedextension).sort
+          @supported_extensions ||= root.fetch('supportedExtension').sort
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_controls
-          @supported_controls ||= root.fetch(:supportedcontrol).sort
+          @supported_controls ||= root.fetch('supportedControl').sort
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_mechanisms
-          @supported_mechanisms ||= root.fetch(:supportedsaslmechanisms).sort
+          @supported_mechanisms ||= root.fetch('supportedSASLMechanisms').sort
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_features
-          @supported_features ||= root.fetch(:supportedfeatures).sort
+          @supported_features ||= root.fetch('supportedFeatures').sort
         end
 
         # @return [Array<Integer>]
         #
         # @api private
         def supported_versions
-          @supported_versions ||= root.fetch(:supportedldapversion).sort.map(&:to_i)
+          @supported_versions ||= root.fetch('supportedLDAPVersion').sort.map(&:to_i)
         end
 
         # @return [Integer]
@@ -420,7 +389,7 @@ module ROM
         #
         # @api private
         def sub_schema_entry
-          @sub_schema_entry ||= root.fetch(:subschemasubentry, EMPTY_ARRAY).first
+          @sub_schema_entry ||= root.fetch('subschemaSubentry', EMPTY_ARRAY).first
         end
 
 
@@ -437,12 +406,12 @@ module ROM
         #
         # @api private
         def schema_attribute_types
-          sub_schema[:attributetypes].sort
+          sub_schema['attributeTypes'].sort
         end
 
-        # TODO: docs for known_attributes
         # @api private
         def known_attributes
+          binding.pry
           directory(
             filter: '(objectclass=*)',
             base: EMPTY_BASE
@@ -471,6 +440,7 @@ module ROM
         end
 
         def auth
+          binding.pry
           connection.instance_variable_get(:@auth)
         end
 
