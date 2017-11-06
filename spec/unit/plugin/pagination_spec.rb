@@ -58,7 +58,7 @@ describe 'Plugin / Pagination' do
 
       accounts.pager.current_page.must_equal 1
       accounts.pager.next_page.must_equal 2
-      accounts.pager.prev_page.must_equal nil
+      accounts.pager.prev_page.must_be_nil
 
       accounts = container.relations[:accounts].page(2)
 
@@ -68,7 +68,7 @@ describe 'Plugin / Pagination' do
 
       accounts = container.relations[:accounts].page(3)
 
-      accounts.pager.next_page.must_equal nil
+      accounts.pager.next_page.must_be_nil
       accounts.pager.prev_page.must_equal 2
     end
   end

@@ -17,7 +17,7 @@ module BER
       end
     end
 
-    private
+    private_class_method
 
     def self.encode(type, encrypted)
       "{#{type.upcase}}" + Base64.encode64(encrypted).chomp!

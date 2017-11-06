@@ -10,13 +10,6 @@ module ROM
 
       extend Dry::Core::ClassAttributes
 
-      # defines :connect_timeout
-      # defines :max_sasl_challenges
-      # defines :result_size
-      # connect_timeout     5
-      # max_sasl_challenges 10
-      # result_size         1_000
-
       defines :ldap_version
       defines :default_base
       defines :default_filter

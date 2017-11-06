@@ -55,7 +55,7 @@ module BER
   BUILTIN_SYNTAX   = compile_syntax(config[:builtin_syntax])
   MAX_FIXNUM_SIZE  = 0.size
   WILDCARD         = '*'.freeze
-  NEW_LINE         = "\n ".freeze
+  NEW_LINE         = "\n".freeze
 
 end
 

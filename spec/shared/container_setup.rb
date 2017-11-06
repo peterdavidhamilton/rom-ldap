@@ -3,13 +3,17 @@ module ContainerSetup
   let(:params) {
     {
       server:   '127.0.0.1:10389',
-      base:     'ou=users,dc=example,dc=com',
+      # base:     'ou=users,dc=example,dc=com',
       username: nil,
       password: nil
     }
   }
 
-  let(:conn)      { ROM::LDAP::Connection.new(server: '127.0.0.1:10389') }
+  let(:conn)      {
+    @conn = ROM::LDAP::Connection.new(server: '127.0.0.1:10389')
+    @conn.directory_options = { base: 'ou=users,dc=example,dc=com' }
+    @conn
+  }
   # let(:conf)      { TestConfiguration.new(:ldap, conn) }
 
   let(:conf)      { ROM::Configuration.new(:ldap, params) }
@@ -21,7 +25,7 @@ module ContainerSetup
   before do
     # everyone
     conf.relation(:accounts) do
-      schema('(uid=*)', infer: true) do
+      schema('(&(objectclass=person)(uid=*))', infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
 
@@ -32,19 +36,19 @@ module ContainerSetup
 
     # test1..test10
     conf.relation(:group9998) do
-      schema('(gidnumber=9998)', as: :customers, infer: true)
+      schema('(&(objectclass=person)(gidnumber=9998))', as: :customers, infer: true)
 
       use :auto_restrictions
     end
 
     conf.relation(:group9997) do
-      schema('(gidnumber=9997)', as: :sandbox, infer: true) do
+      schema('(&(objectclass=person)(gidnumber=9997))', as: :sandbox, infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
     end
 
     conf.relation(:staff) do # or group=9999
-      schema('(uidnumber>=1000)', as: :colleagues, infer: true) do
+      schema('(&(objectclass=person)(uidnumber>=1000))', as: :colleagues, infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
     end

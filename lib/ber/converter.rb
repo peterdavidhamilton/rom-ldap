@@ -4,8 +4,8 @@ require 'dry/initializer'
 
 module BER
   class Converter
-    EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/.freeze
-    UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/.freeze
+    EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/
+    UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/
 
     extend Dry::Initializer
 
@@ -47,39 +47,43 @@ module BER
           [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(3)
         end
 
-
+      # make sure data is not forced to UTF-8
       when :bineq
-        # make sure data is not forced to UTF-8
         [left.to_s.to_ber, unescape(right).to_ber_bin].to_ber_contextspecific(3)
-
 
       when :ex
         seq = []
 
-        unless left =~ EXTENSIBLE_REGEX
-          abort "Bad attribute #{left}"
-        end
+        raise(Error, "Bad attribute #{left}") unless left =~ EXTENSIBLE_REGEX
 
-        type, dn, rule = $1, $2, $4
+        type = Regexp.last_match(1)
+        dn   = Regexp.last_match(2)
+        rule = Regexp.last_match(4)
 
         seq << rule.to_ber_contextspecific(1) unless rule.to_s.empty? # matchingRule
         seq << type.to_ber_contextspecific(2) unless type.to_s.empty? # type
         seq << unescape(right).to_ber_contextspecific(3)              # matchingValue
-        seq << "1".to_ber_contextspecific(4) unless dn.to_s.empty?    # dnAttributes
+        seq << '1'.to_ber_contextspecific(4) unless dn.to_s.empty?    # dnAttributes
 
         seq.to_ber_contextspecific(9)
+
       when :ge
         [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(5)
+
       when :le
         [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(6)
+
       when :ne
         [self.class.eq(left, right).to_ber].to_ber_contextspecific(2)
+
       when :and
         ary = [left.coalesce(:and), right.coalesce(:and)].flatten
         ary.map(&:to_ber).to_ber_contextspecific(0)
+
       when :or
         ary = [left.coalesce(:or), right.coalesce(:or)].flatten
         ary.map(&:to_ber).to_ber_contextspecific(1)
+
       when :not
         [left.to_ber].to_ber_contextspecific(2)
       end
@@ -96,7 +100,7 @@ module BER
     #
     # @api private
     def unescape(right)
-      right.to_s.gsub(UNESCAPE_REGEX) { [$1.hex].pack("U") }
+      right.to_s.gsub(UNESCAPE_REGEX) { [Regexp.last_match(1).hex].pack('U') }
     end
   end
 end

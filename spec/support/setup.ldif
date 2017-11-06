@@ -1,6 +1,14 @@
 version: 1
 
 #
+# Partition
+#
+# dn: dc=example,dc=com
+# dc: example
+# objectClass: top
+# objectClass: domain
+
+#
 # Top Levels
 #
 dn: ou=users,dc=example,dc=com

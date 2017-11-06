@@ -13,6 +13,8 @@ module ROM
           def call(str)
             scanner = StringScanner.new(str)
             parse_filter_branch(scanner) or parse_paren_expression(scanner)
+            # filter = parse_filter_branch(scanner) or parse_paren_expression(scanner)
+            # filter.to_s
           end
 
           private

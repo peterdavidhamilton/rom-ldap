@@ -5,7 +5,6 @@ module ROM
     module Create
 
       def add(dn:, attributes: EMPTY_ARRAY, message_id: next_msgid)
-
         pdu_request  = find_pdu(:add_request)
         pdu_response = find_pdu(:add_response)
         error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]

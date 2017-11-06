@@ -158,8 +158,9 @@ module ROM
 
           @conn.directory_options = options # base, size, time
 
-          pdu = bind! if directory[:username] # simple only
-          pdu.success? ? @conn : pdu
+          pdu = bind! unless directory[:username].nil? # simple only
+          (pdu && pdu.success?) ? @conn : pdu
+
           @conn
         end
       end

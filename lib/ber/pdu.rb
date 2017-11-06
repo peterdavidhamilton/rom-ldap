@@ -5,12 +5,12 @@ module BER
   class PDU
     Error = Class.new(RuntimeError)
 
-    SUCCESS_CODES = [
-      :success,
-      :compare_true,
-      :compare_false,
-      :referral,
-      :sasl_bind_in_progress
+    SUCCESS_CODES = %i[
+      success
+      compare_true
+      compare_false
+      referral
+      sasl_bind_in_progress
     ].freeze
 
     # ResultCodeSearchSuccess = [
@@ -24,13 +24,12 @@ module BER
     def initialize(ber_object)
       begin
         message, tag, third_bit = ber_object
-        @message_id     = message.to_i
-        @app_tag        = tag.ber_identifier & 0x1f
 
-        @ldap_controls  = []
-        @ldap_result    = {}
-
-      rescue Exception => e
+        @message_id = message.to_i
+        @app_tag    = tag.ber_identifier & 0x1f
+        @controls   = []
+        @res        = {}
+      rescue StandardError => e
         raise Error, "LDAP PDU Format Error: #{e.message}"
       end
 
@@ -42,15 +41,23 @@ module BER
     attr_reader :message
     attr_reader :info
     attr_reader :app_tag
-    attr_reader :ldap_controls
+    attr_reader :controls
     attr_reader :bind_parameters
     attr_reader :extended_response
-    attr_reader :search_entry
+    # attr_reader :search_entry
     attr_reader :search_parameters
     attr_reader :search_referrals
 
-    alias msg_id message_id
-    alias result_controls ldap_controls
+    LOGGER = Logger.new(STDOUT)
+
+    def search_entry
+      LOGGER.debug(@search_entry.dn) # debugging api#total
+      @search_entry
+    end
+
+    alias msg_id          message_id
+    alias result_controls controls
+    alias ldap_controls   controls
 
     def inspect
       %(<##{self.class}
@@ -71,23 +78,23 @@ module BER
     alias to_s inspect
 
     def result
-      @ldap_result
+      @res
     end
 
     def error_message
-      @ldap_result.fetch(:errorMessage, :missing)
+      @res.fetch(:error, EMPTY_STRING)
     end
 
     def result_code
-      @ldap_result.fetch(:resultCode, :missing)
+      @res.fetch(:code, EMPTY_STRING)
     end
 
     def matched_dn
-      @ldap_result.fetch(:matchedDN, EMPTY_STRING)
+      @res.fetch(:dn, EMPTY_STRING)
     end
 
     def result_server_sasl_creds
-      @ldap_result.fetch(:serverSaslCreds)
+      @res.fetch(:serverSaslCreds)
     end
 
     def referral?
@@ -101,7 +108,6 @@ module BER
     def failure?
       !success?
     end
-
 
     private
 
@@ -127,21 +133,11 @@ module BER
     end
 
     def check_sequence_size(sequence, size)
-      (sequence.length >= size) || raise(Error, "Invalid LDAP result length. #{sequence}")
+      raise Error, "Invalid LDAP result length. #{sequence}" unless sequence.length >= size
     end
 
-    def set_result(sequence)
-      # @ldap_result = {
-      #   resultCode:   sequence[0],
-      #   matchedDN:    sequence[1],
-      #   errorMessage: sequence[2]
-      # }
-
-      # @res[:code], @res[:dn], @res[:error] = sequence
-
-      @ldap_result[:resultCode]   = sequence[0]
-      @ldap_result[:matchedDN]    = sequence[1]
-      @ldap_result[:errorMessage] = sequence[2]
+    def parse_sequence(sequence)
+      @res[:code], @res[:dn], @res[:error] = sequence
     end
 
     def decode_result
@@ -173,22 +169,21 @@ module BER
     #
     def parse_search_return(sequence)
       check_sequence_size(sequence, 2)
-      set_result(sequence)
-      # @res[:code], @res[:dn], @res[:error] = sequence
+      parse_sequence(sequence)
       decode_result
       @search_entry = Struct.new(*sequence)
     end
 
     def parse_ldap_result(sequence)
       check_sequence_size(sequence, 3)
-      set_result(sequence)
+      parse_sequence(sequence)
       decode_result
       parse_search_referral(sequence[3]) if referral?
     end
 
     def parse_extended_response(sequence)
       check_sequence_size(sequence, 3)
-      set_result(sequence)
+      parse_sequence(sequence)
       decode_result
       @extended_response = sequence[3]
     end
@@ -196,7 +191,7 @@ module BER
     def parse_bind_response(sequence)
       check_sequence_size(sequence, 3)
       parse_ldap_result(sequence)
-      @ldap_result[:serverSaslCreds] = sequence[3] if sequence.length >= 4
+      @res[:serverSaslCreds] = sequence[3] if sequence.length >= 4
       result
     end
 
@@ -205,7 +200,7 @@ module BER
     end
 
     def parse_controls(sequence)
-      @ldap_controls = sequence.map do |control|
+      @controls = sequence.map do |control|
         o             = OpenStruct.new
         o.oid         = control[0]
         o.criticality = control[1]

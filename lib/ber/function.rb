@@ -2,8 +2,7 @@ require 'ber/identified'
 
 module BER
   class Function
-
-    def parse_ber_object(object, syntax, id, data)
+    def parse_ber_object(syntax, id, data)
       object_type = (syntax && syntax[id]) || BUILTIN_SYNTAX[id]
 
       case object_type
@@ -28,14 +27,14 @@ module BER
 
       when :oid
         oid = data.unpack('w*')
-        f = oid.shift
-        g = if f < 40
-              [0, f]
-            elsif f < 80
-              [1, f - 40]
-            else
-              [2, f - 80]
-            end
+        f   = oid.shift
+        g   = if f < 40
+                [0, f]
+              elsif f < 80
+                [1, f - 40]
+              else
+                [2, f - 80]
+              end
         oid.unshift g.last
         oid.unshift g.first
         BerIdentifiedOid.new(oid)
@@ -46,7 +45,7 @@ module BER
         seq.ber_identifier = id
         sio = StringIO.new(data || EMPTY_STRING)
 
-        while !(e = read_ber(sio, syntax)).nil?
+        until (e = read_ber(sio, syntax)).nil?
           seq << e
         end
         seq
@@ -84,7 +83,6 @@ module BER
     end
 
     def read_ber(object, syntax = nil)
-
       if id = object.getbyte
         content_length = read_ber_length(object)
 
@@ -96,7 +94,7 @@ module BER
 
         data = object.read(content_length)
 
-        parse_ber_object(object, syntax, id, data)
+        parse_ber_object(syntax, id, data)
       end
     end
   end

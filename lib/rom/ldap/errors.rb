@@ -10,6 +10,7 @@ module ROM
 
 
 
+    OperationError                = Class.new(StandardError)
     ConnectionError               = Class.new(StandardError)
     ResponseMissingOrInvalidError = Class.new(StandardError) # all operations
     ResponseMissingError          = Class.new(StandardError) # update operation

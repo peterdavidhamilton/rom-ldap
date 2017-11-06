@@ -19,33 +19,33 @@ module ROM
         filter:             self.class.default_filter,
         base:               directory_options[:base],
         # size:               directory_options[:size],
-        # size:               10_000_000,
-        size:               nil,
         # time:               directory_options[:timeout],
+        size:               nil,
         time:               nil,
         scope:              SCOPE_SUBTREE,
         deref:              DEREF_NEVER,
+        attributes:         EMPTY_ARRAY,
         attributes_only:    false,
         return_referrals:   false,
         sort_controls:      false,
-        attributes:         nil,
-        ignore_server_caps: nil,
-        paged:              false, #true, # otherwise resets limited to 1_000
+        ignore_server_caps: false,
+        paged:              true,
         message_id:         next_msgid
       )
+
+        # otherwise resets limited to 1_000
+        paged = false if ignore_server_caps
 
         raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
         filter      = build_query(filter)
         base        ||= self.class.default_base
-        size        = size.to_i #|| self.class.result_size
-        time        = time.to_i #|| self.class.connect_timeout
-        attrs       = Array(attributes)
-        attrs_only  = attributes_only
+        size        = size.to_i
+        time        = time.to_i
         refs        = return_referrals
         sort        = sort_controls
-        ber_attrs   = attrs.map { |attr| attr.to_s.to_ber }
+        ber_attrs   = Array(attributes).map { |attr| attr.to_s.to_ber }
         ber_sort    = encode_sort_controls(sort)
 
         rfc2696_cookie = [126, EMPTY_STRING]
@@ -69,7 +69,7 @@ module ROM
             deref.to_ber_enumerated,
             query_limit.to_ber,
             time.to_ber,
-            attrs_only.to_ber,
+            attributes_only.to_ber,
             filter.to_ber,
             ber_attrs.to_ber_sequence
           ].to_ber_appsequence(find_pdu(:search_request))

@@ -5,7 +5,6 @@ module ROM
     module Delete
 
       def delete(dn:, control_codes: nil, message_id: next_msgid)
-
         pdu_request  = find_pdu(:delete_request)
         pdu_response = find_pdu(:delete_response)
         error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]

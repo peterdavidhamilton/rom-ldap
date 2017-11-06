@@ -89,7 +89,6 @@ module ROM
         results = search.lazy
         reset!
         results = paginate(results) if paginated?
-
         block_given? ? results.send(__callee__, *args, &block) : results
       end
 
@@ -193,7 +192,9 @@ module ROM
       #
       # @api public
       def delete(tuples)
-        tuples.each { |t| api.delete(*t[:dn]) }
+        tuples.each do |t|
+          api.delete(*t[:dn])
+        end
       end
 
       # Output the dataset as an LDIF string.

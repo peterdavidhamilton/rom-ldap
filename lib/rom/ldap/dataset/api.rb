@@ -3,6 +3,7 @@
 
 require 'rom/initializer'
 # require 'rom/support/memoizable'
+require 'timeout'
 
 module ROM
   module LDAP
@@ -14,6 +15,7 @@ module ROM
       class API
         # include Memoizable
         extend Initializer
+        include Timeout
 
         param :connection
         param :logger
@@ -33,14 +35,19 @@ module ROM
         # @api public
         def directory(options, &block) # TODO: rename call
           result_set = []
+          return_set = !options.delete(:result_only)
+
           @result = connection.search(options) do |entry|
             result_set << entry
             yield entry if block_given?
           end
-          result_set.sort_by(&:dn)
+
+          return_set ? result_set.sort_by(&:dn) : !result_set.empty?
         end
 
         attr_reader :result # PDU object
+
+
 
         # Query results as array of hashes ordered by Distinguishing Name
         #
@@ -52,12 +59,17 @@ module ROM
         #
         # @api public
         def search(filter, &block)
-          options = { filter: filter, deref:  DEREF_ALWAYS }
+          time = 30
+          timeout(time) do
 
-          results = directory(options)
-          log(__callee__, filter)
+            results = directory(filter: filter, deref: DEREF_ALWAYS, paged: pageable?)
+            log(__callee__, filter)
+            block_given? ? results.each(&block) : results
+          end
 
-          block_given? ? results.each(&block) : results
+          rescue Timeout::Error
+            log(__callee__, "timed out after #{time} seconds", :warn)
+            EMPTY_ARRAY
         end
 
 
@@ -73,20 +85,23 @@ module ROM
         end
 
 
-        # Used by gateway[filter]
+        # Used by gateway[filter] - limits to 1_000 because paging is negated
         #
         # @return [Integer]
         #
         # @api public
         def attributes(filter)
-          directory(filter: filter, attributes_only: true)
+          directory(filter: filter, attributes_only: true, ignore_server_caps: true)
         end
 
+        # Should count actual total
+        #
         # @return [Integer]
         #
         # @api public
         def count(filter)
-          directory(filter: filter, attributes: 'dn', size: 1_000_000).count
+          # directory(filter: filter, attributes: %i[dn]).count
+          directory(filter: filter, attributes: 'dn').count
         end
 
 
@@ -94,7 +109,7 @@ module ROM
         #
         # @api public
         def exist?(filter)
-          directory(filter: filter, return_result: false)
+          directory(filter: filter, result_only: true)
         end
 
 
@@ -105,9 +120,10 @@ module ROM
         # @api public
         def add(tuple)
           dn, args = prepare(tuple)
-          connection.add(dn: dn, attributes: args)
+          raise OperationError, 'distinguishing name is require' if dn.nil?
+          result = connection.add(dn: dn, attributes: args)
           log(__callee__, dn)
-          success?
+          result.success?
         end
 
 
@@ -116,9 +132,10 @@ module ROM
         #
         # @api public
         def modify(dn, operations)
-          connection.modify(dn: dn, operations: operations)
+          raise OperationError, 'distinguishing name is require' if dn.nil?
+          result = connection.modify(dn: dn, operations: operations)
           log(__callee__, dn)
-          success?
+          result.success?
         end
 
         #
@@ -128,9 +145,10 @@ module ROM
         #
         # @api public
         def delete(dn)
-          connection.delete(dn: dn)
+          raise OperationError, 'distinguishing name is require' if dn.nil?
+          result = connection.delete(dn: dn)
           log(__callee__, dn)
-          success?
+          result.success?
         end
 
         # @result [Array<String>]
@@ -226,7 +244,7 @@ module ROM
             base: EMPTY_BASE,
             scope: SCOPE_BASE_OBJECT,
             attributes: attrs,
-            ignore_server_caps: true
+            ignore_server_caps: true # force paging off
           ).first
         end
 
@@ -238,14 +256,14 @@ module ROM
             scope: SCOPE_BASE_OBJECT,
             filter: '(objectclass=subschema)',
             attributes: %w[objectclasses attributetypes],
-            ignore_server_caps: true,
+            ignore_server_caps: true # force paging off
           ).first
         end
 
         def log(caller = nil, message = nil, level = :info)
           logger.send(level, "#{self.class}##{caller} #{message}")
-          logger.error("#{self.class}##{caller} #{result.error_message}") unless success?
-          logger.debug("#{self.class}##{caller} #{result.message}") if ENV['DEBUG']
+          logger.error("#{self.class}##{caller} #{result.error_message}") if result.failure?
+          logger.debug("#{self.class}##{caller} #{result.message}") if ENV['DEBUG'] && result.message
         end
 
         # Convenience method to prepare a tuple for #add
@@ -399,8 +417,9 @@ module ROM
           binding.pry
           directory(
             filter: '(objectclass=*)',
-            base: EMPTY_BASE
+            base: EMPTY_BASE,
             # base: SCOPE_SUBTREE
+            ignore_server_caps: true # force paging off
           ).flat_map(&:attribute_names).uniq.sort
         end
 

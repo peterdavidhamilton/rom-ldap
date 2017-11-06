@@ -10,7 +10,7 @@ describe ROM::LDAP::Relation, 'command interface' do
 
   it '#insert -> #update -> #delete' do
     # #insert raises error when tuple is incomplete
-    proc { accounts.insert(cn: 'The Dark Knight') }.must_raise ROM::LDAP::Error
+    proc { accounts.insert(cn: 'The Dark Knight') }.must_raise ROM::LDAP::OperationError
 
     # #insert returns true on success
     accounts.insert(

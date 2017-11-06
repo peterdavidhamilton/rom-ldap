@@ -7,7 +7,6 @@ module ROM
       MODIFY_OPERATIONS = { add: 0, delete: 1, replace: 2 }.freeze
 
       def modify(dn:, operations:, message_id: next_msgid)
-
         pdu_request  = find_pdu(:modify_request)
         pdu_response = find_pdu(:modify_response)
         error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
