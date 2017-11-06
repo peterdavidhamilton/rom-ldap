@@ -5,7 +5,7 @@ module ROM
 		extend Dry::Core::Extensions
 
 		register_extension(:active_directory) do
-			require 'rom/sql/extensions/active_directory'
+			require 'rom/ldap/implementations/active_directory'
 		end
 
   end

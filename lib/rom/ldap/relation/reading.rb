@@ -1,30 +1,3 @@
-# avg
-# group
-# group_and_count
-# group_append
-# having
-# inner_join
-# invert
-# join
-# left_join
-# lock
-# map
-# max
-# min
-# offset
-# prefix
-# project
-# qualified
-# qualified_columns
-# read
-# rename
-# right_join
-# select_append
-# select_group
-# sum
-# union
-# unt
-
 module ROM
   module LDAP
     class Relation < ROM::Relation

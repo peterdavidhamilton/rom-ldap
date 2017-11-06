@@ -15,7 +15,6 @@ module ROM
 
         # @api private
         def call(schema, gateway)
-
           attributes    = directory_attributes(gateway)
           type_builder  = TypeBuilder.new(attributes)
           dataset       = schema.name.dataset
@@ -49,12 +48,14 @@ module ROM
         # @api private
         def dataset_attributes(gateway, dataset)
           fetch_or_store(gateway, dataset) do
-            gateway[dataset].flat_map(&:keys).uniq.sort
+            gateway[dataset].flat_map(&:attribute_names).uniq.sort
           end
         end
 
         def directory_attributes(gateway)
-          fetch_or_store(gateway, 'types') { gateway.attribute_types }
+          fetch_or_store(gateway, 'types') do
+            gateway.attribute_types
+          end
         end
       end
     end

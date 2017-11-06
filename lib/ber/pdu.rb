@@ -1,129 +1,203 @@
 require 'ostruct'
+require 'ber/struct'
 
 module BER
   class PDU
     Error = Class.new(RuntimeError)
 
-    INVALID_SEARCH = OpenStruct.new(
-        status:      :failure,
-        result_code: ::BER::ResultCode['OperationsError'],
-        message:    'Invalid search'
-      ).freeze
+    SUCCESS_CODES = [
+      :success,
+      :compare_true,
+      :compare_false,
+      :referral,
+      :sasl_bind_in_progress
+    ].freeze
 
-    RR = ::BER::ResponseRequest
+    # ResultCodeSearchSuccess = [
+    #   :success,
+    #   :time_limit_exceeded,
+    #   :size_limit_exceeded
+    # ].freeze
 
-    attr_reader :message_id
-    alias msg_id message_id
-    attr_reader :app_tag
-    attr_reader :search_entry
-    attr_reader :search_referrals
-    attr_reader :search_parameters
-    attr_reader :bind_parameters
-    attr_reader :extended_response
-    attr_reader :ldap_controls
-    alias result_controls ldap_controls
-
+    # @param ber_object [Array]
+    #
     def initialize(ber_object)
       begin
-        @message_id     = ber_object[0].to_i
-        @app_tag        = ber_object[1].ber_identifier & 0x1f
+        message, tag, third_bit = ber_object
+        @message_id     = message.to_i
+        @app_tag        = tag.ber_identifier & 0x1f
+
         @ldap_controls  = []
+        @ldap_result    = {}
+
       rescue Exception => e
         raise Error, "LDAP PDU Format Error: #{e.message}"
       end
 
-      case @app_tag
-      when RR[:bind_result]             then parse_bind_response(ber_object[1])
-      when RR[:search_returned_data]    then parse_search_return(ber_object[1])
-      when RR[:search_result_referral]  then parse_search_referral(ber_object[1])
-      when RR[:search_result]           then parse_ldap_result(ber_object[1])
-      when RR[:modify_response]         then parse_ldap_result(ber_object[1])
-      when RR[:add_response]            then parse_ldap_result(ber_object[1])
-      when RR[:delete_response]         then parse_ldap_result(ber_object[1])
-      when RR[:modify_rdn_response]     then parse_ldap_result(ber_object[1])
-      when RR[:search_request]          then parse_ldap_search_request(ber_object[1])
-      when RR[:bind_request]            then parse_bind_request(ber_object[1])
-      when RR[:unbind_request]          then parse_unbind_request(ber_object[1])
-      when RR[:extended_response]       then parse_extended_response(ber_object[1])
-      else
-        raise LdapPduError, "unknown pdu-type: #{@app_tag}"
-      end
-
-
-      parse_controls(ber_object[2]) if ber_object[2]
+      parse_tag(pdu_type, tag)
+      parse_controls(third_bit) if third_bit
     end
 
+    attr_reader :message_id
+    attr_reader :message
+    attr_reader :info
+    attr_reader :app_tag
+    attr_reader :ldap_controls
+    attr_reader :bind_parameters
+    attr_reader :extended_response
+    attr_reader :search_entry
+    attr_reader :search_parameters
+    attr_reader :search_referrals
+
+    alias msg_id message_id
+    alias result_controls ldap_controls
+
+    def inspect
+      %(<##{self.class}
+        type=#{pdu_type}
+        result_code=#{result_code}
+        message=#{message}
+        info=#{info}
+        success?=#{success?}
+        referral?=#{referral?}
+        failure?=#{failure?}
+        error_message=#{error_message}
+        matched_dn=#{matched_dn}
+        bind_as=#{bind_parameters}
+        >
+        )
+    end
+
+    alias to_s inspect
+
     def result
-      @ldap_result || {}
+      @ldap_result
     end
 
     def error_message
-      result[:errorMessage] || EMPTY_STRING
+      @ldap_result.fetch(:errorMessage, :missing)
     end
 
-    def result_code(code = :resultCode)
-      @ldap_result && @ldap_result[code]
+    def result_code
+      @ldap_result.fetch(:resultCode, :missing)
     end
 
-    def status
-      ResultCodesNonError.include?(result_code) ? :success : :failure
+    def matched_dn
+      @ldap_result.fetch(:matchedDN, EMPTY_STRING)
+    end
+
+    def result_server_sasl_creds
+      @ldap_result.fetch(:serverSaslCreds)
+    end
+
+    def referral?
+      result_code == 10
     end
 
     def success?
-      status == :success
+      SUCCESS_CODES.include?(@result_symbol)
     end
 
     def failure?
       !success?
     end
 
-    def result_server_sasl_creds
-      # @ldap_result && @ldap_result[:serverSaslCreds]
-      @ldap_result && @ldap_result['serverSaslCreds']
-    end
 
     private
 
+    def parse_tag(pdu_type, tag)
+      case pdu_type
+      # Authenticaton
+      when :bind_request            then parse_bind_request(tag)
+      when :bind_result             then parse_bind_response(tag)
+      when :unbind_request          then parse_unbind_request(tag)
+      # Searching
+      when :search_request          then parse_ldap_search_request(tag)
+      when :search_result_referral  then parse_search_referral(tag)
+      when :search_returned_data    then parse_search_return(tag)
+      # Operation Results
+      when :search_result           then parse_ldap_result(tag)
+      when :add_response            then parse_ldap_result(tag)
+      when :delete_response         then parse_ldap_result(tag)
+      when :modify_response         then parse_ldap_result(tag)
+      when :modify_rdn_response     then parse_ldap_result(tag)
+      # Extended
+      when :extended_response       then parse_extended_response(tag)
+      end
+    end
+
+    def check_sequence_size(sequence, size)
+      (sequence.length >= size) || raise(Error, "Invalid LDAP result length. #{sequence}")
+    end
+
+    def set_result(sequence)
+      # @ldap_result = {
+      #   resultCode:   sequence[0],
+      #   matchedDN:    sequence[1],
+      #   errorMessage: sequence[2]
+      # }
+
+      # @res[:code], @res[:dn], @res[:error] = sequence
+
+      @ldap_result[:resultCode]   = sequence[0]
+      @ldap_result[:matchedDN]    = sequence[1]
+      @ldap_result[:errorMessage] = sequence[2]
+    end
+
+    def decode_result
+      @result_symbol, @message, @info, @flag = BER.lookup(:result, result_code)
+    end
+
+    def pdu_type
+      BER.lookup(:pdu, @app_tag) || raise(Error, "Unknown pdu_type: #{@app_tag}")
+    end
+
+    # @example
+    #   sequence =>
+    #       [
+    #         'uid=test1,ou=users,dc=example,dc=com',
+    #         [
+    #           [ 'mail',         [] ],
+    #           [ 'givenName',    [] ],
+    #           [ 'sn',           [] ],
+    #           [ 'cn',           [] ],
+    #           [ 'objectClass',  [] ],
+    #           [ 'gidNumber',    [] ],
+    #           [ 'uidNumber',    [] ],
+    #           [ 'userPassword', [] ],
+    #           [ 'uid',          [] ]
+    #         ]
+    #       ]
+    #
+    # @param sequence [Array]
+    #
+    def parse_search_return(sequence)
+      check_sequence_size(sequence, 2)
+      set_result(sequence)
+      # @res[:code], @res[:dn], @res[:error] = sequence
+      decode_result
+      @search_entry = Struct.new(*sequence)
+    end
+
     def parse_ldap_result(sequence)
-      (sequence.length >= 3) || raise(Error, 'Invalid LDAP result length.')
-
-      @ldap_result = {
-        resultCode:   sequence[0],
-        matchedDN:    sequence[1],
-        errorMessage: sequence[2]
-      }
-
-      # parse_search_referral(sequence[3]) if @ldap_result[:resultCode] == ResultCode['Referral']
-      parse_search_referral(sequence[3]) if @ldap_result['resultCode'] == ResultCode['Referral']
+      check_sequence_size(sequence, 3)
+      set_result(sequence)
+      decode_result
+      parse_search_referral(sequence[3]) if referral?
     end
 
     def parse_extended_response(sequence)
-      (sequence.length >= 3) || raise(Error, 'Invalid LDAP result length.')
-
-      @ldap_result = {
-        resultCode:   sequence[0],
-        matchedDN:    sequence[1],
-        errorMessage: sequence[2]
-      }
-
+      check_sequence_size(sequence, 3)
+      set_result(sequence)
+      decode_result
       @extended_response = sequence[3]
     end
 
     def parse_bind_response(sequence)
-      (sequence.length >= 3) || raise(Error, 'Invalid LDAP Bind Response length.')
+      check_sequence_size(sequence, 3)
       parse_ldap_result(sequence)
-      # @ldap_result[:serverSaslCreds] = sequence[3] if sequence.length >= 4
-      @ldap_result['serverSaslCreds'] = sequence[3] if sequence.length >= 4
-      @ldap_result
-    end
-
-    def parse_search_return(sequence)
-      (sequence.length >= 2) || raise(Error, 'Invalid Search Response length.')
-
-      @search_entry = Hash.new(sequence[0])
-      # TODO: replace Entity with a parred down struct/hash
-
-      sequence[1].each { |seq| @search_entry[seq[0]] = seq[1] }
+      @ldap_result[:serverSaslCreds] = sequence[3] if sequence.length >= 4
+      result
     end
 
     def parse_search_referral(uris)
@@ -146,15 +220,24 @@ module BER
     end
 
     def parse_ldap_search_request(sequence)
+      binding.pry
       s = OpenStruct.new
-      s.base_object, s.scope, s.deref_aliases, s.size_limit, s.time_limit,
-        s.types_only, s.filter, s.attributes = sequence
+      s.base_object,
+      s.scope,
+      s.deref_aliases,
+      s.size_limit,
+      s.time_limit,
+      s.types_only,
+      s.filter,
+      s.attributes = sequence
       @search_parameters = s
     end
 
     def parse_bind_request(sequence)
       s = OpenStruct.new
-      s.version, s.name, s.authentication = sequence
+      s.version,
+      s.name,
+      s.authentication = sequence
       @bind_parameters = s
     end
 

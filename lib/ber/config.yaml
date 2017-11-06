@@ -77,29 +77,28 @@
       7: :array                 # serverSaslCreds
       9: :array                 # SearchFilter-extensible
 
-
 :pdu:
-  :bind_request:            0
-  :bind_result:             1
-  :unbind_request:          2
-  :search_request:          3
-  :search_returned_data:    4
-  :search_result:           5   # see also SearchResultReferral (19)
-  :modify_request:          6
-  :modify_response:         7
-  :add_request:             8
-  :add_response:            9
-  :delete_request:          10
-  :delete_response:         11
-  :modify_rdn_request:      12
-  :modify_rdn_response:     13
-  :compare_request:         14
-  :compare_response:        15
-  :abandon_request:         16
-  :search_result_referral:  19
-  :extended_request:        23
-  :extended_response:       24
-  :intermediate_response:   25
+  0:  :bind_request
+  1:  :bind_result
+  2:  :unbind_request
+  3:  :search_request
+  4:  :search_returned_data
+  5:  :search_result
+  6:  :modify_request
+  7:  :modify_response
+  8:  :add_request
+  9:  :add_response
+  10: :delete_request
+  11: :delete_response
+  12: :modify_rdn_request
+  13: :modify_rdn_response
+  14: :compare_request
+  15: :compare_response
+  16: :abandon_request
+  19: :search_result_referral
+  23: :extended_request
+  24: :extended_response
+  25: :intermediate_response
 
 :oid:
   1.2.840.113556.1.2.19:           Time
@@ -154,55 +153,178 @@
   1.3.6.1.4.1.1466.115.121.1.53:   Time
 
 
+:result:
+  0:
+    - :success
+    - Success
+    - Indicates the requested client operation completed successfully.
+    - LDAP_SUCCESS:0x00
+  1:
+    - :operations_error
+    - Operations Error
+    - Indicates an internal error. The server is unable to respond with a more specific error and is also unable to properly respond to a request. It does not indicate that the client has sent an erroneous message.
+    - LDAP_OPERATIONS_ERROR:0x01
+  2:
+    - :protocol_error
+    - Protocol Error
+    - Indicates that the server has received an invalid or malformed request from the client.
+    - LDAP_PROTOCOL_ERROR:0x02
+  3:
+    - :time_limit_exceeded
+    - Time Limit Exceeded
+    - >
+      Indicates the operation's time limit specified by either the client or the server has been exceeded.
+      On search operations, incomplete results are returned.
+    - LDAP_TIMELIMIT_EXCEEDED:0x03
+  4:
+    - :size_limit_exceeded
+    - Size Limit Exceeded
+    - >
+      Indicates in a search operation, the size limit specified by the client or the server has been exceeded.
+      Incomplete results are returned.
+    - LDAP_SIZELIMIT_EXCEEDED:0x04
+  5:
+    - :compare_false
+    - False Comparison
+    - >
+      Does not indicate an error condition.
+      Indicates that the results of a compare operation are false.
+    - LDAP_COMPARE_FALSE:0x05
+  6:
+    - :compare_true
+    - True Comparison
+    - >
+      Does not indicate an error condition.
+      Indicates that the results of a compare operation are true.
+    - LDAP_COMPARE_TRUE:0x06
+  7:
+    - :auth_method_not_supported
+    - Authentication Method Not Supported
+    - Indicates during a bind operation the client requested an authentication method not supported by the LDAP server.
+    - LDAP_AUTH_METHOD_NOT_SUPPORTED:0x07
+  8:
+    - :stronger_auth_required
+    - Stronger Authentication Needed
+    - >
+      Indicates one of the following:
+      In bind requests, the LDAP server accepts only strong authentication.
+      In a client request, the client requested an operation such as delete that requires strong authentication.
+      In an unsolicited notice of disconnection, the LDAP server discovers the security protecting the communication between the client and server has unexpectedly failed or been compromised.
+    - LDAP_STRONG_AUTH_REQUIRED:0x08
+  9:
+    -
+    - Reserved.
+    -
+    - Reserved:0x09
+  10:
+    - :referral
+    - Referral
+    - >
+      Does not indicate an error condition.
+      In LDAPv3, indicates that the server does not hold the target entry of the request, but that the servers in the referral field may.
+    - LDAP_REFERRAL:0x0A
+  11:
+    - :admin_limit_exceeded
+    - Admin Limit Exceeded
+    - Indicates an LDAP server limit set by an administrative authority has been exceeded.
+    - LDAP_ADMINLIMIT_EXCEEDED:0x0B
 
-# TODO: symbolise and snake_case the result codes
 
-:result_code:
-  Success:                       0    # 0x00 LDAP_SUCCESS: Indicates the requested client operation completed successfully.
-  OperationsError:               1    # 0x01 LDAP_OPERATIONS_ERROR: Indicates an internal error. The server is unable to respond with a more specific error and is also unable to properly respond to a request. It does not indicate that the client has sent an erroneous message.
-  ProtocolError:                 2    # 0x02 LDAP_PROTOCOL_ERROR: Indicates that the server has received an invalid or malformed request from the client.
-  TimeLimitExceeded:             3    # 0x03 LDAP_TIMELIMIT_EXCEEDED: Indicates the operation's time limit specified by either the client or the server has been exceeded. On search operations, incomplete results are returned.
-  SizeLimitExceeded:             4    # 0x04 LDAP_SIZELIMIT_EXCEEDED: Indicates in a search operation, the size limit specified by the client or the server has been exceeded. Incomplete results are returned.
-  CompareFalse:                  5    # 0x05 LDAP_COMPARE_FALSE: Does not indicate an error condition. Indicates that the results of a compare operation are false.
-  CompareTrue:                   6    # 0x06 LDAP_COMPARE_TRUE: Does not indicate an error condition. Indicates that the results of a compare operation are true.
-  AuthMethodNotSupported:        7    # 0x07 LDAP_AUTH_METHOD_NOT_SUPPORTED: Indicates during a bind operation the client requested an authentication method not supported by the LDAP server.
-  StrongerAuthRequired:          8    # 0x08 LDAP_STRONG_AUTH_REQUIRED: Indicates one of the following:
-                                      # In bind requests, the LDAP server accepts only strong authentication.
-                                      # In a client request, the client requested an operation such as delete that requires strong authentication.
-                                      # In an unsolicited notice of disconnection, the LDAP server discovers the security protecting the communication between the client and server has unexpectedly failed or been compromised.
-  # Reserved:                      9    # 0x09 Reserved.
-  Referral:                      10   # 0x0A LDAP_REFERRAL: Does not indicate an error condition. In LDAPv3, indicates that the server does not hold the target entry of the request, but that the servers in the referral field may.
-  AdminLimitExceeded:            11   # 0x0B LDAP_ADMINLIMIT_EXCEEDED: Indicates an LDAP server limit set by an administrative authority has been exceeded.
-  UnavailableCriticalExtension:  12   # 0x0C LDAP_UNAVAILABLE_CRITICAL_EXTENSION: Indicates the LDAP server was unable to satisfy a request because one or more critical extensions were not available. Either the server does not support the control or the control is not appropriate for the operation type.
-  ConfidentialityRequired:       13   # 0x0D LDAP_CONFIDENTIALITY_REQUIRED: Indicates the session is not protected by a protocol such as Transport Layer Security (TLS), which provides session confidentiality.
-  SaslBindInProgress:            14   # 0x0E LDAP_SASL_BIND_IN_PROGRESS: Does not indicate an error condition, but indicates the server is ready for the next step in the process. The client must send the server the same SASL mechanism to continue the process.
-  # NotUsed:                       15   # 0x0F Not used.
-  NoSuchAttribute:               16   # 0x10 LDAP_NO_SUCH_ATTRIBUTE: Indicates the attribute specified in the modify or compare operation does not exist in the entry.
-  UndefinedAttributeType:        17   # 0x11 LDAP_UNDEFINED_TYPE: Indicates the attribute specified in the modify or add operation does not exist in the LDAP server's schema.
-  InappropriateMatching:         18   # 0x12 LDAP_INAPPROPRIATE_MATCHING: Indicates the matching rule specified in the search filter does not match a rule defined for the attribute's syntax.
-  ConstraintViolation:           19   # 0x13 LDAP_CONSTRAINT_VIOLATION: Indicates the attribute value specified in a modify, add, or modify DN operation violates constraints placed on the attribute. The constraint can be one of size or content (string only, no binary).
-  AttributeOrValueExists:        20   # 0x14 LDAP_TYPE_OR_VALUE_EXISTS: Indicates the attribute value specified in a modify or add operation already exists as a value for that attribute.
-  InvalidAttributeSyntax:        21   # 0x15 LDAP_INVALID_SYNTAX: Indicates the attribute value specified in an add, compare, or modify operation is an unrecognized or invalid syntax for the attribute.
+
+  # UnavailableCriticalExtension:  12   # 0x0C LDAP_UNAVAILABLE_CRITICAL_EXTENSION: Indicates the LDAP server was unable to satisfy a request because one or more critical extensions were not available. Either the server does not support the control or the control is not appropriate for the operation type.
+  # ConfidentialityRequired:       13   # 0x0D LDAP_CONFIDENTIALITY_REQUIRED: Indicates the session is not protected by a protocol such as Transport Layer Security (TLS), which provides session confidentiality.
+  # SaslBindInProgress:            14   # 0x0E LDAP_SASL_BIND_IN_PROGRESS: Does not indicate an error condition, but indicates the server is ready for the next step in the process. The client must send the server the same SASL mechanism to continue the process.
+
+  15:
+    -
+    - Not used.
+    -
+    - NotUsed:0x0F
+
+
+  # NoSuchAttribute:               16   # 0x10 LDAP_NO_SUCH_ATTRIBUTE: Indicates the attribute specified in the modify or compare operation does not exist in the entry.
+  # UndefinedAttributeType:        17   # 0x11 LDAP_UNDEFINED_TYPE: Indicates the attribute specified in the modify or add operation does not exist in the LDAP server's schema.
+  # InappropriateMatching:         18   # 0x12 LDAP_INAPPROPRIATE_MATCHING: Indicates the matching rule specified in the search filter does not match a rule defined for the attribute's syntax.
+  # ConstraintViolation:           19   # 0x13 LDAP_CONSTRAINT_VIOLATION: Indicates the attribute value specified in a modify, add, or modify DN operation violates constraints placed on the attribute. The constraint can be one of size or content (string only, no binary).
+
+
+  20:
+    - :attribute_or_value_exists
+    - Attribute or Value Exists
+    - Indicates the attribute value specified in a modify or add operation already exists as a value for that attribute.
+    - LDAP_TYPE_OR_VALUE_EXISTS:0x14
+  21:
+    - :invalid_attribute_syntax
+    - Invalid Attribute Syntax
+    - Indicates the attribute value specified in an add, compare, or modify operation is an unrecognized or invalid syntax for the attribute.
+    - LDAP_INVALID_SYNTAX:0x15
   # 22-31 - Not used.
-  NoSuchObject:                  32   # 0x20 LDAP_NO_SUCH_OBJECT: Indicates the target object cannot be found. This code is not returned on following operations:
-                                      # Search operations that find the search base but cannot find any entries that match the search filter.
-  AliasProblem:                  33   # 0x21 LDAP_ALIAS_PROBLEM: Indicates an error occurred when an alias was dereferenced.
-  InvalidDNSyntax:               34
-  AliasDereferencingProblem:     36
-  InappropriateAuthentication:   48
-  InvalidCredentials:            49
-  InsufficientAccessRights:      50
-  Busy:                          51
-  Unavailable:                   52
-  UnwillingToPerform:            53
-  NamingViolation:               64
-  ObjectClassViolation:          65
-  NotAllowedOnNonLeaf:           66
-  NotAllowedOnRDN:               67
-  EntryAlreadyExists:            68
-  ObjectClassModsProhibited:     69
-  AffectsMultipleDSAs:           71
-  Other:                         80
+  32:
+    - :no_such_object
+    - No Such Object
+    - >
+      Indicates the target object cannot be found.
+      This code is not returned on following operations:
+      Search operations that find the search base but cannot find any entries that match the search filter.
+    - LDAP_NO_SUCH_OBJECT:0x20
+  33:
+    - :alias_problem
+    - Alias Problem
+    - Indicates an error occurred when an alias was dereferenced.
+    - LDAP_ALIAS_PROBLEM:0x21
+
+
+
+
+  # InvalidDNSyntax:               34
+  # AliasDereferencingProblem:     36
+  # InappropriateAuthentication:   48
+  # InvalidCredentials:            49
+  # InsufficientAccessRights:      50
+  # Busy:                          51
+  # Unavailable:                   52
+  # UnwillingToPerform:            53
+  # NamingViolation:               64
+  # ObjectClassViolation:          65
+  # NotAllowedOnNonLeaf:           66
+  # NotAllowedOnRDN:               67
+  # EntryAlreadyExists:            68
+  # ObjectClassModsProhibited:     69
+  # AffectsMultipleDSAs:           71
+  # Other:                         80
+
+
+
+
+
+
+#   UnavailableCriticalExtension: Unavailable crtical extension
+#   ConfidentialityRequired:      Confidentiality Required
+#   SaslBindInProgress:           saslBindInProgress
+#   NoSuchAttribute:              No Such Attribute
+#   UndefinedAttributeType:       Undefined Attribute Type
+#   InappropriateMatching:        Inappropriate Matching
+#   ConstraintViolation:          Constraint Violation
+
+
+#   NoSuchObject:
+
+#   InvalidDNSyntax:              Invalid DN Syntax
+#   AliasDereferencingProblem:    Alias Dereferencing Problem
+#   InappropriateAuthentication:  Inappropriate Authentication
+#   InvalidCredentials:           Invalid Credentials
+#   InsufficientAccessRights:     Insufficient Access Rights
+#   Busy:                         Busy
+#   Unavailable:                  Unavailable
+#   UnwillingToPerform:           Unwilling to perform
+#   NamingViolation:              Naming Violation
+#   ObjectClassViolation:         Object Class Violation
+#   NotAllowedOnNonLeaf:          Not Allowed On Non-Leaf
+#   NotAllowedOnRDN:              Not Allowed On RDN
+#   EntryAlreadyExists:           Entry Already Exists
+#   ObjectClassModsProhibited:    ObjectClass Modifications Prohibited
+#   AffectsMultipleDSAs:          Affects Multiple DSAs
+#   Other:                        Other
 
 
 

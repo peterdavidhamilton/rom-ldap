@@ -50,19 +50,16 @@ module ROM
       #
       # @api public
       def initialize(directory = EMPTY_HASH, options = EMPTY_HASH)
-
-        @username = directory[:username]
-        @password = directory[:password]
-        @base     = directory[:base]
-        @server   = directory[:server]
-
-        connect!
-
-        @options = options
-        @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
+        @directory = directory
+        @conn      = nil
+        @options   = options
+        @logger    = options.fetch(:logger) { ::Logger.new(STDOUT) }
 
         super()
       end
+
+      attr_reader :directory
+      attr_reader :options
 
       # Used by attribute_inferrer
       #
@@ -91,6 +88,16 @@ module ROM
         api.disconnect
       end
 
+
+      # TODO: wrap with shot-term caching ie: 60 seconds, set by class attribute
+      # CACHE = Moneta.build do
+      #   use :Expires
+      #   use :Transformer, key: [:marshal, :base64], value: :marshal
+      #   adapter :Memory
+      # end
+      # CACHE.fetch(options) do
+
+
       # Return dataset with the given name
       #
       # @param filter [String] a filtered dataset
@@ -99,7 +106,12 @@ module ROM
       #
       # @api public
       def dataset(filter)
+        connection.connect unless connection.alive?
+
         Dataset.new(api, filter)
+
+        rescue *ERROR_MAP.keys => e
+          raise ERROR_MAP.fetch(e.class, Error), e
       end
 
       # @param logger [Logger]
@@ -128,22 +140,40 @@ module ROM
       #
       # @api private
       def api
-        @api ||= Dataset::API.new(connection, logger, options)
+        @api ||= Dataset::API.new(connection, logger)
       end
-
-
-      def connect!
-        @conn = Connection.new(server: @server)
-      end
-
 
       def connection
-        return @conn if @conn
-        conn = connect!
-        pdu  = conn.bind(username: @username, password: @password)
-        pdu.success? ? conn : pdu
+        if connected?
+          @conn
+        else
+          @conn = Connection.new(
+            server:           directory[:server],
+            connect_timeout:  options[:time],
+            read_timeout:     options[:time],
+            write_timeout:    options[:time]
+            # on_connect: proc {}
+            # proxy_server:
+          )
+
+          @conn.directory_options = options # base, size, time
+
+          pdu = bind! if directory[:username] # simple only
+          pdu.success? ? @conn : pdu
+          @conn
+        end
       end
 
+      def connected?
+        !@conn.nil? && @conn.alive?
+      end
+
+      def bind!
+        connection.bind(
+          username: directory[:username],
+          password: directory[:password]
+        )
+      end
     end
   end
 end

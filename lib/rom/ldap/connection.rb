@@ -10,15 +10,22 @@ module ROM
 
       extend Dry::Core::ClassAttributes
 
-      defines :connect_timeout
+      # defines :connect_timeout
+      # defines :max_sasl_challenges
+      # defines :result_size
+      # connect_timeout     5
+      # max_sasl_challenges 10
+      # result_size         1_000
+
       defines :ldap_version
-      defines :max_sasl_challenges
+      defines :default_base
+      defines :default_filter
 
-      connect_timeout 5
-      ldap_version 3
-      max_sasl_challenges 10
+      ldap_version    3
+      default_base    EMPTY_STRING
+      default_filter  '(objectClass=*)'.freeze
 
-
+      attr_accessor :directory_options
 
       include Search
       include Create
@@ -26,24 +33,37 @@ module ROM
       include Update
       include Authenticate
 
-
       private
 
-      def pdu(symbol)
-        ::BER.config[:pdu][symbol]
+      def use_logger=(logger)
+        @logger = logger
       end
 
+      def logger
+        binding.pry
+        @logger || directory_options[:logger]
+      end
+
+      def find_pdu(symbol)
+        ::BER.reverse_lookup(:pdu, symbol)
+      end
+
+      # TODO: NetTCP timeout in here
+      # socket_read(length, buffer, timeout)
 
       def ldap_read(syntax = ::BER::ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)
+        # return unless ber_object = socket_read(syntax, nil, read_timeout)
+        # return unless ber_object = read(syntax)
 
         ::BER::PDU.new(ber_object)
       end
 
+      # time   = directory_options[:time] || self.class.connect_timeout
+
       def ldap_write(request, controls = nil, message_id = next_msgid)
         packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
-
-        socket_write(packet, self.class.connect_timeout)
+        socket_write(packet, write_timeout)
       end
 
       def queued_read(message_id)

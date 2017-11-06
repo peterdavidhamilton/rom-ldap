@@ -13,8 +13,8 @@ module ROM
       #
       # @api public
       def bind(username:, password:, method: :simple, message_id: next_msgid)
-        pdu_request  = pdu(:bind_request)
-        pdu_response = pdu(:bind_result)
+        pdu_request  = find_pdu(:bind_request)
+        pdu_response = find_pdu(:bind_result)
         error_klass  = [NoBindResultError, 'no bind result']
 
         request = [

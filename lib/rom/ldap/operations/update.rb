@@ -8,8 +8,8 @@ module ROM
 
       def modify(dn:, operations:, message_id: next_msgid)
 
-        pdu_request  = pdu(:modify_request)
-        pdu_response = pdu(:modify_response)
+        pdu_request  = find_pdu(:modify_request)
+        pdu_response = find_pdu(:modify_response)
         error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         ops = modify_ops(operations)
@@ -27,8 +27,8 @@ module ROM
 
       def rename(old_dn:, new_rdn:, delete_attrs: false, new_superior: nil, message_id: next_msgid)
 
-        pdu_request  = pdu(:modify_rdn_request)
-        pdu_response = pdu(:modify_rdn_response)
+        pdu_request  = find_pdu(:modify_rdn_request)
+        pdu_response = find_pdu(:modify_rdn_response)
         error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         request = [old_dn, new_rdn, delete_attrs].map(&:to_ber)
@@ -46,8 +46,8 @@ module ROM
 
       def password_modify(dn:, old_pwd:, new_pwd:, message_id: next_msgid)
 
-        pdu_request  = pdu(:extended_request)
-        pdu_response = pdu(:extended_response)
+        pdu_request  = find_pdu(:extended_request)
+        pdu_response = find_pdu(:extended_response)
         error_klass  = [ ResponseMissingError, 'response missing or invalid' ]
 
         context = PASSWORD_MODIFY.to_ber_contextspecific(0)

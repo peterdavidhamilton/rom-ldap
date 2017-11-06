@@ -1,3 +1,5 @@
+require 'ber/password'
+
 module RelationSetup
   include ContainerSetup
 
@@ -12,14 +14,14 @@ module RelationSetup
     factories.define(:account) do |f|
       f.uid           user_name
       f.dn            "uid=#{user_name},ou=users,dc=example,dc=com"
-      f.userpassword  Net::LDAP::Password.generate(:sha, user_name)
+      f.userpassword  BER::Password.generate(:sha, user_name)
       f.uidnumber     { fake(:number, :number, 4) }
       f.gidnumber     { fake(:number, :number, 4) }
       f.cn            { fake(:name, :name_with_middle) }
       f.givenname     { fake(:name, :first_name) }
       f.sn            { fake(:name, :last_name) }
       f.mail          { fake(:internet, :safe_email, user_name) }
-      f.objectclass   %w[inetorgperson extensibleobject]
+      f.objectclass   %w[inetOrgPerson extensibleObject]
     end
 
     factories.define(customers: :account) do |f|

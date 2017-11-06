@@ -18,9 +18,6 @@ module ROM
         param :connection
         param :logger
 
-        option :size, reader: :private, default: proc { 100 }
-        option :time, reader: :private, default: proc { 3 }
-
         attr_reader :directory_type
 
         def initialize(*)
@@ -28,44 +25,34 @@ module ROM
           inspect_server!
         end
 
-        # Wrapper for Net::LDAP::Connection#search directory results
-        #
+
         # @param options [Hash]
         #
-        # @return [Array <Net::LDAP::Entry>]
+        # @return [Array<Hash>]
         #
         # @api public
-        def directory(options, &block)
+        def directory(options, &block) # TODO: rename call
           result_set = []
           @result = connection.search(options) do |entry|
             result_set << entry
             yield entry if block_given?
           end
-          result_set
+          result_set.sort_by(&:dn)
         end
 
-
-
-
+        attr_reader :result # PDU object
 
         # Query results as array of hashes ordered by Distinguishing Name
         #
-        # @param filter [String,Net::LDAP::Filter]
+        # @param filter [String]
         #
         # @param scope
         #
         # @return [Array<Hash>]
         #
         # @api public
-        # NB: scope is likely to always be nil because Dataset#search passes nil
-        def search(filter, scope: SCOPE_SUBTREE, timeout: time, &block)
-          options = {
-            filter: filter,
-            scope:  scope,
-            size:   size,
-            time:   timeout,
-            deref:  DEREF_ALWAYS,
-          }
+        def search(filter, &block)
+          options = { filter: filter, deref:  DEREF_ALWAYS }
 
           results = directory(options)
           log(__callee__, filter)
@@ -91,16 +78,15 @@ module ROM
         # @return [Integer]
         #
         # @api public
-        def attributes(filter, &block)
-          options = { filter: filter, size: size, attributes_only: true }
-          directory(options, &block)
+        def attributes(filter)
+          directory(filter: filter, attributes_only: true)
         end
 
         # @return [Integer]
         #
         # @api public
         def count(filter)
-          directory(filter: filter, attributes: 'dn').count
+          directory(filter: filter, attributes: 'dn', size: 1_000_000).count
         end
 
 
@@ -112,8 +98,6 @@ module ROM
         end
 
 
-        # Wrapper for Net::LDAP::Connection#add
-        #
         # @param tuple [Hash]
         #
         # @return [Boolean]
@@ -198,26 +182,22 @@ module ROM
           when /389/
             @directory_type = :three_eight_nine
           when nil
-            binding.pry
-
-            caps = root.fetch(:supportedcapabilities, EMPTY_ARRAY).sort
+            caps = root['supportedCapabilities'].sort
 
             unless caps.empty?
               require 'rom/ldap/implementations/active_directory'
 
-              dc     = root.fetch(:domaincontrollerfunctionality).first.to_i
-              forest = root.fetch(:forestfunctionality).first.to_i
-              dom    = root.fetch(:domainfunctionality).first.to_i
+              dc     = root.first('domainControllerFunctionality').to_i
+              forest = root.first('forestFunctionality').to_i
+              dom    = root.first('domainFunctionality').to_i
 
               @supported_capabilities   = caps
               @controller_functionality = dc
               @forest_functionality     = forest
               @domain_functionality     = dom
-
-
-              @vendor_name    = 'Microsoft'
-              @vendor_version = ActiveDirectory::VERSION_NAMES[dom]
-              @directory_type = :active_directory
+              @vendor_name              = 'Microsoft'
+              @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
+              @directory_type           = :active_directory
             else
               log(__callee__, 'Active Directory version is unknown')
             end
@@ -232,9 +212,9 @@ module ROM
 
 
 
-        # Returns all known attributes if no param provided
+        # Struct/Hash like object representing an LDAP entity for RootDSE
         #
-        # @return [Array<String>]
+        # @return [BER::Struct]
         #
         # @param attrs [Array<Symbol>] optional array of desired attributes
         #
@@ -250,23 +230,22 @@ module ROM
           ).first
         end
 
-
+        # Struct/Hash like object representing an LDAP entity for SubSchema
+        #
         def sub_schema
           @sub_schema ||= directory(
             base: sub_schema_entry,
             scope: SCOPE_BASE_OBJECT,
-            filter: 'objectclass=subschema',
+            filter: '(objectclass=subschema)',
             attributes: %w[objectclasses attributetypes],
             ignore_server_caps: true,
           ).first
         end
 
-
-        # status = #<Net::LDAP::PDU>
         def log(caller = nil, message = nil, level = :info)
           logger.send(level, "#{self.class}##{caller} #{message}")
-          logger.error("#{self.class}##{caller} #{status}") unless success?
-          logger.debug("#{self.class}##{caller} #{status}") if ENV['DEBUG']
+          logger.error("#{self.class}##{caller} #{result.error_message}") unless success?
+          logger.debug("#{self.class}##{caller} #{result.message}") if ENV['DEBUG']
         end
 
         # Convenience method to prepare a tuple for #add
@@ -301,7 +280,13 @@ module ROM
         def parse_attribute_type(type)
           return unless attribute_name = type[/NAME '(\S+)'/, 1]
           {
-            name:        attribute_name.to_sym,
+
+            # current net/ldap canonicalisation
+            name:        attribute_name.downcase.to_sym,
+
+            # unedited
+            # name:        attribute_name,
+
             description: type[/DESC '(.+)' [A-Z]+/, 1],
             oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
             matcher:     type[/EQUALITY (\S+)/, 1],
@@ -319,49 +304,49 @@ module ROM
         #
         # @api private
         def vendor_name
-          @vendor_name ||= root.fetch('vendorName', EMPTY_ARRAY).first
+          @vendor_name ||= root.first('vendorName')
         end
 
         # @result [String]
         #
         # @api private
         def vendor_version
-          @vendor_version ||= root.fetch('vendorVersion', EMPTY_ARRAY).first
+          @vendor_version ||= root.first('vendorVersion')
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_extensions
-          @supported_extensions ||= root.fetch('supportedExtension').sort
+          @supported_extensions ||= root['supportedExtension'].sort
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_controls
-          @supported_controls ||= root.fetch('supportedControl').sort
+          @supported_controls ||= root['supportedControl'].sort
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_mechanisms
-          @supported_mechanisms ||= root.fetch('supportedSASLMechanisms').sort
+          @supported_mechanisms ||= root['supportedSASLMechanisms'].sort
         end
 
         # @return [Array<String>]
         #
         # @api private
         def supported_features
-          @supported_features ||= root.fetch('supportedFeatures').sort
+          @supported_features ||= root['supportedFeatures'].sort
         end
 
         # @return [Array<Integer>]
         #
         # @api private
         def supported_versions
-          @supported_versions ||= root.fetch('supportedLDAPVersion').sort.map(&:to_i)
+          @supported_versions ||= root['supportedLDAPVersion'].sort.map(&:to_i)
         end
 
         # @return [Integer]
@@ -389,7 +374,7 @@ module ROM
         #
         # @api private
         def sub_schema_entry
-          @sub_schema_entry ||= root.fetch('subschemaSubentry', EMPTY_ARRAY).first
+          @sub_schema_entry ||= root.first('subschemaSubentry')
         end
 
 
@@ -397,7 +382,7 @@ module ROM
         #
         # @api private
         def schema_object_classes
-          sub_schema[:objectclasses].sort
+          sub_schema['objectClasses'].sort
         end
 
         # Query directory for all known attribute types
@@ -415,58 +400,40 @@ module ROM
           directory(
             filter: '(objectclass=*)',
             base: EMPTY_BASE
-          ).flat_map { |a| a.attribute_names }.uniq.sort
+            # base: SCOPE_SUBTREE
+          ).flat_map(&:attribute_names).uniq.sort
         end
 
-        # @return [String]
-        #
-        # @api private
-        def host
-          connection.host
-        end
+        # # @return [String]
+        # #
+        # # @api private
+        # def host
+        #   connection.host
+        # end
 
-        # @return [String]
-        #
-        # @api private
-        def port
-          connection.port
-        end
+        # # @return [Integer]
+        # #
+        # # @api private
+        # def port
+        #   connection.port
+        # end
 
-        # @return [String]
-        #
-        # @api private
-        def base
-          connection.base
-        end
-
-        def auth
-          binding.pry
-          connection.instance_variable_get(:@auth)
-        end
-
-        # deprecate
-        def status
-          # connection.get_operation_result
-          result
-        end
+        # # @return [String]
+        # #
+        # # @api private
+        # def base
+        #   connection.base
+        # end
 
         def detailed_status
-          status.extended_response[0][0]
+          result.extended_response[0][0]
         end
 
         # @return [Boolean]
         #
         # @api private
         def success?
-          result.result_code.to_i.zero?
-        end
-
-        # @return [Net::LDAP::PDU]
-        #
-        # @api private
-        def result
-          # connection.instance_variable_get(:@result)
-          @result
+          result.success?
         end
 
         # @return [Boolean]

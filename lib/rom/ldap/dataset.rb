@@ -2,6 +2,7 @@ require 'rom/initializer'
 require 'rom/ldap/functions'
 require 'rom/ldap/dataset/query_dsl'
 require 'rom/ldap/dataset/api'
+require 'ber/ldif'
 
 module ROM
   module LDAP
@@ -203,7 +204,7 @@ module ROM
       def to_ldif
         results = api.directory(filter: filter_string)
         reset!
-        results.map(&:to_ldif).join("\n")
+        BER::LDIF.new(results).to_ldif
       end
 
 

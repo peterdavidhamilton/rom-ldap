@@ -16,44 +16,46 @@ module ROM
       #
       # @api public
       def search(
-        base:               EMPTY_STRING,
+        filter:             self.class.default_filter,
+        base:               directory_options[:base],
+        # size:               directory_options[:size],
+        # size:               10_000_000,
+        size:               nil,
+        # time:               directory_options[:timeout],
+        time:               nil,
         scope:              SCOPE_SUBTREE,
-        filter:             '(objectClass=*)',
-        size:               10_000, # 126
-        attributes:         nil,
+        deref:              DEREF_NEVER,
         attributes_only:    false,
         return_referrals:   false,
-        deref:              DEREF_NEVER,
-        time:               self.class.connect_timeout,
-        ignore_server_caps: nil,
-        paged:              nil,
         sort_controls:      false,
+        attributes:         nil,
+        ignore_server_caps: nil,
+        paged:              false, #true, # otherwise resets limited to 1_000
         message_id:         next_msgid
       )
 
+        raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
+        raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
+
+        filter      = build_query(filter)
+        base        ||= self.class.default_base
+        size        = size.to_i #|| self.class.result_size
+        time        = time.to_i #|| self.class.connect_timeout
         attrs       = Array(attributes)
         attrs_only  = attributes_only
         refs        = return_referrals
-        size        = size.to_i
-        time        = time.to_i
         sort        = sort_controls
-
-        raise ArgumentError, 'invalid search scope'              unless SearchScopes.include?(scope)
-        raise ArgumentError, 'invalid alias dereferencing value' unless DerefAliasesArray.include?(deref)
-
-        filter    = build_query(filter)
-        ber_attrs = attrs.map { |attr| attr.to_s.to_ber }
-        ber_sort  = encode_sort_controls(sort)
+        ber_attrs   = attrs.map { |attr| attr.to_s.to_ber }
+        ber_sort    = encode_sort_controls(sort)
 
         rfc2696_cookie = [126, EMPTY_STRING]
-        result_pdu     = nil
-        n_results      = 0
+        result_pdu     = nil                  # result object
+        n_results      = 0                    # result counter
 
         loop do
           query_limit = 0
 
           if size > 0
-
             query_limit = if paged
                             ((size - n_results) < 126 ? (size - n_results) : 0)
                           else
@@ -70,7 +72,7 @@ module ROM
             attrs_only.to_ber,
             filter.to_ber,
             ber_attrs.to_ber_sequence
-          ].to_ber_appsequence(pdu(:search_request))
+          ].to_ber_appsequence(find_pdu(:search_request))
 
           controls = []
 
@@ -89,45 +91,32 @@ module ROM
           ldap_write(request, controls, message_id)
 
           result_pdu = nil
-          controls   = []
+          controls   = EMPTY_ARRAY
 
           while pdu = queued_read(message_id)
+            referrals  = pdu.search_referrals || EMPTY_ARRAY
+
             case pdu.app_tag
-            when pdu(:search_returned_data)
+            when find_pdu(:search_returned_data)
               n_results += 1
               yield pdu.search_entry if block_given?
 
-            when pdu(:search_result_referral)
-              if refs
-                if block_given?
-                  se = {}
-                  se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
-                  yield se
-                end
-              end
+            when find_pdu(:search_result_referral)
+              yield(search_referrals: referrals) if refs && block_given?
 
-            when pdu(:search_result)
-              result_pdu = pdu
-              controls   = pdu.result_controls
-
-              if refs && pdu.result_code == ::BER::ResultCode['Referral'] # pdu.referral? predicate
-                if block_given?
-                  se = {}
-                  se[:search_referrals] = (pdu.search_referrals || EMPTY_ARRAY)
-                  yield se
-                end
-              end
+            when find_pdu(:search_result)
+              result_pdu, controls = pdu, pdu.result_controls
+              yield(search_referrals: referrals) if refs && pdu.referral? && block_given?
               break
+
             else
               raise ResponseTypeInvalidError, "invalid response-type in search: #{pdu.app_tag}"
             end
-          end # while
+          end
 
           more_pages = false
 
-          if (result_pdu.result_code == ::BER::ResultCode['Success']) && controls
-            # if result_pdu.success? && controls
-
+          if result_pdu.success? && controls
             controls.each do |c|
               next unless c.oid == PAGED_RESULTS
 
@@ -142,9 +131,9 @@ module ROM
           end
 
           break unless more_pages
-        end # loop
+        end
 
-        result_pdu || ::BER::PDU::INVALID_SEARCH
+        result_pdu
       ensure
         messages = message_queue.delete(message_id)
       end

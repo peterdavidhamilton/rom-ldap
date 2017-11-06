@@ -32,7 +32,7 @@ module ROM
 
     EMPTY_BASE = EMPTY_STRING
 
-    SearchScopes = [ SCOPE_BASE_OBJECT, SCOPE_SINGLE_LEVEL, SCOPE_SUBTREE ]
+    SCOPES = [ SCOPE_BASE_OBJECT, SCOPE_SINGLE_LEVEL, SCOPE_SUBTREE ].freeze
 
     #
     # Aliase Dereferencing
@@ -42,7 +42,7 @@ module ROM
     DEREF_FIND   = 2
     DEREF_ALWAYS = 3
 
-    DerefAliasesArray = [ DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS ]
+    DEREF_ALL = [ DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS ].freeze
 
     #
     # Root DSE - attributes for all implementations

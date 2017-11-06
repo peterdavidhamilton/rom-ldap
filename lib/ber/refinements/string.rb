@@ -19,33 +19,23 @@ module BER
       [code].pack('C') + raw_string.length.to_ber_length_encoding + raw_string
     end
 
-
     def to_ber_bin(code = 0x04)
       [code].pack('C') + length.to_ber_length_encoding + self
     end
 
     def raw_utf8_encoded
-      if self.respond_to?(:encode)
-        begin
-          self.encode('UTF-8').force_encoding('ASCII-8BIT')
-        rescue Encoding::UndefinedConversionError
-          self
-        rescue Encoding::ConverterNotFoundError
-          self
-        rescue Encoding::InvalidByteSequenceError
-          self
-        end
-      else
-        self
-      end
+      return self if respond_to?(:encode)
+      encode('UTF-8').force_encoding('ASCII-8BIT')
+      rescue Encoding::UndefinedConversionError,
+             Encoding::ConverterNotFoundError,
+             Encoding::InvalidByteSequenceError
+      self
     end
     private :raw_utf8_encoded
-
 
     def to_ber_application_string(code)
       to_ber(0x40 + code)
     end
-
 
     def to_ber_contextspecific(code)
       to_ber(0x80 + code)
@@ -56,16 +46,14 @@ module BER
     end
 
     def read_ber!(syntax = nil)
-      io = ::StringIO.new(self)
-
+      io     = ::StringIO.new(self)
       result = io.read_ber(syntax)
-      self.slice!(0...io.pos)
-
-      return result
+      slice!(0...io.pos)
+      result
     end
 
     def reject_empty_ber_arrays
-      self.gsub(/0\000/n, '')
+      gsub(/0\000/n, '')
     end
   end
 end

@@ -27,8 +27,10 @@ module ROM
           inferred = super
           { **inferred }
 
-        # rescue
-        #   FALLBACK_SCHEMA
+        rescue *ERROR_MAP.keys => e
+          raise ERROR_MAP.fetch(e.class, Error), e
+        ensure
+          FALLBACK_SCHEMA
         end
 
         def suppress_errors

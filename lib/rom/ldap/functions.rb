@@ -58,7 +58,7 @@ module ROM
         end
       end
 
-      # value.to_s.tr('-','_').to_sym
+
       def self.snake_case_symbol(value)
         fn = t(:to_string) >> t(:to_underscore) >> t(:to_symbol)
         fn.(value)
@@ -66,7 +66,6 @@ module ROM
 
       def self.to_underscore(value)
         Dry::Core::Inflector.underscore(value)
-        # value.tr('-','_')
       end
 
       def self.fix_entity(tuple)

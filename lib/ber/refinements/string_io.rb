@@ -4,6 +4,14 @@ module BER
       ::BER.function.read_ber(self, syntax)
     end
 
+    # alias read read_ber # overwrite default Socket method for compatibility with Connection
+    # # alias read_nonblock read_ber # overwrite default Socket method for compatibility with Connection
+
+    # def read_nonblock(*args)
+    #   binding.pry
+    #   read(*args)
+    # end
+
     def read_ber_length
       ::BER.function.read_ber_length(self)
     end

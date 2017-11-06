@@ -65,8 +65,7 @@ module ROM
           when nil
             type = attribute[:single] ? 'String' : 'Array'
 
-           ::BER.config[:oid].fetch(attribute[:oid], type)
-
+           ::BER.lookup(:oid, attribute[:oid]) || type
           else
             raise "#{self.class}##{__callee__} #{attribute[:matcher]} not known"
           end

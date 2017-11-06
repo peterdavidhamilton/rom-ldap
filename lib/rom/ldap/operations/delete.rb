@@ -6,8 +6,8 @@ module ROM
 
       def delete(dn:, control_codes: nil, message_id: next_msgid)
 
-        pdu_request  = pdu(:delete_request)
-        pdu_response = pdu(:delete_response)
+        pdu_request  = find_pdu(:delete_request)
+        pdu_response = find_pdu(:delete_response)
         error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
 
         request  = dn.to_s.to_ber_application_string(pdu_request)
