@@ -10,14 +10,11 @@ require 'ber/refinements'
 module BER
   include Dry::Core::Constants
 
-  # ->(v) { ROM::LDAP::Functions.snake_case_symbol(v) }
-  # attr_accessor :formatter
-
   def self.formatter
     @formatter ||= nil
   end
 
-  def self.formatter=(function)
+  def self.use_formatter(function)
     @formatter = function
   end
 

@@ -30,16 +30,8 @@ module ROM
       end
 
       def self.to_bool(tuples)
-        # t(:map_array, t(:to_boolean)).(tuples)
         tuples.map { |t| Dry::Types['form.bool'][t] }
       end
-
-      # def self.to_jpeg(tuples)
-      #   tuples.map do |image|
-      #     encoded = Base64.strict_encode64(image)
-      #     "data:image/jpeg;base64,#{encoded}"
-      #   end
-      # end
 
       def self.to_time(tuples)
         tuples.map do |time|
@@ -58,30 +50,24 @@ module ROM
         end
       end
 
-
-      def self.snake_case_symbol(value)
-        fn = t(:to_string) >> t(:to_underscore) >> t(:to_symbol)
-        fn.(value)
-      end
-
       def self.to_underscore(value)
         Dry::Core::Inflector.underscore(value)
       end
 
-      def self.fix_entity(tuple)
-        t(:map_keys, t(:snake_case_symbol)).(tuple)
+      def self.to_method_name(value)
+        fn = t(:to_string) >> t(:to_underscore) >> t(:to_symbol)
+        fn.(value)
       end
 
-      # def self.search_results(dataset)
-      #   t(:map_array, t(:fix_entity)).(dataset)
-      # end
+      # fired by struct if its schema hash keys include a hyphen
+      def self.fix_entity(tuple)
+        t(:map_keys, t(:to_method_name)).(tuple)
+      end
 
-
-      # convert to a format that can be saved as a string
-      def self.ldap_compatible(tuple)
+      # should be to stringify keys before inserting to database
+      def self.coerce_tuple(tuple)
         t(:map_values, t(:string_input)).(tuple)
       end
-
     end
   end
 end

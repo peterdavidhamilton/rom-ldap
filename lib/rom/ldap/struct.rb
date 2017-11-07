@@ -6,6 +6,7 @@ module ROM
       constructor_type(:schema)
 
       def self.fix_entity(schema)
+        binding.pry
         if schema.keys.any? { |k| k.to_s.include?('-') }
           Functions[:fix_entity][schema]
         else
@@ -22,7 +23,7 @@ module ROM
       end
 
       def to_h
-        super.delete_if { |k, v| v.nil? }
+        super.delete_if { |_k, v| v.nil? }
       end
 
       # TODO: include Person module if objectclasses include 'person' or 'inetorgperson' ?

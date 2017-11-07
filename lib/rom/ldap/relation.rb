@@ -16,7 +16,7 @@ module ROM
       # GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
       # USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
 
-      # defines :base
+      defines :base
       # defines :filter
 
       # filter USERS
@@ -33,17 +33,15 @@ module ROM
 
         relation.dataset do
           # puts to_ldif
-          self #<ROM::LDAP::Dataset filter='(gidnumber=1050)'>
+          self # <ROM::LDAP::Dataset filter='(gidnumber=1050)'>
 
           # db => OpenStruct { :db => OpenStruct { :database_type => :apacheds } }
         end
       end
 
-
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
         event[:dataset].filter_string.to_s
       end
-
 
       schema_class      LDAP::Schema
       schema_attr_class LDAP::Attribute
@@ -62,7 +60,6 @@ module ROM
         end
       end
 
-
       # @yield [t] Transaction
       #
       # @return [Mixed]
@@ -71,8 +68,6 @@ module ROM
       def transaction(opts = EMPTY_HASH, &block)
         Transaction.new(dataset.db).run(opts, &block)
       end
-
-
 
       # Return raw query string
       #
@@ -83,7 +78,6 @@ module ROM
         dataset.filter_string.to_s
       end
 
-
       # @api private
       def self.associations
         schema.associations
@@ -93,9 +87,8 @@ module ROM
       #
       # @api public
       def assoc(name)
-        associations[name].()
+        associations[name].call
       end
-
 
       # available methods provided by DSL
       #
@@ -123,10 +116,9 @@ module ROM
         with(schema: schema.prefix(prefix))
       end
 
-      def wrap(prefix=dataset.name)
+      def wrap(prefix = dataset.name)
         with(schema: schema.wrap(prefix))
       end
-
     end
   end
 end

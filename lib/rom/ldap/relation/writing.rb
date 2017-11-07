@@ -25,7 +25,8 @@ module ROM
         end
 
         # @example
-        #   repo.update(2000, mail: 'fear_the_bat@gotham.com') #=> ??
+        #   repo.update(2000, mail: 'fear_the_bat@gotham.com')
+        #   # => ??
         #
         # @param args [Hash]
         #
@@ -37,7 +38,7 @@ module ROM
         end
 
         # @example
-        #   repo.delete(2000) #=> true
+        #   repo.delete(2000) # => true
         #
         # @param args [Hash]
         #

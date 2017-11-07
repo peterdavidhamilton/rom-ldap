@@ -11,6 +11,7 @@ module ROM
   module LDAP
     class Directory
       extend Initializer
+      extend Notifications::Listener
 
       include Memoizable
       include Root
@@ -24,6 +25,13 @@ module ROM
       option :timeout, default: proc { 30 }
       option :size,    default: proc { 1_000_000 }
       option :logger,  default: proc { ::Logger.new(STDOUT) }
+
+
+
+      subscribe('configuration.directory', adapter: :ldap) do |event|
+        binding.pry
+      end
+
 
       # @result [Array<String>]
       #

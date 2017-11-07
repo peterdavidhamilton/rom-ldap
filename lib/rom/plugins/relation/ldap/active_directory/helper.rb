@@ -7,39 +7,38 @@ module ROM
           #
           # @api public
           module Helper
+            ACCOUNT_DISABLED               = 2
+            ACCOUNT_TEMP_DUPLICATE         = 256
+            ACCOUNT_NORMAL                 = 512
 
-            ACCOUNT_DISABLED               = 2.freeze
-            ACCOUNT_TEMP_DUPLICATE         = 256.freeze
-            ACCOUNT_NORMAL                 = 512.freeze
+            DOMAIN_CONTROLLER              = 532_480
+            PREAUTH_NOT_REQUIRED           = 4_194_304 # Kerberos Preauthentication Disabled
+            ENCRYPTED_TEXT_PWD_ALLOWED     = 128
 
-            DOMAIN_CONTROLLER              = 532480.freeze
-            PREAUTH_NOT_REQUIRED           = 4194304.freeze # Kerberos Preauthentication Disabled
-            ENCRYPTED_TEXT_PWD_ALLOWED     = 128.freeze
+            GROUP_GLOBAL                   = 2
+            GROUP_LOCAL                    = 4
+            GROUP_UNIVERSAL                = 8
+            GROUP_SECURITY_ENABLED         = 2_147_483_648
 
-            GROUP_GLOBAL                   = 2.freeze
-            GROUP_LOCAL                    = 4.freeze
-            GROUP_UNIVERSAL                = 8.freeze
-            GROUP_SECURITY_ENABLED         = 2147483648.freeze
+            HOMEDIR_REQUIRED               = 8
+            INTERDOMAIN_TRUST_ACCOUNT      = 2048
+            LOCKOUT                        = 16
+            MNS_LOGON_ACCOUNT              = 131_072
+            NOT_DELEGATED                  = 1_048_576
+            PARTIAL_SECRETS_ACCOUNT        = 67_108_864
 
-            HOMEDIR_REQUIRED               = 8.freeze
-            INTERDOMAIN_TRUST_ACCOUNT      = 2048.freeze
-            LOCKOUT                        = 16.freeze
-            MNS_LOGON_ACCOUNT              = 131072.freeze
-            NOT_DELEGATED                  = 1048576.freeze
-            PARTIAL_SECRETS_ACCOUNT        = 67108864.freeze
+            PASSWORD_NOT_REQUIRED          = 32
+            PASSWORD_CANT_CHANGE           = 64
+            PASSWORD_DONT_EXPIRE           = 65_536
+            SMARTCARD_REQUIRED             = 262_144 # Smart Card Login Enforced
+            PASSWORD_EXPIRED               = 8_388_608
 
-            PASSWORD_NOT_REQUIRED          = 32.freeze
-            PASSWORD_CANT_CHANGE           = 64.freeze
-            PASSWORD_DONT_EXPIRE           = 65536.freeze
-            SMARTCARD_REQUIRED             = 262144.freeze # Smart Card Login Enforced
-            PASSWORD_EXPIRED               = 8388608.freeze
-
-            SCRIPT                         = 1.freeze
-            SERVER_TRUST_ACCOUNT           = 8192.freeze
-            TRUSTED_FOR_DELEGATION         = 524288.freeze
-            TRUSTED_TO_AUTH_FOR_DELEGATION = 16777216.freeze
-            USE_DES_KEY_ONLY               = 2097152.freeze
-            WORKSTATION_TRUST_ACCOUNT      = 4096.freeze
+            SCRIPT                         = 1
+            SERVER_TRUST_ACCOUNT           = 8192
+            TRUSTED_FOR_DELEGATION         = 524_288
+            TRUSTED_TO_AUTH_FOR_DELEGATION = 16_777_216
+            USE_DES_KEY_ONLY               = 2_097_152
+            WORKSTATION_TRUST_ACCOUNT      = 4096
 
             FLAG   = "systemFlags:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
             GROUP  = "groupType:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
@@ -47,16 +46,15 @@ module ROM
             OPTS   = "options:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
             UAC    = "userAccountControl:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
 
-
             #
             # Accounts
             #
 
             def ad_accounts_all
-              equals('sAMAccountType' => 805306368)
+              equals('sAMAccountType' => 805_306_368)
             end
 
-# AD_USER_DISABLED = Net::LDAP::Filter.ex("userAccountControl:1.2.840.113556.1.4.803", "2")
+            # AD_USER_DISABLED = Filter::Builder.ex("userAccountControl:1.2.840.113556.1.4.803", "2")
             def ad_accounts_disabled
               ad_accounts_all.equals(UAC => ACCOUNT_DISABLED)
             end
@@ -97,8 +95,6 @@ module ROM
               unequals(objectclass: 'publicFolder').equals(msexchhidefromaddresslists: 'TRUE')
             end
 
-
-
             #
             # Groups and Objects
             #
@@ -137,13 +133,12 @@ module ROM
             end
 
             def ad_unrenamable_object
-              equals(FLAG => 134217728)
+              equals(FLAG => 134_217_728)
             end
 
             def ad_undeletable_object
               equals(FLAG => -GROUP_SECURITY_ENABLED)
             end
-
           end
         end
       end

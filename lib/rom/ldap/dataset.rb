@@ -146,7 +146,7 @@ module ROM
       #
       # @api public
       def total
-        results = directory.count(filter_string)
+        results = directory.total(filter_string)
         reset!
         results
       end
@@ -160,8 +160,6 @@ module ROM
         results
       end
 
-      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:add
-      #
       # @param tuple [Hash]
       #
       # @return [Boolean]
@@ -171,22 +169,16 @@ module ROM
         directory.add(tuple)
       end
 
-      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:modify
       #
       # @api public
       def modify(tuples, args)
-        tuples.each do |t|
-          directory.modify(*t[:dn], args.map { |k, v| [:replace, k, v] })
-        end
+        tuples.map { |t| directory.modify(*t[:dn], args.map { |k, v| [:replace, k, v] }) }
       end
 
-      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:delete
       #
       # @api public
       def delete(tuples)
-        tuples.each do |t|
-          directory.delete(*t[:dn])
-        end
+        tuples.map { |t| directory.delete(*t[:dn]) }
       end
 
       # Output the dataset as an LDIF string.
@@ -195,8 +187,6 @@ module ROM
       #
       # @api public
       def to_ldif
-        # results = directory.query(filter: filter_string)
-        # reset!
         BER::LDIF.new(each).to_ldif
       end
 

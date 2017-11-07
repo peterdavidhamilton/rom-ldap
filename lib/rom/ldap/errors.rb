@@ -1,5 +1,4 @@
 require 'rom/ldap/error'
-require 'net/tcp_client/exceptions'
 
 module ROM
   module LDAP

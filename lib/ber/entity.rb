@@ -1,7 +1,5 @@
 require 'ber/ldif'
 
-# BER.formatter = ->(v) { ROM::LDAP::Functions.snake_case_symbol(v) }
-
 module BER
   class Entity
     module ClassMethods

@@ -5,8 +5,7 @@ module ROM
   module LDAP
     include Dry::Core::Constants
 
-    WILDCARD  = '*'.freeze
-
+    WILDCARD = '*'.freeze
 
     #
     # Schema files
@@ -19,9 +18,9 @@ module ROM
       nis
       openldap
     ].freeze
-      # apache
-      # apachemeta
-      # system
+    # apache
+    # apachemeta
+    # system
 
     #
     # Search Scope
@@ -32,7 +31,7 @@ module ROM
 
     EMPTY_BASE = EMPTY_STRING
 
-    SCOPES = [ SCOPE_BASE_OBJECT, SCOPE_SINGLE_LEVEL, SCOPE_SUBTREE ].freeze
+    SCOPES = [SCOPE_BASE_OBJECT, SCOPE_SINGLE_LEVEL, SCOPE_SUBTREE].freeze
 
     #
     # Aliase Dereferencing
@@ -42,7 +41,7 @@ module ROM
     DEREF_FIND   = 2
     DEREF_ALWAYS = 3
 
-    DEREF_ALL = [ DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS ].freeze
+    DEREF_ALL = [DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS].freeze
 
     #
     # Root DSE (DSA-specific entry) - attributes for all implementations
@@ -121,7 +120,6 @@ module ROM
     FAST_CONCURRENT_BIND       = '1.2.840.113556.1.4.1781'.freeze
     MATCHING_RULE_IN_CHAIN     = '1.2.840.113556.1.4.1941'.freeze
 
-
     CANCEL_OPERATION           = '1.3.6.1.1.8'.freeze
     ASSERTION_CONTROL          = '1.3.6.1.1.12'.freeze
     PRE_READ_CONTROL           = '1.3.6.1.1.13.1'.freeze
@@ -159,6 +157,5 @@ module ROM
     VIRTUAL_LIST_VIEW_REQUEST  = '2.16.840.1.113730.3.4.9'.freeze
     VIRTUAL_LIST_VIEW_RESPONSE = '2.16.840.1.113730.3.4.10'.freeze
     PROXIED_AUTHORIZATION_V2   = '2.16.840.1.113730.3.4.18'.freeze
-
   end
 end

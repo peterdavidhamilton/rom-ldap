@@ -16,8 +16,13 @@ module ROM
       attr_reader :logger
 
       # @!attribute [r] options
-      #   @return [Hash] Options passed to API search
+      #   @return [Hash] Options passed to directory
       attr_reader :options
+
+      # @!attribute [r] options
+      #   @return [Hash] Options passed to connection
+      attr_reader :server
+
 
       # Initialize an LDAP gateway
       #
@@ -50,8 +55,6 @@ module ROM
       #
       # @return [LDAP::Gateway]
       #
-      # @see https://github.com/ruby-ldap/ruby-net-ldap/blob/master/lib/net/ldap.rb
-      #
       # @api public
       def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
         @server  = server
@@ -61,9 +64,6 @@ module ROM
 
         super()
       end
-
-      attr_reader :server
-      attr_reader :options
 
       # Used by attribute_inferrer
       #

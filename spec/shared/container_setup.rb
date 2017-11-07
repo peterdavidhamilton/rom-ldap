@@ -1,26 +1,23 @@
 module ContainerSetup
 
   let(:params) do
-    { server:   '127.0.0.1:10389', username: nil, password: nil }
+    { server: '127.0.0.1:10389', username: nil, password: nil }
   end
 
   let(:directory_options) do
-    { base: 'ou=users,dc=example,dc=com', size: 100, timeout: 2 }
+    { base: 'ou=users,dc=example,dc=com' }
   end
 
   let(:conn) do
-    @conn = ROM::LDAP::Connection.new(server: '127.0.0.1:10389')
-    @conn.directory_options = directory_options
-    @conn
+    ROM::LDAP::Connection.new(server: '127.0.0.1:10389')
   end
 
   # let(:conf)      { TestConfiguration.new(:ldap, conn) }
-
   let(:conf)      { ROM::Configuration.new(:ldap, params, directory_options) }
   let(:container) { ROM.container(conf) }
   let(:relations) { container.relations }
   # let(:commands)  { container.commands }
-  let(:factories) { ROM::Factory.configure { |config| config.rom = container }}
+  let(:factories) { ROM::Factory.configure { |conf| conf.rom = container }}
 
   before do
     # everyone

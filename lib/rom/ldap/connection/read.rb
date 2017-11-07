@@ -5,23 +5,29 @@ require 'rom/ldap/filter/builder'
 module ROM
   module LDAP
     module Read
-      # @option filter [String] Required but fallsback to class attribute 'default_filter' if nil.
+      # Connection Search Operation
       #
-      # @option base [String] Required but falls back to class attribute 'default_base' if nil.
+      # @option :filter [String] Required but fallsback to class attribute 'default_filter' if nil.
       #
-      # @option size [Integer] Can be set by gateway options passed to directory.
+      # @option :base [String] Required but falls back to class attribute 'default_base' if nil.
       #
-      # @option time [Integer] Can be set by gateway options passed to directory.
+      # @option :size [Integer] Can be set by gateway options passed to directory.
       #
-      # @option scope [Integer] Defaults to 'subtree'.
+      # @option :time [Integer] Can be set by gateway options passed to directory.
       #
-      # @option deref [Integer] Defaults to 'never'.
+      # @option :scope [Integer] Defaults to 'subtree'.
       #
-      # @option attributes [Array<Symbol/String>] Restrict attributes returned.
+      # @option :deref [Integer] Defaults to 'never'.
       #
-      # @option sort [Boolean, Array<String>] WIP! - irrelevant inside rom-ldap.
+      # @option :attributes [Array<Symbol/String>] Restrict attributes returned.
       #
-      # @option unlimited [Boolean] Exceed the default 1_000 limit.
+      # @option :sort [Boolean, Array<String>] WIP! - irrelevant inside rom-ldap.
+      #
+      # @option :unlimited [Boolean] Exceed the default 1_000 limit.
+      #
+      # @return [PDU]
+      #
+      # @yield [Array<BER::Struct>]
       #
       # @api public
       def search(
@@ -93,7 +99,7 @@ module ROM
 
               counter += 1
               message = "#{self.class}##{__callee__} #{counter}: #{pdu.search_entry.dn}"
-              logger.debug(message)
+              logger.debug(message) if ENV['LDAP_DEBUG']
 
               yield pdu.search_entry if block_given?
 

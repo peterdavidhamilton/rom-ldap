@@ -25,9 +25,8 @@ module ROM
       #
       # @api public
       def self.query_methods
-        internals.map { |m| m.to_s.tr('_','').to_sym }
+        internals.map { |m| m.to_s.tr('_', '').to_sym }
       end
-
 
       def begins(*args)
         Filter::Builder.begins(*args)
@@ -68,6 +67,7 @@ module ROM
       # @return [String]
       #
       # @param params [Array] Chained criteria build by dataset
+      #
       # @param original [Array] Starting table name for relation schema
       #
       # @api public
@@ -81,13 +81,12 @@ module ROM
         end
 
         _and(filters).to_s # TODO: add OR join using DSL
-
-        rescue => e
-          raise e
-          original
+      rescue => e
+        raise e
+        original
       end
 
-      alias_method :[], :call
+      alias [] call
 
       #
       # Fields
@@ -96,12 +95,11 @@ module ROM
         g(:equals, args)
       end
 
-      alias_method :_where, :_equals
+      alias _where _equals
 
       def _unequals(args)
         Filter::Builder.negate(_equals(args))
       end
-
 
       #
       # Attrs
@@ -110,16 +108,14 @@ module ROM
         g(:present, arg)
       end
 
-      alias_method :_has,    :_present
-      alias_method :_exists, :_present
+      alias _has _present
+      alias _exists _present
 
       def _missing(args)
         Filter::Builder.negate(_present(args))
       end
 
-      alias_method :_hasnt, :_missing
-
-
+      alias _hasnt _missing
 
       #
       # Strings
@@ -128,44 +124,43 @@ module ROM
         g(:begins, args)
       end
 
-      alias_method :_prefix, :_begins
+      alias _prefix _begins
 
       def _ends(args)
         g(:ends, args)
       end
 
-      alias_method :_suffix, :_ends
+      alias _suffix _ends
 
       def _contains(args)
         g(:contains, args)
       end
 
-      alias_method :_matches, :_contains
+      alias _matches _contains
 
       def _exclude(args)
         Filter::Builder.negate(_contains(args))
       end
-
 
       #
       # Range
       #
       def _within(args)
         args.map do |attribute, range|
-          bottom, top = range.to_a.first, range.to_a.last
+          bottom = range.to_a.first
+          top = range.to_a.last
           lower       = _gte(attribute => bottom)
           upper       = _lte(attribute => top)
           _and(lower, upper)
         end
       end
 
-      alias_method :_between, :_within
-      alias_method :_range,   :_within
+      alias _between _within
+      alias _range _within
 
       def _outside(args)
         Filter::Builder.negate(_within(args))
       end
-
 
       #
       # Numeric
@@ -174,15 +169,13 @@ module ROM
         g(:ge, args)
       end
 
-      alias_method :_above, :_gte
+      alias _above _gte
 
       def _lte(args)
         g(:le, args)
       end
 
-      alias_method :_below, :_lte
-
-
+      alias _below _lte
 
       private
 
@@ -197,7 +190,6 @@ module ROM
       def _or(*filters)
         Filter::Builder.construct("(|#{filters.join})")
       end
-
 
       def g(command, params)
         collection = []
@@ -224,10 +216,8 @@ module ROM
         end
       end
 
-      # delegate to ROM::LDAP::Dataset::FilterDSL
-      # coerce any value to a string
-      #
-      def submit(method, attribute, value=nil)
+
+      def submit(method, attribute, value = nil)
         if value
           send(method, attribute, Types::Coercible::String[value])
         else
@@ -235,6 +225,5 @@ module ROM
         end
       end
     end
-
   end
 end

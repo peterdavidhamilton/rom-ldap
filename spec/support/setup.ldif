@@ -82,6 +82,7 @@ uidNumber: 1
 
 dn: uid=test2,ou=users,dc=example,dc=com
 cn: test2
+apple-imhandle: '@test2'
 givenName: test2
 mail: test2@example.com
 objectClass: extensibleObject

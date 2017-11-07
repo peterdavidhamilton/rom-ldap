@@ -65,7 +65,7 @@ describe ROM::LDAP::Relation, 'reading module' do
     accounts.where(uid: uid).count.must_equal(1)
   end
 
-  # TODO: fix sort to retain DN at position 1
+  # FIXME: retain DN at first position
   it '#to_ldif' do
     export = <<~LDIF
       version: 3
