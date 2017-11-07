@@ -9,11 +9,7 @@ module ROM
         #
         # @api public
         def authenticate(password)
-          if dataset.authenticated?(password)
-            new(dataset)
-          else
-            new(EMPTY_ARRAY)
-          end
+          dataset.authenticated?(password) ? new(dataset) : new(EMPTY_ARRAY)
         end
 
         # Returns True if the filtered entity can bind.

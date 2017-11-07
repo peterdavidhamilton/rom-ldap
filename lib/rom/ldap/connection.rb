@@ -2,7 +2,11 @@ using ::BER
 
 require 'net/tcp_client'
 require 'dry/core/class_attributes'
-require 'rom/ldap/operations'
+require 'rom/ldap/connection/authenticate'
+require 'rom/ldap/connection/create'
+require 'rom/ldap/connection/read'
+require 'rom/ldap/connection/update'
+require 'rom/ldap/connection/delete'
 
 module ROM
   module LDAP
@@ -13,24 +17,32 @@ module ROM
       defines :default_base
       defines :default_filter
 
-      ldap_version    3
-      default_base    EMPTY_STRING
-      default_filter  '(objectClass=*)'.freeze
+      ldap_version   3
+      default_base   EMPTY_STRING
+      default_filter '(objectClass=*)'.freeze
 
-      include Search
-      include Create
-      include Delete
-      include Update
       include Authenticate
+      include Create
+      include Read
+      include Update
+      include Delete
+
+      def use_logger(logger)
+        @logger = logger
+      end
 
       private
 
-      def find_pdu(symbol)
+      attr_reader :logger
+
+      def pdu_lookup(symbol)
         ::BER.reverse_lookup(:pdu, symbol)
       end
 
       # TODO: NetTCP timeout in here
       # socket_read(length, buffer, timeout)
+
+      # @api private
       def ldap_read(syntax = ::BER::ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)
         # return unless ber_object = socket_read(syntax, nil, read_timeout)
@@ -38,11 +50,13 @@ module ROM
         ::BER::PDU.new(ber_object)
       end
 
+      # @api private
       def ldap_write(request, controls = nil, message_id = next_msgid)
         packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
         socket_write(packet, write_timeout)
       end
 
+      # @api private
       def queued_read(message_id)
         if pdu = message_queue[message_id].shift
           return pdu
@@ -57,19 +71,27 @@ module ROM
         pdu
       end
 
+      # @return [Hash]
+      #
+      # @api private
       def message_queue
         @message_queue ||= Hash.new { |hash, key| hash[key] = [] }
       end
 
+      # @return [Integer]
+      #
+      # @api private
       def next_msgid
         @msgid ||= 0
         @msgid += 1
       end
 
-      def catch_error(pdu, error_klass, pdu_response)
-        raise(*error_klass) if (!pdu || pdu.app_tag != pdu_response)
+      # @return [Exception, Nil]
+      #
+      # @api private
+      def validate_response(pdu, error_klass, pdu_response)
+        raise(*error_klass) if !pdu || pdu.app_tag != pdu_response
       end
-
     end
   end
 end

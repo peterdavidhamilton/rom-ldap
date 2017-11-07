@@ -7,15 +7,14 @@ module ROM
       #
       # @option password
       #
-      # @option method
-      #
-      # @option message_id
+      # @option method [Symbol] Defaults to simple.
       #
       # @api public
-      def bind(username:, password:, method: :simple, message_id: next_msgid)
-        pdu_request  = find_pdu(:bind_request)
-        pdu_response = find_pdu(:bind_result)
-        error_klass  = [NoBindResultError, 'no bind result']
+      def bind(username:, password:, method: :simple)
+        pdu_request  = pdu_lookup(:bind_request)
+        pdu_response = pdu_lookup(:bind_result)
+        error_klass  = [ NoBindResultError, 'no bind result' ]
+        message_id   = next_msgid
 
         request = [
           self.class.ldap_version.to_ber,
@@ -28,58 +27,44 @@ module ROM
 
         pdu = queued_read(message_id)
 
-        catch_error(pdu, error_klass, pdu_response)
+        validate_response(pdu, error_klass, pdu_response)
 
         pdu
       end
 
+      # @option filter [String]
+      #
+      # @option password [String]
+      #
       # @api public
       def bind_as(filter:, password:)
-        result = false
+        if entity = search(filter: filter, size: 1).first
+          password = password.call if password.respond_to?(:call)
 
-        open do |me|
-          rs = search(filter: filter, size: 1)
-
-          binding.pry
-          if rs && rs.first && (dn = rs.first.dn)
-
-            password = password.call if password.respond_to?(:call)
-
-            result = rs if bind(username: password, password: password)
-          end
+          bind(username: entity.dn, password: password) ? entity : false
         end
-
-        result
       end
 
-      # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)
 
+
+      # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)
       #   case method
       #   when :simple_tls
-
       #     @conn = wrap_with_ssl(@conn, tls_options, timeout)
-
       #   when :start_tls
-
       #     request = [
       #       START_TLS.to_ber_contextspecific(0)
       #     ].to_ber_appsequence(Net::LDAP::PDU::ExtendedRequest)
-
       #     ldap_write(request, nil, message_id)
-
       #     pdu = queued_read(message_id)
-
       #     if pdu.nil? || pdu.app_tag != Net::LDAP::PDU::ExtendedResponse
       #       raise Net::LDAP::NoStartTLSResultError, 'no start_tls result'
       #     end
-
       #     unless pdu.result_code.zero?
       #       raise Net::LDAP::StartTLSError,
       #             "start_tls failed: #{pdu.result_code}"
       #     end
-
       #     @conn = wrap_with_ssl(@conn, tls_options, timeout)
-
       #   else
       #     raise Net::LDAP::EncMethodUnsupportedError, "unsupported encryption method #{args[:method]}"
       #   end

@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'ber/struct'
+require 'ber/entity'
 
 module BER
   # Protocol Data Units
@@ -48,24 +48,13 @@ module BER
     attr_reader :controls
     attr_reader :bind_parameters
     attr_reader :extended_response
+    attr_reader :search_entry
     attr_reader :search_parameters
     attr_reader :search_referrals
 
     alias msg_id          message_id
     alias result_controls controls
     alias ldap_controls   controls
-
-
-    # Parsed result from directory yielded by connection.
-    #   Logs to STDOUT for debugging.
-    #
-    # @return [BER::Struct]
-    #
-    # @api public
-    def search_entry
-      LOGGER.debug(@search_entry.dn) if ENV['PDU']
-      @search_entry
-    end
 
     def inspect
       %(<##{self.class}
@@ -179,7 +168,7 @@ module BER
       check_sequence_size(sequence, 2)
       parse_sequence(sequence)
       decode_result
-      @search_entry = Struct.new(*sequence)
+      @search_entry = Entity.new(*sequence)
     end
 
     def parse_ldap_result(sequence)

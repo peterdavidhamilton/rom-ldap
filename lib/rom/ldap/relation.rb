@@ -5,7 +5,6 @@ require 'rom/ldap/attribute'
 require 'rom/ldap/transaction'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
-require 'rom/ldap/relation/defaults'
 
 module ROM
   module LDAP
@@ -14,10 +13,13 @@ module ROM
 
       # struct_namespace LDAP:Struct
 
-      # specify a scope in the relation
-      # defines :scope
+      # GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
+      # USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
+
+      # defines :base
       # defines :filter
 
+      # filter USERS
 
       include LDAP
       include Reading
@@ -26,7 +28,7 @@ module ROM
       extend Notifications::Listener
 
       subscribe('configuration.relations.schema.set', adapter: :ldap) do |event|
-        schema   = event[:schema]
+        # schema   = event[:schema]
         relation = event[:relation]
 
         relation.dataset do

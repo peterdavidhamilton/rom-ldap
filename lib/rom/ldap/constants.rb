@@ -45,24 +45,28 @@ module ROM
     DEREF_ALL = [ DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS ].freeze
 
     #
-    # Root DSE - attributes for all implementations
+    # Root DSE (DSA-specific entry) - attributes for all implementations
     #
     ROOT_DSE_ATTRS = %w[
       altServer
+      changelog
       currentTime
       dataversion
       dnsHostName
       domainControllerFunctionality
       domainFunctionality
+      firstChangeNumber
       forestFunctionality
       isGlobalCatalogReady
       isSynchronized
+      lastChangeNumber
       lastusn
       namingContexts
       netscapemdsuffix
       operatingSystemVersion
       rootDomainNamingContext
       subschemaSubentry
+      supportedAuthPasswordSchemes
       supportedCapabilities
       supportedControl
       supportedExtension
@@ -89,23 +93,34 @@ module ROM
     ].freeze
 
     #
-    # OID Controls
+    # OID Controls ---------------------------------------------
     #
+
     MATCHED_VALUES_CONTROL     = '1.2.826.0.1.3344810.2.3'.freeze
 
+    #
+    # Active Directory
+    #
     MICROSOFT_OID_PREFIX       = '1.2.840.113556'.freeze
     PAGED_RESULTS              = '1.2.840.113556.1.4.319'.freeze
     SHOW_DELETED               = '1.2.840.113556.1.4.417'.freeze
     SORT_REQUEST               = '1.2.840.113556.1.4.473'.freeze
     SORT_RESPONSE              = '1.2.840.113556.1.4.474'.freeze
+    CROSSDOM_MOVE_TARGET       = '1.2.840.113556.1.4.521'.freeze
     SEARCH_NOTIFICATION        = '1.2.840.113556.1.4.528'.freeze
+    LAZY_COMMIT                = '1.2.840.113556.1.4.619'.freeze
+    SD_FLAGS                   = '1.2.840.113556.1.4.801'.freeze
     MATCHING_RULE_BIT_AND      = '1.2.840.113556.1.4.803'.freeze
     MATCHING_RULE_BIT_OR       = '1.2.840.113556.1.4.804'.freeze
     DELETE_TREE                = '1.2.840.113556.1.4.805'.freeze
     DIRECTORY_SYNC             = '1.2.840.113556.1.4.841'.freeze
+    VERIFY_NAME                = '1.2.840.113556.1.4.1338'.freeze
+    DOMAIN_SCOPE               = '1.2.840.113556.1.4.1339'.freeze
+    SEARCH_OPTIONS             = '1.2.840.113556.1.4.1340'.freeze
     PERMISSIVE_MODIFY          = '1.2.840.113556.1.4.1413'.freeze
     FAST_CONCURRENT_BIND       = '1.2.840.113556.1.4.1781'.freeze
     MATCHING_RULE_IN_CHAIN     = '1.2.840.113556.1.4.1941'.freeze
+
 
     CANCEL_OPERATION           = '1.3.6.1.1.8'.freeze
     ASSERTION_CONTROL          = '1.3.6.1.1.12'.freeze

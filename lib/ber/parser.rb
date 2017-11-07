@@ -2,13 +2,13 @@
 #
 module BER
   class Parser
-    Not             = 0xa2 # context-specific constructed 2, "not"
     And             = 0xa0 # context-specific constructed 0, "and"
     Or              = 0xa1 # context-specific constructed 1, "or"
-    greaterOrEqual  = 0xa5 # context-specific constructed 5, "greaterOrEqual"
+    Not             = 0xa2 # context-specific constructed 2, "not"
     equalityMatch   = 0xa3 # context-specific constructed 3, "equalityMatch"
-    lessOrEqual     = 0xa6 # context-specific constructed 6, "lessOrEqual"
     substring       = 0xa4 # context-specific constructed 4, "substring"
+    greaterOrEqual  = 0xa5 # context-specific constructed 5, "greaterOrEqual"
+    lessOrEqual     = 0xa6 # context-specific constructed 6, "lessOrEqual"
     filterInitial   = 0x80 # context-specific primitive 0, SubstringFilter "initial"
     filterAny       = 0x81 # context-specific primitive 0, SubstringFilter "any"
     filterFinal     = 0x82 # context-specific primitive 0, SubstringFilter "final"
@@ -32,14 +32,13 @@ module BER
         [:eq, ber.first, ber.last] if ber.last == WILDCARD
 
       when substring
-        str = ''
+        str   = ''
         final = false
 
         ber.last.each do |b|
           case b.ber_identifier
-
           when filterInitial
-            raise Error, 'Unrecognized substring filter; bad initial value.' unless str.empty?
+            raise Error, 'Unknown substring filter - bad initial value.' unless str.empty?
             str += escape(b)
 
           when filterAny
@@ -71,10 +70,10 @@ module BER
 
         ber.each do |element|
           case element.ber_identifier
-          when 0x81 then rule = element
-          when 0x82 then type = element
-          when 0x83 then value = element
-          when 0x84 then dn = 'dn'
+          when 0x81 then rule = element  # filterAny ?
+          when 0x82 then type = element  # filterFinal ?
+          when 0x83 then value = element # ?
+          when 0x84 then dn = 'dn'       # ?
           end
         end
 

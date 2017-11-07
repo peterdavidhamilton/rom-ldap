@@ -1,5 +1,0 @@
-require 'rom/ldap/operations/authenticate'
-require 'rom/ldap/operations/create'
-require 'rom/ldap/operations/search'
-require 'rom/ldap/operations/update'
-require 'rom/ldap/operations/delete'

@@ -2,7 +2,6 @@ require 'logger'
 require 'rom/gateway'
 require 'rom/ldap/directory'
 require 'rom/ldap/dataset'
-require 'rom/ldap/cache'
 
 module ROM
   module LDAP
@@ -100,13 +99,8 @@ module ROM
       # @return [Dataset]
       #
       # @api public
-      def dataset(filter)
-        # connection.connect unless connection.alive?
-
+      def dataset(filter) # OPTIMIZE: base alternative base along with table name to dataset
         Dataset.new(directory, filter)
-
-        # rescue *ERROR_MAP.keys => e
-        #   raise ERROR_MAP.fetch(e.class, Error), e
       end
 
       # @param logger [Logger]
@@ -135,7 +129,7 @@ module ROM
       #
       # @api private
       def directory
-        @directory ||= Directory.new(connection, options)
+        @dir ||= Directory.new(connection, options).load_rootdse!
       end
 
       def connection
@@ -150,8 +144,10 @@ module ROM
             # on_connect: proc {}
             # proxy_server:
           )
-          pdu = bind! unless server[:username].nil?
-          (pdu && pdu.success?) ? @conn : pdu
+
+          @conn.use_logger(@logger)
+
+          bind! unless server[:username].nil?
 
           @conn
         end

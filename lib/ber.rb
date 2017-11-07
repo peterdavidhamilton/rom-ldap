@@ -1,6 +1,5 @@
 require 'dry/core/constants'
 require 'set'
-require 'logger'
 require 'psych'
 require 'pathname'
 require 'ber/function'
@@ -62,9 +61,6 @@ module BER
 
     out
   end
-
-
-  LOGGER = ::Logger.new(STDOUT)
 
   Error = Class.new(RuntimeError)
   Null  = BerIdentifiedNull.new

@@ -177,7 +177,10 @@
   1:
     - :operations_error
     - Operations Error
-    - Indicates an internal error. The server is unable to respond with a more specific error and is also unable to properly respond to a request. It does not indicate that the client has sent an erroneous message.
+    - >
+      Indicates an internal error.
+      The server is unable to respond with a more specific error and is also unable to properly respond to a request.
+      It does not indicate that the client has sent an erroneous message.
     - LDAP_OPERATIONS_ERROR:0x01
   2:
     - :protocol_error
@@ -285,7 +288,9 @@
   19:
     - :constraint_violation
     - Constraint Violation
-    - Indicates the attribute value specified in a modify, add, or modify DN operation violates constraints placed on the attribute. The constraint can be one of size or content (string only, no binary).
+    - >
+      Indicates the attribute value specified in a modify, add, or modify DN operation violates constraints placed on the attribute.
+      The constraint can be one of size or content (string only, no binary).
     - LDAP_CONSTRAINT_VIOLATION:0x13
   20:
     - :attribute_or_value_exists
@@ -339,6 +344,12 @@
   48:
     - :inappropriate_authentication
     - Inappropriate Authentication
+    - >
+      Indicates during a bind operation, the client is attempting to use an authentication method that the client cannot use correctly.
+      For example, either of the following cause this error:
+      The client returns simple credentials when strong credentials are required.
+      The client returns a DN and a password for a simple bind when the entry does not have a password defined.
+    - LDAP_INAPPROPRIATE_AUTH:0x30
   49:
     - :invalid_credentials
     - Invalid Credentials
@@ -379,13 +390,6 @@
     - :other
     - Other
 
-
-
-    # 0x30
-    # 48
-    # LDAP_INAPPROPRIATE_AUTH: Indicates during a bind operation, the client is attempting to use an authentication method that the client cannot use correctly. For example, either of the following cause this error:
-    # The client returns simple credentials when strong credentials are required.
-    # The client returns a DN and a password for a simple bind when the entry does not have a password defined.
 
     # 0x31
     # 49

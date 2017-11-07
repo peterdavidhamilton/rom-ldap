@@ -3,7 +3,7 @@ require 'ber/ldif'
 # BER.formatter = ->(v) { ROM::LDAP::Functions.snake_case_symbol(v) }
 
 module BER
-  class Struct
+  class Entity
     module ClassMethods
       def rename(key)
         return default_normaliser(key) if BER.formatter.nil?
