@@ -12,7 +12,7 @@ module BER
 
       def default_normaliser(key)
         key = key.to_s.downcase
-        key = key.tr('-','')
+        key = key.tr('-', '')
         key = key[0..-2] if key[-1] == '='
         key.to_sym
       end
@@ -34,7 +34,9 @@ module BER
     extend ClassMethods
 
     def initialize(dn = nil, attributes = EMPTY_HASH)
-      @dn, @source, @canonical = dn, {}, {}
+      @dn = dn
+      @source = {}
+      @canonical = {}
 
       attributes.each do |key, value|
         store_source('dn', dn)
@@ -110,7 +112,7 @@ module BER
 
     def method_missing(method, *args, &block)
       value = self[method]
-      return value if !value.empty?
+      return value unless value.empty?
       return @canonical.public_send(method, *args, &block) if @canonical.respond_to?(method)
       super
     end
@@ -130,8 +132,7 @@ module BER
     end
 
     def store_canonical(key, value)
-      @canonical[rename(key)]  = Array(value)
+      @canonical[rename(key)] = Array(value)
     end
-
   end
 end

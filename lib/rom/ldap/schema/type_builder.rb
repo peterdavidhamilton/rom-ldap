@@ -41,36 +41,34 @@ module ROM
           attributes.select { |a| a[:name].downcase.eql?(name) }.first
         end
 
-
         STRING_MATCHERS = %w[
-                              caseIgnoreListMatch
-                              caseIgnoreMatch
-                              caseExactMatch
-                              distinguishedNameMatch
-                              objectIdentifierMatch
-                              octetStringMatch
-                              protocolInformationMatch
-                              telephoneNumberMatch
-                            ].freeze
+          caseIgnoreListMatch
+          caseIgnoreMatch
+          caseExactMatch
+          distinguishedNameMatch
+          objectIdentifierMatch
+          octetStringMatch
+          protocolInformationMatch
+          telephoneNumberMatch
+        ].freeze
 
         # @return [String]
         #
         # @api private
         def map_type(attribute)
           case attribute[:matcher]
-          when *STRING_MATCHERS       then 'String'
           when 'booleanMatch'         then 'Bool'
           when 'integerMatch'         then 'Int'
           when 'generalizedTimeMatch' then 'Time'
           when nil
             type = attribute[:single] ? 'String' : 'Array'
 
-           ::BER.lookup(:oid, attribute[:oid]) || type
+            ::BER.lookup(:oid, attribute[:oid]) || type
+          when *STRING_MATCHERS then 'String'
           else
             raise "#{self.class}##{__callee__} #{attribute[:matcher]} not known"
           end
         end
-
       end
     end
   end

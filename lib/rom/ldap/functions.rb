@@ -16,17 +16,15 @@ module ROM
         when Enumerable then attribute.map(&:to_s)
         when Hash       then attribute.to_json
         when String     then attribute
-        else
-          nil
         end
       end
 
       def self.to_int(tuples)
-        t(:map_array, t(:to_integer)).(tuples)
+        t(:map_array, t(:to_integer)).call(tuples)
       end
 
       def self.to_sym(tuples)
-        t(:map_array, t(:to_symbol)).(tuples)
+        t(:map_array, t(:to_symbol)).call(tuples)
       end
 
       def self.to_bool(tuples)
@@ -37,8 +35,8 @@ module ROM
         tuples.map do |time|
           begin
             numeric_time = Integer(time)
-            ten_k        = 10_000_000.freeze
-            since_1601   = 11_644_473_600.freeze
+            ten_k        = 10_000_000
+            since_1601   = 11_644_473_600
             time         = (numeric_time / ten_k) - since_1601
 
             ::Time.at(time)
@@ -56,19 +54,18 @@ module ROM
 
       def self.to_method_name(value)
         fn = t(:to_string) >> t(:to_underscore) >> t(:to_symbol)
-        fn.(value)
+        fn.call(value)
       end
 
       # fired by struct if its schema hash keys include a hyphen
       def self.fix_entity(tuple)
-        t(:map_keys, t(:to_method_name)).(tuple)
+        t(:map_keys, t(:to_method_name)).call(tuple)
       end
 
       # should be to stringify keys before inserting to database
       def self.coerce_tuple(tuple)
-        t(:map_values, t(:string_input)).(tuple)
+        t(:map_values, t(:string_input)).call(tuple)
       end
     end
   end
 end
-

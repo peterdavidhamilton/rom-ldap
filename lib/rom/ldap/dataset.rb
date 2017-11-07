@@ -16,7 +16,6 @@ module ROM
       option :offset,    reader: false, optional: true
       option :limit,     reader: false, optional: true
 
-
       # @api public
       def opts
         Hash[
@@ -32,8 +31,8 @@ module ROM
       # @param args [Hash] New arguments to chain.
       #
       # @api private
-      def merge!(args, &block)
-        @criteria = Functions[:deep_merge][criteria, {"_#{__callee__}" => args}]
+      def merge!(args)
+        @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
         self
       end
 
@@ -48,11 +47,10 @@ module ROM
       # @example
       #   api.db.db.database_type => :apacheds
       #
-      # @public
+      # @api public
       def db
         ::OpenStruct.new(db: ::OpenStruct.new(database_type: directory.type))
       end
-
 
       # @return [ROM::LDAP::Dataset, self]
       #
@@ -84,7 +82,6 @@ module ROM
         block_given? ? results.send(__callee__, *args, &block) : results
       end
 
-
       # Respond to repository methods by first calling #each
       #
       alias as each
@@ -94,7 +91,6 @@ module ROM
       alias one each
       alias to_a each
       alias with each
-
 
       # Combine original relation filter with search criteria
       #
@@ -133,7 +129,6 @@ module ROM
         reset!
         results
       end
-
 
       # @return [Integer]
       #
@@ -189,7 +184,6 @@ module ROM
       def to_ldif
         BER::LDIF.new(each).to_ldif
       end
-
 
       private
 

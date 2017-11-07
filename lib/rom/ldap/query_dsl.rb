@@ -216,7 +216,6 @@ module ROM
         end
       end
 
-
       def submit(method, attribute, value = nil)
         if value
           send(method, attribute, Types::Coercible::String[value])

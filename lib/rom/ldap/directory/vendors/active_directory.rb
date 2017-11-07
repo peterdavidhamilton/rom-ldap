@@ -46,7 +46,6 @@ module ROM
         SystemMemoryLimitPercent
         ThreadMemoryLimit
       ].freeze
-
     end
   end
 end

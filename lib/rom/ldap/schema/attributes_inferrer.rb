@@ -7,7 +7,6 @@ module ROM
     class Schema < ROM::Schema
       # @api private
       class AttributesInferrer
-
         extend Initializer
         extend Dry::Core::Cache
 
@@ -21,7 +20,7 @@ module ROM
           columns       = dataset_attributes(gateway, dataset)
 
           inferred = columns.map do |name|
-            type = type_builder.(name, schema.name)
+            type = type_builder.call(name, schema.name)
             attr_class.new(type)
           end
 

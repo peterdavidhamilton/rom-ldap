@@ -26,14 +26,11 @@ module ROM
       option :size,    default: proc { 1_000_000 }
       option :logger,  default: proc { ::Logger.new(STDOUT) }
 
-
-
       subscribe('configuration.directory', adapter: :ldap) do |event|
         binding.pry
       end
 
-
-      # @result [Array<String>]
+      # @return [Array<String>]
       #
       # @example
       #   [ 'Apple', '510.30' ]
@@ -55,9 +52,7 @@ module ROM
 
       private
 
-
       def log(caller = nil, message = nil, level = :info)
-
         logger.send(level, "#{self.class}##{caller} #{message}")
 
         if result.failure?
@@ -67,7 +62,6 @@ module ROM
           logger.debug("#{self.class}##{caller} #{result.message}")
         end
       end
-
 
       # Build hash from attribute definition
       #   used by TypeBuilder
@@ -95,7 +89,7 @@ module ROM
           single:      !type.scan(/SINGLE-VALUE/).empty?,
           modifiable:  !type.scan(/NO-USER-MODIFICATION/).empty?,
           usage:       type[/USAGE (\S+)/, 1],
-          source:      type[/X-SCHEMA '(\S+)'/, 1],
+          source:      type[/X-SCHEMA '(\S+)'/, 1]
         }
       end
 

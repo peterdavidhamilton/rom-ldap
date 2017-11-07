@@ -2,7 +2,6 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
-
         # Returns empty dataset if the filtered entity cannot bind.
         #
         # @return [Relation]
@@ -56,7 +55,7 @@ module ROM
           dataset.one?
         end
 
-        alias_method :distinct?, :unique?
+        alias distinct? unique?
 
         # @return [Boolean]
         #
@@ -65,7 +64,7 @@ module ROM
           dataset.exist?
         end
 
-        alias_method :any?, :exist?
+        alias any? exist?
 
         # @return [Boolean]
         #
@@ -100,7 +99,6 @@ module ROM
         def fetch(pk)
           by_pk(pk).one!
         end
-
 
         # raw filter to LDIF
         #
@@ -195,10 +193,9 @@ module ROM
         #
         # @api public
         def select(*args)
-          new(dataset.map { |e| e.select { |k,v| args.include?(k) } })
+          new(dataset.map { |e| e.select { |k, _v| args.include?(k) } })
         end
-        alias_method :pluck, :select
-
+        alias pluck select
 
         # Filters by regexp
         #
@@ -215,9 +212,8 @@ module ROM
         #       e[attribute].grep(regex)
         #     end
         #   )
-          # .detect {|f| f["age"] > 35 }
+        # .detect {|f| f["age"] > 35 }
         # end
-
 
         # Qualifies all columns in a relation
         #
@@ -232,7 +228,7 @@ module ROM
         # @api public
         def qualified
           binding.pry
-          schema.qualified.(self)
+          schema.qualified.call(self)
         end
 
         def join(*args)

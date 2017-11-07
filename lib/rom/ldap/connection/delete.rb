@@ -3,16 +3,15 @@ using ::BER
 module ROM
   module LDAP
     module Delete
-
-      # @option control_codes [?]
+      # @option :control_codes [?]
       #
-      # @option dn [String]
+      # @option :dn [String]
       #
       # @api public
       def delete(dn:, control_codes: nil)
         pdu_request  = pdu_lookup(:delete_request)
         pdu_response = pdu_lookup(:delete_response)
-        error_klass  = [ ResponseMissingOrInvalidError, 'response missing or invalid' ]
+        error_klass  = [ResponseMissingOrInvalidError, 'response missing or invalid']
         message_id   = next_msgid
 
         request      = dn.to_s.to_ber_application_string(pdu_request)
@@ -26,7 +25,6 @@ module ROM
 
         pdu
       end
-
     end
   end
 end

@@ -12,29 +12,24 @@ module BER
       if self <= 127
         [self].pack('C')
       else
-        i = [self].pack('N').sub(/^[\0]+/, "")
+        i = [self].pack('N').sub(/^[\0]+/, '')
         [0x80 + i.length].pack('C') + i
       end
     end
 
     def to_ber_application(tag)
-      [0x40 + tag].pack("C") + to_ber_internal
+      [0x40 + tag].pack('C') + to_ber_internal
     end
-
 
     private
 
     def to_ber_internal
       size  = 1
-      size += 1 until (((self < 0) ? ~self : self) >> (size * 8)).zero?
+      size += 1 until ((self < 0 ? ~self : self) >> (size * 8)).zero?
 
-      if self > 0 && (self & (0x80 << (size - 1) * 8)) > 0
-        size += 1
-      end
+      size += 1 if self > 0 && (self & (0x80 << (size - 1) * 8)) > 0
 
-      if self < 0 && (self & (0x80 << (size - 1) * 8)) == 0
-        size += 1
-      end
+      size += 1 if self < 0 && (self & (0x80 << (size - 1) * 8)) == 0
 
       result = [size]
 
@@ -45,6 +40,5 @@ module BER
 
       result.pack('C*')
     end
-
   end
 end

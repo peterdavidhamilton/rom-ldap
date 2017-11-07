@@ -67,7 +67,6 @@ module BER
   MAX_FIXNUM_SIZE  = 0.size
   WILDCARD         = '*'.freeze
   NEW_LINE         = "\n".freeze
-
 end
 
 require 'ber/pdu'

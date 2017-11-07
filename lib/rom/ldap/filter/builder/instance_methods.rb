@@ -5,12 +5,12 @@ module ROM
     module Filter
       class Builder
         module InstanceMethods
-          def &(filter)
-            self.class.join(self, filter)
+          def &(other)
+            self.class.join(self, other)
           end
 
-          def |(filter)
-            self.class.intersect(self, filter)
+          def |(other)
+            self.class.intersect(self, other)
           end
 
           def ~@

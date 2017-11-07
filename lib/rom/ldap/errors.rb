@@ -2,7 +2,6 @@ require 'rom/ldap/error'
 
 module ROM
   module LDAP
-
     #                                                        # USAGE
     ConfigError                   = Class.new(StandardError) # WIP
     ConnectionError               = Class.new(StandardError) # mapped below
@@ -19,6 +18,5 @@ module ROM
       Net::TCPClient::ConnectionTimeout => ConnectionError,
       Net::TCPClient::ReadTimeout       => ConnectionError
     }.freeze
-
   end
 end

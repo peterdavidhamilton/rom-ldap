@@ -2,7 +2,6 @@ module ROM
   module LDAP
     class Directory
       module Root
-
         # Set instance variables like directory_type
         #
         # @return [ROM::LDAP::Directory]
@@ -25,7 +24,9 @@ module ROM
           when nil
             caps = root['supportedCapabilities'].sort
 
-            unless caps.empty?
+            if caps.empty?
+              log(__callee__, 'Active Directory version is unknown')
+            else
               require 'rom/ldap/directory/vendors/active_directory'
 
               dc     = root.first('domainControllerFunctionality').to_i
@@ -39,8 +40,6 @@ module ROM
               @vendor_name              = 'Microsoft'
               @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
               @directory_type           = :active_directory
-            else
-              log(__callee__, 'Active Directory version is unknown')
             end
 
           else
@@ -71,7 +70,6 @@ module ROM
             unlimited:  false
           ).first
         end
-
 
         # @return [Integer]
         #
@@ -146,7 +144,6 @@ module ROM
         def supported_versions
           root['supportedLDAPVersion'].sort.map(&:to_i)
         end
-
       end
     end
   end

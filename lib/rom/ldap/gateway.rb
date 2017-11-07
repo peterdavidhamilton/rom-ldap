@@ -23,7 +23,6 @@ module ROM
       #   @return [Hash] Options passed to connection
       attr_reader :server
 
-
       # Initialize an LDAP gateway
       #
       # Gateways are typically initialized via ROM::Configuration object

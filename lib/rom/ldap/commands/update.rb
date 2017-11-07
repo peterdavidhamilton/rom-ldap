@@ -27,7 +27,6 @@ module ROM
         def update(*args)
           relation.update(*args)
         end
-
       end
     end
   end

@@ -15,7 +15,6 @@ module BER
     isPresent       = 0x87 # context-specific primitive 7, "present"
     extComparison   = 0xa9 # context-specific constructed 9, "extensible comparison"
 
-
     def call(ber)
       case ber.ber_identifier
       # when And then ber.map { |b| call(b) }.inject { |memo, obj| memo & obj }

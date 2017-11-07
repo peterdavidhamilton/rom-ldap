@@ -3,17 +3,17 @@ using ::BER
 module ROM
   module LDAP
     module Authenticate
-      # @option username
+      # @option :username
       #
-      # @option password
+      # @option :password
       #
-      # @option method [Symbol] Defaults to simple.
+      # @option :method [Symbol] Defaults to simple.
       #
       # @api public
       def bind(username:, password:, method: :simple)
         pdu_request  = pdu_lookup(:bind_request)
         pdu_response = pdu_lookup(:bind_result)
-        error_klass  = [ NoBindResultError, 'no bind result' ]
+        error_klass  = [NoBindResultError, 'no bind result']
         message_id   = next_msgid
 
         request = [
@@ -32,20 +32,21 @@ module ROM
         pdu
       end
 
-      # @option filter [String]
+      # @option :filter [String] Should identify a single entity.
+      #   Filtering by DN is recommended.
       #
-      # @option password [String]
+      # @option :password [String]
+      #
+      # @return [Boolean] True if password matches first result.
       #
       # @api public
       def bind_as(filter:, password:)
         if entity = search(filter: filter, size: 1).first
           password = password.call if password.respond_to?(:call)
 
-          bind(username: entity.dn, password: password) ? entity : false
+          bind(username: entity.dn, password: password) # ? entity : false
         end
       end
-
-
 
       # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)
       #   case method

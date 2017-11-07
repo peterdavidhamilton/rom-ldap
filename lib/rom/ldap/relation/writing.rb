@@ -2,7 +2,6 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Writing
-
         # @example
         #   repo.insert(
         #     dn: 'uid=batman,ou=users,dc=test',
@@ -30,7 +29,7 @@ module ROM
         #
         # @param args [Hash]
         #
-        # @return [Array, <Hash>]
+        # @return [Array, <Boolean>]
         #
         # @api public
         def update(args)
@@ -40,15 +39,12 @@ module ROM
         # @example
         #   repo.delete(2000) # => true
         #
-        # @param args [Hash]
-        #
-        # @return [Array, <Hash>]
+        # @return [Array, <Boolean>]
         #
         # @api public
-        def delete(*args)
+        def delete
           dataset.delete(dataset.entries)
         end
-
       end
     end
   end

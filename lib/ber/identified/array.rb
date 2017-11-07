@@ -6,5 +6,4 @@ module BER
       super
     end
   end
-
 end

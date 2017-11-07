@@ -6,7 +6,6 @@ module ROM
     class Schema < ROM::Schema
       # @api private
       class Inferrer < ROM::Schema::Inferrer
-
         attributes_inferrer ->(schema, gateway, options) do
           AttributesInferrer.new(options).call(schema, gateway)
         end
@@ -26,7 +25,6 @@ module ROM
         def call(schema, gateway)
           inferred = super
           { **inferred }
-
         rescue *ERROR_MAP.keys => e
           raise ERROR_MAP.fetch(e.class, Error), e
         ensure

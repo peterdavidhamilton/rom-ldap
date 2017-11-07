@@ -2,13 +2,12 @@ module ROM
   module LDAP
     class Directory
       module Operations
-
         # @param options [Hash]
         #
         # @return [Array<Hash>]
         #
         # @api public
-        def query(options, &block)
+        def query(options)
           result_set = []
           tuples     = !options.delete(:result_only)
 
@@ -21,7 +20,6 @@ module ROM
         end
 
         attr_reader :result # PDU object
-
 
         # Query results as array of hashes ordered by Distinguished Name
         #
@@ -38,15 +36,15 @@ module ROM
             results = query(filter: filter, size: size, deref: DEREF_ALWAYS, unlimited: unlimited)
             block_given? ? results.each(&block) : results
           end
-
-          rescue Timeout::Error
-            log(__callee__, "timed out after #{timeout} seconds", :warn)
-          ensure
-            log(__callee__, filter)
+        rescue Timeout::Error
+          log(__callee__, "timed out after #{timeout} seconds", :warn)
+        ensure
+          log(__callee__, filter)
         end
 
-
-        # @param args [Hash]
+        # @option :filter [String]
+        #
+        # @option :password [String]
         #
         # @return [Boolean]
         #
@@ -54,7 +52,6 @@ module ROM
         def bind_as(filter:, password:)
           connection.bind_as(filter: filter, password: password)
         end
-
 
         # Used by gateway[filter] to infer schema. Limited to 100.
         #
@@ -74,14 +71,12 @@ module ROM
           query(filter: filter, attributes: %i[dn]).count
         end
 
-
         # @return [Boolean]
         #
         # @api public
         def exist?(filter)
           query(filter: filter, result_only: true)
         end
-
 
         # @param tuple [Hash]
         #
@@ -100,7 +95,6 @@ module ROM
 
           result.success?
         end
-
 
         #
         # @return [Boolean]
@@ -131,7 +125,6 @@ module ROM
 
           result.success?
         end
-
       end
     end
   end

@@ -37,9 +37,8 @@ module ROM
         # @api private
         def bitwise?
           supported_controls.include?(MATCHING_RULE_BIT_AND) &&
-          supported_controls.include?(MATCHING_RULE_BIT_OR)
+            supported_controls.include?(MATCHING_RULE_BIT_OR)
         end
-
       end
     end
   end

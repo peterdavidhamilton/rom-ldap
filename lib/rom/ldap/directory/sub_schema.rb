@@ -38,7 +38,6 @@ module ROM
         def schema_attribute_types
           sub_schema['attributeTypes'].sort
         end
-
       end
     end
   end

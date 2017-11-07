@@ -26,9 +26,9 @@ module BER
     def raw_utf8_encoded
       return self if respond_to?(:encode)
       encode('UTF-8').force_encoding('ASCII-8BIT')
-      rescue Encoding::UndefinedConversionError,
-             Encoding::ConverterNotFoundError,
-             Encoding::InvalidByteSequenceError
+    rescue Encoding::UndefinedConversionError,
+           Encoding::ConverterNotFoundError,
+           Encoding::InvalidByteSequenceError
       self
     end
     private :raw_utf8_encoded

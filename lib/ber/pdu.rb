@@ -32,7 +32,6 @@ module BER
         @app_tag    = tag.ber_identifier & 0x1f
         @controls   = []
         @res        = {}
-
       rescue Exception => e
         raise Error, "#{self.class}: #{e.message}"
       end
