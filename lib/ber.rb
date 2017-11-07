@@ -1,11 +1,26 @@
 require 'dry/core/constants'
 require 'set'
+require 'logger'
+require 'psych'
+require 'pathname'
+require 'ber/function'
 require 'ber/refinements'
 
 # Basic Encoding Rules
 #
 module BER
   include Dry::Core::Constants
+
+  # ->(v) { ROM::LDAP::Functions.snake_case_symbol(v) }
+  # attr_accessor :formatter
+
+  def self.formatter
+    @formatter ||= nil
+  end
+
+  def self.formatter=(function)
+    @formatter = function
+  end
 
   def self.refinements
     @refinements = (@refinements || Set.new) << BER
@@ -47,6 +62,9 @@ module BER
 
     out
   end
+
+
+  LOGGER = ::Logger.new(STDOUT)
 
   Error = Class.new(RuntimeError)
   Null  = BerIdentifiedNull.new

@@ -1,6 +1,8 @@
 require 'logger'
 require 'rom/gateway'
+require 'rom/ldap/directory'
 require 'rom/ldap/dataset'
+require 'rom/ldap/cache'
 
 module ROM
   module LDAP
@@ -34,7 +36,10 @@ module ROM
       #   Connects to a database via params and options
       #
       #   @example
-      #     ROM.container(:ldap, {}, size: 100, time: 3)
+      #     ROM.container(:ldap,
+      #       {server:, username:, password:},
+      #       {base: '', size: 100, timeout: 3}
+      #     )
       #
       #   @param [Hash] passed to ROM::LDAP::Connection#new
       #
@@ -49,16 +54,16 @@ module ROM
       # @see https://github.com/ruby-ldap/ruby-net-ldap/blob/master/lib/net/ldap.rb
       #
       # @api public
-      def initialize(directory = EMPTY_HASH, options = EMPTY_HASH)
-        @directory = directory
-        @conn      = nil
-        @options   = options
-        @logger    = options.fetch(:logger) { ::Logger.new(STDOUT) }
+      def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
+        @server  = server
+        @conn    = nil
+        @options = options
+        @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
 
         super()
       end
 
-      attr_reader :directory
+      attr_reader :server
       attr_reader :options
 
       # Used by attribute_inferrer
@@ -69,7 +74,7 @@ module ROM
       #
       # @api public
       def [](filter)
-        api.attributes(filter) || EMPTY_ARRAY
+        directory.attributes(filter) || EMPTY_ARRAY
       end
 
       # Directory attributes identifiers and descriptions
@@ -78,25 +83,15 @@ module ROM
       #
       # @api public
       def attribute_types
-        api.attribute_types
+        directory.attribute_types
       end
 
       # Disconnect from the gateway's directory
       #
       # @api public
       def disconnect
-        api.disconnect
+        directory.disconnect
       end
-
-
-      # TODO: wrap with shot-term caching ie: 60 seconds, set by class attribute
-      # CACHE = Moneta.build do
-      #   use :Expires
-      #   use :Transformer, key: [:marshal, :base64], value: :marshal
-      #   adapter :Memory
-      # end
-      # CACHE.fetch(options) do
-
 
       # Return dataset with the given name
       #
@@ -106,12 +101,12 @@ module ROM
       #
       # @api public
       def dataset(filter)
-        connection.connect unless connection.alive?
+        # connection.connect unless connection.alive?
 
-        Dataset.new(api, filter)
+        Dataset.new(directory, filter)
 
-        rescue *ERROR_MAP.keys => e
-          raise ERROR_MAP.fetch(e.class, Error), e
+        # rescue *ERROR_MAP.keys => e
+        #   raise ERROR_MAP.fetch(e.class, Error), e
       end
 
       # @param logger [Logger]
@@ -127,20 +122,20 @@ module ROM
       #
       # @api public
       def database_type
-        api.directory_type
+        directory.type
       end
 
       alias directory_type database_type
 
       private
 
-      # Wrapper for ROM::LDAP::Connection
+      # Wrapper for Connection and Logger
       #
-      # @return [Dataset::API] an api instance
+      # @return [Directory] ldap server object
       #
       # @api private
-      def api
-        @api ||= Dataset::API.new(connection, logger)
+      def directory
+        @directory ||= Directory.new(connection, options)
       end
 
       def connection
@@ -148,21 +143,22 @@ module ROM
           @conn
         else
           @conn = Connection.new(
-            server:           directory[:server],
-            connect_timeout:  options[:time],
-            read_timeout:     options[:time],
-            write_timeout:    options[:time]
+            server:           server[:server],
+            connect_timeout:  options[:timeout],
+            read_timeout:     options[:timeout],
+            write_timeout:    options[:timeout]
             # on_connect: proc {}
             # proxy_server:
           )
-
-          @conn.directory_options = options # base, size, time
-
-          pdu = bind! unless directory[:username].nil? # simple only
+          pdu = bind! unless server[:username].nil?
           (pdu && pdu.success?) ? @conn : pdu
 
           @conn
         end
+      end
+
+      def disconnect
+        connection.close
       end
 
       def connected?
@@ -170,10 +166,7 @@ module ROM
       end
 
       def bind!
-        connection.bind(
-          username: directory[:username],
-          password: directory[:password]
-        )
+        connection.bind(username: server[:username], password: server[:password])
       end
     end
   end

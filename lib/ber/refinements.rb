@@ -1,6 +1,7 @@
-# Used in BER::Converter, ROM::LDAP::Connection and its operation modules.
-
-require 'ber/function'
+#
+# Used in BER::Converter,
+#   ROM::LDAP::Connection and its operation modules.
+#
 require 'ber/refinements/array'
 require 'ber/refinements/false_class'
 require 'ber/refinements/integer'

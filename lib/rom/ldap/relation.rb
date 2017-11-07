@@ -14,6 +14,11 @@ module ROM
 
       # struct_namespace LDAP:Struct
 
+      # specify a scope in the relation
+      # defines :scope
+      # defines :filter
+
+
       include LDAP
       include Reading
       include Writing
@@ -33,7 +38,6 @@ module ROM
       end
 
 
-
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
         event[:dataset].filter_string.to_s
       end
@@ -44,14 +48,7 @@ module ROM
       schema_inferrer   LDAP::Schema::Inferrer.new.freeze
       schema_dsl        LDAP::Schema::DSL
 
-      forward(*Dataset::QueryDSL.query_methods)
-
-
-
-      # specify a scope in the relation
-      # defines :scope
-      # defines :filter
-
+      forward(*QueryDSL.query_methods)
 
       def primary_key
         attribute = schema.find(&:primary_key?)

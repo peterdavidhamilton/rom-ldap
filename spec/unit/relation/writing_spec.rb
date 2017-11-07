@@ -31,7 +31,7 @@ describe ROM::LDAP::Relation, 'command interface' do
     accounts.where(uid: 'batman').update(missing: 'Hulk').must_equal [{
       dn: ['uid=batman,ou=users,dc=example,dc=com'],
       sn: ['Wayne'],
-      'apple-imhandle': ['bruce-wayne'],
+      appleimhandle: ['bruce-wayne'],
       cn: ['The Dark Knight'],
       objectclass: %w[
         top
@@ -50,7 +50,7 @@ describe ROM::LDAP::Relation, 'command interface' do
     accounts.where(uid: 'batman').update(sn: 'Stark').must_equal [{
       dn: ['uid=batman,ou=users,dc=example,dc=com'],
       sn: ['Wayne'],
-      'apple-imhandle': ['bruce-wayne'],
+      appleimhandle: ['bruce-wayne'],
       cn: ['The Dark Knight'],
       objectclass: %w[
         top

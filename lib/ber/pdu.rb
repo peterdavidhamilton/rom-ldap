@@ -2,39 +2,43 @@ require 'ostruct'
 require 'ber/struct'
 
 module BER
+  # Protocol Data Units
+  #
   class PDU
     Error = Class.new(RuntimeError)
 
     SUCCESS_CODES = %i[
       success
+      time_limit_exceeded
+      size_limit_exceeded
       compare_true
       compare_false
       referral
       sasl_bind_in_progress
     ].freeze
 
-    # ResultCodeSearchSuccess = [
-    #   :success,
-    #   :time_limit_exceeded,
-    #   :size_limit_exceeded
-    # ].freeze
+    LIMIT_CODES = %i[
+      time_limit_exceeded
+      size_limit_exceeded
+    ].freeze
 
     # @param ber_object [Array]
     #
     def initialize(ber_object)
       begin
-        message, tag, third_bit = ber_object
+        message, tag, ctrls = ber_object
 
         @message_id = message.to_i
         @app_tag    = tag.ber_identifier & 0x1f
         @controls   = []
         @res        = {}
-      rescue StandardError => e
-        raise Error, "LDAP PDU Format Error: #{e.message}"
+
+      rescue Exception => e
+        raise Error, "#{self.class}: #{e.message}"
       end
 
       parse_tag(pdu_type, tag)
-      parse_controls(third_bit) if third_bit
+      parse_controls(ctrls) if ctrls
     end
 
     attr_reader :message_id
@@ -44,20 +48,24 @@ module BER
     attr_reader :controls
     attr_reader :bind_parameters
     attr_reader :extended_response
-    # attr_reader :search_entry
     attr_reader :search_parameters
     attr_reader :search_referrals
-
-    LOGGER = Logger.new(STDOUT)
-
-    def search_entry
-      LOGGER.debug(@search_entry.dn) # debugging api#total
-      @search_entry
-    end
 
     alias msg_id          message_id
     alias result_controls controls
     alias ldap_controls   controls
+
+
+    # Parsed result from directory yielded by connection.
+    #   Logs to STDOUT for debugging.
+    #
+    # @return [BER::Struct]
+    #
+    # @api public
+    def search_entry
+      LOGGER.debug(@search_entry.dn) if ENV['PDU']
+      @search_entry
+    end
 
     def inspect
       %(<##{self.class}
@@ -82,19 +90,19 @@ module BER
     end
 
     def error_message
-      @res.fetch(:error, EMPTY_STRING)
+      @res.fetch(:error, nil)
     end
 
     def result_code
-      @res.fetch(:code, EMPTY_STRING)
+      @res.fetch(:code, nil)
     end
 
     def matched_dn
-      @res.fetch(:dn, EMPTY_STRING)
+      @res.fetch(:dn, nil)
     end
 
     def result_server_sasl_creds
-      @res.fetch(:serverSaslCreds)
+      @res.fetch(:server_sasl_credentials)
     end
 
     def referral?
@@ -102,7 +110,7 @@ module BER
     end
 
     def success?
-      SUCCESS_CODES.include?(@result_symbol)
+      SUCCESS_CODES.include?(@sym)
     end
 
     def failure?
@@ -141,7 +149,7 @@ module BER
     end
 
     def decode_result
-      @result_symbol, @message, @info, @flag = BER.lookup(:result, result_code)
+      @sym, @message, @info, @flag = BER.lookup(:result, result_code)
     end
 
     def pdu_type
@@ -191,7 +199,7 @@ module BER
     def parse_bind_response(sequence)
       check_sequence_size(sequence, 3)
       parse_ldap_result(sequence)
-      @res[:serverSaslCreds] = sequence[3] if sequence.length >= 4
+      @res[:server_sasl_credentials] = sequence[3] if sequence.length >= 4
       result
     end
 
@@ -215,7 +223,6 @@ module BER
     end
 
     def parse_ldap_search_request(sequence)
-      binding.pry
       s = OpenStruct.new
       s.base_object,
       s.scope,
@@ -230,9 +237,7 @@ module BER
 
     def parse_bind_request(sequence)
       s = OpenStruct.new
-      s.version,
-      s.name,
-      s.authentication = sequence
+      s.version, s.name, s.authentication = sequence
       @bind_parameters = s
     end
 

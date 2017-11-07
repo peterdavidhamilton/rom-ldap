@@ -1,22 +1,23 @@
 require 'ber/ldif'
 
+# BER.formatter = ->(v) { ROM::LDAP::Functions.snake_case_symbol(v) }
+
 module BER
   class Struct
     module ClassMethods
       def rename(key)
-        return default_normaliser(key) if formatter.nil?
-        formatter.call(key)
+        return default_normaliser(key) if BER.formatter.nil?
+        BER.formatter.call(key)
       end
 
       private
 
       def default_normaliser(key)
         key = key.to_s.downcase
+        key = key.tr('-','')
         key = key[0..-2] if key[-1] == '='
         key.to_sym
       end
-
-      attr_accessor :formatter
 
       def _load(entry)
         from_single_ldif_string(entry)
@@ -35,9 +36,7 @@ module BER
     extend ClassMethods
 
     def initialize(dn = nil, attributes = EMPTY_HASH)
-      @dn = dn
-      @source = {}
-      @canonical = {}
+      @dn, @source, @canonical = dn, {}, {}
 
       attributes.each do |key, value|
         store_source('dn', dn)
@@ -60,15 +59,13 @@ module BER
     alias fetch []
 
     def first(key)
-      if value = self[key]
-        value.first
-      end
+      value = self[key]
+      value.first if value
     end
 
     def last(key)
-      if value = self[key]
-        value.last
-      end
+      value = self[key]
+      value.last if value
     end
 
     def keys
@@ -106,7 +103,7 @@ module BER
     end
 
     def to_ldif
-      BER::LDIF.new(self).to_ldif
+      BER::LDIF.new(self, comments: Time.now).to_ldif
     end
 
     def respond_to_missing?(*args)

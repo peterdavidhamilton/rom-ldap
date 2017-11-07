@@ -25,7 +25,7 @@ module RelationSetup
     end
 
     factories.define(customers: :account) do |f|
-      f.gidnumber 9998
+      f.gidnumber      9998
     end
 
     factories.define(colleagues: :account) do |f|

@@ -1,36 +1,28 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/dataset/query_dsl'
-require 'rom/ldap/dataset/api'
+require 'rom/ldap/query_dsl'
 require 'ber/ldif'
 
 module ROM
   module LDAP
     class Dataset
-      # include ROM::EnumerableDataset
-
-      # def self.row_proc
-      #   -> tuple { tuple.each_with_object({}) { |(k,v), h| h[k.to_sym] = v } }
-      # end
-
       extend  Initializer
       include Enumerable
       include Dry::Equalizer(:criteria)
 
-      param  :api,      reader: :private
-      param  :filter,   reader: :private # original dataset table name
-      option :criteria, reader: :private, default: proc { {} }
-
-      option :offset, reader: false, optional: true
-      option :limit,  reader: false, optional: true
+      param  :directory, reader: :private
+      param  :filter,    reader: :private
+      option :criteria,  reader: :private, default: proc { {} }
+      option :offset,    reader: false, optional: true
+      option :limit,     reader: false, optional: true
 
 
       # @api public
       def opts
         Hash[
-          offset: @offset,
-          limit: @limit,
-          criteria: @criteria,
+          offset:     @offset,
+          limit:      @limit,
+          criteria:   @criteria,
           pagination: paginated?
         ]
       end
@@ -58,7 +50,7 @@ module ROM
       #
       # @public
       def db
-        ::OpenStruct.new(db: ::OpenStruct.new(database_type: api.directory_type))
+        ::OpenStruct.new(db: ::OpenStruct.new(database_type: directory.type))
       end
 
 
@@ -130,14 +122,14 @@ module ROM
       #
       # @api public
       def authenticated?(password)
-        api.bind_as(filter: filter_string, password: password)
+        directory.bind_as(filter: filter_string, password: password)
       end
 
       # @return [Boolean]
       #
       # @api public
       def exist?
-        results = api.exist?(filter_string)
+        results = directory.exist?(filter_string)
         reset!
         results
       end
@@ -154,7 +146,7 @@ module ROM
       #
       # @api public
       def total
-        results = api.count(filter_string)
+        results = directory.count(filter_string)
         reset!
         results
       end
@@ -163,7 +155,7 @@ module ROM
       #
       # @api public
       def include?(key)
-        results = api.include?(filter_string, key)
+        results = directory.include?(filter_string, key)
         reset!
         results
       end
@@ -176,7 +168,7 @@ module ROM
       #
       # @api public
       def add(tuple)
-        api.add(tuple)
+        directory.add(tuple)
       end
 
       # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:modify
@@ -184,7 +176,7 @@ module ROM
       # @api public
       def modify(tuples, args)
         tuples.each do |t|
-          api.modify(*t[:dn], args.map { |k, v| [:replace, k, v] })
+          directory.modify(*t[:dn], args.map { |k, v| [:replace, k, v] })
         end
       end
 
@@ -193,7 +185,7 @@ module ROM
       # @api public
       def delete(tuples)
         tuples.each do |t|
-          api.delete(*t[:dn])
+          directory.delete(*t[:dn])
         end
       end
 
@@ -203,13 +195,22 @@ module ROM
       #
       # @api public
       def to_ldif
-        results = api.directory(filter: filter_string)
-        reset!
-        BER::LDIF.new(results).to_ldif
+        # results = directory.query(filter: filter_string)
+        # reset!
+        BER::LDIF.new(each).to_ldif
       end
 
 
       private
+
+      # @return [Array<Hash>]
+      #
+      # @api private
+      def search(&block)
+        results = directory.search(filter_string, &block)
+        reset!
+        results
+      end
 
       def query_dsl
         @query_dsl ||= QueryDSL.new
@@ -239,16 +240,6 @@ module ROM
       def paginated?
         !!@limit && !!@offset
       end
-
-      # @return [Array<Hash>]
-      #
-      # @api private
-      def search(&block)
-        results = api.search(filter_string, &block)
-        reset!
-        results
-      end
-
     end
   end
 end

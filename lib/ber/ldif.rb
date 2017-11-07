@@ -6,7 +6,7 @@ module BER
 
     param  :tuples
     option :version,  default: proc { 3 }
-    option :comments, default: proc { [] }
+    option :comments, default: proc { EMPTY_ARRAY }
 
     def to_ldif
       ary = []

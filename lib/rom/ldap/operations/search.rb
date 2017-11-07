@@ -1,6 +1,6 @@
 using ::BER
 
-require 'rom/ldap/dataset/filter/builder'
+require 'rom/ldap/filter/builder'
 
 module ROM
   module LDAP
@@ -16,10 +16,8 @@ module ROM
       #
       # @api public
       def search(
-        filter:             self.class.default_filter,
-        base:               directory_options[:base],
-        # size:               directory_options[:size],
-        # time:               directory_options[:timeout],
+        filter:             ,
+        base:               ,
         size:               nil,
         time:               nil,
         scope:              SCOPE_SUBTREE,
@@ -28,40 +26,27 @@ module ROM
         attributes_only:    false,
         return_referrals:   false,
         sort_controls:      false,
-        ignore_server_caps: false,
-        paged:              true,
+        unlimited:          true,
         message_id:         next_msgid
       )
-
-        # otherwise resets limited to 1_000
-        paged = false if ignore_server_caps
 
         raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
-        filter      = build_query(filter)
-        base        ||= self.class.default_base
-        size        = size.to_i
-        time        = time.to_i
-        refs        = return_referrals
-        sort        = sort_controls
-        ber_attrs   = Array(attributes).map { |attr| attr.to_s.to_ber }
-        ber_sort    = encode_sort_controls(sort)
-
+        filter         = build_query(filter || self.class.default_filter)
+        base           ||= self.class.default_base
+        size           = size.to_i
+        time           = time.to_i
+        refs           = return_referrals
+        sort           = sort_controls
+        ber_attrs      = Array(attributes).map { |attr| attr.to_s.to_ber }
+        ber_sort       = encode_sort_controls(sort)
         rfc2696_cookie = [126, EMPTY_STRING]
-        result_pdu     = nil                  # result object
-        n_results      = 0                    # result counter
+        result_pdu     = nil
+        query_limit    = 0..126.include?(size) ? size : 0
+        n_results      = 0
 
         loop do
-          query_limit = 0
-
-          if size > 0
-            query_limit = if paged
-                            ((size - n_results) < 126 ? (size - n_results) : 0)
-                          else
-                            size
-                          end
-          end
 
           request = [
             base.to_ber,
@@ -76,7 +61,7 @@ module ROM
 
           controls = []
 
-          if paged
+          if unlimited
             controls <<
               [
                 PAGED_RESULTS.to_ber,
@@ -141,7 +126,7 @@ module ROM
       private
 
       def build_query(filter)
-        Dataset::Filter::Builder.construct(filter) if filter.is_a?(String)
+        Filter::Builder.construct(filter) if filter.is_a?(String)
       end
 
       def encode_sort_controls(sort_definitions)

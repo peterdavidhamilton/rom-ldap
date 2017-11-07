@@ -7,7 +7,6 @@ require 'rom/ldap/operations'
 module ROM
   module LDAP
     class Connection < Net::TCPClient
-
       extend Dry::Core::ClassAttributes
 
       defines :ldap_version
@@ -18,8 +17,6 @@ module ROM
       default_base    EMPTY_STRING
       default_filter  '(objectClass=*)'.freeze
 
-      attr_accessor :directory_options
-
       include Search
       include Create
       include Delete
@@ -28,31 +25,18 @@ module ROM
 
       private
 
-      def use_logger=(logger)
-        @logger = logger
-      end
-
-      def logger
-        binding.pry
-        @logger || directory_options[:logger]
-      end
-
       def find_pdu(symbol)
         ::BER.reverse_lookup(:pdu, symbol)
       end
 
       # TODO: NetTCP timeout in here
       # socket_read(length, buffer, timeout)
-
       def ldap_read(syntax = ::BER::ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)
         # return unless ber_object = socket_read(syntax, nil, read_timeout)
         # return unless ber_object = read(syntax)
-
         ::BER::PDU.new(ber_object)
       end
-
-      # time   = directory_options[:time] || self.class.connect_timeout
 
       def ldap_write(request, controls = nil, message_id = next_msgid)
         packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
