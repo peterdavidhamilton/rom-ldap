@@ -12,6 +12,17 @@ module ContainerSetup
     ROM::LDAP::Connection.new(server: '127.0.0.1:10389')
   end
 
+  let(:formatter) do
+    ->(key) {
+      # ROM::LDAP::Functions.to_method_name(key)
+
+      key = key.to_s.downcase
+      key = key.tr('-', '')
+      key = key[0..-2] if key[-1] == '='
+      key.to_sym
+    }
+  end
+
   # let(:conf)      { TestConfiguration.new(:ldap, conn) }
   let(:conf)      { ROM::Configuration.new(:ldap, params, directory_options) }
   let(:container) { ROM.container(conf) }
@@ -20,9 +31,12 @@ module ContainerSetup
   let(:factories) { ROM::Factory.configure { |conf| conf.rom = container }}
 
   before do
+
+    ROM::LDAP::Directory::Entity.use_formatter(formatter)
+
     # everyone
     conf.relation(:accounts) do
-      schema('(&(objectclass=person)(uid=*))', infer: true) do
+      schema('(&(objectclass=person)(uid=*))', as: :accounts, infer: true) do
         attribute :uidnumber, ROM::LDAP::Types::Serial
       end
 

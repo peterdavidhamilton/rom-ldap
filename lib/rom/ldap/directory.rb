@@ -47,7 +47,8 @@ module ROM
       #
       # @api public
       def attribute_types
-        schema_attribute_types.flat_map(&method(:parse_attribute_type)).reject(&:nil?).sort_by(&:first)
+        types = schema_attribute_types.flat_map(&method(:parse_attribute_type))
+        types.flatten.reject(&:nil?).sort_by(&:first)
       end
 
       private
@@ -76,21 +77,26 @@ module ROM
       #
       # @api private
       def parse_attribute_type(type)
-        return unless attribute_name = type[/NAME '(\S+)'/, 1]
-        {
-          # name:        Functions.to_method_name(attribute_name),
-          name:        BER.formatter(attribute_name),
-          # name:        BER::Entity.rename(attribute_name),
-          description: type[/DESC '(.+)' [A-Z]+/, 1],
-          oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
-          matcher:     type[/EQUALITY (\S+)/, 1],
-          substr:      type[/SUBSTR (\S+)/, 1],
-          ordering:    type[/ORDERING (\S+)/, 1],
-          single:      !type.scan(/SINGLE-VALUE/).empty?,
-          modifiable:  !type.scan(/NO-USER-MODIFICATION/).empty?,
-          usage:       type[/USAGE (\S+)/, 1],
-          source:      type[/X-SCHEMA '(\S+)'/, 1]
-        }
+        attribute_names = if type[/NAME '(\S+)'/, 1]
+                            type[/NAME '(\S+)'/, 1]
+                          elsif type[/NAME \( '(\S+)' '(\S+)' \)/]
+                            [Regexp.last_match(1), Regexp.last_match(2)]
+                          end
+
+        Array(attribute_names).map do |name|
+          {
+            name:        Entity.rename(name),
+            description: type[/DESC '(.+)' [A-Z]+/, 1],
+            oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
+            matcher:     type[/EQUALITY (\S+)/, 1],
+            substr:      type[/SUBSTR (\S+)/, 1],
+            ordering:    type[/ORDERING (\S+)/, 1],
+            single:      type.scan(/SINGLE-VALUE/).any?,
+            modifiable:  type.scan(/NO-USER-MODIFICATION/).any?,
+            usage:       type[/USAGE (\S+)/, 1],
+            source:      type[/X-SCHEMA '(\S+)'/, 1]
+          }
+        end
       end
 
       memoize :root, :sub_schema, :attribute_types

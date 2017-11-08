@@ -96,11 +96,8 @@ module ROM
 
             case pdu.app_tag
             when pdu_lookup(:search_returned_data)
-
               counter += 1
-              message = "#{self.class}##{__callee__} #{counter}: #{pdu.search_entry.dn}"
-              logger.debug(message)
-
+              logger.debug("#{self.class}##{__callee__} #{counter}: #{pdu.search_entry.dn}")
               yield pdu.search_entry if block_given?
 
             when pdu_lookup(:search_result_referral)
@@ -146,7 +143,7 @@ module ROM
 
       private
 
-      # Delegate to Filter::Builder#contruct
+      # Delegate to Filter::Builder#construct
       #
       # api private
       def build_filter(filter)

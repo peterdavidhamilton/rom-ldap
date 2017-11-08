@@ -20,7 +20,7 @@ describe ROM::Struct,
 
 
     before do
-      BER.use_formatter(formatter)
+      ROM::LDAP::Directory::Entity.use_formatter(formatter)
     end
 
     it 'infered schema is snake_case' do
@@ -29,7 +29,7 @@ describe ROM::Struct,
     end
 
     after do
-      BER.use_formatter(nil)
+       ROM::LDAP::Directory::Entity.use_formatter(nil)
     end
   end
 end

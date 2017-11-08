@@ -1,3 +1,4 @@
+require 'ber'
 require 'rom/ldap/types'
 require 'rom/initializer'
 
@@ -42,6 +43,7 @@ module ROM
         end
 
         STRING_MATCHERS = %w[
+          caseIgnoreIA5Match
           caseIgnoreListMatch
           caseIgnoreMatch
           caseExactMatch

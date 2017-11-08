@@ -1,7 +1,10 @@
+require 'ber'
+
 using ::BER
 
 require 'net/tcp_client'
 require 'dry/core/class_attributes'
+require 'rom/ldap/directory/pdu'
 require 'rom/ldap/connection/authenticate'
 require 'rom/ldap/connection/create'
 require 'rom/ldap/connection/read'
@@ -47,7 +50,7 @@ module ROM
         return unless ber_object = socket.read_ber(syntax)
         # return unless ber_object = socket_read(syntax, nil, read_timeout)
         # return unless ber_object = read(syntax)
-        ::BER::PDU.new(ber_object)
+        Directory::PDU.new(ber_object)
       end
 
       # @api private

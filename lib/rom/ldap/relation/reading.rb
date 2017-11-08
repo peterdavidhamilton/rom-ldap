@@ -51,26 +51,27 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        def unique?
+        def one?
           dataset.one?
         end
 
-        alias distinct? unique?
+        alias distinct? one?
+        alias unique? one?
 
         # @return [Boolean]
         #
         # @api public
-        def exist?
-          dataset.exist?
+        def any?
+          dataset.any?
         end
 
-        alias any? exist?
+        alias exist? any?
 
         # @return [Boolean]
         #
         # @api public
         def none?
-          !exist?
+          dataset.none?
         end
 
         # Find tuple by primary_key - required by commands

@@ -1,7 +1,7 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
 require 'rom/ldap/query_dsl'
-require 'ber/ldif'
+require 'rom/ldap/directory/ldif'
 
 module ROM
   module LDAP
@@ -124,10 +124,8 @@ module ROM
       # @return [Boolean]
       #
       # @api public
-      def exist?
-        results = directory.exist?(filter_string)
-        reset!
-        results
+      def any?
+        each.any?
       end
 
       # @return [Integer]
@@ -182,7 +180,7 @@ module ROM
       #
       # @api public
       def to_ldif
-        BER::LDIF.new(each).to_ldif
+        Directory::LDIF.new(each, comments: Time.now).to_ldif
       end
 
       private

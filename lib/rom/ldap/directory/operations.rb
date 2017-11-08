@@ -9,14 +9,13 @@ module ROM
         # @api public
         def query(options)
           result_set = []
-          tuples     = !options.delete(:result_only)
 
-          @result = connection.search(base: base, **options) do |entry|
-            result_set << entry
-            yield entry if block_given?
+          @result = connection.search(base: base, **options) do |entity|
+            result_set << entity
+            yield entity if block_given?
           end
 
-          tuples ? result_set.sort_by(&:dn) : !result_set.empty?
+          result_set.sort_by(&:dn)
         end
 
         attr_reader :result # PDU object
@@ -69,13 +68,6 @@ module ROM
         # @api public
         def total(filter)
           query(filter: filter, attributes: %i[dn]).count
-        end
-
-        # @return [Boolean]
-        #
-        # @api public
-        def exist?(filter)
-          query(filter: filter, result_only: true)
         end
 
         # @param tuple [Hash]

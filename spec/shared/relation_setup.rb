@@ -1,4 +1,4 @@
-require 'ber/password'
+require 'rom/ldap/directory/password'
 
 module RelationSetup
   include ContainerSetup
@@ -14,7 +14,7 @@ module RelationSetup
     factories.define(:account) do |f|
       f.uid           user_name
       f.dn            "uid=#{user_name},ou=users,dc=example,dc=com"
-      f.userpassword  BER::Password.generate(:sha, user_name)
+      f.userpassword  ROM::LDAP::Directory::Password.generate(:sha, user_name)
       f.uidnumber     { fake(:number, :number, 4) }
       f.gidnumber     { fake(:number, :number, 4) }
       f.cn            { fake(:name, :name_with_middle) }
@@ -25,7 +25,7 @@ module RelationSetup
     end
 
     factories.define(customers: :account) do |f|
-      f.gidnumber      9998
+      f.gidnumber 9998
     end
 
     factories.define(colleagues: :account) do |f|

@@ -1,7 +1,4 @@
-require 'ber'
-
 require 'rom/core'
-
 require 'rom/ldap/version'
 require 'rom/ldap/constants'
 require 'rom/ldap/connection'
