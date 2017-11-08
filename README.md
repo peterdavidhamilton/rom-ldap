@@ -37,7 +37,4 @@ Server Implementations:
 
 ## TODO
 
-- Uncouple from Net::LDAP.
-    Replace Net::LDAP::Entry with a Dry::Struct
-    #entry_to_json method [http://ldap3.readthedocs.io/abstraction.html#entry]
-    #entry_to_ldif method
+- add instrumentation to connection/dsl/api classes

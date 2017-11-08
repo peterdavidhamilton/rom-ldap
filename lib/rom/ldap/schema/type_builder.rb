@@ -1,3 +1,4 @@
+require 'ber'
 require 'rom/ldap/types'
 require 'rom/initializer'
 
@@ -41,41 +42,34 @@ module ROM
           attributes.select { |a| a[:name].downcase.eql?(name) }.first
         end
 
-
         STRING_MATCHERS = %w[
-                              caseIgnoreListMatch
-                              caseIgnoreMatch
-                              caseExactMatch
-                              distinguishedNameMatch
-                              objectIdentifierMatch
-                              octetStringMatch
-                              protocolInformationMatch
-                              telephoneNumberMatch
-                            ].freeze
+          caseIgnoreIA5Match
+          caseIgnoreListMatch
+          caseIgnoreMatch
+          caseExactMatch
+          distinguishedNameMatch
+          objectIdentifierMatch
+          octetStringMatch
+          protocolInformationMatch
+          telephoneNumberMatch
+        ].freeze
 
         # @return [String]
         #
         # @api private
         def map_type(attribute)
           case attribute[:matcher]
-          when *STRING_MATCHERS       then 'String'
           when 'booleanMatch'         then 'Bool'
           when 'integerMatch'         then 'Int'
           when 'generalizedTimeMatch' then 'Time'
           when nil
             type = attribute[:single] ? 'String' : 'Array'
-            oids.fetch(attribute[:oid], type)
+
+            ::BER.lookup(:oid, attribute[:oid]) || type
+          when *STRING_MATCHERS then 'String'
           else
             raise "#{self.class}##{__callee__} #{attribute[:matcher]} not known"
           end
-        end
-
-        # @return [Hash]
-        #
-        # @api private
-        def oids
-          oid_hash = ROM::LDAP.root.join('oids.yaml')
-          @oids ||= Psych.load_file(oid_hash)
         end
       end
     end

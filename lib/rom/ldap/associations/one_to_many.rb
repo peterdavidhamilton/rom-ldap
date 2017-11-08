@@ -4,7 +4,6 @@ module ROM
   module LDAP
     module Associations
       class OneToMany < ROM::Associations::OneToMany
-
         # @api public
         def call(target: self.target)
           binding.pry
@@ -14,7 +13,7 @@ module ROM
           if view
             apply_view(schema, relation)
           else
-            schema.(relation)
+            schema.call(relation)
           end
         end
 

@@ -1,9 +1,5 @@
 module ROM
   module LDAP
-    def self.root
-      Pathname(File.dirname(__dir__))
-    end
-
-    VERSION = '0.0.6'.freeze
+    VERSION = '0.0.7'.freeze
   end
 end

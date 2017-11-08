@@ -1,5 +1,6 @@
 require 'logger'
 require 'rom/gateway'
+require 'rom/ldap/directory'
 require 'rom/ldap/dataset'
 
 module ROM
@@ -10,23 +11,23 @@ module ROM
     class Gateway < ROM::Gateway
       adapter :ldap
 
-      # @!attribute [r] client
-      #   @return [Object, Hash] Net::LDAP client instance
-      attr_reader :client
-
       # @!attribute [r] logger
       #   @return [Object] configured gateway logger
       attr_reader :logger
 
       # @!attribute [r] options
-      #   @return [Hash] Options passed to API search
+      #   @return [Hash] Options passed to directory
       attr_reader :options
+
+      # @!attribute [r] options
+      #   @return [Hash] Options passed to connection
+      attr_reader :server
 
       # Initialize an LDAP gateway
       #
       # Gateways are typically initialized via ROM::Configuration object
       #
-      # @overload initialize(uri)
+      # @overload initialize(params)
       #   Connects to a directory via params hash
       #
       #   @example
@@ -34,13 +35,16 @@ module ROM
       #
       #   @param [Hash]
       #
-      # @overload initialize(uri, options)
-      #   Connects to a database via URI and options
+      # @overload initialize(params, options)
+      #   Connects to a database via params and options
       #
       #   @example
-      #     ROM.container(:ldap, {}, size: 100, time: 3)
+      #     ROM.container(:ldap,
+      #       {server:, username:, password:},
+      #       {base: '', size: 100, timeout: 3}
+      #     )
       #
-      #   @param [Hash] passed to Net::LDAP#new
+      #   @param [Hash] passed to ROM::LDAP::Connection#new
       #
       #   @param options [Hash] default server options
       #
@@ -48,22 +52,12 @@ module ROM
       #
       #   @option options [Integer] :size Directory result limit
       #
-      # @overload initialize(connection)
-      #   Creates a gateway from an existing directory connection.
-      #   This works with Net::LDAP connections exclusively.
-      #
-      #   @example
-      #     ROM.container(:ldap, Net::LDAP.new)
-      #
-      #   @param [Net::LDAP] connection a connection instance
-      #
       # @return [LDAP::Gateway]
-      #
-      # @see https://github.com/ruby-ldap/ruby-net-ldap/blob/master/lib/net/ldap.rb
       #
       # @api public
       def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
-        @client  = connect(server)
+        @server  = server
+        @conn    = nil
         @options = options
         @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
 
@@ -78,7 +72,7 @@ module ROM
       #
       # @api public
       def [](filter)
-        api.attributes(filter) || EMPTY_ARRAY
+        directory.attributes(filter) || EMPTY_ARRAY
       end
 
       # Directory attributes identifiers and descriptions
@@ -87,14 +81,14 @@ module ROM
       #
       # @api public
       def attribute_types
-        api.attribute_types
+        directory.attribute_types
       end
 
       # Disconnect from the gateway's directory
       #
       # @api public
       def disconnect
-        api.disconnect
+        directory.disconnect
       end
 
       # Return dataset with the given name
@@ -104,8 +98,8 @@ module ROM
       # @return [Dataset]
       #
       # @api public
-      def dataset(filter)
-        Dataset.new(api, filter)
+      def dataset(filter) # OPTIMIZE: base alternative base along with table name to dataset
+        Dataset.new(directory, filter)
       end
 
       # @param logger [Logger]
@@ -121,53 +115,54 @@ module ROM
       #
       # @api public
       def database_type
-        api.directory_type
+        directory.type
       end
 
-      alias_method :directory_type, :database_type
+      alias directory_type database_type
 
       private
 
-      # Wrapper for Net::LDAP client
+      # Wrapper for Connection and Logger
       #
-      # @return [Dataset::API] an api instance
+      # @return [Directory] ldap server object
       #
       # @api private
-      def api
-        @api ||= Dataset::API.new(connection, logger, options)
+      def directory
+        @dir ||= Directory.new(connection, options).load_rootdse!
       end
 
-      # Connect to directory or reuse established connection instance
-      #
-      # @return [Net::LDAP] a client instance
-      #
-      # @param server [Hash,Net::LDAP] a client instance or params
-      #
-      # @api private
-      def connect(server)
-        case server
-        when ::Net::LDAP
-          server
-        else
-          ::Net::LDAP.new(server)
-        end
-      end
-
-      # Bind to directory and rescue errors
-      #
-      # @return [Net::LDAP] a client instance
-      #
-      # @api private
       def connection
-        begin
-          client.bind
-        rescue *ERROR_MAP.keys => e
-          raise ERROR_MAP.fetch(e.class, Error), e
+        if connected?
+          @conn
         else
-          client
+          @conn = Connection.new(
+            server:           server[:server],
+            connect_timeout:  options[:timeout],
+            read_timeout:     options[:timeout],
+            write_timeout:    options[:timeout]
+            # on_connect: proc {}
+            # proxy_server:
+          )
+
+          @conn.use_logger(@logger)
+
+          bind! unless server[:username].nil?
+
+          @conn
         end
       end
 
+      def disconnect
+        connection.close
+      end
+
+      def connected?
+        !@conn.nil? && @conn.alive?
+      end
+
+      def bind!
+        connection.bind(username: server[:username], password: server[:password])
+      end
     end
   end
 end

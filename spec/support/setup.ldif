@@ -1,6 +1,14 @@
 version: 1
 
 #
+# Partition
+#
+# dn: dc=example,dc=com
+# dc: example
+# objectClass: top
+# objectClass: domain
+
+#
 # Top Levels
 #
 dn: ou=users,dc=example,dc=com
@@ -76,6 +84,7 @@ dn: uid=test2,ou=users,dc=example,dc=com
 cn: test2
 givenName: test2
 mail: test2@example.com
+apple-imhandle: @test2
 objectClass: extensibleObject
 objectClass: inetOrgPerson
 objectClass: organizationalPerson

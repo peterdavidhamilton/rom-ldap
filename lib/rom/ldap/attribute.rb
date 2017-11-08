@@ -6,7 +6,6 @@ module ROM
     #
     # @api public
     class Attribute < ROM::Attribute
-
       # @return [Boolean]
       def multiple?
         meta[:multiple]
@@ -29,8 +28,6 @@ module ROM
       def qualified(table_alias = nil)
         # binding.pry
       end
-
     end
-
   end
 end

@@ -5,14 +5,21 @@ require 'rom/ldap/attribute'
 require 'rom/ldap/transaction'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
-require 'rom/ldap/relation/defaults'
 
 module ROM
   module LDAP
     class Relation < ROM::Relation
       adapter :ldap
 
-      # struct_namespace ::ROM::LDAP::Struct
+      # struct_namespace LDAP:Struct
+
+      # GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
+      # USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
+
+      defines :base
+      # defines :filter
+
+      # filter USERS
 
       include LDAP
       include Reading
@@ -20,26 +27,28 @@ module ROM
 
       extend Notifications::Listener
 
+      subscribe('configuration.relations.schema.set', adapter: :ldap) do |event|
+        # schema   = event[:schema]
+        relation = event[:relation]
 
-      subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        # event[:relation]
-        event[:dataset].filter_string.to_s
+        relation.dataset do
+          # puts to_ldif
+          self # <ROM::LDAP::Dataset filter='(gidnumber=1050)'>
+
+          # db => OpenStruct { :db => OpenStruct { :database_type => :apacheds } }
+        end
       end
 
+      subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
+        event[:dataset].filter_string.to_s
+      end
 
       schema_class      LDAP::Schema
       schema_attr_class LDAP::Attribute
       schema_inferrer   LDAP::Schema::Inferrer.new.freeze
       schema_dsl        LDAP::Schema::DSL
 
-      forward(*Dataset::QueryDSL.query_methods)
-
-
-
-      # specify a scope in the relation
-      # defines :scope
-      # defines :filter
-
+      forward(*QueryDSL.query_methods)
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -51,7 +60,6 @@ module ROM
         end
       end
 
-
       # @yield [t] Transaction
       #
       # @return [Mixed]
@@ -60,8 +68,6 @@ module ROM
       def transaction(opts = EMPTY_HASH, &block)
         Transaction.new(dataset.db).run(opts, &block)
       end
-
-
 
       # Return raw query string
       #
@@ -72,12 +78,17 @@ module ROM
         dataset.filter_string.to_s
       end
 
-
       # @api private
       def self.associations
         schema.associations
       end
 
+      # @return [Relation]
+      #
+      # @api public
+      def assoc(name)
+        associations[name].call
+      end
 
       # available methods provided by DSL
       #
@@ -88,6 +99,10 @@ module ROM
         Dataset::DSL.query_methods.sort
       end
       private :query_methods
+
+      def base
+        where(base: self.class.base)
+      end
 
       def project(*names)
         with(schema: schema.project(*names.flatten))
@@ -105,10 +120,9 @@ module ROM
         with(schema: schema.prefix(prefix))
       end
 
-      def wrap(prefix=dataset.name)
+      def wrap(prefix = dataset.name)
         with(schema: schema.wrap(prefix))
       end
-
     end
   end
 end

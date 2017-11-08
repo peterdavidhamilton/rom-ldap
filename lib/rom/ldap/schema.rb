@@ -5,8 +5,6 @@ require 'rom/ldap/schema/inferrer'
 module ROM
   module LDAP
     class Schema < ROM::Schema
-
-
       # Create a new relation based on the schema definition
       #
       # @param [Relation] relation The source relation
@@ -17,7 +15,6 @@ module ROM
       def call(relation)
         relation.new(relation.dataset, schema: self)
       end
-
 
       # Project schema so that it only contains primary key
       #

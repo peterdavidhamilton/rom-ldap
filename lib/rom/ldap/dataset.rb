@@ -1,36 +1,27 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/dataset/query_dsl'
-require 'rom/ldap/dataset/api'
+require 'rom/ldap/query_dsl'
+require 'rom/ldap/directory/ldif'
 
 module ROM
   module LDAP
     class Dataset
-
-      # include ROM::EnumerableDataset
-
-      # def self.row_proc
-      #   -> tuple { tuple.each_with_object({}) { |(k,v), h| h[k.to_sym] = v } }
-      # end
-
       extend  Initializer
       include Enumerable
       include Dry::Equalizer(:criteria)
 
-      param  :api,      reader: :private
-      param  :filter,   reader: :private # original dataset table name
-      option :criteria, reader: :private, default: proc { {} }
-
-      option :offset, reader: false, optional: true
-      option :limit,  reader: false, optional: true
-
+      param  :directory, reader: :private
+      param  :filter,    reader: :private
+      option :criteria,  reader: :private, default: proc { {} }
+      option :offset,    reader: false, optional: true
+      option :limit,     reader: false, optional: true
 
       # @api public
       def opts
         Hash[
-          offset: @offset,
-          limit: @limit,
-          criteria: @criteria,
+          offset:     @offset,
+          limit:      @limit,
+          criteria:   @criteria,
           pagination: paginated?
         ]
       end
@@ -40,8 +31,8 @@ module ROM
       # @param args [Hash] New arguments to chain.
       #
       # @api private
-      def merge!(args, &block)
-        @criteria = Functions[:deep_merge][criteria, {"_#{__callee__}" => args}]
+      def merge!(args)
+        @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
         self
       end
 
@@ -51,17 +42,15 @@ module ROM
         alias_method meth, :merge!
       end
 
-      # OPTIMIZE:
-      # Strange return structs to mirror Sequel behaviour for rom-sql
+      # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
       #
       # @example
       #   api.db.db.database_type => :apacheds
       #
-      # @public
+      # @api public
       def db
-        ::OpenStruct.new(db: ::OpenStruct.new(database_type: api.directory_type) )
+        ::OpenStruct.new(db: ::OpenStruct.new(database_type: directory.type))
       end
-
 
       # @return [ROM::LDAP::Dataset, self]
       #
@@ -83,28 +72,25 @@ module ROM
         self
       end
 
-      # @return [Enumberator::Lazy, Array]
+      # @return [Enumerator::Lazy, Array]
       #
       # @api public
       def each(*args, &block)
-        results = search.lazy # search(scope: nil)
+        results = search.lazy
         reset!
         results = paginate(results) if paginated?
-
         block_given? ? results.send(__callee__, *args, &block) : results
       end
 
-
       # Respond to repository methods by first calling #each
       #
-      alias_method :as,       :each
-      alias_method :map_to,   :each
-      alias_method :map_with, :each
-      alias_method :one!,     :each
-      alias_method :one,      :each
-      alias_method :to_a,     :each
-      alias_method :with,     :each
-
+      alias as each
+      alias map_to each
+      alias map_with each
+      alias one! each
+      alias one each
+      alias to_a each
+      alias with each
 
       # Combine original relation filter with search criteria
       #
@@ -132,18 +118,15 @@ module ROM
       #
       # @api public
       def authenticated?(password)
-        api.bind_as(filter: filter_string, password: password)
+        directory.bind_as(filter: filter_string, password: password)
       end
 
       # @return [Boolean]
       #
       # @api public
-      def exist?
-        results = api.exist?(filter_string)
-        reset!
-        results
+      def any?
+        each.any?
       end
-
 
       # @return [Integer]
       #
@@ -156,7 +139,7 @@ module ROM
       #
       # @api public
       def total
-        results = api.count(filter_string)
+        results = directory.total(filter_string)
         reset!
         results
       end
@@ -165,36 +148,30 @@ module ROM
       #
       # @api public
       def include?(key)
-        results = api.include?(filter_string, key)
+        results = directory.include?(filter_string, key)
         reset!
         results
       end
 
-      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:add
-      #
       # @param tuple [Hash]
       #
       # @return [Boolean]
       #
       # @api public
       def add(tuple)
-        api.add(tuple)
+        directory.add(tuple)
       end
 
-      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:modify
       #
       # @api public
       def modify(tuples, args)
-        tuples.each do |t|
-          api.modify(*t[:dn], args.map { |k, v| [:replace, k, v] })
-        end
+        tuples.map { |t| directory.modify(*t[:dn], args.map { |k, v| [:replace, k, v] }) }
       end
 
-      # http://www.rubydoc.info/gems/ruby-net-ldap/Net%2FLDAP:delete
       #
       # @api public
       def delete(tuples)
-        tuples.each { |t| api.delete(*t[:dn]) }
+        tuples.map { |t| directory.delete(*t[:dn]) }
       end
 
       # Output the dataset as an LDIF string.
@@ -203,13 +180,19 @@ module ROM
       #
       # @api public
       def to_ldif
-        results = api.directory(filter: filter_string)
-        reset!
-        results.map(&:to_ldif).join("\n")
+        Directory::LDIF.new(each, comments: Time.now).to_ldif
       end
 
-
       private
+
+      # @return [Array<Hash>]
+      #
+      # @api private
+      def search(&block)
+        results = directory.search(filter_string, &block)
+        reset!
+        results
+      end
 
       def query_dsl
         @query_dsl ||= QueryDSL.new
@@ -239,16 +222,6 @@ module ROM
       def paginated?
         !!@limit && !!@offset
       end
-
-      # @return [Array<Hash>]
-      #
-      # @api private
-      def search(scope: nil, &block)
-        results = api.search(filter_string, scope: scope, &block)
-        reset!
-        results
-      end
-
     end
   end
 end

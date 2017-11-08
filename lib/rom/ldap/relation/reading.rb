@@ -1,46 +1,14 @@
-# avg
-# group
-# group_and_count
-# group_append
-# having
-# inner_join
-# invert
-# join
-# left_join
-# lock
-# map
-# max
-# min
-# offset
-# prefix
-# project
-# qualified
-# qualified_columns
-# read
-# rename
-# right_join
-# select_append
-# select_group
-# sum
-# union
-# unt
-
 module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
-
         # Returns empty dataset if the filtered entity cannot bind.
         #
         # @return [Relation]
         #
         # @api public
         def authenticate(password)
-          if dataset.authenticated?(password)
-            new(dataset)
-          else
-            new(EMPTY_ARRAY)
-          end
+          dataset.authenticated?(password) ? new(dataset) : new(EMPTY_ARRAY)
         end
 
         # Returns True if the filtered entity can bind.
@@ -83,26 +51,27 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        def unique?
+        def one?
           dataset.one?
         end
 
-        alias_method :distinct?, :unique?
+        alias distinct? one?
+        alias unique? one?
 
         # @return [Boolean]
         #
         # @api public
-        def exist?
-          dataset.exist?
+        def any?
+          dataset.any?
         end
 
-        alias_method :any?, :exist?
+        alias exist? any?
 
         # @return [Boolean]
         #
         # @api public
         def none?
-          !exist?
+          dataset.none?
         end
 
         # Find tuple by primary_key - required by commands
@@ -131,7 +100,6 @@ module ROM
         def fetch(pk)
           by_pk(pk).one!
         end
-
 
         # raw filter to LDIF
         #
@@ -226,10 +194,9 @@ module ROM
         #
         # @api public
         def select(*args)
-          new(dataset.map { |e| e.select { |k,v| args.include?(k) } })
+          new(dataset.map { |e| e.select { |k, _v| args.include?(k) } })
         end
-        alias_method :pluck, :select
-
+        alias pluck select
 
         # Filters by regexp
         #
@@ -246,9 +213,8 @@ module ROM
         #       e[attribute].grep(regex)
         #     end
         #   )
-          # .detect {|f| f["age"] > 35 }
+        # .detect {|f| f["age"] > 35 }
         # end
-
 
         # Qualifies all columns in a relation
         #
@@ -263,7 +229,7 @@ module ROM
         # @api public
         def qualified
           binding.pry
-          schema.qualified.(self)
+          schema.qualified.call(self)
         end
 
         def join(*args)

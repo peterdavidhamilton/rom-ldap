@@ -7,6 +7,7 @@ require 'rom-ldap'
 
 require 'minitest/autorun'
 require 'minitest/spec'
+
 class Module
   include Minitest::Spec::DSL
 end

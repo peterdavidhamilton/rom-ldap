@@ -4,11 +4,10 @@ module ROM
   module LDAP
     module Associations
       class ManyToMany < ROM::Associations::ManyToMany
-
         # @api public
         def call(target: self.target)
           binding.pry
-          left = join_assoc.(target: target)
+          left = join_assoc.call(target: target)
 
           schema =
             if left.schema.key?(foreign_key)
@@ -26,7 +25,7 @@ module ROM
           if view
             apply_view(schema, relation)
           else
-            schema.(relation)
+            schema.call(relation)
           end
         end
 

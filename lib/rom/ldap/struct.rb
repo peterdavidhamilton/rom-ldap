@@ -4,29 +4,7 @@ module ROM
   module LDAP
     class Struct < ROM::Struct
       constructor_type(:schema)
-
-      def self.fix_entity(schema)
-        if schema.keys.any? { |k| k.to_s.include?('-') }
-          Functions[:fix_entity][schema]
-        else
-          schema
-        end
-      end
-
-      def self.attributes(schema)
-        super(fix_entity(schema))
-      end
-
-      def self.new(schema)
-        super(fix_entity(schema))
-      end
-
-      def to_h
-        super.delete_if { |k, v| v.nil? }
-      end
-
       # TODO: include Person module if objectclasses include 'person' or 'inetorgperson' ?
-
       module Person
         def user_name
           shortcut(:uid, :cn)
@@ -47,6 +25,10 @@ module ROM
         def id
           shortcut(:uidnumber)
         end
+      end
+
+      def to_h
+        super.delete_if { |_k, v| v.nil? }
       end
 
       private

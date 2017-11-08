@@ -78,12 +78,12 @@ module ROM
             per_page     = per_page.to_i
 
             self.class.new(
-              dataset.offset((current_page-1)*per_page).limit(per_page),
+              dataset.offset((current_page - 1) * per_page).limit(per_page),
               current_page: current_page, per_page: per_page
             )
           end
 
-          alias_method :limit_value, :per_page
+          alias limit_value per_page
         end
 
         # @api private
@@ -129,7 +129,6 @@ module ROM
     end
   end
 end
-
 
 ROM.plugins do
   adapter :ldap do

@@ -30,20 +30,13 @@ module ROM
       end
 
       module Multiple
-            # String = Types.Constructor(::String,  -> v { v.map(&:to_s)   })
-            # Int    = Types.Constructor(::Integer, -> v { v.map(&:to_i)   })
-            # Symbol = Types::Coercible::Array.member(Types::Symbol)
-            # Bool   = Types::Coercible::Array.member(Types::Bool)
-
-
         String = Types::Coercible::Array.member(Types::Coercible::String)
         Int    = Types::Coercible::Array.member(Types::Coercible::Int)
-        Bool   = Types.Constructor(Types::Bool, -> v { Functions[:to_bool][v] })
-        Symbol = Types.Constructor(::Symbol,    -> v { v.map(&:to_sym)        })
-        Time   = Types.Constructor(::Time,      -> v { Functions[:to_time][v] })
+        Bool   = Types.Constructor(Types::Bool, ->(v) { Functions[:to_bool][v] })
+        Symbol = Types.Constructor(::Symbol,    ->(v) { v.map(&:to_sym)        })
+        Time   = Types.Constructor(::Time,      ->(v) { Functions[:to_time][v] })
         Array  = Types::Array
       end
-
     end
   end
 end
