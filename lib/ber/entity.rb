@@ -4,18 +4,10 @@ module BER
   class Entity
     module ClassMethods
       def rename(key)
-        return default_normaliser(key) if BER.formatter.nil?
-        BER.formatter.call(key)
+        BER.formatter ? BER.formatter(key) : key
       end
 
       private
-
-      def default_normaliser(key)
-        key = key.to_s.downcase
-        key = key.tr('-', '')
-        key = key[0..-2] if key[-1] == '='
-        key.to_sym
-      end
 
       def _load(entry)
         from_single_ldif_string(entry)

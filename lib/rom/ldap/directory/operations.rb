@@ -84,7 +84,7 @@ module ROM
         #
         # @api public
         def add(tuple)
-          args = LDAP::Functions[:coerce_tuple][tuple.dup]
+          args = LDAP::Functions[:coerce_tuple_in][tuple.dup]
           dn   = args.delete(:dn)
 
           raise OperationError, 'distinguished name is required' if dn.nil?

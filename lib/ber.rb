@@ -1,5 +1,4 @@
 require 'dry/core/constants'
-require 'set'
 require 'psych'
 require 'pathname'
 require 'ber/function'
@@ -10,16 +9,12 @@ require 'ber/refinements'
 module BER
   include Dry::Core::Constants
 
-  def self.formatter
-    @formatter ||= nil
+  def self.formatter(attribute = nil)
+    ROM::LDAP::Functions.to_method_name(attribute)
   end
 
   def self.use_formatter(function)
     @formatter = function
-  end
-
-  def self.refinements
-    @refinements = (@refinements || Set.new) << BER
   end
 
   def self.function

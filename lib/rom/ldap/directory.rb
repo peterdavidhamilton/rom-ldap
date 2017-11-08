@@ -78,9 +78,9 @@ module ROM
       def parse_attribute_type(type)
         return unless attribute_name = type[/NAME '(\S+)'/, 1]
         {
-          # TODO: link schema attribute parsing to entity attribute parsing
-          name:        attribute_name.downcase.to_sym,
-
+          # name:        Functions.to_method_name(attribute_name),
+          name:        BER.formatter(attribute_name),
+          # name:        BER::Entity.rename(attribute_name),
           description: type[/DESC '(.+)' [A-Z]+/, 1],
           oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
           matcher:     type[/EQUALITY (\S+)/, 1],

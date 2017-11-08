@@ -99,7 +99,7 @@ module ROM
 
               counter += 1
               message = "#{self.class}##{__callee__} #{counter}: #{pdu.search_entry.dn}"
-              logger.debug(message) if ENV['LDAP_DEBUG']
+              logger.debug(message)
 
               yield pdu.search_entry if block_given?
 

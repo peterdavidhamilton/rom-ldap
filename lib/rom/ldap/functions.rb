@@ -57,13 +57,12 @@ module ROM
         fn.call(value)
       end
 
-      # fired by struct if its schema hash keys include a hyphen
-      def self.fix_entity(tuple)
-        t(:map_keys, t(:to_method_name)).call(tuple)
-      end
+      #   key = key.to_s.downcase
+      #   key = key.tr('-', '')
+      #   key = key[0..-2] if key[-1] == '='
+      #   key.to_sym
 
-      # should be to stringify keys before inserting to database
-      def self.coerce_tuple(tuple)
+      def self.coerce_tuple_in(tuple)
         t(:map_values, t(:string_input)).call(tuple)
       end
     end

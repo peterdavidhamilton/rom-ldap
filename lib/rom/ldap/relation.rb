@@ -100,6 +100,10 @@ module ROM
       end
       private :query_methods
 
+      def base
+        where(base: self.class.base)
+      end
+
       def project(*names)
         with(schema: schema.project(*names.flatten))
       end
