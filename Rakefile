@@ -1,7 +1,7 @@
 begin
   require 'pry-byebug'
 rescue LoadError
-end if ENV['DEBUG']
+end if ENV['PRY']
 
 require 'bundler/gem_tasks'
 

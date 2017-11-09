@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-describe ROM::LDAP::Relation, 'ldap adapter' do
-  include RelationSetup
+RSpec.describe ROM::LDAP::Relation do
 
   it '#primary_key' do
   end

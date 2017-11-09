@@ -1,8 +1,6 @@
 require 'rom/ldap/directory/ldif'
+require 'rom/ldap/functions'
 
-# TODO: Find a way to map from canonical to source keys so
-# inserting new entries can use the same formatted attribute names.
-#
 module ROM
   module LDAP
     class Directory
@@ -16,6 +14,12 @@ module ROM
 
           def use_formatter(function)
             @formatter = function
+          end
+
+          def to_method_name!
+            if formatter.nil?
+              use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
+            end
           end
 
           def from_ldif(ldif)
@@ -68,6 +72,10 @@ module ROM
 
         def attribute_names
           @canonical.keys
+        end
+
+        def translation_map
+          attribute_names.zip(keys).to_h
         end
 
         def each(key = nil, &block)

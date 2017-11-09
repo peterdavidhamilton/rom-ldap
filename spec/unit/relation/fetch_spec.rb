@@ -1,21 +1,35 @@
 require 'spec_helper'
 
-describe ROM::Relation, '#fetch' do
-  include ContainerSetup
+RSpec.describe ROM::Relation do
 
-  let(:relation) { relations.accounts }
+  include_context 'directory setup'
+
+  before do
+    conf.relation(:foo) do
+      schema('(&(objectclass=person)(uid=*))', as: :foo, infer: true) do
+        attribute 'uidNumber', ROM::LDAP::Types::Serial
+        primary_key 'uidNumber'
+      end
+    end
+  end
+
+  let(:relation) { relations.foo }
 
   describe '#fetch' do
     it 'returns a single tuple identified by the pk' do
-      relation.fetch(1)[:uidnumber].must_equal(['1'])
+      expect(relation.fetch(1)['uidNumber']).to eql(['1'])
     end
 
     it 'raises when tuple was not found' do
-      proc { relation.fetch(535315412) }.must_raise(ROM::TupleCountMismatchError)
+      expect {
+        relation.fetch(5_315_412)
+      }.to raise_error(ROM::TupleCountMismatchError, 'The relation does not contain any tuples')
     end
 
     it 'raises when more tuples were returned' do
-      proc { relation.fetch([1, 2]) }.must_raise(ROM::TupleCountMismatchError)
+      expect {
+        relation.fetch([1, 2])
+      }.to raise_error(ROM::TupleCountMismatchError, 'The relation consists of more than one tuple')
     end
   end
 

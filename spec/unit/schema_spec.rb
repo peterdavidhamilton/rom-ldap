@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ROM::LDAP::Schema do
+RSpec.describe ROM::LDAP::Schema do
 
   describe '#primary_key' do
     it 'returns primary key attributes' do
@@ -11,7 +11,7 @@ describe ROM::LDAP::Schema do
       schema = schema_proc.call
       schema.finalize_attributes!.finalize!
 
-      schema.primary_key.must_equal [schema[:id]]
+      expect(schema.primary_key).to eql([schema[:id]])
     end
 
     it 'returns empty array when there is no PK defined' do
@@ -22,7 +22,7 @@ describe ROM::LDAP::Schema do
       schema = schema_proc.call
       schema.finalize_attributes!.finalize!
 
-      schema.primary_key.must_equal []
+      expect(schema.primary_key).to eql([])
     end
   end
 

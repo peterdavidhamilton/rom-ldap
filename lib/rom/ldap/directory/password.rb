@@ -6,17 +6,22 @@ require 'securerandom'
 module ROM
   module LDAP
     class Directory
-      module Password
-        def self.generate(type, password)
-          salt = secure_salt
-
+      class Password
+        def self.generate(type, password, salt = secure_salt )
           case type
           when :md5  then encode(type, md5(password))
           when :sha  then encode(type, sha(password))
           when :ssha then encode(type, ssha(password, salt))
           else
-            raise Error, "Unsupported password-hash type (#{type})"
+            raise Error, "Unsupported encryption type (#{type})"
           end
+        end
+
+        def self.check_ssha(password, encrypted)
+          decoded = Base64.decode64(encrypted.gsub(/^{SSHA}/, ''))
+          hash = decoded[0..20]
+          salt = decoded[20..-1]
+          encode(:ssha, ssha(password, salt)) == encrypted
         end
 
         private_class_method

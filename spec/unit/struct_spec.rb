@@ -1,35 +1,34 @@
 require 'spec_helper'
 
-describe ROM::Struct,
-  'function to produce canonical ldap attributes' do
+RSpec.describe ROM::Struct do
 
-  include RelationSetup
+  include_context 'relations'
 
-  let(:formatter) {
-    ->(v) { ROM::LDAP::Functions.to_method_name(v) }
-  }
-
-  describe 'default formatter' do
-
-    it '' do
+  describe 'unformatted' do
+    it 'produces camel-case attribute names like "gidNumber"' do
+      keys = %w[apple-imhandle cn dn gidNumber givenName
+                mail objectClass sn uid uidNumber userPassword]
+      expect(keys).to eq(accounts.schema.to_h.keys)
     end
-
   end
 
-  describe 'custom formatter' do
+  describe 'net-ldap formatter' do
+    let(:formatter) { old_format_proc }
 
-
-    before do
-      ROM::LDAP::Directory::Entity.use_formatter(formatter)
+    it 'produces lowercase symbol attribute names like :gidnumber' do
+      keys = %i[appleimhandle cn dn gidnumber givenname
+                mail objectclass sn uid uidnumber userpassword]
+      expect(keys).to eq(accounts.schema.to_h.keys)
     end
+  end
 
-    it 'infered schema is snake_case' do
-      # binding.pry
-      # accounts.schema.to_h.keys
-    end
+  describe 'rom-ldap formatter' do
+    let(:formatter) { ->(key) { ROM::LDAP::Functions.to_method_name(key) } }
 
-    after do
-       ROM::LDAP::Directory::Entity.use_formatter(nil)
+    it 'produces snake_case symbol attribute names like :gid_number' do
+      keys = %i[apple_imhandle cn dn gid_number given_name
+                mail object_class sn uid uid_number user_password]
+      expect(keys).to eq(accounts.schema.to_h.keys)
     end
   end
 end
