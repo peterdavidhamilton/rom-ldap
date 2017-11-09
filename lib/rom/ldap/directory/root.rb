@@ -50,6 +50,11 @@ module ROM
           self
         end
 
+        # @return [Symbol]
+        #
+        # @api public
+        attr_reader :type
+
         private
 
         # Representation of directory RootDSE
@@ -90,11 +95,6 @@ module ROM
         #
         # @api private
         attr_reader :supported_capabilities
-
-        # @return [Symbol]
-        #
-        # @api private
-        attr_reader :type
 
         # @return [String]
         #

@@ -17,7 +17,7 @@ module ROM
         #
         # @api public
         def authenticated?(password)
-          !!dataset.authenticated?(password)
+          dataset.authenticated?(password)
         end
 
         # Count the number of entries selected from the paginated dataset.
@@ -137,10 +137,25 @@ module ROM
           dataset.reverse_each.first
         end
 
-        # Orders the dataset by a given attribute
+
+        # Specify an alternative search base for the dataset.
         #
         # @example
-        #   relation.order(:givenname)
+        #   relation.base("cn=department,ou=users,dc=org")
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def base(alt_base)
+          new(dataset.search_base(alt_base))
+        end
+
+        # Orders the dataset by a given attribute
+        #
+        # @param attribute [Symbol]
+        #
+        # @example
+        #   relation.order(:given_name)
         #
         # @return [Relation]
         #

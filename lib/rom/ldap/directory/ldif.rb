@@ -14,14 +14,12 @@ module ROM
         extend Dry::Initializer
 
         param  :tuples
-        option :version,  default: proc { 3 }
-        option :comments, default: proc { nil }
 
-        def to_ldif
+        def to_ldif(version: 3, comment: nil)
           ary = []
 
-          ary << "version: #{version}\n" if version
-          ary += comments if comments
+          ary << "version: #{version}\n"
+          ary += comment if comment
 
           Array(tuples).each do |t|
             t.sort.each do |key, values|
@@ -37,6 +35,12 @@ module ROM
           end
 
           block_given? ? ary.map(&:yield) : ary.join(NEW_LINE)
+        end
+
+        def from_ldif(file)
+          input = ::StringIO.new(file)
+          binding.pry
+
         end
 
         private

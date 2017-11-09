@@ -5,16 +5,38 @@ require 'rom/ldap/directory/ldif'
 
 module ROM
   module LDAP
+    # @option :base [String] Default search base defined in ROM.configuration
+    #
+    # @api private
     class Dataset
       extend  Initializer
       include Enumerable
       include Dry::Equalizer(:criteria)
 
-      param  :directory, reader: :private
-      param  :filter,    reader: :private
-      option :criteria,  reader: :private, default: proc { {} }
-      option :offset,    reader: false, optional: true
-      option :limit,     reader: false, optional: true
+      param :directory, reader: :private
+
+      param :filter,
+        reader: :private,
+        type: Dry::Types['strict.string']
+
+      option :base,
+        reader: :private,
+        type: Dry::Types['strict.string']
+
+      option :criteria,
+        reader: :private,
+        type: Dry::Types['strict.hash'],
+        default: proc { {} }
+
+      option :offset,
+        reader: false,
+        optional: true,
+        type: Dry::Types['strict.int']
+
+      option :limit,
+        reader: false,
+        optional: true,
+        type: Dry::Types['strict.int']
 
       # @api public
       def opts
@@ -22,11 +44,12 @@ module ROM
           offset:     @offset,
           limit:      @limit,
           criteria:   @criteria,
+          base:       @base,
           pagination: paginated?
         ]
       end
 
-      # @return [ROM::LDAP::Dataset, self]
+      # @return [ROM::LDAP::Dataset]
       #
       # @param args [Hash] New arguments to chain.
       #
@@ -52,7 +75,7 @@ module ROM
         ::OpenStruct.new(db: ::OpenStruct.new(database_type: directory.type))
       end
 
-      # @return [ROM::LDAP::Dataset, self]
+      # @return [ROM::LDAP::Dataset]
       #
       # @param offset [Integer] Integer value to start pagination range.
       #
@@ -62,13 +85,23 @@ module ROM
         self
       end
 
-      # @return [ROM::LDAP::Dataset, self]
+      # @return [ROM::LDAP::Dataset]
       #
-      # @param limit [Integer] Integer value to calculate pagination range end.
+      # @param limit [Integer] Value to calculate pagination range end.
       #
       # @api public
       def limit(limit)
         @limit = limit
+        self
+      end
+
+      # @return [ROM::LDAP::Dataset]
+      #
+      # @param base [String] Alternative search base.
+      #
+      # @api public
+      def search_base(base)
+        @base = base
         self
       end
 
@@ -107,7 +140,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(<##{self.class} filter="#{filter_string}">)
+        %(<##{self.class} filter="#{filter_string}" base="#{@base}">)
       end
 
       # True if password binds for the filtered dataset
@@ -180,7 +213,7 @@ module ROM
       #
       # @api public
       def to_ldif
-        Directory::LDIF.new(each, comments: Time.now).to_ldif
+        @ldif ||= Directory::LDIF.new(each).to_ldif(comment: Time.now)
       end
 
       private
@@ -189,7 +222,7 @@ module ROM
       #
       # @api private
       def search(&block)
-        results = directory.search(filter_string, &block)
+        results = directory.search(filter_string, base: base, &block)
         reset!
         results
       end

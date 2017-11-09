@@ -8,14 +8,14 @@ module ROM
         #
         # @api public
         def query(options)
-          result_set = []
+          set  = []
 
           @result = connection.search(base: base, **options) do |entity|
-            result_set << entity
+            set << entity
             yield entity if block_given?
           end
 
-          result_set.sort_by(&:dn)
+          set.sort_by(&:dn)
         end
 
         attr_reader :result # PDU object
@@ -27,12 +27,12 @@ module ROM
         # @return [Array<Hash>]
         #
         # @api public
-        def search(filter, &block)
+        def search(filter, base: nil, &block)
           results = EMPTY_ARRAY
           unlimited = pageable? && size.nil?
 
           Timeout.timeout(timeout) do
-            results = query(filter: filter, size: size, deref: DEREF_ALWAYS, unlimited: unlimited)
+            results = query(filter: filter, base: base, size: size, deref: DEREF_ALWAYS, unlimited: unlimited)
             block_given? ? results.each(&block) : results
           end
         rescue Timeout::Error

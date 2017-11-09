@@ -96,12 +96,16 @@ module ROM
       #
       # @api private
       def query_methods
-        Dataset::DSL.query_methods.sort
+        QueryDSL.query_methods.sort
       end
       private :query_methods
 
-      def base
-        where(base: self.class.base)
+
+      # Compliments #root method with an alternative search base
+      #
+      # @api public
+      def branch
+        base(self.class.base)
       end
 
       def project(*names)

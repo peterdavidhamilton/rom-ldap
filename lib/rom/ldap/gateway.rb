@@ -57,18 +57,18 @@ module ROM
       # @api public
       def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
         @server  = server
-        @conn    = nil
         @options = options
         @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
+        @conn    = nil
 
         super()
       end
 
       # Used by attribute_inferrer
       #
-      # @param filter [String,Net::LDAP::Filter]
+      # @param filter [String]
       #
-      # @return [Array<Net::LDAP::Entry>]
+      # @return [Array<ROM::LDAP::Directory::Entity>]
       #
       # @api public
       def [](filter)
@@ -98,8 +98,8 @@ module ROM
       # @return [Dataset]
       #
       # @api public
-      def dataset(filter) # OPTIMIZE: base alternative base along with table name to dataset
-        Dataset.new(directory, filter)
+      def dataset(filter)
+        Dataset.new(directory, filter, base: options[:base])
       end
 
       # @param logger [Logger]
@@ -145,9 +145,7 @@ module ROM
           )
 
           @conn.use_logger(@logger)
-
           bind! unless server[:username].nil?
-
           @conn
         end
       end

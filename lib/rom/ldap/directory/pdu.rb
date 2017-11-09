@@ -81,7 +81,7 @@ module ROM
         end
 
         def error_message
-          @res.fetch(:error, nil)
+          @res.fetch(:error, EMPTY_STRING)[/comment: (.*), data/, 1]
         end
 
         def result_code

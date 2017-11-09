@@ -1,5 +1,8 @@
 require 'rom/ldap/directory/ldif'
 
+# TODO: Find a way to map from canonical to source keys so
+# inserting new entries can use the same formatted attribute names.
+#
 module ROM
   module LDAP
     class Directory
@@ -15,20 +18,11 @@ module ROM
             @formatter = function
           end
 
-          private
-
-          def _load(entry)
-            from_single_ldif_string(entry)
+          def from_ldif(ldif)
+            LDIF.read_ldif(ldif)
           end
 
-          # def from_single_ldif_string(ldif)
-          #   ds = LDIF.read_ldif(::StringIO.new(ldif))
-          #   return nil if ds.empty?
-          #   raise Error, "Too many LDIF entries" unless ds.size == 1
-          #   entry = ds.to_entries.first
-          #   return nil if entry.dn.nil?
-          #   entry
-          # end
+          alias _load from_ldif
         end
 
         extend ClassMethods
@@ -92,18 +86,18 @@ module ROM
           @canonical.inspect
         end
 
+        alias inspect to_s
+
         def to_json
           @source.to_json
         end
-
-        alias inspect to_s
 
         def hash
           @source.hash
         end
 
-        def to_ldif
-          LDIF.new(self, comments: Time.now).to_ldif
+        def to_ldif(_ = nil)
+          LDIF.new(self).to_ldif(comment: Time.now)
         end
 
         def respond_to_missing?(*args)
@@ -119,9 +113,7 @@ module ROM
 
         private
 
-        def _dump(_depth)
-          to_ldif
-        end
+        alias _dump to_ldif
 
         def store_source(key, value)
           @source[key] = Array(value)
