@@ -47,6 +47,14 @@ module ROM
             UAC    = "userAccountControl:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
 
             #
+            # Ambiguous Name Resolution (ANR)
+            #
+            def ambiguous(value)
+              equals('anr' => value)
+            end
+
+
+            #
             # Accounts
             #
 

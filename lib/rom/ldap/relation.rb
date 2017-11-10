@@ -48,7 +48,9 @@ module ROM
       schema_inferrer   LDAP::Schema::Inferrer.new.freeze
       schema_dsl        LDAP::Schema::DSL
 
-      forward(*QueryDSL.query_methods)
+      # Defer query dsl methods
+      #
+      forward(*Filter::DSL.query_methods)
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -96,7 +98,7 @@ module ROM
       #
       # @api private
       def query_methods
-        QueryDSL.query_methods.sort
+        Filter::DSL.query_methods.sort
       end
       private :query_methods
 

@@ -10,7 +10,13 @@ module ROM
     module Filter
       # @api private
       class Builder
-        METHODS = %i[ne eq ge le and or not ex bineq].freeze
+        METHODS = %i[
+          ne eq ge le ex bineq
+          present parse_ber construct
+          join and
+          intersect or
+          negate not
+        ].freeze
 
         extend ClassMethods
 

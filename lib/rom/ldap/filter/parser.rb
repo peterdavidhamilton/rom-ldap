@@ -18,6 +18,15 @@ module ROM
 
         private
 
+        # def parse_ldap_filter(obj)
+        #   case obj.ber_identifier
+        #   when 0x87 then eq(obj.to_s, WILDCARD) # present. context-specific primitive 7.
+        #   when 0xa3 then eq(obj[0], obj[1])     # equalityMatch. context-specific constructed 3.
+        #   else
+        #     raise FilterError, "Unknown LDAP search-filter type: #{obj.ber_identifier}"
+        #   end
+        # end
+
         def parse_paren_expression(scanner)
           if scanner.scan(/\s*\(\s*/)
             expr = if scanner.scan(/\s*\&\s*/)

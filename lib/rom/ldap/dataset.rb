@@ -1,10 +1,20 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/query_dsl'
+require 'rom/ldap/filter/dsl'
 require 'rom/ldap/directory/ldif'
 
 module ROM
   module LDAP
+    # Method chaining class to build search criteria.
+    #   Passes criteria and orignal filter to the query DSL.
+    #
+    # @param filter [String] Relation name
+    #   @example => "(&(objectclass=person)(uidnumber=*))"
+    #
+    # @option :limit [Integer] Pagination page(1)
+    #
+    # @option :offset [Integer] Pagination per_page(20)
+    #
     # @option :base [String] Default search base defined in ROM.configuration
     #
     # @api private
@@ -54,15 +64,18 @@ module ROM
       # @param args [Hash] New arguments to chain.
       #
       # @api private
-      def merge!(args)
+      def chain!(args)
         @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
         self
       end
 
-      private :merge!
+      private :chain!
 
-      QueryDSL.query_methods.each do |meth|
-        alias_method meth, :merge!
+      # Merge criteria when the next DSL method is called
+      #
+      # @api private
+      Filter::DSL.query_methods.each do |query_method|
+        alias_method query_method, :chain!
       end
 
       # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
@@ -228,7 +241,7 @@ module ROM
       end
 
       def query_dsl
-        @query_dsl ||= QueryDSL.new
+        @query_dsl ||= Filter::DSL.new
       end
 
       # Reset the current criteria

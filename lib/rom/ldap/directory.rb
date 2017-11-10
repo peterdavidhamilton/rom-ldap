@@ -2,6 +2,8 @@ require 'rom/initializer'
 require 'rom/support/memoizable'
 require 'timeout'
 
+# require 'dry-monitor'
+
 require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/sub_schema'
 require 'rom/ldap/directory/capabilities'
@@ -11,7 +13,7 @@ module ROM
   module LDAP
     class Directory
       extend Initializer
-      extend Notifications::Listener
+      # extend Notifications::Listener
 
       include Memoizable
       include Root
@@ -26,9 +28,12 @@ module ROM
       option :size,    default: proc { 1_000_000 }
       option :logger,  default: proc { ::Logger.new(STDOUT) }
 
-      subscribe('configuration.directory', adapter: :ldap) do |event|
-        binding.pry
-      end
+
+      # Dry::Monitor::Notifications.new(:app)
+
+      # subscribe('configuration.directory', adapter: :ldap) do |event|
+      #   binding.pry
+      # end
 
       # @return [Array<String>]
       #

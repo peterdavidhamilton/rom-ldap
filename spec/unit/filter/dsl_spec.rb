@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe ROM::LDAP::QueryDSL do
+RSpec.describe ROM::LDAP::Filter::DSL do
   include_context 'factories'
 
   let(:formatter) { old_format_proc }

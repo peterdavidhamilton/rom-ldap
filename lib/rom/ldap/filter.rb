@@ -1,49 +1,6 @@
 module ROM
   module LDAP
     module Filter
-      # OPERATORS_MAP = {
-      #   :op_plus   => :+@,
-      #   :op_minus  => :-@,
-      #   :op_add    => :+,
-      #   :op_sub    => :-,
-      #   :op_pow    => :**,
-      #   :op_mul    => :*,
-      #   :op_div    => :/,
-      #   :op_mod    => :%,
-      #   :op_tilde  => :~,
-      #   :op_cmp    => :<=>,
-      #   :op_lshift => :<<,
-      #   :op_rshift => :>>,
-      #   :op_lt     => :<,
-      #   :op_gt     => :>,
-      #   :op_case   => :===,
-      #   :op_equal  => :==,
-      #   :op_apply  => :=~,
-      #   :op_lt_eq  => :<=,
-      #   :op_gt_eq  => :>=,
-      #   :op_or     => :|,
-      #   :op_and    => :&,
-      #   :op_xor    => :^,
-      #   :op_store  => :[]=,
-      #   :op_fetch  => :[]
-      # }
-
-      # method      | aliases          | RFC-2254 filter string
-      # ______________________________________________________________________
-      # :filter     |                  |
-      # :present    | :has, :exists    | 'column=*'
-      # :lte        | :below,          | 'column<=value'
-      # :gte        | :above,          | 'column>=value'
-      # :begins     | :prefix,         | 'column=value*'
-      # :ends       | :suffix,         | 'column=*value'
-      # :within     | :between, :range | '&(('column>=value')('column<=value'))'
-      # :outside    |                  | '~&(('column>=value')('column<=value'))'
-      # :equals     | :where,          | 'column=value'
-      # :not        | :missing,        | '~column=value'
-      # :contains   | :matches,        | 'column=*value*'
-      # :exclude    |                  | '~column=*value*'
-      # :extensible | :ext             | 'column:=value'
-      #
     end
 
     EQUAL     = '='.freeze
