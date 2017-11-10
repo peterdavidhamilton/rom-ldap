@@ -19,7 +19,7 @@ module ROM
           ary = []
 
           ary << "version: #{version}\n"
-          ary += comment if comment
+          ary << comment if comment
 
           Array(tuples).each do |t|
             t.sort.each do |key, values|

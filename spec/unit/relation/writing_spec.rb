@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 RSpec.describe ROM::LDAP::Relation do
-
   include_context 'relations'
 
   describe '#insert' do
@@ -13,19 +12,19 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it '#insert -> #update -> #delete' do
-      expect {
+      expect do
         accounts.insert(cn: 'The Dark Knight')
-      }.to raise_error(ROM::LDAP::OperationError, 'distinguished name is required')
+      end.to raise_error(ROM::LDAP::OperationError, 'distinguished name is required')
 
       expect(accounts.insert(
-        dn: 'uid=batman,ou=users,dc=example,dc=com',
-        cn: 'The Dark Knight',
-        uid: 'batman',
-        sn: 'Wayne',
-        uidnumber: 1003,
-        gidnumber: 1050,
-        'apple-imhandle': 'bruce-wayne',
-        objectclass: %w[extensibleobject inetorgperson apple-user]
+               dn: 'uid=batman,ou=users,dc=example,dc=com',
+               cn: 'The Dark Knight',
+               uid: 'batman',
+               sn: 'Wayne',
+               uidnumber: 1003,
+               gidnumber: 1050,
+               'apple-imhandle': 'bruce-wayne',
+               objectclass: %w[extensibleobject inetorgperson apple-user]
       )).to be(true)
 
       expect(accounts.where(uid: 'batman').one[:cn]).to eql(['The Dark Knight'])

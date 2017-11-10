@@ -200,7 +200,7 @@ module ROM
 
         def parse_controls(sequence)
           @controls = sequence.map do |control|
-            o             = OpenStruct.new
+            o             = ::OpenStruct.new
             o.oid         = control[0]
             o.criticality = control[1]
             o.value       = control[2]
@@ -214,7 +214,7 @@ module ROM
         end
 
         def parse_ldap_search_request(sequence)
-          s = OpenStruct.new
+          s = ::OpenStruct.new
           s.base_object,
           s.scope,
           s.deref_aliases,
@@ -227,7 +227,7 @@ module ROM
         end
 
         def parse_bind_request(sequence)
-          s = OpenStruct.new
+          s = ::OpenStruct.new
           s.version, s.name, s.authentication = sequence
           @bind_parameters = s
         end

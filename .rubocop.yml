@@ -1,0 +1,23 @@
+# rubocop --auto-gen-config
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  Include:
+    - Rakefile
+  Exclude:
+    - doc/**/*
+    - log/*
+  TargetRubyVersion: 2.4
+
+Style/LambdaCall:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: false
+
+Style/Encoding:
+  Enabled: true
+
+Style/FrozenStringLiteralComment:
+  EnforcedStyle: when_needed
+  Enabled: false

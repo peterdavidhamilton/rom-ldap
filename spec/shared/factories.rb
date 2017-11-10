@@ -1,52 +1,46 @@
+require 'rom-factory'
 require 'rom/ldap/directory/password'
 
-RSpec.shared_context 'factories' do
+Faker::Config.random = Random.new(42)
+Faker::Config.locale = :en
 
+RSpec.shared_context 'factories' do
   include_context 'relations'
 
-  let(:user_name) { Faker::Internet.unique.user_name }
-  let(:password)  { ROM::LDAP::Directory::Password.generate(:sha, user_name) }
+  let(:factories) do
+    ROM::Factory.configure { |conf| conf.rom = container }
+  end
+
+  let(:user_names) { [Faker::Internet.unique.user_name] }
 
   before do
-    @uid = user_name
-
-    factories.define(:account) do |f|
-      f.uid  @uid
-      f.dn   "uid=#{@uid},ou=users,dc=example,dc=com"
-      f.cn   { fake(:name, :name_with_middle) }
-      f.sn   { fake(:name, :last_name) }
-      f.mail { fake(:internet, :safe_email, @uid) }
-    end
-
-    factories.define(flat_account: :account) do |f|
-      f.userpassword  password
+    factories.define(:person, relation: :people) do |f|
+      f.sequence(:uniqueidentifier) { |n| n * n }
+      f.uid           'foo'
       f.uidnumber     { fake(:number, :number, 4) }
-      f.gidnumber     { fake(:number, :number, 4) }
+      f.gidnumber     { 1 }
+      f.dn            'uid=foo,ou=users,dc=example,dc=com'
+      f.userpassword  ROM::LDAP::Directory::Password.generate(:sha, 'foo')
+      f.cn            { fake(:name, :name_with_middle) }
       f.givenname     { fake(:name, :first_name) }
-      f.appleimhandle { '@name' }
-      f.objectclass   %w[inetOrgPerson extensibleObject]
+      f.sn            { fake(:name, :last_name) }
+      f.appleimhandle { '@foo' }
+      f.mail          { fake(:internet, :safe_email, 'foo') }
+      f.objectclass   %w[inetOrgPerson extensibleObject apple-user]
     end
 
-    # factories.define(snake_case_account: :account) do |f|
-    #   f.user_password  password
-    #   f.uid_number     { fake(:number, :number, 4) }
-    #   f.gid_number     { fake(:number, :number, 4) }
-    #   f.given_name     { fake(:name, :first_name) }
-    #   f.object_class   %w[inetOrgPerson extensibleObject apple-user]
-    # end
-
-    factories.define(customers: :account) do |f|
-      f.gidnumber 9998
+    user_names.each do |uid|
+      factories[:person,
+                uid: uid,
+                dn: "uid=#{uid},ou=users,dc=example,dc=com",
+                appleimhandle: "@#{uid}",
+                mail: "#{uid}@example.com"
+      ]
     end
+  end
 
-    # factories.define(colleagues: :account) do |f|
-    #   f.uidnumber { fake(:number, :between, [1001, 2000])}
-    # end
-
-
-    factories.define(sandbox: :account) do |f|
-      f.gidnumber 9997
-    end
+  after do
+    user_names.each { |uid| accounts.where(uid: uid).delete }
   end
 
 end

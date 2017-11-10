@@ -7,4 +7,4 @@ require 'bundler/gem_tasks'
 
 Rake.add_rakelib 'rakelib'
 
-task default: :test
+task default: [:spec]

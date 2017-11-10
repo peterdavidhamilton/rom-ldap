@@ -12,4 +12,5 @@ group :test do
   gem 'rom-factory', '~> 0.5.0', require: false
   gem 'rubocop'
   gem 'simplecov', require: false
+  gem 'rspec'
 end

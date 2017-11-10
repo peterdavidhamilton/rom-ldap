@@ -120,17 +120,6 @@ module ROM
 
       alias directory_type database_type
 
-      private
-
-      # Wrapper for Connection and Logger
-      #
-      # @return [Directory] ldap server object
-      #
-      # @api private
-      def directory
-        @dir ||= Directory.new(connection, options).load_rootdse!
-      end
-
       def connection
         if connected?
           @conn
@@ -148,6 +137,17 @@ module ROM
           bind! unless server[:username].nil?
           @conn
         end
+      end
+
+      private
+
+      # Wrapper for Connection and Logger
+      #
+      # @return [Directory] ldap server object
+      #
+      # @api private
+      def directory
+        @dir ||= Directory.new(connection, options).load_rootdse!
       end
 
       def disconnect

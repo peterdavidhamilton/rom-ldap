@@ -58,12 +58,12 @@ module ROM
 
         def first(key)
           value = self[key]
-          value.first if value
+          value&.first
         end
 
         def last(key)
           value = self[key]
-          value.last if value
+          value&.last
         end
 
         def keys

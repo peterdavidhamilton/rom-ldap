@@ -6,6 +6,7 @@ module ROM
     include Dry::Core::Constants
 
     WILDCARD = '*'.freeze
+    NEW_LINE = "\n".freeze
 
     #
     # Schema files

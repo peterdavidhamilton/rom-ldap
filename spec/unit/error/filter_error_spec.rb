@@ -1,7 +1,8 @@
 require 'spec_helper'
 
-describe ROM::LDAP::FilterError do
-  include ContainerSetup
+RSpec.describe ROM::LDAP::FilterError do
+
+  include_context 'directory'
 
   describe 'FilterError' do
     before do

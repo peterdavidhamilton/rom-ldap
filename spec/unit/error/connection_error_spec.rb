@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-describe ROM::LDAP::ConnectionError do
-  include ContainerSetup
+RSpec.describe ROM::LDAP::ConnectionError do
 
   # describe 'downed host' do
   #   let(:params) do

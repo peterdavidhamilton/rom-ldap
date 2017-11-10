@@ -1,62 +1,37 @@
-RSpec.shared_context 'directory setup' do
+RSpec.shared_context 'directory' do
 
-  let(:params) do
+  let(:server) do
     { server: '127.0.0.1:10389', username: nil, password: nil }
   end
 
-  let(:directory_options) do
+  let(:ldap_options) do
     { base: 'ou=users,dc=example,dc=com' }
   end
 
-  let(:conn) do
-    ROM::LDAP::Connection.new(server: '127.0.0.1:10389')
+  let(:conf) do
+    ROM::Configuration.new(:ldap, server, ldap_options)
   end
 
-  # let(:conf)      { TestConfiguration.new(:ldap, conn) }
-  let(:conf)      { ROM::Configuration.new(:ldap, params, directory_options) }
-  let(:container) { ROM.container(conf) }
-  let(:relations) { container.relations }
-  # let(:commands)  { container.commands }
-  let(:factories) { ROM::Factory.configure { |conf| conf.rom = container }}
+  let(:container) do
+    ROM.container(conf)
+  end
 
-  let(:old_format_proc) {
+  let(:conn) do
+    conf.gateways[:default].connection
+  end
+
+  let(:relations) do
+    container.relations
+  end
+
+  let(:old_format_proc) do
     ->(key) {
       key = key.to_s.downcase.tr('-', '')
       key = key[0..-2] if key[-1] == '='
       key.to_sym
     }
-  }
+  end
 
   let(:formatter) { nil }
 
-
-  # TODO: divide relation before block up.
-  before do
-    ROM::LDAP::Directory::Entity.use_formatter(formatter)
-
-    conf.relation(:accounts) do
-      schema('(&(objectclass=person)(uid=*))', as: :accounts, infer: true)
-      use :pagination
-      per_page 4
-      auto_struct false
-    end
-
-    conf.relation(:group9998) do
-      schema('(&(objectclass=person)(gidnumber=9998))', as: :customers, infer: true)
-      use :auto_restrictions
-      auto_struct false
-    end
-
-    conf.relation(:group9997) do
-      schema('(&(objectclass=person)(gidnumber=9997))', as: :sandbox, infer: true)
-      auto_struct false
-    end
-
-    conf.relation(:staff) do
-      schema('(&(objectclass=person)(uidnumber>=1000))', as: :colleagues, infer: true) do
-        attribute :uidnumber, ROM::LDAP::Types::Serial
-      end
-      auto_struct false
-    end
-  end
 end

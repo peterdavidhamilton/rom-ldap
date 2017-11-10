@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe ROM::Relation do
 
-  include_context 'directory setup'
+  include_context 'directory'
 
   before do
     conf.relation(:foo) do

@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-describe ROM::LDAP::ConfigError do
-  include ContainerSetup
+RSpec.describe ROM::LDAP::ConfigError do
 
   # describe 'invalid search size' do
   #   let(:params) do

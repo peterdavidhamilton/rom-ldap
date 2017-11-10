@@ -213,7 +213,7 @@ module ROM
       #
       # @api public
       def to_ldif
-        @ldif ||= Directory::LDIF.new(each).to_ldif(comment: Time.now)
+        @ldif ||= Directory::LDIF.new(each).to_ldif #(comment: Time.now)
       end
 
       private

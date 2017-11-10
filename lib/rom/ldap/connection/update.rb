@@ -74,7 +74,7 @@ module ROM
         operations.each_with_object([]) do |(op, attr, values), ops|
           op_ber = MODIFY_OPERATIONS[op.to_sym].to_ber_enumerated
 
-          values = [values].flat_map { |v| v.to_ber if v }.to_ber_set
+          values = [values].flat_map { |v| v&.to_ber }.to_ber_set
 
           values = [attr.to_s.to_ber, values].to_ber_sequence
 

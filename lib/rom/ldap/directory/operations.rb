@@ -76,8 +76,10 @@ module ROM
         #
         # @api public
         def add(tuple)
-          args = LDAP::Functions[:coerce_tuple_in][tuple.dup]
-          dn   = args.delete(:dn)
+          trans   = tuple_translation(tuple)
+          payload = LDAP::Functions[:rename_keys, trans][tuple.dup]
+          args    = LDAP::Functions[:coerce_tuple_in][payload]
+          dn      = args.delete(:dn)
 
           raise OperationError, 'distinguished name is required' if dn.nil?
 
@@ -87,6 +89,12 @@ module ROM
 
           result.success?
         end
+
+        def tuple_translation(tuple)
+          attributes = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
+          attributes.map { |a| a.values_at(:name, :original) }.to_h
+        end
+        private :tuple_translation
 
         #
         # @return [Boolean]

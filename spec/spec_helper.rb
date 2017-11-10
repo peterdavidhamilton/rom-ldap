@@ -22,13 +22,6 @@ end if ENV['PRY']
 
 require 'rom-ldap'
 
-# require 'minitest/autorun'
-# require 'minitest/spec'
-
-# class Module
-#   include Minitest::Spec::DSL
-# end
-
 require 'pathname'
 SPEC_ROOT = root = Pathname(__FILE__).dirname
 TMP_PATH  = root.join('../tmp')
@@ -63,7 +56,3 @@ RSpec.configure do |config|
   # config.include ENVHelper
 end
 
-
-require 'rom-factory'
-Faker::Config.random = Random.new(42)
-Faker::Config.locale = :en

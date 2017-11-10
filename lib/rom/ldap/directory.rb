@@ -86,6 +86,7 @@ module ROM
         Array(attribute_names).map do |name|
           {
             name:        Entity.rename(name),
+            original:    name,
             description: type[/DESC '(.+)' [A-Z]+/, 1],
             oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
             matcher:     type[/EQUALITY (\S+)/, 1],
