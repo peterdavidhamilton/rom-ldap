@@ -43,14 +43,11 @@ module ROM
         event[:dataset].filter_string.to_s
       end
 
-      schema_class      LDAP::Schema
-      schema_attr_class LDAP::Attribute
-      schema_inferrer   LDAP::Schema::Inferrer.new.freeze
-      schema_dsl        LDAP::Schema::DSL
-
-      # Defer query dsl methods
-      #
-      forward(*Filter::DSL.query_methods)
+      schema_class      Schema
+      schema_attr_class Attribute
+      schema_inferrer   Schema::Inferrer.new.freeze
+      schema_dsl        Schema::DSL
+      forward           *Dataset.dsl
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -98,7 +95,8 @@ module ROM
       #
       # @api private
       def query_methods
-        Filter::DSL.query_methods.sort
+        # Filter::DSL.query_methods.sort
+        Dataset.dsl.sort
       end
       private :query_methods
 

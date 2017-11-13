@@ -10,14 +10,14 @@ module ROM
       # @option :method [Symbol] Defaults to simple.
       #
       # @api public
-      def bind(username:, password:, method: :simple)
+      def bind(username:, password:, version:, method: :simple)
         pdu_request  = pdu_lookup(:bind_request)
         pdu_response = pdu_lookup(:bind_result)
         error_klass  = [NoBindResultError, 'no bind result']
         message_id   = next_msgid
 
         request = [
-          self.class.ldap_version.to_ber,
+          version.to_ber,
           username.to_ber,
           password.to_ber_contextspecific(0)
 

@@ -31,6 +31,7 @@ module ROM
       #
       # @api public
       def search(
+        # TODO: replace filter keyword with expression
         filter:,
         base:,
         size: nil, # TODO: rename size -> max_results
@@ -47,11 +48,14 @@ module ROM
         raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
-        base   ||= self.class.default_base
-        filter ||= self.class.default_filter
 
-        filter = build_filter(filter)
-        # filter_ber = filter_to_ber(filter)
+            # TODO: connection shouldn't know about default base or filter
+            # base   ||= self.class.default_base
+            # filter ||= self.class.default_filter
+
+            # remove once connection is always receiving an Expression object
+            filter = build_filter(filter)
+            # filter_ber = filter_to_ber(filter)
 
         size = size.to_i
         time = time.to_i
@@ -72,10 +76,7 @@ module ROM
             query_limit.to_ber,
             time.to_ber,
             attributes_only.to_ber,
-
             filter.to_ber,
-            # filter_ber,
-
             ber_attrs.to_ber_sequence
           ].to_ber_appsequence(pdu_lookup(:search_request))
 
@@ -148,15 +149,10 @@ module ROM
 
       private
 
+      # TODO: remove once what is submitted is always an Expression object
       def build_filter(filter)
         Filter::Parser.new.call(filter)
       end
-
-      # def filter_to_ber(filter)
-      #   op, left, right = Filter::Parser.new.call(filter)
-      #   BER::Converter.new(op, left, right).call
-      # end
-
 
       # FIXME: Sort controls sill relevant?
       #

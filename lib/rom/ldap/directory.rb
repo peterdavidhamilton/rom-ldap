@@ -1,4 +1,5 @@
 require 'rom/initializer'
+require 'dry/core/class_attributes'
 require 'rom/support/memoizable'
 require 'timeout'
 
@@ -14,6 +15,16 @@ module ROM
     class Directory
       extend Initializer
       # extend Notifications::Listener
+
+      extend Dry::Core::ClassAttributes
+
+      defines :ldap_version
+      defines :default_base
+      defines :default_filter
+
+      ldap_version   3
+      default_base   EMPTY_STRING
+      default_filter '(objectClass=*)'.freeze
 
       include Memoizable
       include Root

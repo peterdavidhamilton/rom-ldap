@@ -3,55 +3,48 @@ require 'rom/ldap/filter'
 module ROM
   module LDAP
     module Filter
+      # Transform an AST into a filter expression
+      #
+      # @api private
       class Decomposer
         include Filter
 
+        # Called by Directory#query to generate the expression which is passed to Connection#search
+        #
+        # @return [Filter::Expression]
+        #
         def call(ast)
-          # raise if ast is not an array
-
           case ast.size
+          when 0 then EMPTY_STRING
 
-          # a branch
+          # extra array wrapping
+          when 1 then single(ast.first)
+
+          # &, |, !
           when 2
             left, right = ast
-            # raise if cnst is nil
+            constructor = id_constructor(left)
+            expressions = right.map { |exp| single(exp) }.join
+            "(#{constructor}(#{expressions}))"
 
-            if left.is_a?(Symbol)
-              case left
-              when :con_and, :con_or
-                binding.pry
-                constructor = id_constructor(left)
-                expression  = call(right)
-
-                "(#{constructor}(#{expression}))"
-              when :con_not
-
-                constructor = id_constructor(left)
-                expression  = call(right)
-              end
-            else
-              binding.pry
-            end
-
-          # an expression
-          when 3
-            op, attribute, val = ast
-            operator = id_operator(op)
-            # raise if operator is nil
-            value    = id_value(val)
-
-            "(#{attribute}#{operator}#{value})"
+          # simple expression
+          when 3 then single(ast)
 
           else
-
+            :wip
           end
-
-
         end
 
         alias [] call
 
         private
+
+        def single(ast)
+          op, attribute, val = ast
+          operator = id_operator(op)
+          value    = id_value(val)
+          "(#{attribute}#{operator}#{value})"
+        end
 
 
         # @param sym [Symbol]

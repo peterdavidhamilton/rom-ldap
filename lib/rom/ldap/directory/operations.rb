@@ -2,6 +2,8 @@ module ROM
   module LDAP
     class Directory
       module Operations
+        # TODO: Turns a Dataset's AST into an Expression and sends to the connection
+        #
         # @param options [Hash]
         #
         # @return [Array<Hash>]
@@ -10,7 +12,15 @@ module ROM
         def query(options)
           set  = []
 
-          @result = connection.search(base: base, **options) do |entity|
+          # TODO: ast = options.delete(:ast)
+          #       expression = Filter::Decomposer.call(ast)  # maybe rename as Generator
+          # options.merge!(expression: expression)
+          #
+          base ||= self.class.default_base
+
+          filter = options.delete(:filter) || self.class.default_filter
+
+          @result = connection.search(base: base, filter: filter, **options) do |entity|
             set << entity
             yield entity if block_given?
           end
@@ -45,11 +55,17 @@ module ROM
         #
         # @option :password [String]
         #
+        # @option :version [Integer] defaults to server value or class attribute
+        #
         # @return [Boolean]
         #
         # @api public
-        def bind_as(filter:, password:)
-          connection.bind_as(filter: filter, password: password)
+        def bind_as(filter:, password:, version: vendor_version)
+          connection.bind_as(
+            filter: filter,
+            password: password,
+            version: (version || self.class.ldap_version)
+          )
         end
 
         # Used by gateway[filter] to infer schema. Limited to 100.

@@ -1,6 +1,6 @@
 require 'dry-types'
 require 'dry-initializer'
-require 'ber/converter'
+require 'rom/ldap/filter/expression/encoder'
 
 # TODO: this logic should be in the deecomposer that turns ast into expression.
 #
@@ -16,6 +16,9 @@ module ROM
         param :left,  reader: :private
         param :right, reader: :private, optional: true
 
+        #
+        # Constructors
+        #
         def &(other)
           self.class.new(:and, self, other)
         end
@@ -49,12 +52,12 @@ module ROM
 
         alias to_s to_rfc2254
 
-        # TODO: relocate #to_ber to Connection#search
         def to_ber
-          BER::Converter.new(op, left, right).call
+          Encoder.new(op, left, right).call
         end
 
-        # these things appear in BER::Parser
+        # @see [Filter::Expression::Decoder]
+        #
         def execute(&block)
           binding.pry
 

@@ -11,68 +11,68 @@ module ROM
           dataset.authenticated?(password) ? new(dataset) : new(EMPTY_ARRAY)
         end
 
-        # Returns True if the filtered entity can bind.
-        #
-        # @return [Boolean]
-        #
-        # @api public
-        def authenticated?(password)
-          dataset.authenticated?(password)
-        end
+                        # Returns True if the filtered entity can bind.
+                        #
+                        # @return [Boolean]
+                        #
+                        # @api public
+                        def authenticated?(password)
+                          dataset.authenticated?(password)
+                        end
 
-        # Count the number of entries selected from the paginated dataset.
-        #
-        # @return [Integer]
-        #
-        # @api public
-        def count
-          dataset.count
-        end
+                        # Count the number of entries selected from the paginated dataset.
+                        #
+                        # @return [Integer]
+                        #
+                        # @api public
+                        def count
+                          dataset.count
+                        end
 
-        # Count the number of entries in the dataset.
-        #   Unrestricted by the gateway search limit.
-        #
-        # @return [Integer]
-        #
-        # @api public
-        def total
-          dataset.total
-        end
+                        # Count the number of entries in the dataset.
+                        #   Unrestricted by the gateway search limit.
+                        #
+                        # @return [Integer]
+                        #
+                        # @api public
+                        def total
+                          dataset.total
+                        end
 
-        # @return [Boolean]
-        #
-        # @param key
-        #
-        # @api public
-        def include?(key)
-          dataset.include?(key)
-        end
+                        # @return [Boolean]
+                        #
+                        # @param key
+                        #
+                        # @api public
+                        def include?(key)
+                          dataset.include?(key)
+                        end
 
-        # @return [Boolean]
-        #
-        # @api public
-        def one?
-          dataset.one?
-        end
+                        # @return [Boolean]
+                        #
+                        # @api public
+                        def one?
+                          dataset.one?
+                        end
 
-        alias distinct? one?
-        alias unique? one?
+                        alias distinct? one?
+                        alias unique? one?
 
-        # @return [Boolean]
-        #
-        # @api public
-        def any?
-          dataset.any?
-        end
+                        # @return [Boolean]
+                        #
+                        # @api public
+                        def any?
+                          dataset.any?
+                        end
 
-        alias exist? any?
+                        alias exist? any?
 
-        # @return [Boolean]
-        #
-        # @api public
-        def none?
-          dataset.none?
-        end
+                        # @return [Boolean]
+                        #
+                        # @api public
+                        def none?
+                          dataset.none?
+                        end
 
         # Find tuple by primary_key - required by commands
         #
@@ -113,29 +113,29 @@ module ROM
           dataset.to_ldif
         end
 
-        # First tuple from the relation
-        #
-        # @example
-        #   relation.where(sn: 'smith').first
-        #
-        # @return [Hash]
-        #
-        # @api public
-        def first
-          dataset.first
-        end
+                        # First tuple from the relation
+                        #
+                        # @example
+                        #   relation.where(sn: 'smith').first
+                        #
+                        # @return [Hash]
+                        #
+                        # @api public
+                        def first
+                          dataset.first
+                        end
 
-        # Last tuple from the relation
-        #
-        # @example
-        #   relation.where(sn: 'smith').last
-        #
-        # @return [Hash]
-        #
-        # @api public
-        def last
-          dataset.reverse_each.first
-        end
+                        # Last tuple from the relation
+                        #
+                        # @example
+                        #   relation.where(sn: 'smith').last
+                        #
+                        # @return [Hash]
+                        #
+                        # @api public
+                        def last
+                          dataset.reverse_each.first
+                        end
 
 
         # Specify an alternative search base for the dataset.

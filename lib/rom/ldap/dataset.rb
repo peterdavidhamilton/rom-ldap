@@ -3,6 +3,8 @@ require 'rom/ldap/functions'
 require 'rom/ldap/filter/dsl'
 require 'rom/ldap/directory/ldif'
 
+require_relative 'chain_methods'
+
 module ROM
   module LDAP
     # Method chaining class to build search criteria.
@@ -23,6 +25,7 @@ module ROM
       include Enumerable
       include Dry::Equalizer(:criteria)
 
+
       param :directory, reader: :private
 
       param :filter,
@@ -35,8 +38,10 @@ module ROM
 
       option :criteria,
         reader: :private,
-        type: Dry::Types['strict.hash'],
-        default: proc { {} }
+        type: Dry::Types['strict.array'],
+        # type: Dry::Types['strict.hash'],
+        default: proc { [] }
+        # default: proc { {} }
 
       option :offset,
         reader: false,
@@ -64,19 +69,26 @@ module ROM
       # @param args [Hash] New arguments to chain.
       #
       # @api private
-      def chain!(args)
-        @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
-        self
-      end
-
-      private :chain!
+      # def chain!(args)
+      #   @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
+      #   self
+      # end
 
       # Merge criteria when the next DSL method is called
       #
       # @api private
-      Filter::DSL.query_methods.each do |query_method|
-        alias_method query_method, :chain!
+      # Filter::DSL.query_methods.each do |query_method|
+      #   alias_method query_method, :chain!
+      # end
+
+      include ChainMethods
+
+      # short list of methods that the relation forwards to the dataset directly
+      def self.dsl
+        ChainMethods.public_instance_methods(false)
       end
+
+
 
       # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
       #
@@ -118,6 +130,8 @@ module ROM
         self
       end
 
+      # Sends methods like one! and map_to to the result array
+      #
       # @return [Enumerator::Lazy, Array]
       #
       # @api public
@@ -127,6 +141,7 @@ module ROM
         results = paginate(results) if paginated?
         block_given? ? results.send(__callee__, *args, &block) : results
       end
+      # private :each
 
       # Respond to repository methods by first calling #each
       #
@@ -138,14 +153,7 @@ module ROM
       alias to_a each
       alias with each
 
-      # Combine original relation filter with search criteria
-      #
-      # @return [String]
-      #
-      # @api public
-      def filter_string
-        query_dsl[criteria, filter]
-      end
+
 
       # Inspect dataset revealing current filter criteria
       #
@@ -174,12 +182,28 @@ module ROM
         each.any?
       end
 
+                   # alias exist? any?
+
       # @return [Integer]
       #
       # @api public
       def count
         each.size
       end
+
+
+                  # alias distinct? one?
+                  # alias unique? one?
+
+
+                  # def first
+                  #   each.first
+                  # end
+
+                  # def last
+                  #   each.reverse_each.first
+                  # end
+
 
       # @return [Integer]
       #
@@ -229,6 +253,28 @@ module ROM
         @ldif ||= Directory::LDIF.new(each).to_ldif #(comment: Time.now)
       end
 
+
+      # Combine original relation filter with search criteria
+      #
+      # @return [String]
+      #
+      # @api public
+      def filter_string # TODO: will become #to_ast
+        # query_dsl[criteria, filter]
+
+
+        # NB: need to merge two asts
+
+        table_name_ast = Filter::Composer.new.call(filter)
+        # filter => "(&(objectclass=person)(uid=*))"
+        # table_name_ast => [:con_and, [[:op_equal, "objectclass", "person"], [:op_equal, "uid", :wildcard]]]
+
+        Filter::Decomposer.new.call(criteria)
+        # criteria => [[:equals, :uid, "billy"]]
+        # string  => "(uid=billy)"
+      end
+
+
       private
 
       # @return [Array<Hash>]
@@ -240,6 +286,8 @@ module ROM
         results
       end
 
+
+      # TODO: replace use of DSL in dataset with a call to the AST building Filter::Decomposer
       def query_dsl
         @query_dsl ||= Filter::DSL.new
       end

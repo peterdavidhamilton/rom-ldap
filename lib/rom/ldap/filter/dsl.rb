@@ -25,9 +25,9 @@ module ROM
         # @return [Array <String>]
         # @api private
         #
-        def self.internals
-          new.public_methods.select { |m| /^_[a-z]+$/.match?(m) }
-        end
+        # def self.internals
+        #   new.public_methods.select { |m| /^_[a-z]+$/.match?(m) }
+        # end
 
         # Coerce and expose public DSL query methods
         #   '_exclude' to :exclude
@@ -39,9 +39,9 @@ module ROM
         # @return [Array<Symbol>]
         #
         # @api public
-        def self.query_methods
-          internals.map { |m| m.to_s.tr('_', '').to_sym }
-        end
+        # def self.query_methods
+        #   internals.map { |m| m.to_s.tr('_', '').to_sym }
+        # end
 
 
         # @return [String]
@@ -57,6 +57,9 @@ module ROM
           if params.is_a?(String)
             filters << params
           else
+            binding.pry
+            # {"_equals"=>{:uid=>"billy"}}
+            # [:eq, :uid, 'billy']
             params.each { |cmd, args| filters << submit(cmd, args) }
           end
 
@@ -71,15 +74,15 @@ module ROM
         #
         # Fields
         #
-        def _equals(args)
-          g(:equals, args)
-        end
+        # def _equals(args)
+        #   g(:equals, args)
+        # end
 
-        alias _where _equals
+        # alias _where _equals
 
-        def _unequals(args)
-          negate(_equals(args))
-        end
+        # def _unequals(args)
+        #   negate(_equals(args))
+        # end
 
         #
         # Attrs

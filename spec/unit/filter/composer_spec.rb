@@ -73,7 +73,7 @@ RSpec.describe ROM::LDAP::Filter::Composer do
     let(:string) { '(|(uidnumber=*)(mail=*))' }
 
     it '#parse' do
-      ast = compiler[string]
+      ast = composer[string]
 
       expect(ast).to eql(
         [
@@ -91,7 +91,7 @@ RSpec.describe ROM::LDAP::Filter::Composer do
     let(:string) { '(&(objectclass=person)(uidnumber=*)(blocked=TRUE))' }
 
     it '#parse' do
-      ast = compiler.(string)
+      ast = composer.(string)
 
       expect(ast).to eql(
         [
