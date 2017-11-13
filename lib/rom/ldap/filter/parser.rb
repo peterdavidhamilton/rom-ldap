@@ -1,70 +1,88 @@
 require 'strscan'
-require 'rom/ldap/filter'
+require 'rom/ldap/filter/expression'
 
+# TODO: replace the parser - which turns a string into expressions.
+# with a composer to build an ast from a string,
+# and a decomposer to turn an ast into a string.
 module ROM
   module LDAP
     module Filter
       class Parser
         extend Dry::Initializer
 
-        param :filter_klass
+        OPERATORS = {
+          eq: '=',
+          ne: '!=',
+          ex: ':=',
+          px: '~=',
+          gt: '>',
+          lt: '<',
+          le: '<=',
+          ge: '>=',
+        }.freeze
+
+        INTERSECTION_REGEX  = /\s*\&\s*/
+        UNION_REGEX         = /\s*\|\s*/
+        NEGATION_REGEX      = /\s*\!\s*/
+        OPEN_REGEX          = /\s*\(\s*/
+        CLOSE_REGEX         = /\s*\)\s*/
+        ATTRIBUTE_REGEX     = /[-\w:.]*[\w]/
+        WS_REGEX            = /\s*/
+        UNESCAPE_REGEX      = /\\([a-fA-F\d]{2})/
+        VALUE_REGEX         = /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|\\[a-fA-F\d]{2})+/u
+
+        OPERATOR_REGEX = Regexp.union(*OPERATORS.values)
+
 
         def call(str)
           scanner = StringScanner.new(str)
-          parse_filter_branch(scanner) || parse_paren_expression(scanner)
-          # filter = parse_filter_branch(scanner) or parse_paren_expression(scanner)
-          # filter.to_s
+          parse_branch(scanner) || parse_expression(scanner)
+
+          # op, left, right = parse_branch(scanner) || parse_expression(scanner)
+          # Builder.new(op, left, right)
+
+          # args = parse_branch(scanner) || parse_expression(scanner)
+          # Builder.new(*args)
         end
+
+
+
 
         private
 
-        # def parse_ldap_filter(obj)
-        #   case obj.ber_identifier
-        #   when 0x87 then eq(obj.to_s, WILDCARD) # present. context-specific primitive 7.
-        #   when 0xa3 then eq(obj[0], obj[1])     # equalityMatch. context-specific constructed 3.
-        #   else
-        #     raise FilterError, "Unknown LDAP search-filter type: #{obj.ber_identifier}"
-        #   end
-        # end
+        def id_operator(str)
+          OPERATORS.invert[str]
+        end
 
-        def parse_paren_expression(scanner)
-          if scanner.scan(/\s*\(\s*/)
-            expr = if scanner.scan(/\s*\&\s*/)
+        def parse_expression(scanner)
+          if scanner.scan(OPEN_REGEX)
+            expr = if scanner.scan(INTERSECTION_REGEX)
                      merge_branches(:&, scanner)
-                   elsif scanner.scan(/\s*\|\s*/)
+                   elsif scanner.scan(UNION_REGEX)
                      merge_branches(:|, scanner)
-                   elsif scanner.scan(/\s*\!\s*/)
-                     br = parse_paren_expression(scanner)
+                   elsif scanner.scan(NEGATION_REGEX)
+                     br = parse_expression(scanner)
                      ~br if br
                    else
-                     parse_filter_branch(scanner)
+                     parse_branch(scanner)
                    end
 
-            expr if expr && scanner.scan(/\s*\)\s*/)
+            expr if expr && scanner.scan(CLOSE_REGEX)
           end
         end
 
-        def parse_filter_branch(scanner)
+        def parse_branch(scanner)
           scanner.scan(WS_REGEX)
-          if token = scanner.scan(TOKEN_REGEX)
-
+          if attribute = scanner.scan(ATTRIBUTE_REGEX)
             scanner.scan(WS_REGEX)
-
             if op = scanner.scan(OPERATOR_REGEX)
-
               scanner.scan(WS_REGEX)
-
               if value = scanner.scan(VALUE_REGEX)
 
-                value.strip!
+                # [ id_operator(op), attribute, value ]
 
-                case op
-                when EQUAL     then filter_klass.eq(token, value)
-                when NOT_EQUAL then filter_klass.ne(token, value)
-                when LESS_THAN then filter_klass.le(token, value)
-                when MORE_THAN then filter_klass.ge(token, value)
-                when EXT_COMP  then filter_klass.ex(token, value)
-                end
+                args = [ id_operator(op), attribute, value ]
+                Expression.new(*args)
               end
             end
           end
@@ -72,15 +90,15 @@ module ROM
 
         def parse_branches(scanner)
           branches = []
-          while branch = parse_paren_expression(scanner)
+          while branch = parse_expression(scanner)
             branches << branch
           end
           branches
         end
 
         def merge_branches(op, scanner)
-          filter   = nil
           branches = parse_branches(scanner)
+          filter   = nil
 
           if branches.size >= 1
             filter = branches.shift

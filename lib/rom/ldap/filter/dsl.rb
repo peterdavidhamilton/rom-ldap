@@ -1,10 +1,24 @@
-require 'rom/ldap/filter/builder'
+require 'rom/ldap/filter/parser'     # #construct
+require 'rom/ldap/filter/expression' # #build
 
 module ROM
   module LDAP
     module Filter
       class DSL
         DSLError = Class.new(StandardError)
+
+
+        ESCAPES = {
+          "\0" => '00', # NUL      = %x00 ; null character
+          '*'  => '2A', # ASTERISK = %x2A ; asterisk (WILDCARD)
+          '('  => '28', # LPARENS  = %x28 ; left parenthesis ("(")
+          ')'  => '29', # RPARENS  = %x29 ; right parenthesis (")")
+          '\\' => '5C', # ESC      = %x5C ; esc (or backslash) ("\")
+        }.freeze
+
+        ESCAPE_REGEX = Regexp.new('[' + ESCAPES.keys.map { |e| Regexp.escape(e) }.join + ']')
+
+
 
         # Public instance methods prefixed with underscore
         #
@@ -28,72 +42,6 @@ module ROM
         def self.query_methods
           internals.map { |m| m.to_s.tr('_', '').to_sym }
         end
-
-
-        # forward(*Builder::METHODS)
-
-        # def self.forward
-        #   Builder::METHODS.each do |method|
-        #     class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        #       def #{method}(*args, &block)
-        #         Builder.__send__(:#{method}, *args, &block)
-        #       end
-        #     RUBY
-        #   end
-        # end
-
-
-                def begins(*args)
-                  Builder.begins(*args)
-                end
-
-                def contains(*args)
-                  Builder.contains(*args)
-                end
-
-                def ends(*args)
-                  Builder.ends(*args)
-                end
-
-                def escape(*args)
-                  Builder.escape(*args)
-                end
-
-                def equals(*args)
-                  Builder.equals(*args)
-                end
-
-                def ge(*args)
-                  Builder.ge(*args)
-                end
-
-                def le(*args)
-                  Builder.le(*args)
-                end
-
-                def equals(*args)
-                  Builder.equals(*args)
-                end
-
-                def present?(*args)
-                  # Builder.present(*args)
-                  Builder.new(:eq, attribute, WILDCARD)
-                end
-
-                alias present present?
-                alias pres present?
-
-                def negate(filter)
-                  # Builder.negate(*args)
-                  Builder.new(:not, filter, nil)
-                end
-
-
-                # Uses the folowwing builder class methods  => eq ne le ge ex
-                def construct(ldap_filter_string)
-                  Filter::Parser.new(Filter::Builder).call(ldap_filter_string)
-                end
-
 
 
         # @return [String]
@@ -130,7 +78,7 @@ module ROM
         alias _where _equals
 
         def _unequals(args)
-          Builder.negate(_equals(args))
+          negate(_equals(args))
         end
 
         #
@@ -144,7 +92,7 @@ module ROM
         alias _exists _present
 
         def _missing(args)
-          Builder.negate(_present(args))
+          negate(_present(args))
         end
 
         alias _hasnt _missing
@@ -171,7 +119,7 @@ module ROM
         alias _matches _contains
 
         def _exclude(args)
-          Builder.negate(_contains(args))
+          negate(_contains(args))
         end
 
         #
@@ -191,7 +139,7 @@ module ROM
         alias _range _within
 
         def _outside(args)
-          Builder.negate(_within(args))
+          negate(_within(args))
         end
 
         #
@@ -214,14 +162,12 @@ module ROM
         # union
         #
         def _and(*filters)
-          # Builder.construct("(&#{filters.join})")
           construct("(&#{filters.join})")
         end
 
         # intersection
         #
         def _or(*filters)
-          # Builder.construct("(|#{filters.join})")
           construct("(|#{filters.join})")
         end
 
@@ -257,6 +203,83 @@ module ROM
             send(method, attribute)
           end
         end
+
+
+
+
+        def equals(attribute, value)
+          build(:eq, attribute, escape(value))
+        end
+
+        def begins(attribute, value)
+          build(:eq, attribute, escape(value) + WILDCARD)
+        end
+
+        def ends(attribute, value)
+          build(:eq, attribute, WILDCARD + escape(value))
+        end
+
+        def contains(attribute, value)
+          build(:eq, attribute, WILDCARD + escape(value) + WILDCARD)
+        end
+
+        def bineq(attribute, value)
+          build(:bineq, attribute, value)
+        end
+
+        def ex(attribute, value)
+          build(:ex, attribute, value)
+        end
+
+        def ne(attribute, value)
+          build(:ne, attribute, value)
+        end
+
+        def ge(attribute, value)
+          build(:ge, attribute, value)
+        end
+
+        def le(attribute, value)
+          build(:le, attribute, value)
+        end
+
+        def present?(attribute)
+          build(:eq, attribute, WILDCARD)
+        end
+
+        alias present present?
+        alias pres present?
+
+        def negate(filter)
+          build(:not, filter, nil)
+        end
+
+
+        def construct(filter)
+          Parser.new.call(filter)
+        end
+
+
+
+        # def parse_ldap_filter(obj)
+        #   case obj.ber_identifier
+        #   when 0x87 then Builder.new(:eq, obj.to_s, WILDCARD) # present. context-specific primitive 7.
+        #   when 0xa3 then Builder.new(:eq, obj[0], obj[1])     # equalityMatch. context-specific constructed 3.
+        #   else
+        #     raise FilterError, "Unknown LDAP search-filter type: #{obj.ber_identifier}"
+        #   end
+        # end
+
+
+
+        def escape(string)
+          string.gsub(ESCAPE_REGEX) { |char| '\\' + ESCAPES[char] }
+        end
+
+        def build(*args)
+          Expression.new(*args)
+        end
+
       end
     end
   end

@@ -1,6 +1,6 @@
 using ::BER
 
-require 'rom/ldap/filter/builder'
+require 'rom/ldap/filter/parser'
 
 module ROM
   module LDAP
@@ -33,8 +33,8 @@ module ROM
       def search(
         filter:,
         base:,
-        size: nil,
-        time: nil,
+        size: nil, # TODO: rename size -> max_results
+        time: nil, # TODO: rename time -> max_time
         scope: SCOPE_SUBTREE,
         deref: DEREF_NEVER,
         attributes: EMPTY_ARRAY,
@@ -47,8 +47,12 @@ module ROM
         raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
-        filter = build_filter(filter || self.class.default_filter)
-        base ||= self.class.default_base
+        base   ||= self.class.default_base
+        filter ||= self.class.default_filter
+
+        filter = build_filter(filter)
+        # filter_ber = filter_to_ber(filter)
+
         size = size.to_i
         time = time.to_i
         refs = return_referrals
@@ -68,7 +72,10 @@ module ROM
             query_limit.to_ber,
             time.to_ber,
             attributes_only.to_ber,
+
             filter.to_ber,
+            # filter_ber,
+
             ber_attrs.to_ber_sequence
           ].to_ber_appsequence(pdu_lookup(:search_request))
 
@@ -114,11 +121,9 @@ module ROM
             end
           end
 
-          # break if counter == size
-
           more_pages = false
 
-          if result_pdu.success? && controls
+          if result_pdu && result_pdu.success? && controls
             controls.each do |c|
               next unless c.oid == PAGED_RESULTS
               more_pages = false
@@ -143,12 +148,15 @@ module ROM
 
       private
 
-      # Delegate to Filter::Builder#construct
-      #
-      # api private
       def build_filter(filter)
-        Filter::Builder.construct(filter) if filter.is_a?(String)
+        Filter::Parser.new.call(filter)
       end
+
+      # def filter_to_ber(filter)
+      #   op, left, right = Filter::Parser.new.call(filter)
+      #   BER::Converter.new(op, left, right).call
+      # end
+
 
       # FIXME: Sort controls sill relevant?
       #
