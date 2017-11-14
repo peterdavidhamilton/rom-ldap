@@ -1,4 +1,5 @@
 require 'rom/ldap/filter'
+require 'rom/ldap/filter/expression'
 
 module ROM
   module LDAP
@@ -16,20 +17,9 @@ module ROM
         def call(ast)
           case ast.size
           when 0 then EMPTY_STRING
-
-          # extra array wrapping
-          when 1 then single(ast.first)
-
-          # &, |, !
-          when 2
-            left, right = ast
-            constructor = id_constructor(left)
-            expressions = right.map { |exp| single(exp) }.join
-            "(#{constructor}(#{expressions}))"
-
-          # simple expression
-          when 3 then single(ast)
-
+          when 1 then single(ast.first) # extra array wrapping
+          when 2 then constructed(ast)  # &, |, !
+          when 3 then single(ast)       # simple expression
           else
             :wip
           end
@@ -39,11 +29,63 @@ module ROM
 
         private
 
+        # @param ast [Array]
+        #
+        # @return [String]
+        #
+        # @example
+        #   => [:op_equal, 'uidNumber', :wildcard]
+        #
+        # @api private
         def single(ast)
           op, attribute, val = ast
-          operator = id_operator(op)
+          # operator = id_operator(op)
           value    = id_value(val)
-          "(#{attribute}#{operator}#{value})"
+          # "(#{attribute}#{operator}#{value})"
+
+          Expression.new(op, attribute, value)
+        end
+
+        # @param ast [Array]
+        #
+        # @return [String]
+        #
+        # @example
+        #   => [:con_not, [:op_equal, 'uidNumber', :wildcard]]
+        #   => [:con_and, [
+        #         [:op_equal, 'uidNumber', :wildcard],
+        #         [:op_equal, 'registered', true]
+        #       ]]
+        #
+        # @api private
+        def constructed(ast)
+          left, right = ast
+          constructor = id_constructor(left)
+
+          if left == :con_not
+            expressions = single(right)
+            "(#{constructor}#{expressions})"
+
+          elsif constructed?(right)
+            expressions = right.map(&method(:call)).join
+            "(#{constructor}#{expressions})"
+
+          else
+            expressions = right.map(&method(:single)).join
+            "(#{constructor}(#{expressions}))"
+          end
+        end
+
+
+        # Identify nested expressions that start with constructors
+        #
+        # @param expr [Array]
+        #
+        # @return [Boolean]
+        #
+        # @api private
+        def constructed?(expr)
+          expr.any? { |x| CONSTRUCTORS.keys.include?(x.first) }
         end
 
 
@@ -83,7 +125,6 @@ module ROM
         def id_value(sym)
           VALUES.fetch(sym, sym)
         end
-
 
       end
     end

@@ -49,13 +49,9 @@ module ROM
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
 
-            # TODO: connection shouldn't know about default base or filter
-            # base   ||= self.class.default_base
-            # filter ||= self.class.default_filter
-
+# binding.pry
             # remove once connection is always receiving an Expression object
-            filter = build_filter(filter)
-            # filter_ber = filter_to_ber(filter)
+            # filter = build_filter(filter)
 
         size = size.to_i
         time = time.to_i
@@ -150,9 +146,9 @@ module ROM
       private
 
       # TODO: remove once what is submitted is always an Expression object
-      def build_filter(filter)
-        Filter::Parser.new.call(filter)
-      end
+      # def build_filter(filter)
+      #   Filter::Parser.new.call(filter)
+      # end
 
       # FIXME: Sort controls sill relevant?
       #

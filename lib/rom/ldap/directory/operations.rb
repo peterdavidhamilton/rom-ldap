@@ -1,3 +1,5 @@
+require 'rom/ldap/filter/compiler'
+
 module ROM
   module LDAP
     class Directory
@@ -19,6 +21,8 @@ module ROM
           base ||= self.class.default_base
 
           filter = options.delete(:filter) || self.class.default_filter
+
+          filter = Filter::Compiler.new(filter).to_filter
 
           @result = connection.search(base: base, filter: filter, **options) do |entity|
             set << entity

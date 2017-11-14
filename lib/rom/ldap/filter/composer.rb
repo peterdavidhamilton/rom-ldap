@@ -53,7 +53,7 @@ module ROM
         # Tokenise the operator, attribute, value parts of an expression.
         #
         # @example
-        #   => [:op_equal, 'uidNumber', :val_wild]
+        #   => [:op_equal, 'uidNumber', :wildcard]
         #
         # @return [Array]
         #
@@ -102,10 +102,10 @@ module ROM
         # @param str [String]
         #
         # @example
-        #   id_value('TRUE') => :val_true
+        #   id_value('TRUE') => true
         #   id_value('peter hamilton') => 'peter hamilton'
         #
-        # @return [Symbol,String]
+        # @return [Symbol,String,Boolean]
         #
         # @api private
         def id_value(str)

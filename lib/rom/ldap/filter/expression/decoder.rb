@@ -4,52 +4,57 @@ module ROM
   module LDAP
     module Filter
       class Expression
-        # BER::Parser
         #
         # @api private
         class Decoder
-          And             = 0xa0 # context-specific constructed 0, "and"
-          Or              = 0xa1 # context-specific constructed 1, "or"
-          Not             = 0xa2 # context-specific constructed 2, "not"
-          equalityMatch   = 0xa3 # context-specific constructed 3, "equalityMatch"
-          substring       = 0xa4 # context-specific constructed 4, "substring"
-          greaterOrEqual  = 0xa5 # context-specific constructed 5, "greaterOrEqual"
-          lessOrEqual     = 0xa6 # context-specific constructed 6, "lessOrEqual"
-          filterInitial   = 0x80 # context-specific primitive 0, SubstringFilter "initial"
-          filterAny       = 0x81 # context-specific primitive 0, SubstringFilter "any"
-          filterFinal     = 0x82 # context-specific primitive 0, SubstringFilter "final"
-          isPresent       = 0x87 # context-specific primitive 7, "present"
-          extComparison   = 0xa9 # context-specific constructed 9, "extensible comparison"
+
+          LOOKUP = {
+            and:              0xa0, # context-specific constructed 0, "and"
+            or:               0xa1, # context-specific constructed 1, "or"
+            not:              0xa2, # context-specific constructed 2, "not"
+            equality_match:   0xa3, # context-specific constructed 3, "equalityMatch"
+            substring:        0xa4, # context-specific constructed 4, "substring"
+            greater_or_equal: 0xa5, # context-specific constructed 5, "greaterOrEqual"
+            less_or_equal:    0xa6, # context-specific constructed 6, "lessOrEqual"
+            filter_initial:   0x80, # context-specific primitive 0, SubstringFilter "initial"
+            filter_any:       0x81, # context-specific primitive 0, SubstringFilter "any"
+            filter_final:     0x82, # context-specific primitive 0, SubstringFilter "final"
+                              # 0x83,
+                              # 0x84,
+            is_present:       0x87, # context-specific primitive 7, "present"
+            ext_comparison:   0xa9, # context-specific constructed 9, "extensible comparison"
+          }
 
           def call(ber)
-            case ber.ber_identifier
-            # when And then ber.map { |b| call(b) }.inject { |memo, obj| memo & obj }
-            # when Or  then ber.map { |b| call(b) }.inject { |memo, obj| memo | obj }
+            identifier = LOOKUP.invert[ber.ber_identifier]
 
-            when And then ber.map { |b| call(b) }.inject { |memo, obj| [:&, memo, obj] }
+            case identifier
+            when LOOKUP[:and]
+              ber.map { |b| call(b) }.inject { |memo, obj| [:&, memo, obj] }
 
-            when Or  then ber.map { |b| call(b) }.inject { |memo, obj| [:&, memo, obj] }
+            when LOOKUP[:or]
+              ber.map { |b| call(b) }.inject { |memo, obj| [:&, memo, obj] }
 
-            # Filter::Builder.~call(ber.first)
-            when Not then [:~, ber.first]
+            when LOOKUP[:not]
+              [:~, ber.first]
 
-            when equalityMatch
+            when LOOKUP[:equality_match]
               [:eq, ber.first, ber.last] if ber.last == WILDCARD
 
-            when substring
+            when LOOKUP[:substring]
               str   = ''
               final = false
 
               ber.last.each do |b|
                 case b.ber_identifier
-                when filterInitial
+                when LOOKUP[:filter_initial]
                   raise Error, 'Unknown substring filter - bad initial value.' unless str.empty?
                   str += escape(b)
 
-                when filterAny
+                when LOOKUP[:filter_any]
                   str += "*#{escape(b)}"
 
-                when filterFinal
+                when LOOKUP[:filter_final]
                   str += "*#{escape(b)}"
                   final = true
                 end
@@ -59,11 +64,16 @@ module ROM
 
               [:eq, ber.first.to_s, str]
 
-            when greaterOrEqual then [:ge, ber.first.to_s, ber.last.to_s]
-            when lessOrEqual    then [:le, ber.first.to_s, ber.last.to_s]
-            when isPresent      then [:present, ber.to_s]
+            when LOOKUP[:greater_or_equal]
+              [:ge, ber.first.to_s, ber.last.to_s]
 
-            when extComparison
+            when LOOKUP[:less_or_equal]
+              [:le, ber.first.to_s, ber.last.to_s]
+
+            when LOOKUP[:is_present]
+              then [:present, ber.to_s]
+
+            when LOOKUP[:ext_comparison]
 
               if ber.size < 2
                 raise Error, 'Invalid extensible search filter, should be at least two elements'
@@ -75,8 +85,8 @@ module ROM
 
               ber.each do |element|
                 case element.ber_identifier
-                when 0x81 then rule = element  # filterAny ?
-                when 0x82 then type = element  # filterFinal ?
+                when LOOKUP[:filter_any]   then rule = element
+                when LOOKUP[:filter_final] then type = element
                 when 0x83 then value = element # ?
                 when 0x84 then dn = 'dn'       # ?
                 end

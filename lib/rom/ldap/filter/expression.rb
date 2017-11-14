@@ -33,16 +33,17 @@ module ROM
 
         def to_raw_rfc2254
           case op
-          when :ne  then        "!(#{left}=#{right})"
-          when :eq, :bineq then "#{left}=#{right}"
-          when :ex  then        "#{left}:=#{right}"
-          when :ge  then        "#{left}>=#{right}"
-          when :gt  then        "#{left}>#{right}"
-          when :le  then        "#{left}<=#{right}"
-          when :lt  then        "#{left}<#{right}"
-          when :and then        "&(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
-          when :or  then        "|(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
-          when :not then        "!(#{left.to_raw_rfc2254})"
+          when :con_not   then        "!(#{left}=#{right})"
+          when :op_equal, :bineq then "#{left}=#{right}"
+          when :op_ext    then        "#{left}:=#{right}"
+          when :op_prox   then        "#{left}~=#{right}"
+          when :op_gt_eq  then        "#{left}>=#{right}"
+          when :op_gt     then        "#{left}>#{right}"
+          when :op_lt_eq  then        "#{left}<=#{right}"
+          when :op_lt     then        "#{left}<#{right}"
+          when :con_and   then        "&(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
+          when :con_or    then        "|(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
+          when :con_not   then        "!(#{left.to_raw_rfc2254})"
           end
         end
 

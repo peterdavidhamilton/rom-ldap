@@ -13,8 +13,8 @@ module ROM
 
         param :input # string or array
 
-        option :composer,   default: proc { Composer.new }   # parse str to ast
-        option :decomposer, default: proc { Decomposer.new } # parse ast to str
+        option :composer,   default: proc { Composer.new }
+        option :decomposer, default: proc { Decomposer.new }
 
         # query in ast out
         def to_ast

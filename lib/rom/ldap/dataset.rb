@@ -1,9 +1,10 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/filter/dsl'
 require 'rom/ldap/directory/ldif'
 
-require_relative 'chain_methods'
+require 'rom/ldap/filter/composer'
+require 'rom/ldap/filter/decomposer'
+require 'rom/ldap/filter/dsl'
 
 module ROM
   module LDAP
@@ -25,7 +26,6 @@ module ROM
       include Enumerable
       include Dry::Equalizer(:criteria)
 
-
       param :directory, reader: :private
 
       param :filter,
@@ -39,9 +39,7 @@ module ROM
       option :criteria,
         reader: :private,
         type: Dry::Types['strict.array'],
-        # type: Dry::Types['strict.hash'],
         default: proc { [] }
-        # default: proc { {} }
 
       option :offset,
         reader: false,
@@ -64,30 +62,15 @@ module ROM
         ]
       end
 
-      # @return [ROM::LDAP::Dataset]
+      # Methods that define the query interface.
       #
-      # @param args [Hash] New arguments to chain.
+      include Filter::DSL
+
+      # Used by Relation to forward methods to dataset
       #
-      # @api private
-      # def chain!(args)
-      #   @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
-      #   self
-      # end
-
-      # Merge criteria when the next DSL method is called
-      #
-      # @api private
-      # Filter::DSL.query_methods.each do |query_method|
-      #   alias_method query_method, :chain!
-      # end
-
-      include ChainMethods
-
-      # short list of methods that the relation forwards to the dataset directly
       def self.dsl
-        ChainMethods.public_instance_methods(false)
+        Filter::DSL.public_instance_methods(false)
       end
-
 
 
       # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
@@ -288,9 +271,9 @@ module ROM
 
 
       # TODO: replace use of DSL in dataset with a call to the AST building Filter::Decomposer
-      def query_dsl
-        @query_dsl ||= Filter::DSL.new
-      end
+      # def query_dsl
+      #   @query_dsl ||= Filter::DSL.new
+      # end
 
       # Reset the current criteria
       #
@@ -298,7 +281,7 @@ module ROM
       #
       # @api private
       def reset!
-        @criteria = {}
+        @criteria = []
         self
       end
 

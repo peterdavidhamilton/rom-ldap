@@ -6,7 +6,48 @@ module ROM
   module LDAP
     module Filter
       class Expression
-        # BER::Convertor used within an Expression instance to encode op, left, right.
+        # Used in ROM::LDAP::Filter::Expression#to_ber to encode op, left, right.
+        #
+        # Filter ::=
+        #     CHOICE {
+        #         and             [0] SET OF Filter,
+        #         or              [1] SET OF Filter,
+        #         not             [2] Filter,
+        #         equalityMatch   [3] AttributeValueAssertion,
+        #         substrings      [4] SubstringFilter,
+        #         greaterOrEqual  [5] AttributeValueAssertion,
+        #         lessOrEqual     [6] AttributeValueAssertion,
+        #         present         [7] AttributeType,
+        #         approxMatch     [8] AttributeValueAssertion,
+        #         extensibleMatch [9] MatchingRuleAssertion
+        #     }
+        #
+        # SubstringFilter ::=
+        #     SEQUENCE {
+        #         type               AttributeType,
+        #         SEQUENCE OF CHOICE {
+        #             initial        [0] LDAPString,
+        #             any            [1] LDAPString,
+        #             final          [2] LDAPString
+        #         }
+        #     }
+        #
+        # MatchingRuleAssertion ::=
+        #     SEQUENCE {
+        #       matchingRule    [1] MatchingRuleId OPTIONAL,
+        #       type            [2] AttributeDescription OPTIONAL,
+        #       matchValue      [3] AssertionValue,
+        #       dnAttributes    [4] BOOLEAN DEFAULT FALSE
+        #     }
+        #
+        # Matching Rule Suffixes
+        #     Less than   [.1] or .[lt]
+        #     Less than or equal to  [.2] or [.lte]
+        #     Equality  [.3] or  [.eq] (default)
+        #     Greater than or equal to  [.4] or [.gte]
+        #     Greater than  [.5] or [.gt]
+        #     Substring  [.6] or  [.sub]
+        #
         #
         # @api private
         class Encoder
@@ -49,7 +90,8 @@ module ROM
                 seq.push last if last
 
                 [left.to_s.to_ber, seq.to_ber].to_ber_contextspecific(4)
-              else # equality
+              else
+                # equality
                 [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(3)
               end
 

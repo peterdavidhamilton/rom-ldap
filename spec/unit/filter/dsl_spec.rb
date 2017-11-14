@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe ROM::LDAP::Filter::DSL do
+RSpec.describe 'relation query dsl' do
   include_context 'factories'
 
   let(:formatter) { old_format_proc }
