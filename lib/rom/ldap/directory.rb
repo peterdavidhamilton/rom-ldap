@@ -34,10 +34,10 @@ module ROM
 
       param :connection
 
-      option :base
-      option :timeout, default: proc { 30 }
-      option :size,    default: proc { 1_000_000 }
-      option :logger,  default: proc { ::Logger.new(STDOUT) }
+      option :base #,        default: -> { self.class.default_base }
+      option :timeout,     default: -> { 30 }
+      option :max_results, default: -> { 1_000_000 }
+      option :logger,      default: -> { ::Logger.new(STDOUT) }
 
 
       # Dry::Monitor::Notifications.new(:app)

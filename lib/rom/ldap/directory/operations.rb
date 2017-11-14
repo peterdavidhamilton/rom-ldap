@@ -1,10 +1,9 @@
-require 'rom/ldap/filter/compiler'
+require 'rom/ldap/filter/transformer'
 
 module ROM
   module LDAP
     class Directory
       module Operations
-        # TODO: Turns a Dataset's AST into an Expression and sends to the connection
         #
         # @param options [Hash]
         #
@@ -14,17 +13,11 @@ module ROM
         def query(options)
           set  = []
 
-          # TODO: ast = options.delete(:ast)
-          #       expression = Filter::Decomposer.call(ast)  # maybe rename as Generator
-          # options.merge!(expression: expression)
-          #
-          base ||= self.class.default_base
+          base       ||= self.class.default_base
+          filters    = options.delete(:filter) || self.class.default_filter
+          expression = merge_criteria(filters)
 
-          filter = options.delete(:filter) || self.class.default_filter
-
-          filter = Filter::Compiler.new(filter).to_filter
-
-          @result = connection.search(base: base, filter: filter, **options) do |entity|
+          @result = connection.search(base: base, expression: expression, **options) do |entity|
             set << entity
             yield entity if block_given?
           end
@@ -42,11 +35,14 @@ module ROM
         #
         # @api public
         def search(filter, base: nil, &block)
-          results = EMPTY_ARRAY
-          unlimited = pageable? && size.nil?
-
           Timeout.timeout(timeout) do
-            results = query(filter: filter, base: base, size: size, deref: DEREF_ALWAYS, unlimited: unlimited)
+
+            results = query(filter: filter,
+                            base: base,
+                            max_results: max_results,
+                            deref: DEREF_ALWAYS,
+                            unlimited: unlimited?)
+
             block_given? ? results.each(&block) : results
           end
         rescue Timeout::Error
@@ -78,7 +74,7 @@ module ROM
         #
         # @api public
         def attributes(filter)
-          query(filter: filter, size: 100, attributes_only: true, unlimited: false)
+          query(filter: filter, max_results: 100, attributes_only: true, unlimited: false)
         end
 
         # Should count actual total
@@ -102,19 +98,10 @@ module ROM
           dn      = args.delete(:dn)
 
           raise OperationError, 'distinguished name is required' if dn.nil?
-
           result = connection.add(dn: dn, attributes: args)
-
           log(__callee__, dn)
-
           result.success?
         end
-
-        def tuple_translation(tuple)
-          attributes = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
-          attributes.map { |a| a.values_at(:name, :original) }.to_h
-        end
-        private :tuple_translation
 
         #
         # @return [Boolean]
@@ -122,11 +109,8 @@ module ROM
         # @api public
         def modify(dn, operations)
           raise OperationError, 'distinguished name is required' if dn.nil?
-
           result = connection.modify(dn: dn, operations: operations)
-
           log(__callee__, dn)
-
           result.success?
         end
 
@@ -138,13 +122,40 @@ module ROM
         # @api public
         def delete(dn)
           raise OperationError, 'distinguished name is required' if dn.nil?
-
           result = connection.delete(dn: dn)
-
           log(__callee__, dn)
-
           result.success?
         end
+
+
+
+        private
+
+        # Is the server capable of paging and has a user defined limit not been set.
+        #
+        def unlimited?
+          pageable? && max_results.nil?
+        end
+
+        # map from :uid_number => 'uidNumber'
+        #
+        def tuple_translation(tuple)
+          attributes = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
+          attributes.map { |a| a.values_at(:name, :original) }.to_h
+        end
+
+        # merge orignal table name with criteria
+        #
+        def merge_criteria(filters)
+          Array(filters).map(&method(:build_expression)).reduce(:&)
+        end
+
+        # whether a string or an ast the transformer returns an expression object
+        #
+        def build_expression(filter)
+          Filter::Transformer.new(filter).to_exp
+        end
+
       end
     end
   end

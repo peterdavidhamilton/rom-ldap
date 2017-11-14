@@ -41,7 +41,7 @@ module ROM
       #   @example
       #     ROM.container(:ldap,
       #       {server:, username:, password:},
-      #       {base: '', size: 100, timeout: 3}
+      #       {base: '', max_results: 100, timeout: 3}
       #     )
       #
       #   @param [Hash] passed to ROM::LDAP::Connection#new

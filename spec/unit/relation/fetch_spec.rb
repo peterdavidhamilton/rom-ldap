@@ -6,7 +6,7 @@ RSpec.describe ROM::Relation do
 
   before do
     conf.relation(:foo) do
-      schema('(&(objectclass=person)(uid=*))', as: :foo, infer: true) do
+      schema('(&((objectclass=person)(uid=*)))', as: :foo, infer: true) do
         attribute 'uidNumber', ROM::LDAP::Types::Serial
         primary_key 'uidNumber'
       end

@@ -9,37 +9,39 @@ module ROM
         class Decoder
 
           LOOKUP = {
-            and:              0xa0, # context-specific constructed 0, "and"
-            or:               0xa1, # context-specific constructed 1, "or"
-            not:              0xa2, # context-specific constructed 2, "not"
+            con_and:          0xa0, # context-specific constructed 0, "and"
+            con_or:           0xa1, # context-specific constructed 1, "or"
+            con_not:          0xa2, # context-specific constructed 2, "not"
             equality_match:   0xa3, # context-specific constructed 3, "equalityMatch"
             substring:        0xa4, # context-specific constructed 4, "substring"
-            greater_or_equal: 0xa5, # context-specific constructed 5, "greaterOrEqual"
-            less_or_equal:    0xa6, # context-specific constructed 6, "lessOrEqual"
+            op_gt_eq:         0xa5, # context-specific constructed 5, "greaterOrEqual"
+            op_lt_eq:         0xa6, # context-specific constructed 6, "lessOrEqual"
             filter_initial:   0x80, # context-specific primitive 0, SubstringFilter "initial"
             filter_any:       0x81, # context-specific primitive 0, SubstringFilter "any"
             filter_final:     0x82, # context-specific primitive 0, SubstringFilter "final"
                               # 0x83,
                               # 0x84,
             is_present:       0x87, # context-specific primitive 7, "present"
-            ext_comparison:   0xa9, # context-specific constructed 9, "extensible comparison"
+            op_ext:           0xa9, # context-specific constructed 9, "extensible comparison"
           }
 
           def call(ber)
+            binding.pry
             identifier = LOOKUP.invert[ber.ber_identifier]
 
             case identifier
-            when LOOKUP[:and]
-              ber.map { |b| call(b) }.inject { |memo, obj| [:&, memo, obj] }
+            when LOOKUP[:con_and]
+              ber.map { |b| call(b) }.inject { |memo, obj| [:con_and, memo, obj] }
 
-            when LOOKUP[:or]
-              ber.map { |b| call(b) }.inject { |memo, obj| [:&, memo, obj] }
+            when LOOKUP[:con_or]
+              ber.map { |b| call(b) }.inject { |memo, obj| [:con_or, memo, obj] }
 
-            when LOOKUP[:not]
-              [:~, ber.first]
+            when LOOKUP[:con_not]
+              # [:~, ber.first]
+              [:con_not, ber.first, nil]
 
             when LOOKUP[:equality_match]
-              [:eq, ber.first, ber.last] if ber.last == WILDCARD
+              [:op_equal, ber.first, ber.last] if ber.last == WILDCARD
 
             when LOOKUP[:substring]
               str   = ''
@@ -62,18 +64,18 @@ module ROM
 
               str += WILDCARD unless final
 
-              [:eq, ber.first.to_s, str]
+              [:op_equal, ber.first.to_s, str]
 
-            when LOOKUP[:greater_or_equal]
-              [:ge, ber.first.to_s, ber.last.to_s]
+            when LOOKUP[:op_gt_eq]
+              [:op_gt_eq, ber.first.to_s, ber.last.to_s]
 
-            when LOOKUP[:less_or_equal]
-              [:le, ber.first.to_s, ber.last.to_s]
+            when LOOKUP[:op_lt_eq]
+              [:op_lt_eq, ber.first.to_s, ber.last.to_s]
 
             when LOOKUP[:is_present]
               then [:present, ber.to_s]
 
-            when LOOKUP[:ext_comparison]
+            when LOOKUP[:op_ext]
 
               if ber.size < 2
                 raise Error, 'Invalid extensible search filter, should be at least two elements'
@@ -97,7 +99,7 @@ module ROM
               attribute << ":#{dn}"     if dn
               attribute << ":#{rule}"   if rule
 
-              [:ex, attribute, value]
+              [:op_ext, attribute, value]
             else
               raise Error, "Invalid BER tag-value (#{ber.ber_identifier}) in search filter."
             end

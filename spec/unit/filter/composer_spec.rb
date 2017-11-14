@@ -1,14 +1,12 @@
 require 'spec_helper'
 
-require 'rom/ldap/filter/composer'
+RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
+  let(:composer) { ROM::LDAP::Filter::Transformer::Composer.new }
 
-RSpec.describe ROM::LDAP::Filter::Composer do
-  let(:composer) { ROM::LDAP::Filter::Composer.new }
-
-  describe 'and x3 (eq gt prox)' do
+  describe 'con_and' do
     let(:string) { '(&(objectclass=person)(uidnumber>=34)(mail~=*@example.com))' }
 
-    it 'parse' do
+    it 'con_and' do
       ast = composer.call(string)
 
       expect(ast).to eql(
@@ -24,10 +22,10 @@ RSpec.describe ROM::LDAP::Filter::Composer do
     end
   end
 
-  describe 'not and x4 (eq lt sn)' do
+  describe 'con_not con_and' do
     let(:string) { '(!(&(objectclass=person)(uidnumber<2)(sn=hamilton)(givenname=peter)))' }
 
-    it 'parse' do
+    it 'con_not con_and' do
       ast = composer.call(string)
 
       expect(ast).to eql(
@@ -47,10 +45,10 @@ RSpec.describe ROM::LDAP::Filter::Composer do
     end
   end
 
-  describe 'not then or (gt lt)' do
+  describe 'con_not con_or' do
     let(:string) { '(!(|(uidnumber>=10)(gidnumber<=34)))' }
 
-    it '#parse' do
+    it 'con_not con_or' do
       ast = composer.call(string)
 
       expect(ast).to eql(

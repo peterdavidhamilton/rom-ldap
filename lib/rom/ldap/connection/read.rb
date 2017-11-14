@@ -1,19 +1,17 @@
 using ::BER
 
-require 'rom/ldap/filter/parser'
-
 module ROM
   module LDAP
     module Read
       # Connection Search Operation
       #
-      # @option :filter [String] Required but fallsback to class attribute 'default_filter' if nil.
+      # @option :expression [Filter::Expression]
       #
       # @option :base [String] Required but falls back to class attribute 'default_base' if nil.
       #
-      # @option :size [Integer] Can be set by gateway options passed to directory.
+      # @option :max_results [Integer] Can be set by gateway options passed to directory.
       #
-      # @option :time [Integer] Can be set by gateway options passed to directory.
+      # @option :max_time [Integer] Can be set by gateway options passed to directory.
       #
       # @option :scope [Integer] Defaults to 'subtree'.
       #
@@ -31,11 +29,10 @@ module ROM
       #
       # @api public
       def search(
-        # TODO: replace filter keyword with expression
-        filter:,
+        expression:,
         base:,
-        size: nil, # TODO: rename size -> max_results
-        time: nil, # TODO: rename time -> max_time
+        max_results: nil,
+        max_time: nil,
         scope: SCOPE_SUBTREE,
         deref: DEREF_NEVER,
         attributes: EMPTY_ARRAY,
@@ -48,20 +45,14 @@ module ROM
         raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
-
-# binding.pry
-            # remove once connection is always receiving an Expression object
-            # filter = build_filter(filter)
-
-        size = size.to_i
-        time = time.to_i
-        refs = return_referrals
+        max_results = max_results.to_i
+        max_time = max_time.to_i
         message_id = next_msgid
         ber_attrs = Array(attributes).map { |attr| attr.to_s.to_ber }
         ber_sort = encode_sort_controls(sort)
         rfc2696_cookie = [126, EMPTY_STRING]
         result_pdu = nil
-        query_limit = (0..126).cover?(size) ? size : 0
+        query_limit = (0..126).cover?(max_results) ? max_results : 0
         counter = 0
 
         loop do
@@ -70,9 +61,9 @@ module ROM
             scope.to_ber_enumerated,
             deref.to_ber_enumerated,
             query_limit.to_ber,
-            time.to_ber,
+            max_time.to_ber,
             attributes_only.to_ber,
-            filter.to_ber,
+            expression.to_ber,
             ber_attrs.to_ber_sequence
           ].to_ber_appsequence(pdu_lookup(:search_request))
 
@@ -105,12 +96,12 @@ module ROM
               yield pdu.search_entry if block_given?
 
             when pdu_lookup(:search_result_referral)
-              yield(search_referrals: referrals) if refs && block_given?
+              yield(search_referrals: referrals) if return_referrals && block_given?
 
             when pdu_lookup(:search_result)
               result_pdu = pdu
               controls   = pdu.result_controls
-              yield(search_referrals: referrals) if refs && pdu.referral? && block_given?
+              yield(search_referrals: referrals) if return_referrals && pdu.referral? && block_given?
               break
 
             else
@@ -144,11 +135,6 @@ module ROM
       end
 
       private
-
-      # TODO: remove once what is submitted is always an Expression object
-      # def build_filter(filter)
-      #   Filter::Parser.new.call(filter)
-      # end
 
       # FIXME: Sort controls sill relevant?
       #

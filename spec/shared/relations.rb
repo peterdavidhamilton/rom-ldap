@@ -6,14 +6,14 @@ RSpec.shared_context 'relations' do
     ROM::LDAP::Directory::Entity.use_formatter(formatter)
 
     conf.relation(:accounts) do
-      schema('(&(objectclass=person)(uid=*))', as: :accounts, infer: true)
+      schema('(&((objectclass=person)(uid=*)))', as: :accounts, infer: true)
       use :pagination
       per_page 4
       auto_struct false
     end
 
     conf.relation(:people) do
-      schema('(&(objectclass=person)(gidnumber=1))', as: :people) do
+      schema('(&((objectclass=person)(gidnumber=1)))', as: :people) do
         attribute :uid,               ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
         attribute :uidnumber,         ROM::LDAP::Types::Serial, read: ROM::LDAP::Types::Single::Int
         attribute :uniqueidentifier,  ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::Int
@@ -32,7 +32,7 @@ RSpec.shared_context 'relations' do
     end
 
     conf.relation(:group9998) do
-      schema('(&(objectclass=person)(gidnumber=9998))', as: :customers, infer: true)
+      schema('(&((objectclass=person)(gidnumber=9998)))', as: :customers, infer: true)
       use :auto_restrictions
       auto_struct false
     end

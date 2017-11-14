@@ -11,12 +11,12 @@ module ROM
         meta[:multiple]
       end
 
-      # @return [Net::BER::BerIdentifiedString]
+      # @return [BER::BerIdentifiedString]
       def description
         meta[:description]
       end
 
-      # @return [Net::BER::BerIdentifiedString]
+      # @return [BER::BerIdentifiedString]
       def oid
         meta[:oid]
       end

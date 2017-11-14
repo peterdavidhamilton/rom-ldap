@@ -1,15 +1,12 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
 require 'rom/ldap/directory/ldif'
-
-require 'rom/ldap/filter/composer'
-require 'rom/ldap/filter/decomposer'
-require 'rom/ldap/filter/dsl'
+require 'rom/ldap/dsl'
 
 module ROM
   module LDAP
     # Method chaining class to build search criteria.
-    #   Passes criteria and orignal filter to the query DSL.
+    #   Passes AST and orignal filter to the query DSL.
     #
     # @param filter [String] Relation name
     #   @example => "(&(objectclass=person)(uidnumber=*))"
@@ -24,7 +21,7 @@ module ROM
     class Dataset
       extend  Initializer
       include Enumerable
-      include Dry::Equalizer(:criteria)
+      include Dry::Equalizer(:ast)
 
       param :directory, reader: :private
 
@@ -36,10 +33,10 @@ module ROM
         reader: :private,
         type: Dry::Types['strict.string']
 
-      option :criteria,
+      option :ast,
         reader: :private,
         type: Dry::Types['strict.array'],
-        default: proc { [] }
+        default: -> { [] }
 
       option :offset,
         reader: false,
@@ -56,20 +53,20 @@ module ROM
         Hash[
           offset:     @offset,
           limit:      @limit,
-          criteria:   @criteria,
-          base:       @base,
+          ast:        ast,
+          base:       base,
           pagination: paginated?
         ]
       end
 
       # Methods that define the query interface.
       #
-      include Filter::DSL
+      include DSL
 
       # Used by Relation to forward methods to dataset
       #
       def self.dsl
-        Filter::DSL.public_instance_methods(false)
+        DSL.public_instance_methods(false)
       end
 
 
@@ -237,24 +234,14 @@ module ROM
       end
 
 
-      # Combine original relation filter with search criteria
+      # Combine original relation dataset name (LDAP filter string)
+      #   with search criteria (AST).
       #
       # @return [String]
       #
       # @api public
-      def filter_string # TODO: will become #to_ast
-        # query_dsl[criteria, filter]
-
-
-        # NB: need to merge two asts
-
-        table_name_ast = Filter::Composer.new.call(filter)
-        # filter => "(&(objectclass=person)(uid=*))"
-        # table_name_ast => [:con_and, [[:op_equal, "objectclass", "person"], [:op_equal, "uid", :wildcard]]]
-
-        Filter::Decomposer.new.call(criteria)
-        # criteria => [[:equals, :uid, "billy"]]
-        # string  => "(uid=billy)"
+      def filter_string
+        [ filter , ast ]
       end
 
 
@@ -269,19 +256,13 @@ module ROM
         results
       end
 
-
-      # TODO: replace use of DSL in dataset with a call to the AST building Filter::Decomposer
-      # def query_dsl
-      #   @query_dsl ||= Filter::DSL.new
-      # end
-
       # Reset the current criteria
       #
       # @return [ROM::LDAP::Dataset]
       #
       # @api private
       def reset!
-        @criteria = []
+        @ast = []
         self
       end
 

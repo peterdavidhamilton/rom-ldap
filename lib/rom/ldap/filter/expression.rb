@@ -2,8 +2,6 @@ require 'dry-types'
 require 'dry-initializer'
 require 'rom/ldap/filter/expression/encoder'
 
-# TODO: this logic should be in the deecomposer that turns ast into expression.
-#
 module ROM
   module LDAP
     module Filter
@@ -12,23 +10,23 @@ module ROM
 
         extend Dry::Initializer
 
-        param :op,    reader: :private, type: Dry::Types['strict.symbol']
-        param :left,  reader: :private
-        param :right, reader: :private, optional: true
+        param :op, type: Dry::Types['strict.symbol']
+        param :left
+        param :right, optional: true
 
         #
         # Constructors
         #
         def &(other)
-          self.class.new(:and, self, other)
+          self.class.new(:con_and, self, other)
         end
 
         def |(other)
-          self.class.new(:or, self, other)
+          self.class.new(:con_or, self, other)
         end
 
         def ~@
-          self.class.new(:not, self, nil)
+          self.class.new(:con_not, self, nil)
         end
 
         def to_raw_rfc2254
@@ -53,6 +51,10 @@ module ROM
 
         alias to_s to_rfc2254
 
+        def inspect
+          %(<##{self.class} op=#{op} left=#{left} right=#{right}>)
+        end
+
         def to_ber
           Encoder.new(op, left, right).call
         end
@@ -63,7 +65,7 @@ module ROM
           binding.pry
 
           case op
-          when :eq
+          when :op_equal
             if right == WILDCARD
               yield :present, left
             elsif right.index WILDCARD
@@ -71,13 +73,13 @@ module ROM
             else
               yield(:equalityMatch, left, right)
             end
-          when :ge
+          when :op_gt_eq
             yield(:greaterOrEqual, left, right)
-          when :le
+          when :op_lt_eq
             yield(:lessOrEqual, left, right)
-          when :or, :and
+          when :con_or, :con_and
             yield(op, left.execute(&block), right.execute(&block))
-          when :not
+          when :con_not
             yield(op, left.execute(&block))
           end || EMPTY_ARRAY
         end

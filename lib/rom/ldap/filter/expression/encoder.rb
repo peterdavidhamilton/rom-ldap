@@ -63,7 +63,7 @@ module ROM
           def call
             case op
 
-            when :eq
+            when :op_equal
               if right == WILDCARD
                 left.to_s.to_ber_contextspecific(7)
 
@@ -99,7 +99,7 @@ module ROM
             when :bineq
               [left.to_s.to_ber, unescape(right).to_ber_bin].to_ber_contextspecific(3)
 
-            when :ex
+            when :op_ext
               seq = []
 
               raise(Error, "Bad attribute #{left}") unless left =~ EXTENSIBLE_REGEX
@@ -115,24 +115,26 @@ module ROM
 
               seq.to_ber_contextspecific(9)
 
-            when :ge
+            when :op_gt_eq
               [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(5)
 
-            when :le
+            when :op_lt_eq
               [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(6)
 
             when :ne
+              binding.pry
+
               [self.class.eq(left, right).to_ber].to_ber_contextspecific(2)
 
-            when :and
-              ary = [left.coalesce(:and), right.coalesce(:and)].flatten
+            when :con_and
+              ary = [left.coalesce(:con_and), right.coalesce(:con_and)].flatten
               ary.map(&:to_ber).to_ber_contextspecific(0)
 
-            when :or
-              ary = [left.coalesce(:or), right.coalesce(:or)].flatten
+            when :con_or
+              ary = [left.coalesce(:con_or), right.coalesce(:con_or)].flatten
               ary.map(&:to_ber).to_ber_contextspecific(1)
 
-            when :not
+            when :con_not
               [left.to_ber].to_ber_contextspecific(2)
             end
           end

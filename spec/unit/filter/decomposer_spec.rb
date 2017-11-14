@@ -1,13 +1,10 @@
 require 'spec_helper'
 
-require 'rom/ldap/filter/decomposer'
+RSpec.describe ROM::LDAP::Filter::Transformer::Decomposer do
 
-RSpec.describe ROM::LDAP::Filter::Decomposer do
-
-  let(:decomposer) { ROM::LDAP::Filter::Decomposer.new }
+  let(:decomposer) { ROM::LDAP::Filter::Transformer::Decomposer.new }
 
   it '(&(|(cn~=John)(sn=Smith))(!(uid=*)))' do
-
     ast = decomposer.call(
       [
         :con_and,
@@ -20,18 +17,6 @@ RSpec.describe ROM::LDAP::Filter::Decomposer do
 
     expect(ast).to eql('(&(|((cn~=John)(sn=Smith)))(!(uid=*)))')
   end
-
-  it '(!(gn~=Peter))' do
-
-    ast = decomposer.call(
-      [
-        :con_not, [:op_prox, 'gn', 'Peter'],
-      ]
-    )
-
-    expect(ast).to eql('(!(gn~=Peter))')
-  end
-
 
   it '(&((gn~=Peter)(sn=Hamilton)))' do
 
@@ -46,6 +31,11 @@ RSpec.describe ROM::LDAP::Filter::Decomposer do
     )
 
     expect(ast).to eql('(&((gn~=Peter)(sn=Hamilton)))')
+  end
+
+  it '(!(gn~=Peter))' do
+    ast = decomposer.call([ :con_not, [:op_prox, 'gn', 'Peter'] ])
+    expect(ast).to eql('(!(gn~=Peter))')
   end
 
   it '(|((mail=*)(uid>=500)(cn~=Peter Hamilton)))' do
