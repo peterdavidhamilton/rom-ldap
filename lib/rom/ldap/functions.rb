@@ -1,6 +1,12 @@
 require 'transproc'
 require 'dry/core/inflector'
 
+
+require 'rom/ldap/functions/query_exporter'
+require 'rom/ldap/functions/filter_exporter'
+require 'rom/ldap/functions/expression_exporter'
+
+
 module ROM
   module LDAP
     module Functions
@@ -58,6 +64,58 @@ module ROM
 
       def self.coerce_tuple_in(tuple)
         t(:map_values, t(:string_input)).call(tuple)
+      end
+
+
+      # 'filter' to 'query'
+      #
+      # @param input [String]
+      #
+      # @return [Array]
+      #
+      # @api public
+      def self.to_ast(input)
+        query_exporter.call(input)
+      end
+
+      # 'query' to 'filter'
+      #
+      # @param input [Array]
+      #
+      # @return [String]
+      #
+      # @api public
+      def self.to_ldap(input)
+        filter_exporter.call(input)
+      end
+
+      # 'query' or 'filter' to 'expression'
+      #
+      # @param input [Array,String]
+      #
+      # @return [Expression]
+      #
+      # @api public
+      def self.to_exp(input)
+        if input.is_a?(String)
+          expression_exporter.call(input)
+        else
+          expression_exporter.call(to_ldap(input))
+        end
+      end
+
+      private
+
+      def self.query_exporter
+        @composer ||= QueryExporter.new
+      end
+
+      def self.filter_exporter
+        @decomposer ||= FilterExporter.new
+      end
+
+      def self.expression_exporter
+        @parser ||= ExpressionExporter.new
       end
     end
   end

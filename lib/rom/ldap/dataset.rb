@@ -1,12 +1,11 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
 require 'rom/ldap/directory/ldif'
-require 'rom/ldap/dsl'
+require 'rom/ldap/dataset/dsl'
 
 module ROM
   module LDAP
     # Method chaining class to build search criteria.
-    #   Passes AST and orignal filter to the query DSL.
     #
     # @param filter [String] Relation name
     #   @example => "(&(objectclass=person)(uidnumber=*))"
@@ -21,11 +20,11 @@ module ROM
     class Dataset
       extend  Initializer
       include Enumerable
-      include Dry::Equalizer(:ast)
+      include Dry::Equalizer(:criteria)
 
       param :directory, reader: :private
 
-      param :filter,
+      param :source,
         reader: :private,
         type: Dry::Types['strict.string']
 
@@ -33,7 +32,7 @@ module ROM
         reader: :private,
         type: Dry::Types['strict.string']
 
-      option :ast,
+      option :criteria,
         reader: :private,
         type: Dry::Types['strict.array'],
         default: -> { [] }
@@ -50,13 +49,13 @@ module ROM
 
       # @api public
       def opts
-        Hash[
-          offset:     @offset,
-          limit:      @limit,
-          ast:        ast,
-          base:       base,
-          pagination: paginated?
-        ]
+        {
+          base:   base,
+          source: source,
+          query:  query,
+          offset: @offset,
+          limit:  @limit
+        }.freeze
       end
 
       # Methods that define the query interface.
@@ -68,7 +67,6 @@ module ROM
       def self.dsl
         DSL.public_instance_methods(false)
       end
-
 
       # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
       #
@@ -133,15 +131,13 @@ module ROM
       alias to_a each
       alias with each
 
-
-
       # Inspect dataset revealing current filter criteria
       #
       # @return [String]
       #
       # @api public
       def inspect
-        %(<##{self.class} ast="#{ast}" base="#{base}">)
+        %(<##{self.class} search="#{filter_string}" base="#{base}">)
       end
 
       # True if password binds for the filtered dataset
@@ -152,7 +148,7 @@ module ROM
       #
       # @api public
       def authenticated?(password)
-        directory.bind_as(filter: filter_string, password: password)
+        directory.bind_as(filter: query, password: password)
       end
 
       # @return [Boolean]
@@ -162,8 +158,6 @@ module ROM
         each.any?
       end
 
-                   # alias exist? any?
-
       # @return [Integer]
       #
       # @api public
@@ -171,25 +165,11 @@ module ROM
         each.size
       end
 
-
-                  # alias distinct? one?
-                  # alias unique? one?
-
-
-                  # def first
-                  #   each.first
-                  # end
-
-                  # def last
-                  #   each.reverse_each.first
-                  # end
-
-
       # @return [Integer]
       #
       # @api public
       def total
-        results = directory.total(filter_string)
+        results = directory.total(query)
         reset!
         results
       end
@@ -198,7 +178,7 @@ module ROM
       #
       # @api public
       def include?(key)
-        results = directory.include?(filter_string, key)
+        results = directory.include?(query, key)
         reset!
         results
       end
@@ -233,26 +213,42 @@ module ROM
         @ldif ||= Directory::LDIF.new(each).to_ldif #(comment: Time.now)
       end
 
+      # Convert the full query to an LDAP filter string
+      #
+      # @return [String]
+      #
+      # @api public
+      def filter_string
+        Functions[:to_ldap][query]
+      end
+
+      private
 
       # Combine original relation dataset name (LDAP filter string)
       #   with search criteria (AST).
       #
       # @return [String]
       #
-      # @api public
-      def filter_string
-        # TODO: join these!!!
-        [filter, ast]
+      # @api private
+      def query
+        return source_to_ast if criteria.empty?
+        [:con_and, [source_to_ast, criteria]]
       end
 
-
-      private
+      # Convert the relation's source filter string to a query AST.
+      #
+      # @return [Array]
+      #
+      # @api private
+      def source_to_ast
+        Functions[:to_ast][source]
+      end
 
       # @return [Array<Hash>]
       #
       # @api private
       def search(&block)
-        results = directory.search(filter_string, base: base, &block)
+        results = directory.search(query, base: base, &block)
         reset!
         results
       end
@@ -263,7 +259,7 @@ module ROM
       #
       # @api private
       def reset!
-        @ast = []
+        @criteria = []
         self
       end
 

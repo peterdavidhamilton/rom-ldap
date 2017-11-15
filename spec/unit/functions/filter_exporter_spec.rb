@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-RSpec.describe ROM::LDAP::Filter::Transformer::Decomposer do
+RSpec.describe ROM::LDAP::Functions::FilterExporter do
 
-  let(:decomposer) { ROM::LDAP::Filter::Transformer::Decomposer.new }
+  let(:exporter) { ROM::LDAP::Functions::FilterExporter.new }
 
   it '(&(|(cn~=John)(sn=Smith))(!(uid=*)))' do
-    ast = decomposer.call(
+    ast = exporter.call(
       [
         :con_and,
         [
@@ -15,12 +15,12 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Decomposer do
       ]
     )
 
-    expect(ast).to eql('(&(|((cn~=John)(sn=Smith)))(!(uid=*)))')
+    expect(ast).to eql('(&(|(cn~=John)(sn=Smith))(!(uid=*)))')
   end
 
-  it '(&((gn~=Peter)(sn=Hamilton)))' do
+  it '(&(gn~=Peter)(sn=Hamilton))' do
 
-    ast = decomposer.call(
+    ast = exporter.call(
       [
         :con_and,
         [
@@ -30,17 +30,17 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Decomposer do
       ]
     )
 
-    expect(ast).to eql('(&((gn~=Peter)(sn=Hamilton)))')
+    expect(ast).to eql('(&(gn~=Peter)(sn=Hamilton))')
   end
 
   it '(!(gn~=Peter))' do
-    ast = decomposer.call([ :con_not, [:op_prox, 'gn', 'Peter'] ])
+    ast = exporter.call([ :con_not, [:op_prox, 'gn', 'Peter'] ])
     expect(ast).to eql('(!(gn~=Peter))')
   end
 
-  it '(|((mail=*)(uid>=500)(cn~=Peter Hamilton)))' do
+  it '(|(mail=*)(uid>=500)(cn~=Peter Hamilton))' do
 
-    ast = decomposer.call(
+    ast = exporter.call(
       [
         :con_or,
         [
@@ -51,28 +51,28 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Decomposer do
       ]
     )
 
-    expect(ast).to eql('(|((cn~=Peter Hamilton)(mail=*)(uid>=500)))')
+    expect(ast).to eql('(|(cn~=Peter Hamilton)(mail=*)(uid>=500))')
   end
 
   describe 'single expressions' do
     it 'approximately' do
-      ast = decomposer.call([:op_prox, 'cn', 'Peter Hamilton'])
+      ast = exporter.call([:op_prox, 'cn', 'Peter Hamilton'])
       expect(ast).to eql('(cn~=Peter Hamilton)')
     end
 
     it 'equals' do
-      ast = decomposer.call([:op_equal, 'mail', '*@peterdavidhamilton.com'])
+      ast = exporter.call([:op_equal, 'mail', '*@peterdavidhamilton.com'])
       expect(ast).to eql('(mail=*@peterdavidhamilton.com)')
     end
 
     it 'greater than' do
-      ast = decomposer.call([:op_gt, 'uid', 500])
+      ast = exporter.call([:op_gt, 'uid', 500])
       expect(ast).to eql('(uid>500)')
     end
 
 
     it 'less than or equal' do
-      ast = decomposer.call([:op_lt_eq, 'uid', 500])
+      ast = exporter.call([:op_lt_eq, 'uid', 500])
       expect(ast).to eql('(uid<=500)')
     end
   end

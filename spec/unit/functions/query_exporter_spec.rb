@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
-  let(:composer) { ROM::LDAP::Filter::Transformer::Composer.new }
+RSpec.describe ROM::LDAP::Functions::QueryExporter do
+  let(:exporter) { ROM::LDAP::Functions::QueryExporter.new }
 
   describe 'con_and' do
     let(:string) { '(&(objectclass=person)(uidnumber>=34)(mail~=*@example.com))' }
 
     it 'con_and' do
-      ast = composer.call(string)
+      ast = exporter.call(string)
 
       expect(ast).to eql(
         [
@@ -26,7 +26,7 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
     let(:string) { '(!(&(objectclass=person)(uidnumber<2)(sn=hamilton)(givenname=peter)))' }
 
     it 'con_not con_and' do
-      ast = composer.call(string)
+      ast = exporter.call(string)
 
       expect(ast).to eql(
         [
@@ -49,7 +49,7 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
     let(:string) { '(!(|(uidnumber>=10)(gidnumber<=34)))' }
 
     it 'con_not con_or' do
-      ast = composer.call(string)
+      ast = exporter.call(string)
 
       expect(ast).to eql(
         [
@@ -71,7 +71,7 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
     let(:string) { '(|(uidnumber=*)(mail=*))' }
 
     it '#parse' do
-      ast = composer[string]
+      ast = exporter[string]
 
       expect(ast).to eql(
         [
@@ -89,7 +89,7 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
     let(:string) { '(&(objectclass=person)(uidnumber=*)(blocked=TRUE))' }
 
     it '#parse' do
-      ast = composer.(string)
+      ast = exporter.(string)
 
       expect(ast).to eql(
         [
@@ -108,7 +108,7 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Composer do
     let(:string) { '(&(|(cn~=John)(sn=Smith))(!(uid=*)))' }
 
     it '#parse' do
-      ast = composer.call(string).to_s
+      ast = exporter.call(string).to_s
 
       expect(ast).to eql(
         "[:con_and, [[:con_or, [[:op_prox, \"cn\", \"John\"], [:op_equal, \"sn\", \"Smith\"]]], [:con_not, [:op_equal, \"uid\", :wildcard]]]]"

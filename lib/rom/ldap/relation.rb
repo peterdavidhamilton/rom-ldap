@@ -13,13 +13,13 @@ module ROM
 
       # struct_namespace LDAP:Struct
 
-      # GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
-      # USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
-
       defines :base
-      # defines :filter
+      defines :users
+      defines :groups
 
-      # filter USERS
+      users '(&(objectclass=person)(uid=*))'.freeze
+      # users '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
+      groups '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
 
       include LDAP
       include Reading
@@ -40,7 +40,7 @@ module ROM
       end
 
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        event[:dataset].filter_string.to_s
+        event[:dataset].filter_string
       end
 
       schema_class      Schema
@@ -73,9 +73,9 @@ module ROM
       # @return [String]
       #
       # @api private
-      # def filter
-      #   dataset.filter_string.to_s
-      # end
+      def filter
+        dataset.filter_string
+      end
 
       # @api private
       def self.associations
@@ -88,18 +88,6 @@ module ROM
       def assoc(name)
         associations[name].call
       end
-
-      # available methods provided by DSL
-      #
-      # @return [Array<Symbol>]
-      #
-      # @api private
-      def query_methods
-        # Filter::DSL.query_methods.sort
-        Dataset.dsl.sort
-      end
-      private :query_methods
-
 
       # Compliments #root method with an alternative search base
       #

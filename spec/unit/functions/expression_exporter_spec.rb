@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-RSpec.describe ROM::LDAP::Filter::Transformer::Parser do
+RSpec.describe ROM::LDAP::Functions::ExpressionExporter do
 
-  let(:parser) { ROM::LDAP::Filter::Transformer::Parser.new }
+  let(:exporter) { ROM::LDAP::Functions::ExpressionExporter.new }
 
   describe 'con_and con_and' do
     let(:string) do
@@ -10,7 +10,7 @@ RSpec.describe ROM::LDAP::Filter::Transformer::Parser do
     end
 
     it 'parse' do
-      expression = parser.call(string)
+      expression = exporter.call(string)
       expect(expression.to_s).to eql(string)
 
       # expect(expression.op).to eql(:con_and)

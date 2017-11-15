@@ -1,5 +1,3 @@
-require 'rom/ldap/filter/transformer'
-
 module ROM
   module LDAP
     class Directory
@@ -12,12 +10,12 @@ module ROM
         # @api public
         def query(options)
           set  = []
+          base ||= self.class.default_base
 
-          base       ||= self.class.default_base
-          filters    = options.delete(:filter) || self.class.default_filter
-          expression = merge_criteria(filters)
+          filter = options.delete(:filter) || self.class.default_filter
+          expr   = to_exp(filter)
 
-          @result = connection.search(base: base, expression: expression, **options) do |entity|
+          @result = connection.search(base: base, expression: expr, **options) do |entity|
             set << entity
             yield entity if block_given?
           end
@@ -48,7 +46,7 @@ module ROM
         rescue Timeout::Error
           log(__callee__, "timed out after #{timeout} seconds", :warn)
         ensure
-          log(__callee__, filter[1])
+          log(__callee__, to_ldap(filter))
         end
 
         # @option :filter [String]
@@ -128,7 +126,6 @@ module ROM
         end
 
 
-
         private
 
         # Is the server capable of paging and has a user defined limit not been set.
@@ -144,16 +141,12 @@ module ROM
           attributes.map { |a| a.values_at(:name, :original) }.to_h
         end
 
-        # merge orignal table name with criteria
-        #
-        def merge_criteria(filters)
-          Array(filters).map(&method(:build_expression)).reduce(:&)
+        def to_exp(filter)
+          Functions[:to_exp][filter]
         end
 
-        # whether a string or an ast the transformer returns an expression object
-        #
-        def build_expression(filter)
-          Filter::Transformer.new(filter).to_exp
+        def to_ldap(filter)
+          Functions[:to_ldap][filter]
         end
 
       end
