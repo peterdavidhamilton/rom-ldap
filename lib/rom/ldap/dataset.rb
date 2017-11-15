@@ -141,7 +141,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(<##{self.class} filter="#{filter_string}" base="#{@base}">)
+        %(<##{self.class} ast="#{ast}" base="#{base}">)
       end
 
       # True if password binds for the filtered dataset
@@ -241,7 +241,8 @@ module ROM
       #
       # @api public
       def filter_string
-        [ filter , ast ]
+        # TODO: join these!!!
+        [filter, ast]
       end
 
 

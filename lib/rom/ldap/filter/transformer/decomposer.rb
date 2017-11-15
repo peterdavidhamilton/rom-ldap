@@ -17,7 +17,8 @@ module ROM
           def call(ast)
             case ast.size
             when 0 then EMPTY_STRING
-            when 1 then single(ast.first) # extra array wrapping
+            when 1 then call( ((ast.first).is_a?(Symbol) ? ast : ast.first)  ) # extra array wrapping
+            # when 1 then call( ( constructed(ast) ? ast : ast.first )  ) # extra array wrapping
             when 2 then constructed(ast)  # &, |, !
             when 3 then single(ast)       # simple expression
             else

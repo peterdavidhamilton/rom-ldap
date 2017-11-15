@@ -27,7 +27,6 @@ module ROM
             if scanner.scan(OPEN_REGEX)
               if scanner.scan(BRANCH_REGEX)
                 const = scanner.matched
-
                 branches = []
 
                 while branch = parse_expression
@@ -64,6 +63,7 @@ module ROM
           # @api private
           def parse_branch
             scanner.scan(WS_REGEX)
+            scanner.scan(OPEN_REGEX) # allows (&(x)(y)) and (&((x)(y)))
             scanner.scan(ATTR_REGEX)
             attribute = scanner.matched
 

@@ -48,7 +48,7 @@ module ROM
         rescue Timeout::Error
           log(__callee__, "timed out after #{timeout} seconds", :warn)
         ensure
-          log(__callee__, filter)
+          log(__callee__, filter[1])
         end
 
         # @option :filter [String]

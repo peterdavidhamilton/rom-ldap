@@ -73,9 +73,9 @@ module ROM
       # @return [String]
       #
       # @api private
-      def filter
-        dataset.filter_string.to_s
-      end
+      # def filter
+      #   dataset.filter_string.to_s
+      # end
 
       # @api private
       def self.associations

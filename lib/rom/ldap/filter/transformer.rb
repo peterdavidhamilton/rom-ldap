@@ -17,20 +17,42 @@ module ROM
         option :composer,   default: -> { Composer.new }
         option :decomposer, default: -> { Decomposer.new }
 
+
+        # def call
+        #   case input
+        #   when String then composer.call(input)
+        #   when Array  then decomposer.call(input)
+        #   else
+        #     input
+        #   end
+        # end
+
         # string -> ast
-        def to_ast
+        def to_a
           input.is_a?(String) ? composer.call(input) : input
         end
+
+        # alias to_a call
+        alias to_ast to_a
 
         # ast -> string
         def to_s
           input.is_a?(Array) ? decomposer.call(input) : input
         end
 
+        # alias to_s call
+        alias to_filter to_s
+
         # ast/string -> Expression
         def to_exp
-          input.is_a?(String) ? parser.call(input) : parser.call(to_s)
+          if input.is_a?(String)
+            parser.call(input)
+          else
+            parser.call(to_s)
+          end
         end
+
+
 
       end
     end
