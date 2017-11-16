@@ -34,8 +34,6 @@ module ROM
                 branches << branch
               end
 
-              expr = nil
-
               if branches.size >= 1
                 expr = branches.shift
                 expr = expr.__send__(const, branches.shift) until branches.empty?

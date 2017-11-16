@@ -42,7 +42,8 @@ module ROM
           op, attribute, val = ast
           operator = id_operator(op)
           value    = id_value(val)
-          "(#{attribute}#{operator}#{value})"
+
+          wrap(attribute, operator, value)
         end
 
         # @param ast [Array]
@@ -51,25 +52,28 @@ module ROM
         #
         # @example
         #   => [:con_not, [:op_equal, 'uidNumber', :wildcard]]
-        #   => [:con_and, [
-        #         [:op_equal, 'uidNumber', :wildcard],
-        #         [:op_equal, 'registered', true]
-        #       ]]
+        #   => [
+        #         :con_and,
+        #         [
+        #           [:op_equal, 'uidNumber', :wildcard],
+        #           [:op_equal, 'registered', true]
+        #         ]
+        #      ]
         #
         # @api private
         def constructed(ast)
-           left, right = ast
-            constructor = id_constructor(left)
-
-            if left == :con_not
-              expression = single(right)
-            else
-              expression = right.map(&method(:call)).join
-            end
-
-            "(#{constructor}#{expression})"
+          left, right = ast
+          expr = left.eql?(:con_not) ? single(right) : right.map(&method(:call)).join
+          constructor = id_constructor(left)
+          wrap(constructor, expr)
         end
 
+        # Stringify params and wrap with parentheses.
+        #
+        # @api private
+        def wrap(*attrs)
+           "(#{attrs.join})"
+        end
       end
     end
   end

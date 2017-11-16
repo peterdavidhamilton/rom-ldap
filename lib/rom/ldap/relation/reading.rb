@@ -2,6 +2,19 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
+
+        # Standard directory query. Supersede criteria with the given filter string.
+        #
+        # @param raw [String] Valid LDAP filter string
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def search(raw)
+          new(dataset.search(raw))
+        end
+
+
         # Returns empty dataset if the filtered entity cannot bind.
         #
         # @return [Relation]

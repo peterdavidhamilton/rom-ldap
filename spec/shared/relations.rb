@@ -13,7 +13,7 @@ RSpec.shared_context 'relations' do
     end
 
     conf.relation(:people) do
-      schema('(&(objectclass=person)(gidnumber=1))', as: :people) do
+      schema('(&(objectclass=person)(gidnumber=1))') do
         attribute :uid,               ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
         attribute :uidnumber,         ROM::LDAP::Types::Serial, read: ROM::LDAP::Types::Single::Int
         attribute :uniqueidentifier,  ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::Int

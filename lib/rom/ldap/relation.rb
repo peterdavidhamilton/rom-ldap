@@ -40,7 +40,7 @@ module ROM
       end
 
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        event[:dataset].filter_string
+        event[:dataset].opts[:filter]
       end
 
       schema_class      Schema
@@ -68,16 +68,36 @@ module ROM
         Transaction.new(dataset.db).run(opts, &block)
       end
 
-      # Return raw query string
+      # Current dataset in LDAP filter format.
       #
       # @return [String]
       #
-      # @api private
+      # @api public
       def filter
-        dataset.filter_string
+        dataset.opts[:filter]
       end
 
-      # @api private
+      # Current dataset in abstract query format.
+      #
+      # @return [String]
+      #
+      # @api public
+      def query
+        dataset.opts[:query]
+      end
+
+
+      # Original dataset in LDAP filter format.
+      #
+      # @return [String]
+      #
+      # @api public
+      def source
+        dataset.opts[:source]
+      end
+
+
+      # @api public
       def self.associations
         schema.associations
       end

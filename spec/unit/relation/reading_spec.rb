@@ -1,102 +1,133 @@
 require 'spec_helper'
 
 RSpec.describe ROM::LDAP::Relation do
-  include_context 'relations'
 
-  let(:formatter) { old_format_proc }
+  describe 'uncoerced attributes' do
+    include_context 'relations'
 
-  it 'default order by dn' do
-    names = customers.to_a.collect { |t| t[:givenname] }
-    expect(names).to eql(
-      [
-        ['test1'], ['test10'], ['test2'], ['test3'], ['test4'],
-        ['test5'], ['test6'], ['test7'], ['test8'], ['test9']
-      ]
-    )
+    let(:formatter) { nil }
+
+    it 'raise errors if unsuitable method names' do
+      expect { customers.with(auto_struct: true).to_a }.to raise_error(
+        NameError, "invalid attribute name `apple-imhandle'"
+      )
+    end
+
+    it 'default order by dn' do
+      names = customers.to_a.collect { |t| t['givenName'] }
+      expect(names).to eql(
+        [
+          ['test1'], ['test10'], ['test2'], ['test3'], ['test4'],
+          ['test5'], ['test6'], ['test7'], ['test8'], ['test9']
+        ]
+      )
+    end
+
+    it '#reverse' do
+      names = customers.reverse.to_a.collect { |t| t['givenName'] }
+      expect(names).to eql(
+        [
+          ['test9'], ['test8'], ['test7'], ['test6'], ['test5'],
+          ['test4'], ['test3'], ['test2'], ['test10'], ['test1']
+        ]
+      )
+    end
+
+    it '#random' do
+      names = customers.random.to_a.collect { |t| t['givenName'] }
+      expect(names).not_to eql(
+        [
+          ['test1'], ['test10'], ['test2'], ['test3'], ['test4'],
+          ['test5'], ['test6'], ['test7'], ['test8'], ['test9']
+        ]
+      )
+    end
   end
 
-  it '#reverse' do
-    names = customers.reverse.to_a.collect { |t| t[:givenname] }
-    expect(names).to eql(
-      [
-        ['test9'], ['test8'], ['test7'], ['test6'], ['test5'],
-        ['test4'], ['test3'], ['test2'], ['test10'], ['test1']
-      ]
-    )
+
+  describe 'snake-case coerced attributes' do
+    include_context 'relations'
+
+    let(:formatter) { new_format_proc }
+
+    it 'make suitable method names' do
+      expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
+    end
+
+    it '#limit' do
+      names = customers.limit(2).to_a.collect { |t| t[:given_name] }
+      expect(names).to eql(
+        [
+          ['test1'],
+          ['test10']
+        ]
+      )
+    end
   end
 
-  it '#random' do
-    names = customers.random.to_a.collect { |t| t[:givenname] }
-    expect(names).not_to eql(
-      [
-        ['test1'], ['test10'], ['test2'], ['test3'], ['test4'],
-        ['test5'], ['test6'], ['test7'], ['test8'], ['test9']
-      ]
-    )
-  end
 
-  it '#limit' do
-    names = customers.limit(2).to_a.collect { |t| t[:givenname] }
-    expect(names).to eql(
-      [
-        ['test1'],
-        ['test10']
-      ]
-    )
-  end
+  describe 'flat coerced attributes' do
+    include_context 'relations'
 
-  it '#first' do
-    expect(customers.first[:givenname]).to eql(['test1'])
-  end
+    let(:formatter) { old_format_proc }
 
-  it '#last' do
-    expect(customers.last[:givenname]).to eql(['test9'])
-  end
+    it 'make suitable method names' do
+      expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
+    end
 
-  it '#select' do
-    result = accounts.where(uid: 'test2').select(:appleimhandle).to_a
-    expect(result).to eql([{ appleimhandle: ['@test2'] }])
+    it '#first' do
+      expect(customers.first[:givenname]).to eql(['test1'])
+    end
 
-    result = accounts.where(uid: 'test2').select(:appleimhandle).one
-    expect(result).to have_key(:appleimhandle)
-    expect(result).to_not have_key(:uid)
-  end
+    it '#last' do
+      expect(customers.last[:givenname]).to eql(['test9'])
+    end
 
-  it '#unique?' do
-    expect(accounts.where(uid: 'test3').unique?).to eql(true)
-  end
+    it '#select' do
+      result = accounts.where(uid: 'test2').select(:appleimhandle).to_a
+      expect(result).to eql([{ appleimhandle: ['@test2'] }])
 
-  it '#any?' do
-    expect(accounts.any?).to eql(true)
-  end
+      result = accounts.where(uid: 'test2').select(:appleimhandle).one
+      expect(result).to have_key(:appleimhandle)
+      expect(result).to_not have_key(:uid)
+    end
 
-  it '#count' do
-    expect(accounts.count).to eql(11)
-  end
+    it '#unique?' do
+      expect(accounts.where(uid: 'test3').unique?).to eql(true)
+    end
 
-  # FIXME: retain DN at first position
-  it '#to_ldif' do
-    export = <<~LDIF
-      version: 3
+    it '#any?' do
+      expect(accounts.any?).to eql(true)
+    end
 
-      cn: test1
-      dn: uid=test1,ou=users,dc=example,dc=com
-      gidnumber: 9998
-      givenname: test1
-      mail: test1@example.com
-      objectclass: top
-      objectclass: inetOrgPerson
-      objectclass: person
-      objectclass: organizationalPerson
-      objectclass: extensibleObject
-      sn: test1
-      uid: test1
-      uidnumber: 1
-      userpassword: {SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw=
+    it '#count' do
+      expect(accounts.count).to eql(11)
+    end
 
-    LDIF
-    # userpassword:: e1NIQX10RVNzQm1FL3lOWTNsYjZhMEw2dlZRRVpOcXc9
+    # FIXME: retain DN at first position
+    it '#to_ldif' do
+      export = <<~LDIF
+        version: 3
 
-    expect(accounts.where(uid: 'test1').to_ldif).to eql(export)
+        cn: test1
+        dn: uid=test1,ou=users,dc=example,dc=com
+        gidnumber: 9998
+        givenname: test1
+        mail: test1@example.com
+        objectclass: top
+        objectclass: inetOrgPerson
+        objectclass: person
+        objectclass: organizationalPerson
+        objectclass: extensibleObject
+        sn: test1
+        uid: test1
+        uidnumber: 1
+        userpassword: {SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw=
+
+      LDIF
+      # userpassword:: e1NIQX10RVNzQm1FL3lOWTNsYjZhMEw2dlZRRVpOcXc9
+
+      expect(accounts.where(uid: 'test1').to_ldif).to eql(export)
+    end
   end
 end

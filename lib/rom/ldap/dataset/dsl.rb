@@ -1,128 +1,171 @@
 module ROM
   module LDAP
     class Dataset
-      # Query interface
+      # AST Query Interface
       #
       # @api public
       module DSL
+        # Equality filter aliased as 'where'.
+        #
+        # @example
+        #   relation.where(uid: 'pete')
+        #   relation.where(uid: %w[pete leanda])
+        #
+        # @api public
         def equals(args)
-          @criteria << [:con_or, *array(args)]
-          self
+          save! *array_arguments(args)
         end
         alias where equals
 
+        # Inequality filter aliased as '?'. Inverse of 'equals'.
+        #
+        # @example
+        #   relation.unequals(uid: 'pete')
+        #   relation.unequals(uid: %w[pete leanda])
+        #
+        # @api public
         def unequals(args)
-          @criteria << [:con_not, [:con_or, *array(args)]]
-          self
+          save! *[:con_not, array_arguments(args)]
         end
 
+        # Presence filter aliased as 'has', 'exists'.
+        #
+        # @example
+        #   relation.present(:uid)
+        #   relation.has(:mail)
+        #
+        # @api public
         def present(attribute)
-          @criteria << [:op_equal, attribute, :wildcard]
-          self
+          save! *[:op_equal, attribute, :wildcard]
         end
         alias has present
         alias exists present
 
+        # Absence filter aliased as 'hasnt'. Inverse of 'present'.
+        #
+        # @example
+        #   relation.missing(:uid)
+        #   relation.hasnt(:mail)
+        #
+        # @api public
         def missing(attribute)
-          @criteria << [:con_not, [:op_equal, attribute, :wildcard]]
-          self
+          save! *[:con_not, [:op_equal, attribute, :wildcard]]
         end
         alias hasnt missing
 
+
+
+
+
         def gt(args)
-          @criteria << [:op_gt, *args.to_a.first]
-          self
+          save! *[:op_gt, *args.to_a.first]
         end
 
         def gte(args)
-          @criteria << [:op_gt_eq, *args.to_a.first]
-          self
+          save! *[:op_gt_eq, *args.to_a[0]]
         end
         alias above gte
 
         def lt(args)
-          # @criteria << [:op_lt, *args.to_a[0]]
-          @criteria << args.to_a.unshift(:op_lt)
-          self
+          save! *args.to_a.unshift(:op_lt)
         end
 
         def lte(args)
-          @criteria << [:op_lt_eq, *args.to_a.first]
-          self
+          save! *[:op_lt_eq, *args.to_a.first]
         end
         alias below lte
 
         def begins(args)
-          @criteria << wildcard(args, right: WILDCARD)
-          self
+          save! *wildcard_arguments(args, right: WILDCARD)
         end
         # alias starts begins
 
         def ends(args)
-          @criteria << wildcard(args, left: WILDCARD)
-          self
+          save! *wildcard_arguments(args, left: WILDCARD)
         end
         # alias suffix ends
 
         def contains(args)
-          @criteria << wildcard(args, left: WILDCARD, right: WILDCARD)
-          self
+          save! *wildcard_arguments(args, left: WILDCARD, right: WILDCARD)
         end
         alias matches contains
 
         def excludes(args)
-          @criteria << [:con_not, wildcard(args, left: WILDCARD, right: WILDCARD)]
-          self
+          save! *[:con_not, wildcard_arguments(args, left: WILDCARD, right: WILDCARD)]
         end
 
+
+
         def within(args)
-          @criteria << [:con_and, range(args)]
-          self
+          save! *[:con_and, range_arguments(args)]
         end
         alias between within
 
         def outside(args)
-          @criteria << [:con_not, [:con_and, range(args)]]
-          self
+          save! *[:con_not, [:con_and, range_arguments(args)]]
         end
 
         private
 
-        # def save(expression)
-        #   @criteria = expression if @criteria.empty?
-        #   @criteria << expression
-        # end
-
-        def array(args)
-          attribute, values = args.to_a.first
-
-          Array(values).map do |value|
-            [:op_equal, attribute, escape(value)]
-          end
+        # Update the criteria
+        #
+        # @api private
+        def save!(*exprs)
+          @criteria.unshift(*exprs)
+          self
         end
 
-        def wildcard(args, left: EMPTY_STRING, right: EMPTY_STRING)
-          attribute, value = args.to_a.first
+        # Handle potential arrays of arguments with an 'either or join'
+        #
+        # @param args [Array]
+        #
+        # @return [Array]
+        #
+        # @api private
+        def array_arguments(args)
+          attribute, values = args.to_a[0]
+          exprs = Array(values).map { |val| [:op_equal, attribute, escape(val)] }
+          (exprs.size >= 2) ? [:con_or, exprs] : exprs.flatten
+        end
+
+        # Process values >= 1
+        #
+        # @param args [Array]
+        #
+        # @options :left [String] prepended to value - used for wildcard
+        # @options :right [String] appended to value - used for wildcard
+        #
+        # @return [Array]
+        #
+        # @api private
+        def wildcard_arguments(args, left: EMPTY_STRING, right: EMPTY_STRING)
+          attribute, value = args.to_a[0]
           value = left + escape(value) + right
-          [ :op_equal, attribute, value ]
+          [:op_equal, attribute, value]
         end
 
-        def range(args)
-          attribute, range = args.to_a.first
-
+        # Process values >= 1
+        #
+        # @param args [Array]
+        #
+        # @return [Array]
+        #
+        # @api private
+        def range_arguments(args)
+          attribute, range = args.to_a[0]
           lower, *rest, upper = range.to_a
-          # lower = range.to_a.first
-          lower = [:op_gt_eq, attribute, lower]
 
-          # upper = range.to_a.last
+          lower = [:op_gt_eq, attribute, lower]
           upper = [:op_lt_eq, attribute, upper]
 
           [lower, upper]
         end
 
+        # Escape "(, ), \, *, null" characters
+        #
+        # @api private
         def escape(value)
-          string = Types::Coercible::String[value]
-          string.gsub(ESCAPE_REGEX) { |char| '\\' + ESCAPES[char] }
+          value.to_s.gsub(ESCAPE_REGEX) { |char| '\\' + ESCAPES[char] }
         end
       end
     end

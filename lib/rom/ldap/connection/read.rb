@@ -92,7 +92,8 @@ module ROM
             case pdu.app_tag
             when pdu_lookup(:search_returned_data)
               counter += 1
-              logger.debug("#{self.class}##{__callee__} #{counter}: #{pdu.search_entry.dn}")
+              # NB: Debugging output of each entry being processed
+              logger.debug("#{counter}: #{pdu.search_entry.dn}")
               yield pdu.search_entry if block_given?
 
             when pdu_lookup(:search_result_referral)

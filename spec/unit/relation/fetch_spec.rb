@@ -1,22 +1,25 @@
 require 'spec_helper'
 
-RSpec.describe ROM::Relation do
-
-  include_context 'directory'
-
-  before do
-    conf.relation(:foo) do
-      # schema('(&(objectclass=person)(uid=*))', as: :foo, infer: true) do
-      schema(users, as: :foo, infer: true) do
-        attribute 'uidNumber', ROM::LDAP::Types::Serial
-        primary_key 'uidNumber'
-      end
-    end
-  end
-
-  let(:relation) { relations.foo }
+RSpec.describe ROM::LDAP::Relation, helpers: true do
 
   describe '#fetch' do
+    include_context 'directory'
+
+    let(:formatter) { nil }
+
+    before do
+      use_formatter(formatter)
+
+      conf.relation(:foo) do
+        schema(users, infer: true) do
+          attribute 'uidNumber', ROM::LDAP::Types::Serial
+          primary_key 'uidNumber'
+        end
+      end
+    end
+
+    let(:relation) { relations.foo }
+
     it 'returns a single tuple identified by the pk' do
       expect(relation.fetch(1)['uidNumber']).to eql(['1'])
     end

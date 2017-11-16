@@ -23,7 +23,7 @@ RSpec.describe ROM::Struct do
   end
 
   describe 'rom-ldap formatter' do
-    let(:formatter) { ->(key) { ROM::LDAP::Functions.to_method_name(key) } }
+    let(:formatter) { new_format_proc }
 
     it 'produces snake_case symbol attribute names like :gid_number' do
       keys = %i[apple_imhandle cn dn gid_number given_name

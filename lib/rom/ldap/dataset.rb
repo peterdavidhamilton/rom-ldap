@@ -25,17 +25,12 @@ module ROM
       param :directory, reader: :private
 
       param :source,
-        reader: :private,
+        reader: false,
         type: Dry::Types['strict.string']
 
       option :base,
-        reader: :private,
+        reader: false,
         type: Dry::Types['strict.string']
-
-      option :criteria,
-        reader: :private,
-        type: Dry::Types['strict.array'],
-        default: -> { [] }
 
       option :offset,
         reader: false,
@@ -47,12 +42,18 @@ module ROM
         optional: true,
         type: Dry::Types['strict.int']
 
+      option :criteria,
+        reader: :private,
+        type: Dry::Types['strict.array'],
+        default: -> { [] }
+
       # @api public
       def opts
         {
-          base:   base,
-          source: source,
+          base:   @base,
+          source: @source,
           query:  query,
+          filter: filter,
           offset: @offset,
           limit:  @limit
         }.freeze
@@ -108,6 +109,18 @@ module ROM
         self
       end
 
+      # Raw filter search
+      #
+      # @return [ROM::LDAP::Dataset]
+      #
+      # @param filter [String] Valid LDAP filter string
+      #
+      # @api public
+      def search(filter)
+        @source = filter
+        each
+      end
+
       # Sends methods like one! and map_to to the result array
       #
       # @return [Enumerator::Lazy, Array]
@@ -121,7 +134,7 @@ module ROM
       end
       # private :each
 
-      # Respond to repository methods by first calling #each
+      # Respond to repository methods by calling #each to hit directory.
       #
       alias as each
       alias map_to each
@@ -131,13 +144,13 @@ module ROM
       alias to_a each
       alias with each
 
-      # Inspect dataset revealing current filter criteria
+      # Inspect dataset revealing current filter and base.
       #
       # @return [String]
       #
       # @api public
       def inspect
-        %(<##{self.class} search="#{filter_string}" base="#{base}">)
+        %(<##{self.class} filter="#{filter}" base="#{@base}">)
       end
 
       # True if password binds for the filtered dataset
@@ -213,16 +226,16 @@ module ROM
         @ldif ||= Directory::LDIF.new(each).to_ldif #(comment: Time.now)
       end
 
+      private
+
       # Convert the full query to an LDAP filter string
       #
       # @return [String]
       #
-      # @api public
-      def filter_string
+      # @api private
+      def filter
         Functions[:to_ldap][query]
       end
-
-      private
 
       # Combine original relation dataset name (LDAP filter string)
       #   with search criteria (AST).
@@ -241,14 +254,14 @@ module ROM
       #
       # @api private
       def source_to_ast
-        Functions[:to_ast][source]
+        Functions[:to_ast][@source]
       end
 
       # @return [Array<Hash>]
       #
       # @api private
       def search(&block)
-        results = directory.search(query, base: base, &block)
+        results = directory.search(query, base: @base, &block)
         reset!
         results
       end
