@@ -65,20 +65,23 @@ module ROM
         case op
         when :op_equal
           if right == WILDCARD
-            yield :present, left
+            yield(:present, left)
           elsif right.index WILDCARD
-            yield(:substrings, left, right)
+            yield(:substring, left, right)
           else
-            yield(:equalityMatch, left, right)
+            yield(:equality_match, left, right)
           end
-        when :op_gt_eq
-          yield(:greaterOrEqual, left, right)
-        when :op_lt_eq
-          yield(:lessOrEqual, left, right)
         when :con_or, :con_and
           yield(op, left.execute(&block), right.execute(&block))
         when :con_not
           yield(op, left.execute(&block))
+        else
+          yield(op, left, right)
+
+        # when :op_gt_eq
+        #   yield(:op_gt_eq, left, right)
+        # when :op_lt_eq
+        #   yield(:op_lt_eq, left, right)
         end || EMPTY_ARRAY
       end
 
@@ -104,9 +107,10 @@ module ROM
       # @api private
       def match(entry)
         case op
-        when :eq
+        when :op_equal
           if right == WILDCARD
-            (l = entry[left]) && !l.empty?
+            # (l = entry[left]) && !l.empty?
+            (l = entry[left]) && l.any?
           else
             (l = entry[left]) && (l = Array(l)) && l.index(right)
           end

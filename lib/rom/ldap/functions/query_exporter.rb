@@ -29,22 +29,22 @@ module ROM
         def parse_expression
           if scanner.scan(OPEN_REGEX)
             if scanner.scan(BRANCH_REGEX)
-               const    = id_constructor(scanner.matched)
-               branches = []
+              const    = id_constructor(scanner.matched)
+              branches = []
 
-               while branch = parse_expression
-                 branches << branch
-               end
+              while branch = parse_expression
+                branches << branch
+              end
 
-               arr = [const, branches]
+              arr = [const, branches]
 
-             elsif scanner.scan(NOT_REGEX)
-               const = id_constructor(scanner.matched)
-               arr  = [const, parse_expression]
+            elsif scanner.scan(NOT_REGEX)
+              const = id_constructor(scanner.matched)
+              arr   = [const, parse_expression]
 
-             else
-               arr = parse_branch
-             end
+            else
+              arr = parse_branch
+            end
 
             arr if arr && scanner.scan(CLOSE_REGEX)
           end
