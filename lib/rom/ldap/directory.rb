@@ -80,8 +80,7 @@ module ROM
         end
       end
 
-      # Build hash from attribute definition
-      #   used by TypeBuilder
+      # Build hash from attribute definition.
       #
       # @example
       #   parse_attribute_type("...")
@@ -90,6 +89,8 @@ module ROM
       # @param type [String]
       #
       # @return [Hash]
+      #
+      # @see TypeBuilder
       #
       # @api private
       def parse_attribute_type(type)

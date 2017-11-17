@@ -17,9 +17,7 @@ module ROM
           end
 
           def to_method_name!
-            if formatter.nil?
-              use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
-            end
+            use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
           end
 
           def from_ldif(ldif)

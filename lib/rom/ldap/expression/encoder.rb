@@ -117,12 +117,6 @@ module ROM
           when :op_lte
             [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(6)
 
-          when :ne
-            # TODO: negation of #eq method used
-            binding.pry
-
-            [self.class.eq(left, right).to_ber].to_ber_contextspecific(2)
-
           when :con_and
             ary = [left.coalesce(:con_and), right.coalesce(:con_and)].flatten
             ary.map(&:to_ber).to_ber_contextspecific(0)
@@ -133,6 +127,12 @@ module ROM
 
           when :con_not
             [left.to_ber].to_ber_contextspecific(2)
+
+          # when :ne
+          #   # TODO: negation of #eq method used
+          #   binding.pry
+
+          #   [self.class.eq(left, right).to_ber].to_ber_contextspecific(2)
           end
         end
 

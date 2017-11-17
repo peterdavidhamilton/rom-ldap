@@ -1,11 +1,9 @@
 require 'transproc'
 require 'dry/core/inflector'
 
-
 require 'rom/ldap/functions/query_exporter'
 require 'rom/ldap/functions/filter_exporter'
 require 'rom/ldap/functions/expression_exporter'
-
 
 module ROM
   module LDAP
@@ -75,7 +73,7 @@ module ROM
       #
       # @api public
       def self.to_ast(input)
-        query_exporter.call(input)
+        query.call(input)
       end
 
       # 'query' to 'filter'
@@ -86,7 +84,7 @@ module ROM
       #
       # @api public
       def self.to_ldap(input)
-        filter_exporter.call(input)
+        filter.call(input)
       end
 
       # 'query' or 'filter' to 'expression'
@@ -98,23 +96,23 @@ module ROM
       # @api public
       def self.to_exp(input)
         if input.is_a?(String)
-          expression_exporter.call(input)
+          expression.call(input)
         else
-          expression_exporter.call(to_ldap(input))
+          expression[to_ldap(input)]
         end
       end
 
       private
 
-      def self.query_exporter
+      def self.query
         @composer ||= QueryExporter.new
       end
 
-      def self.filter_exporter
+      def self.filter
         @decomposer ||= FilterExporter.new
       end
 
-      def self.expression_exporter
+      def self.expression
         @parser ||= ExpressionExporter.new
       end
     end

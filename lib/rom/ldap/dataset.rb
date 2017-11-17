@@ -69,6 +69,23 @@ module ROM
         DSL.public_instance_methods(false)
       end
 
+
+      # Raw filter search
+      #
+      # @overload ??
+      #
+      # @return [ROM::LDAP::Dataset]
+      #
+      # @param filter [String] Valid LDAP filter string
+      #
+      # @api public
+      def call(filter)
+        @criteria = []
+        @source   = filter
+        each
+      end
+      alias [] call
+
       # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
       #
       # @example
@@ -109,18 +126,6 @@ module ROM
         self
       end
 
-      # Raw filter search
-      #
-      # @return [ROM::LDAP::Dataset]
-      #
-      # @param filter [String] Valid LDAP filter string
-      #
-      # @api public
-      def search(filter)
-        @source = filter
-        each
-      end
-
       # Sends methods like one! and map_to to the result array
       #
       # @return [Enumerator::Lazy, Array]
@@ -132,7 +137,6 @@ module ROM
         results = paginate(results) if paginated?
         block_given? ? results.send(__callee__, *args, &block) : results
       end
-      # private :each
 
       # Respond to repository methods by calling #each to hit directory.
       #

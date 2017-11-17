@@ -55,23 +55,23 @@ module ROM
 
 
         def gt(args)
-          save! *[:con_not, args.to_a.unshift(:op_lte)]
+          save! *[:con_not, [:op_lte, *args.to_a[0]]]
         end
+        alias above gt
 
         def lt(args)
-          save! *[:con_not, args.to_a.unshift(:op_gte)]
+          save! *[:con_not, [:op_gte, *args.to_a[0]]]
         end
+        alias below lt
 
 
         def gte(args)
           save! *[:op_gte, *args.to_a[0]]
         end
-        alias above gte
 
         def lte(args)
           save! *[:op_lte, *args.to_a[0]]
         end
-        alias below lte
 
         def begins(args)
           save! *wildcard_arguments(args, right: WILDCARD)

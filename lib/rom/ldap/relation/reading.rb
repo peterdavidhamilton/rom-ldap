@@ -11,7 +11,7 @@ module ROM
         #
         # @api public
         def search(raw)
-          new(dataset.search(raw))
+          new(dataset[raw])
         end
 
 
