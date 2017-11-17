@@ -38,5 +38,4 @@ RSpec.shared_context 'directory' do
 
   let(:formatter) { nil }
 
-
 end

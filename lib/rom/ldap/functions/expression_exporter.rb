@@ -12,8 +12,6 @@ module ROM
         include Lookup
 
         def call(string)
-          Types::Strict::String[string]
-
           @scanner = StringScanner.new(string)
           parse_expression
         end

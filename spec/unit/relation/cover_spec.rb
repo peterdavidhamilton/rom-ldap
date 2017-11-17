@@ -29,16 +29,16 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
             [
               :con_and,
               [
-                [:op_gt_eq, :uniqueidentifier, 3],
-                [:op_lt_eq, :uniqueidentifier, 9]
+                [:op_gte, :uniqueidentifier, 3],
+                [:op_lte, :uniqueidentifier, 9]
               ]
             ]
           ]
@@ -75,16 +75,16 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
             [
               :con_and,
               [
-                [:op_gt_eq, :uniqueidentifier, -1],
-                [:op_lt_eq, :uniqueidentifier, 12]
+                [:op_gte, :uniqueidentifier, -1],
+                [:op_lte, :uniqueidentifier, 12]
               ]
             ]
           ]
@@ -104,13 +104,54 @@ RSpec.describe ROM::LDAP::Relation do
   end
 
 
-  # TODO: finish these
-  # it '#outside' do
-  #   results = relation.outside(uniqueidentifier: 30..100)
+  describe '#outside' do
+    let(:formatter) { old_format_proc }
+    let(:relation) { relations[:people].between(uniqueidentifier: 30..100) }
 
-  #   expect(results.to_a.count).to eql(4)
-  #   expect(results.select(:uniqueidentifier).to_a.map(&:values)).to cover(4)
-  # end
+    it 'source filter' do
+      expect(relation.source).to eql('(&(objectclass=person)(gidnumber=1))')
+    end
+
+    it 'chained criteria' do
+      expect(relation.query).to eql(
+        [
+          :con_and,
+          [
+            # original
+            [
+              :con_and,
+              [
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
+              ]
+            ],
+            # criteria
+            [
+              :con_and,
+              [
+                [:op_gte, :uniqueidentifier, 30],
+                [:op_lte, :uniqueidentifier, 100]
+              ]
+            ]
+          ]
+        ]
+      )
+    end
+
+    it 'combined filter' do
+      expect(relation.filter).to eql(
+        '(&(&(objectclass=person)(gidnumber=1))(&(uniqueidentifier>=30)(uniqueidentifier<=100)))'
+      )
+    end
+
+    it 'result' do
+      # results = relation.with(auto_struct: false).select(:uniqueidentifier).to_a
+      # expect(results.map(&:values)).to cover(4)
+      expect(relation.count).to eql(0)
+    end
+  end
+
+
 
 
   describe '#gte' do
@@ -130,12 +171,12 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
-            [:op_gt_eq, :uniqueidentifier, 5]
+            [:op_gte, :uniqueidentifier, 5]
           ]
         ]
       )
@@ -159,13 +200,51 @@ RSpec.describe ROM::LDAP::Relation do
   end
 
 
-  # it '#gte' do
-  #   expect(relation.gte(uniqueidentifier: 4).count).to eql(3)
-  #   expect(relation.above(uniqueidentifier: 5).count).to eql(2)
-  # end
 
-  # it '#lte' do
-  #   expect(relation.lte(uniqueidentifier: 9).count).to eql(3)
-  #   expect(relation.below(uniqueidentifier: 11).count).to eql(3)
-  # end
+  describe '#lte' do
+    let(:formatter) { old_format_proc }
+    let(:relation) { relations[:people].lte(uniqueidentifier: 9) }
+
+    it 'source filter' do
+      expect(relation.source).to eql('(&(objectclass=person)(gidnumber=1))')
+    end
+
+    it 'chained criteria' do
+      expect(relation.query).to eql(
+        [
+          :con_and,
+          [
+            # original
+            [
+              :con_and,
+              [
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
+              ]
+            ],
+            # criteria
+            [:op_lte, :uniqueidentifier, 9]
+          ]
+        ]
+      )
+    end
+
+    it 'combined filter' do
+      expect(relation.filter).to eql(
+        '(&(&(objectclass=person)(gidnumber=1))(uniqueidentifier<=9))'
+      )
+    end
+
+    it 'result' do
+      results = relation.with(auto_struct: false).select(:uid, :uniqueidentifier).to_a
+      expect(results).to eql(
+        [
+          { uid: 'zippy', uniqueidentifier: 1 },
+          { uid: 'george', uniqueidentifier: 4 },
+          { uid: 'bungle', uniqueidentifier: 9 },
+        ]
+      )
+    end
+  end
+
 end

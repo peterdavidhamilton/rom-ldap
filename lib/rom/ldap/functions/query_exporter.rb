@@ -11,8 +11,6 @@ module ROM
         include Lookup
 
         def call(string)
-          Types::Strict::String[string]
-
           @scanner = StringScanner.new(string)
           parse_expression
         end
@@ -55,7 +53,7 @@ module ROM
         # Tokenise the operator, attribute, value parts of an expression.
         #
         # @example
-        #   => [:op_equal, 'uidNumber', :wildcard]
+        #   => [:op_eq, 'uidNumber', :wildcard]
         #
         # @return [Array]
         #

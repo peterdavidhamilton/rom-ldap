@@ -30,13 +30,11 @@ module ROM
       def to_raw_rfc2254
         case op
         when :con_not   then        "!(#{left}=#{right})"
-        when :op_equal, :bineq then "#{left}=#{right}"
+        when :op_eq, :bineq then "#{left}=#{right}"
         when :op_ext    then        "#{left}:=#{right}"
-        when :op_prox   then        "#{left}~=#{right}"
-        when :op_gt_eq  then        "#{left}>=#{right}"
-        when :op_gt     then        "#{left}>#{right}"
-        when :op_lt_eq  then        "#{left}<=#{right}"
-        when :op_lt     then        "#{left}<#{right}"
+        when :op_prx   then        "#{left}~=#{right}"
+        when :op_gte  then        "#{left}>=#{right}"
+        when :op_lte  then        "#{left}<=#{right}"
         when :con_and   then        "&(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
         when :con_or    then        "|(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
         when :con_not   then        "!(#{left.to_raw_rfc2254})"
@@ -63,7 +61,7 @@ module ROM
         binding.pry
 
         case op
-        when :op_equal
+        when :op_eq
           if right == WILDCARD
             yield(:present, left)
           elsif right.index WILDCARD
@@ -78,10 +76,10 @@ module ROM
         else
           yield(op, left, right)
 
-        # when :op_gt_eq
-        #   yield(:op_gt_eq, left, right)
-        # when :op_lt_eq
-        #   yield(:op_lt_eq, left, right)
+        # when :op_gte
+        #   yield(:op_gte, left, right)
+        # when :op_lte
+        #   yield(:op_lte, left, right)
         end || EMPTY_ARRAY
       end
 
@@ -107,7 +105,7 @@ module ROM
       # @api private
       def match(entry)
         case op
-        when :op_equal
+        when :op_eq
           if right == WILDCARD
             # (l = entry[left]) && !l.empty?
             (l = entry[left]) && l.any?

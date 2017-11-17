@@ -9,8 +9,17 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
       [
         :con_and,
         [
-          [:con_or,  [[:op_prox, 'cn', 'John'], [:op_equal, 'sn', 'Smith']]],
-          [:con_not, [:op_equal, 'uid', :wildcard]]
+          [
+            :con_or,
+            [
+              [:op_prx, 'cn', 'John'],
+              [:op_eq, 'sn', 'Smith']
+            ]
+          ],
+          [
+            :con_not,
+            [:op_eq, 'uid', :wildcard]
+          ]
         ]
       ]
     )
@@ -24,8 +33,8 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
       [
         :con_and,
         [
-          [:op_prox, 'gn', 'Peter'],
-          [:op_equal, 'sn', 'Hamilton'],
+          [:op_prx, 'gn', 'Peter'],
+          [:op_eq, 'sn', 'Hamilton'],
         ]
       ]
     )
@@ -34,7 +43,7 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
   end
 
   it '(!(gn~=Peter))' do
-    ast = exporter.call([ :con_not, [:op_prox, 'gn', 'Peter'] ])
+    ast = exporter.call([ :con_not, [:op_prx, 'gn', 'Peter'] ])
     expect(ast).to eql('(!(gn~=Peter))')
   end
 
@@ -44,9 +53,9 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
       [
         :con_or,
         [
-          [:op_prox, 'cn', 'Peter Hamilton'],
-          [:op_equal, 'mail', :wildcard],
-          [:op_gt_eq, 'uid', 500],
+          [:op_prx, 'cn', 'Peter Hamilton'],
+          [:op_eq, 'mail', :wildcard],
+          [:op_gte, 'uid', 500],
         ]
       ]
     )
@@ -56,23 +65,23 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
 
   describe 'single expressions' do
     it 'approximately' do
-      ast = exporter.call([:op_prox, 'cn', 'Peter Hamilton'])
+      ast = exporter.call([:op_prx, 'cn', 'Peter Hamilton'])
       expect(ast).to eql('(cn~=Peter Hamilton)')
     end
 
     it 'equals' do
-      ast = exporter.call([:op_equal, 'mail', '*@peterdavidhamilton.com'])
+      ast = exporter.call([:op_eq, 'mail', '*@peterdavidhamilton.com'])
       expect(ast).to eql('(mail=*@peterdavidhamilton.com)')
     end
 
     it 'greater than' do
-      ast = exporter.call([:op_gt, 'uid', 500])
-      expect(ast).to eql('(uid>500)')
+      ast = exporter.call([:op_gte, 'uid', 500])
+      expect(ast).to eql('(uid>=500)')
     end
 
 
     it 'less than or equal' do
-      ast = exporter.call([:op_lt_eq, 'uid', 500])
+      ast = exporter.call([:op_lte, 'uid', 500])
       expect(ast).to eql('(uid<=500)')
     end
   end

@@ -22,12 +22,12 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
-            [:op_equal, :uid, 'billy']
+            [:op_eq, :uid, 'billy']
           ]
         ]
       )
@@ -59,16 +59,16 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
             [
               :con_or,
               [
-                [:op_equal, :uid, 'billy'],
-                [:op_equal, :uid, 'sally']
+                [:op_eq, :uid, 'billy'],
+                [:op_eq, :uid, 'sally']
               ]
             ]
           ]
@@ -104,14 +104,14 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
             [
               :con_not,
-              [:op_equal, :uid, 'sally']
+              [:op_eq, :uid, 'sally']
             ]
           ]
         ]
@@ -146,8 +146,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
@@ -156,8 +156,8 @@ RSpec.describe ROM::LDAP::Relation do
               [
                 :con_or,
                 [
-                  [:op_equal, :uid, 'billy'],
-                  [:op_equal, :uid, 'sally']
+                  [:op_eq, :uid, 'billy'],
+                  [:op_eq, :uid, 'sally']
                 ]
               ]
             ]

@@ -4,18 +4,13 @@ RSpec.describe ROM::LDAP::Functions::ExpressionExporter do
 
   let(:exporter) { ROM::LDAP::Functions::ExpressionExporter.new }
 
-  describe 'con_and con_and' do
-    let(:string) do
-      '(&(&(objectclass=person)(uidnumber>=34))(mail~=*@example.com))'
-    end
+  describe 'roundtrip' do
 
     it 'parse' do
+      string = '(&(&(objectclass=person)(uidnumber>=34))(mail~=*@example.com))'
       expression = exporter.call(string)
-      expect(expression.to_s).to eql(string)
 
-      # expect(expression.op).to eql(:con_and)
-      # expect(expression.left.op).to eql(:con_and)
-      # expect(expression.right.op).to eql(:op_prox)
+      expect(expression.to_s).to eql(string)
     end
   end
 

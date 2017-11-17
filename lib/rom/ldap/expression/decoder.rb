@@ -9,36 +9,33 @@ module ROM
 
         def call(ber)
           binding.pry
-          identifier = LOOKUP.invert[ber.ber_identifier]
-
-          case identifier
-          when LOOKUP[:con_and]
+          case identifier(ber)
+          when request(:con_and)
             ber.map { |b| call(b) }.inject { |memo, obj| [:con_and, memo, obj] }
 
-          when LOOKUP[:con_or]
+          when request(:con_or)
             ber.map { |b| call(b) }.inject { |memo, obj| [:con_or, memo, obj] }
 
-          when LOOKUP[:con_not]
-            # [:~, ber.first]
+          when request(:con_not)
             [:con_not, ber.first, nil]
 
-          when LOOKUP[:equality_match]
-            [:op_equal, ber.first, ber.last] if ber.last == WILDCARD
+          when request(:equality_match)
+            [:op_eq, ber.first, ber.last] if ber.last == WILDCARD
 
-          when LOOKUP[:substring]
+          when request(:substring)
             str   = ''
             final = false
 
             ber.last.each do |b|
               case b.ber_identifier
-              when LOOKUP[:filter_initial]
+              when request(:substr_initial)
                 raise Error, 'Unknown substring filter - bad initial value.' unless str.empty?
                 str += escape(b)
 
-              when LOOKUP[:filter_any]
+              when request(:substr_any)
                 str += "*#{escape(b)}"
 
-              when LOOKUP[:filter_final]
+              when request(:substr_final)
                 str += "*#{escape(b)}"
                 final = true
               end
@@ -46,18 +43,18 @@ module ROM
 
             str += WILDCARD unless final
 
-            [:op_equal, ber.first.to_s, str]
+            [:op_eq, ber.first.to_s, str]
 
-          when LOOKUP[:op_gt_eq]
-            [:op_gt_eq, ber.first.to_s, ber.last.to_s]
+          when request(:op_gte)
+            [:op_gte, ber.first.to_s, ber.last.to_s]
 
-          when LOOKUP[:op_lt_eq]
-            [:op_lt_eq, ber.first.to_s, ber.last.to_s]
+          when request(:op_lte)
+            [:op_lte, ber.first.to_s, ber.last.to_s]
 
-          when LOOKUP[:is_present]
+          when request(:is_present)
             then [:present, ber.to_s]
 
-          when LOOKUP[:op_ext]
+          when request(:op_ext)
 
             if ber.size < 2
               raise Error, 'Invalid extensible search filter, should be at least two elements'
@@ -69,8 +66,8 @@ module ROM
 
             ber.each do |element|
               case element.ber_identifier
-              when LOOKUP[:filter_any]   then rule = element
-              when LOOKUP[:filter_final] then type = element
+              when request(:filter_any)   then rule = element
+              when request(:filter_final) then type = element
               when 0x83 then value = element # ?
               when 0x84 then dn = 'dn'       # ?
               end
@@ -85,6 +82,16 @@ module ROM
           else
             raise Error, "Invalid BER tag-value (#{ber.ber_identifier}) in search filter."
           end
+        end
+
+        private
+
+        def identifier(ber)
+          BER.reverse_lookup(:request, ber.ber_identifier)
+        end
+
+        def request(key)
+          BER.lookup(:request, key)
         end
       end
     end

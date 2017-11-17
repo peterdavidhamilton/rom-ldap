@@ -36,7 +36,7 @@ module ROM
         #
         # @api public
         def present(attribute)
-          save! *[:op_equal, attribute, :wildcard]
+          save! *[:op_eq, attribute, :wildcard]
         end
         alias has present
         alias exists present
@@ -49,29 +49,27 @@ module ROM
         #
         # @api public
         def missing(attribute)
-          save! *[:con_not, [:op_equal, attribute, :wildcard]]
+          save! *[:con_not, [:op_eq, attribute, :wildcard]]
         end
         alias hasnt missing
 
 
-
-
-
         def gt(args)
-          save! *[:op_gt, *args.to_a.first]
+          save! *[:con_not, args.to_a.unshift(:op_lte)]
         end
 
+        def lt(args)
+          save! *[:con_not, args.to_a.unshift(:op_gte)]
+        end
+
+
         def gte(args)
-          save! *[:op_gt_eq, *args.to_a[0]]
+          save! *[:op_gte, *args.to_a[0]]
         end
         alias above gte
 
-        def lt(args)
-          save! *args.to_a.unshift(:op_lt)
-        end
-
         def lte(args)
-          save! *[:op_lt_eq, *args.to_a.first]
+          save! *[:op_lte, *args.to_a[0]]
         end
         alias below lte
 
@@ -124,7 +122,7 @@ module ROM
         # @api private
         def array_arguments(args)
           attribute, values = args.to_a[0]
-          exprs = Array(values).map { |val| [:op_equal, attribute, escape(val)] }
+          exprs = Array(values).map { |val| [:op_eq, attribute, escape(val)] }
           (exprs.size >= 2) ? [:con_or, exprs] : exprs.flatten
         end
 
@@ -141,7 +139,7 @@ module ROM
         def wildcard_arguments(args, left: EMPTY_STRING, right: EMPTY_STRING)
           attribute, value = args.to_a[0]
           value = left + escape(value) + right
-          [:op_equal, attribute, value]
+          [:op_eq, attribute, value]
         end
 
         # Process values >= 1
@@ -155,8 +153,8 @@ module ROM
           attribute, range = args.to_a[0]
           lower, *rest, upper = range.to_a
 
-          lower = [:op_gt_eq, attribute, lower]
-          upper = [:op_lt_eq, attribute, upper]
+          lower = [:op_gte, attribute, lower]
+          upper = [:op_lte, attribute, upper]
 
           [lower, upper]
         end

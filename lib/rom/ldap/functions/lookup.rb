@@ -18,7 +18,7 @@ module ROM
       # @param val [Symbol,String]
       #
       # @example
-      #   id_operator(:op_gt_eq) => '>='
+      #   id_operator(:op_gte) => '>='
       #
       # @return [String,Symbol]
       #

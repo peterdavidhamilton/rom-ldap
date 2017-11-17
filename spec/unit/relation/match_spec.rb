@@ -22,12 +22,12 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
-            [:op_equal, 'uidNumber', :wildcard]
+            [:op_eq, 'uidNumber', :wildcard]
           ]
         ]
       )
@@ -58,14 +58,14 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
             [
               :con_not,
-              [:op_equal, :mail, :wildcard]
+              [:op_eq, :mail, :wildcard]
             ]
           ]
         ]
@@ -99,12 +99,12 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
-            [:op_equal, :uid, 'b*']
+            [:op_eq, :uid, 'b*']
           ]
         ]
       )
@@ -137,12 +137,12 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
-            [:op_equal, :uid, '*a']
+            [:op_eq, :uid, '*a']
           ]
         ]
       )
@@ -175,12 +175,12 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
-            [:op_equal, :uid, '*o*']
+            [:op_eq, :uid, '*o*']
           ]
         ]
       )
@@ -213,14 +213,14 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_equal, 'objectclass', 'person'],
-                [:op_equal, 'gidnumber', '1']
+                [:op_eq, 'objectclass', 'person'],
+                [:op_eq, 'gidnumber', '1']
               ]
             ],
             # criteria
             [
               :con_not,
-              [:op_equal, :uid, '*i*']
+              [:op_eq, :uid, '*i*']
             ]
           ]
         ]

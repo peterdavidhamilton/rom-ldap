@@ -10,7 +10,7 @@ module ROM
       # @option :method [Symbol] Defaults to simple.
       #
       # @api public
-      def bind(username:, password:, version:, method: :simple)
+      def bind(username:, password:, version: 3, method: :simple)
         pdu_request  = pdu_lookup(:bind_request)
         pdu_response = pdu_lookup(:bind_result)
         error_klass  = [NoBindResultError, 'no bind result']

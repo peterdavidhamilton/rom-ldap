@@ -59,7 +59,7 @@ module ROM
         def call
           case op
 
-          when :op_equal
+          when :op_eq
             if right == WILDCARD
               left.to_s.to_ber_contextspecific(7)
 
@@ -111,10 +111,10 @@ module ROM
 
             seq.to_ber_contextspecific(9)
 
-          when :op_gt_eq
+          when :op_gte
             [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(5)
 
-          when :op_lt_eq
+          when :op_lte
             [left.to_s.to_ber, unescape(right).to_ber].to_ber_contextspecific(6)
 
           when :ne

@@ -16,13 +16,11 @@ module ROM
 
     # NB: Order of values effects regexp
     OPERATORS = {
-      op_prox:  '~=',
-      op_ext:   ':=',
-      op_gt_eq: '>=',
-      op_lt_eq: '<=',
-      op_gt:    '>',
-      op_lt:    '<',
-      op_equal: '='
+      op_prx: '~=',
+      op_ext: ':=',
+      op_gte: '>=',
+      op_lte: '<=',
+      op_eq:  '='
     }.freeze
 
     VALUES = {
@@ -49,26 +47,6 @@ module ROM
     #
     EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/
     UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/
-
-    #
-    # Expression Decoder
-    #
-    LOOKUP = {
-      con_and:          0xa0, # context-specific constructed 0, "and"
-      con_or:           0xa1, # context-specific constructed 1, "or"
-      con_not:          0xa2, # context-specific constructed 2, "not"
-      equality_match:   0xa3, # context-specific constructed 3, "equalityMatch"
-      substring:        0xa4, # context-specific constructed 4, "substring"
-      op_gt_eq:         0xa5, # context-specific constructed 5, "greaterOrEqual"
-      op_lt_eq:         0xa6, # context-specific constructed 6, "lessOrEqual"
-      filter_initial:   0x80, # context-specific primitive 0, SubstringFilter "initial"
-      filter_any:       0x81, # context-specific primitive 0, SubstringFilter "any"
-      filter_final:     0x82, # context-specific primitive 0, SubstringFilter "final"
-      # 0x83,
-      # 0x84,
-      is_present:       0x87, # context-specific primitive 7, "present"
-      op_ext:           0xa9, # context-specific constructed 9, "extensible comparison"
-    }.freeze
 
     #
     # Regexp
