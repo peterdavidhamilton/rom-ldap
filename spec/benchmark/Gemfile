@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'pry',        platforms: %i[jruby rbx]
+gem 'pry-byebug', platforms: :mri
+gem 'net-ldap'
+gem 'ldap-ber', git: 'bb:ldap-ber', branch: 'develop'
+gem 'rom-ldap', git: 'bb:rom-ldap', branch: 'feature/ast'
+gem 'benchmark-ips'
