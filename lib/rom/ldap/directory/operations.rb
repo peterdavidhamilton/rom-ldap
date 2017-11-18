@@ -34,7 +34,6 @@ module ROM
         # @api public
         def search(filter, base: nil, &block)
           Timeout.timeout(timeout) do
-
             results = query(filter: filter,
                             base: base,
                             max_results: max_results,
@@ -59,11 +58,8 @@ module ROM
         #
         # @api public
         def bind_as(filter:, password:, version: vendor_version)
-          connection.bind_as(
-            filter: filter,
-            password: password,
-            version: (version || self.class.ldap_version)
-          )
+          version ||= self.class.ldap_version
+          connection.bind_as(filter: filter, password: password, version: version)
         end
 
         # Used by gateway[filter] to infer schema. Limited to 100.
@@ -75,13 +71,13 @@ module ROM
           query(filter: filter, max_results: 100, attributes_only: true, unlimited: false)
         end
 
-        # Should count actual total
+        # Count everything within the base, inclusive.
         #
         # @return [Integer]
         #
         # @api public
-        def total(filter)
-          query(filter: filter, attributes: %i[dn]).count
+        def base_total
+          query(filter: self.class.default_filter, base: base, attributes: %i[cn]).count
         end
 
         # @param tuple [Hash]
@@ -125,7 +121,6 @@ module ROM
           result.success?
         end
 
-
         private
 
         # Is the server capable of paging and has a user defined limit not been set.
@@ -148,7 +143,6 @@ module ROM
         def to_ldap(filter)
           Functions[:to_ldap][filter]
         end
-
       end
     end
   end

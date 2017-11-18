@@ -5,16 +5,21 @@ require 'rom/ldap/dataset/dsl'
 
 module ROM
   module LDAP
-    # Method chaining class to build search criteria.
+    # Method chaining class to build search criteria,
+    #   finalised and reset once #each is called.
     #
-    # @param filter [String] Relation name
+    # @param directory [Directory] Directory object
+    #
+    # @param source [String] Relation name.
     #   @example => "(&(objectclass=person)(uidnumber=*))"
     #
-    # @option :limit [Integer] Pagination page(1)
+    # @option :limit [Integer] Pagination page(1).
     #
-    # @option :offset [Integer] Pagination per_page(20)
+    # @option :offset [Integer] Pagination per_page(20).
     #
-    # @option :base [String] Default search base defined in ROM.configuration
+    # @option :base [String] Default search base defined in ROM.configuration.
+    #
+    # @option :criteria [Array] Initial query criteria AST.
     #
     # @api private
     class Dataset
@@ -25,27 +30,27 @@ module ROM
       param :directory, reader: :private
 
       param :source,
-        reader: false,
-        type: Dry::Types['strict.string']
+        reader:   false,
+        type:     Dry::Types['strict.string']
 
       option :base,
-        reader: false,
-        type: Dry::Types['strict.string']
+        reader:   false,
+        type:     Dry::Types['strict.string']
 
       option :offset,
-        reader: false,
+        reader:   false,
         optional: true,
-        type: Dry::Types['strict.int']
+        type:     Dry::Types['strict.int']
 
       option :limit,
-        reader: false,
+        reader:   false,
         optional: true,
-        type: Dry::Types['strict.int']
+        type:     Dry::Types['strict.int']
 
       option :criteria,
-        reader: :private,
-        type: Dry::Types['strict.array'],
-        default: -> { [] }
+        reader:   :private,
+        type:     Dry::Types['strict.array'],
+        default:  -> { [] }
 
       # @api public
       def opts
@@ -70,9 +75,8 @@ module ROM
       end
 
 
-      # Raw filter search
-      #
-      # @overload ??
+      # Raw filter search.
+      # Temporarily replace dataset with new filter.
       #
       # @return [ROM::LDAP::Dataset]
       #
@@ -80,20 +84,25 @@ module ROM
       #
       # @api public
       def call(filter)
+        original  = @source
         @criteria = []
         @source   = filter
-        each
+        results   = each
+        @source   = original
+        results
       end
       alias [] call
 
-      # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
+      # Mirror Sequel dataset behaviour for rom-sql relation compatibility.
       #
       # @example
-      #   api.db.db.database_type => :apacheds
+      #   dataset.db.db.database_type => :apacheds
       #
       # @api public
       def db
-        ::OpenStruct.new(db: ::OpenStruct.new(database_type: directory.type))
+        db = ::OpenStruct.new
+        db[:database_type] = directory.type
+        ::OpenStruct.new(db: db)
       end
 
       # @return [ROM::LDAP::Dataset]
@@ -126,7 +135,7 @@ module ROM
         self
       end
 
-      # Sends methods like one! and map_to to the result array
+      # Initiate directory search and return some or all results before resetting criteria.
       #
       # @return [Enumerator::Lazy, Array]
       #
@@ -138,15 +147,15 @@ module ROM
         block_given? ? results.send(__callee__, *args, &block) : results
       end
 
-      # Respond to repository methods by calling #each to hit directory.
+      # Respond to Relation methods by returning finalised search results.
       #
       alias as each
       alias map_to each
       alias map_with each
       alias one! each
       alias one each
-      alias to_a each
       alias with each
+      alias to_a each
 
       # Inspect dataset revealing current filter and base.
       #
@@ -182,13 +191,13 @@ module ROM
         each.size
       end
 
+      # Unrestricted count of every entry under the base with base entry deducted.
+      #
       # @return [Integer]
       #
       # @api public
       def total
-        results = directory.total(query)
-        reset!
-        results
+        directory.base_total - 1
       end
 
       # @return [Boolean]

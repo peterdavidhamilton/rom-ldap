@@ -10,7 +10,7 @@ module ROM
           query(
             base:       sub_schema_entry,
             scope:      SCOPE_BASE_OBJECT,
-            filter:     '(objectclass=subschema)',
+            filter:     '(objectClass=subschema)',
             attributes: %w[objectclasses attributetypes],
             unlimited:  false
           ).first
