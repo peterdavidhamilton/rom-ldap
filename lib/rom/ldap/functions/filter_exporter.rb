@@ -15,8 +15,8 @@ module ROM
         #
         def call(ast)
           case ast.size
-          when 2 then parse_expression(ast)
-          when 3 then parse_branch(ast)
+          when 2 then parse(ast)
+          when 3 then parse_expression(ast)
           end
         end
 
@@ -32,7 +32,7 @@ module ROM
         #   => [:op_eq, 'uidNumber', :wildcard]
         #
         # @api private
-        def parse_branch(ast)
+        def parse_expression(ast)
           op, attribute, val = ast
           operator = id_operator(op)
           value    = id_value(val)
@@ -55,7 +55,7 @@ module ROM
         #      ]
         #
         # @api private
-        def parse_expression(ast)
+        def parse(ast)
           left, right = ast
           expr = left.eql?(:con_not) ? call(right) : right.map(&method(:call)).join
           constructor = id_constructor(left)
@@ -66,7 +66,7 @@ module ROM
         #
         # @api private
         def wrap(*attrs)
-           "(#{attrs.join})"
+          "(#{attrs.join})"
         end
       end
     end

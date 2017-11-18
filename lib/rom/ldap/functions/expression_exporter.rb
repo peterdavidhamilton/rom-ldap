@@ -13,7 +13,7 @@ module ROM
 
         def call(string)
           @scanner = StringScanner.new(string)
-          parse_expression
+          parse
         end
 
         alias [] call
@@ -22,13 +22,13 @@ module ROM
 
         attr_reader :scanner
 
-        def parse_expression
+        def parse
           if scanner.scan(OPEN_REGEX)
             if scanner.scan(BRANCH_REGEX)
               const = scanner.matched
               branches = []
 
-              while branch = parse_expression
+              while branch = parse
                 branches << branch
               end
 
@@ -37,11 +37,11 @@ module ROM
                 expr = expr.__send__(const, branches.shift) until branches.empty?
               end
 
-             elsif scanner.scan(NOT_REGEX)
-               expr = ~parse_expression
+            elsif scanner.scan(NOT_REGEX)
+              expr = ~parse
 
-             else
-               expr = parse_branch
+            else
+              expr = parse_expression
              end
 
             expr if expr && scanner.scan(CLOSE_REGEX)
@@ -58,7 +58,7 @@ module ROM
         # @return [Expression]
         #
         # @api private
-        def parse_branch
+        def parse_expression
           scanner.scan(WS_REGEX)
           scanner.scan(ATTR_REGEX)
           attribute = scanner.matched
@@ -73,7 +73,6 @@ module ROM
 
           Expression.new(operator, attribute, value)
         end
-
       end
     end
   end

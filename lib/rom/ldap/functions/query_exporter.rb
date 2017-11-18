@@ -12,7 +12,7 @@ module ROM
 
         def call(string)
           @scanner = StringScanner.new(string)
-          parse_expression
+          parse
         end
 
         alias [] call
@@ -24,13 +24,13 @@ module ROM
         # @return [Array]
         #
         # @api private
-        def parse_expression
+        def parse
           if scanner.scan(OPEN_REGEX)
             if scanner.scan(BRANCH_REGEX)
               const    = id_constructor(scanner.matched)
               branches = []
 
-              while branch = parse_expression
+              while branch = parse
                 branches << branch
               end
 
@@ -38,10 +38,10 @@ module ROM
 
             elsif scanner.scan(NOT_REGEX)
               const = id_constructor(scanner.matched)
-              arr   = [const, parse_expression]
+              arr   = [const, parse]
 
             else
-              arr = parse_branch
+              arr = parse_expression
             end
 
             arr if arr && scanner.scan(CLOSE_REGEX)
@@ -58,7 +58,7 @@ module ROM
         # @return [Array]
         #
         # @api private
-        def parse_branch
+        def parse_expression
           scanner.scan(WS_REGEX)
           scanner.scan(ATTR_REGEX)
           attribute = scanner.matched
@@ -73,7 +73,6 @@ module ROM
 
           [operator, attribute, value]
         end
-
       end
     end
   end

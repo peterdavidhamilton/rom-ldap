@@ -1,8 +1,6 @@
 module ROM
   module LDAP
     module Lookup
-      # TODO: rename parse_branch and parse_expression methods in the functions for clarity
-
       # @param val [Symbol,String]
       #
       # @example
@@ -45,8 +43,6 @@ module ROM
           VALUES.invert.fetch(val, val)
         end
       end
-
-
     end
   end
 end
