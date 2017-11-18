@@ -13,13 +13,13 @@ module ROM
 
       # struct_namespace LDAP:Struct
 
-      # GROUPS = '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
-      # USERS  = '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
-
       defines :base
-      # defines :filter
+      defines :users
+      defines :groups
 
-      # filter USERS
+      users '(&(objectclass=person)(uid=*))'.freeze
+      # users '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
+      groups '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
 
       include LDAP
       include Reading
@@ -40,15 +40,14 @@ module ROM
       end
 
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        event[:dataset].filter_string.to_s
+        event[:dataset].opts[:filter]
       end
 
-      schema_class      LDAP::Schema
-      schema_attr_class LDAP::Attribute
-      schema_inferrer   LDAP::Schema::Inferrer.new.freeze
-      schema_dsl        LDAP::Schema::DSL
-
-      forward(*QueryDSL.query_methods)
+      schema_class      Schema
+      schema_attr_class Attribute
+      schema_inferrer   Schema::Inferrer.new.freeze
+      schema_dsl        Schema::DSL
+      forward           *Dataset.dsl
 
       def primary_key
         attribute = schema.find(&:primary_key?)
@@ -69,16 +68,36 @@ module ROM
         Transaction.new(dataset.db).run(opts, &block)
       end
 
-      # Return raw query string
+      # Current dataset in LDAP filter format.
       #
       # @return [String]
       #
-      # @api private
+      # @api public
       def filter
-        dataset.filter_string.to_s
+        dataset.opts[:filter]
       end
 
-      # @api private
+      # Current dataset in abstract query format.
+      #
+      # @return [String]
+      #
+      # @api public
+      def query
+        dataset.opts[:query]
+      end
+
+
+      # Original dataset in LDAP filter format.
+      #
+      # @return [String]
+      #
+      # @api public
+      def source
+        dataset.opts[:source]
+      end
+
+
+      # @api public
       def self.associations
         schema.associations
       end
@@ -89,17 +108,6 @@ module ROM
       def assoc(name)
         associations[name].call
       end
-
-      # available methods provided by DSL
-      #
-      # @return [Array<Symbol>]
-      #
-      # @api private
-      def query_methods
-        QueryDSL.query_methods.sort
-      end
-      private :query_methods
-
 
       # Compliments #root method with an alternative search base
       #

@@ -3,7 +3,6 @@ require 'ber'
 using ::BER
 
 require 'net/tcp_client'
-require 'dry/core/class_attributes'
 require 'rom/ldap/directory/pdu'
 require 'rom/ldap/connection/authenticate'
 require 'rom/ldap/connection/create'
@@ -14,16 +13,6 @@ require 'rom/ldap/connection/delete'
 module ROM
   module LDAP
     class Connection < Net::TCPClient
-      extend Dry::Core::ClassAttributes
-
-      defines :ldap_version
-      defines :default_base
-      defines :default_filter
-
-      ldap_version   3
-      default_base   EMPTY_STRING
-      default_filter '(objectClass=*)'.freeze
-
       include Authenticate
       include Create
       include Read

@@ -16,6 +16,7 @@ RSpec.describe ROM::LDAP::Relation do
         accounts.insert(cn: 'The Dark Knight')
       end.to raise_error(ROM::LDAP::OperationError, 'distinguished name is required')
 
+      # maps internal attribute format to ldap proper name
       expect(accounts.insert(
                dn: 'uid=batman,ou=users,dc=example,dc=com',
                cn: 'The Dark Knight',
@@ -23,7 +24,7 @@ RSpec.describe ROM::LDAP::Relation do
                sn: 'Wayne',
                uidnumber: 1003,
                gidnumber: 1050,
-               'apple-imhandle': 'bruce-wayne',
+               appleimhandle: 'bruce-wayne',
                objectclass: %w[extensibleobject inetorgperson apple-user]
       )).to be(true)
 

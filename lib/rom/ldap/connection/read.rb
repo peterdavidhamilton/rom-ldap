@@ -1,19 +1,17 @@
 using ::BER
 
-require 'rom/ldap/filter/builder'
-
 module ROM
   module LDAP
     module Read
       # Connection Search Operation
       #
-      # @option :filter [String] Required but fallsback to class attribute 'default_filter' if nil.
+      # @option :expression [Filter::Expression]
       #
       # @option :base [String] Required but falls back to class attribute 'default_base' if nil.
       #
-      # @option :size [Integer] Can be set by gateway options passed to directory.
+      # @option :max_results [Integer] Can be set by gateway options passed to directory.
       #
-      # @option :time [Integer] Can be set by gateway options passed to directory.
+      # @option :max_time [Integer] Can be set by gateway options passed to directory.
       #
       # @option :scope [Integer] Defaults to 'subtree'.
       #
@@ -31,10 +29,10 @@ module ROM
       #
       # @api public
       def search(
-        filter:,
+        expression:,
         base:,
-        size: nil,
-        time: nil,
+        max_results: nil,
+        max_time: nil,
         scope: SCOPE_SUBTREE,
         deref: DEREF_NEVER,
         attributes: EMPTY_ARRAY,
@@ -47,17 +45,14 @@ module ROM
         raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
         raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
-        filter = build_filter(filter || self.class.default_filter)
-        base ||= self.class.default_base
-        size = size.to_i
-        time = time.to_i
-        refs = return_referrals
+        max_results = max_results.to_i
+        max_time = max_time.to_i
         message_id = next_msgid
         ber_attrs = Array(attributes).map { |attr| attr.to_s.to_ber }
         ber_sort = encode_sort_controls(sort)
         rfc2696_cookie = [126, EMPTY_STRING]
         result_pdu = nil
-        query_limit = (0..126).cover?(size) ? size : 0
+        query_limit = (0..126).cover?(max_results) ? max_results : 0
         counter = 0
 
         loop do
@@ -66,9 +61,9 @@ module ROM
             scope.to_ber_enumerated,
             deref.to_ber_enumerated,
             query_limit.to_ber,
-            time.to_ber,
+            max_time.to_ber,
             attributes_only.to_ber,
-            filter.to_ber,
+            expression.to_ber,
             ber_attrs.to_ber_sequence
           ].to_ber_appsequence(pdu_lookup(:search_request))
 
@@ -97,16 +92,17 @@ module ROM
             case pdu.app_tag
             when pdu_lookup(:search_returned_data)
               counter += 1
-              logger.debug("#{self.class}##{__callee__} #{counter}: #{pdu.search_entry.dn}")
+              # NB: Debugging output of each entry being processed
+              logger.debug("#{counter}: #{pdu.search_entry.dn}")
               yield pdu.search_entry if block_given?
 
             when pdu_lookup(:search_result_referral)
-              yield(search_referrals: referrals) if refs && block_given?
+              yield(search_referrals: referrals) if return_referrals && block_given?
 
             when pdu_lookup(:search_result)
               result_pdu = pdu
               controls   = pdu.result_controls
-              yield(search_referrals: referrals) if refs && pdu.referral? && block_given?
+              yield(search_referrals: referrals) if return_referrals && pdu.referral? && block_given?
               break
 
             else
@@ -114,11 +110,9 @@ module ROM
             end
           end
 
-          # break if counter == size
-
           more_pages = false
 
-          if result_pdu.success? && controls
+          if result_pdu&.success? && controls
             controls.each do |c|
               next unless c.oid == PAGED_RESULTS
               more_pages = false
@@ -142,13 +136,6 @@ module ROM
       end
 
       private
-
-      # Delegate to Filter::Builder#construct
-      #
-      # api private
-      def build_filter(filter)
-        Filter::Builder.construct(filter) if filter.is_a?(String)
-      end
 
       # FIXME: Sort controls sill relevant?
       #

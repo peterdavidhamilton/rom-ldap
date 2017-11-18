@@ -1,6 +1,9 @@
 require 'rom/initializer'
+require 'dry/core/class_attributes'
 require 'rom/support/memoizable'
 require 'timeout'
+
+# require 'dry-monitor'
 
 require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/sub_schema'
@@ -11,7 +14,17 @@ module ROM
   module LDAP
     class Directory
       extend Initializer
-      extend Notifications::Listener
+      # extend Notifications::Listener
+
+      extend Dry::Core::ClassAttributes
+
+      defines :ldap_version
+      defines :default_base
+      defines :default_filter
+
+      ldap_version   3
+      default_base   EMPTY_STRING
+      default_filter '(objectClass=*)'.freeze
 
       include Memoizable
       include Root
@@ -21,14 +34,17 @@ module ROM
 
       param :connection
 
-      option :base
-      option :timeout, default: proc { 30 }
-      option :size,    default: proc { 1_000_000 }
-      option :logger,  default: proc { ::Logger.new(STDOUT) }
+      option :base #,        default: -> { self.class.default_base }
+      option :timeout,     default: -> { 30 }
+      option :max_results, default: -> { 1_000_000 }
+      option :logger,      default: -> { ::Logger.new(STDOUT) }
 
-      subscribe('configuration.directory', adapter: :ldap) do |event|
-        binding.pry
-      end
+
+      # Dry::Monitor::Notifications.new(:app)
+
+      # subscribe('configuration.directory', adapter: :ldap) do |event|
+      #   binding.pry
+      # end
 
       # @return [Array<String>]
       #
@@ -40,6 +56,13 @@ module ROM
       def vendor
         [vendor_name, vendor_version]
       end
+
+
+      #
+      #
+      # def reconnect
+      #   connection.connect
+      # end
 
       # Directory attributes identifiers and descriptions
       #
@@ -64,8 +87,7 @@ module ROM
         end
       end
 
-      # Build hash from attribute definition
-      #   used by TypeBuilder
+      # Build hash from attribute definition.
       #
       # @example
       #   parse_attribute_type("...")
@@ -74,6 +96,8 @@ module ROM
       # @param type [String]
       #
       # @return [Hash]
+      #
+      # @see TypeBuilder
       #
       # @api private
       def parse_attribute_type(type)

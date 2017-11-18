@@ -8,6 +8,60 @@ module ROM
     WILDCARD = '*'.freeze
     NEW_LINE = "\n".freeze
 
+    CONSTRUCTORS = {
+      con_and: '&', # intersection
+      con_or:  '|', # union
+      con_not: '!', # negation
+    }.freeze
+
+    # NB: Order of values effects regexp
+    OPERATORS = {
+      op_prx: '~=',
+      op_ext: ':=',
+      op_gte: '>=',
+      op_lte: '<=',
+      op_eq:  '='
+    }.freeze
+
+    VALUES = {
+      :wildcard => WILDCARD,
+      true      => 'TRUE',
+      false     => 'FALSE'
+    }.freeze
+
+    #
+    # DSL dataset methods
+    #
+    ESCAPES = {
+      "\0" => '00', # NUL      = %x00     null character
+      '*'  => '2A', # ASTERISK = %x2A     asterisk ("*")
+      '('  => '28', # LPARENS  = %x28     left parenthesis ("(")
+      ')'  => '29', # RPARENS  = %x29     right parenthesis (")")
+      '\\' => '5C', # ESC      = %x5C     esc (or backslash) ("\")
+    }.freeze
+
+    ESCAPE_REGEX = Regexp.new('[' + ESCAPES.keys.map { |e| Regexp.escape(e) }.join + ']')
+
+    #
+    # Expression Encoder
+    #
+    EXTENSIBLE_REGEX = /^([-;\w]*)(:dn)?(:(\w+|[.\w]+))?$/
+    UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/
+
+    #
+    # Regexp
+    #
+    WS_REGEX      = /\s*/
+    OPEN_REGEX    = /\s*\(\s*/
+    CLOSE_REGEX   = /\s*\)\s*/
+    AND_REGEX     = /\s*\&\s*/
+    OR_REGEX      = /\s*\|\s*/
+    NOT_REGEX     = /\s*\!\s*/
+    ATTR_REGEX    = /[-\w:.]*[\w]/
+    VAL_REGEX     = /(?:[-\[\]{}\w*.+\/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|\\[a-fA-F\d]{2})+/u
+    OP_REGEX      = Regexp.union(*OPERATORS.values)
+    BRANCH_REGEX  = Regexp.union(OR_REGEX, AND_REGEX)
+
     #
     # Schema files
     #

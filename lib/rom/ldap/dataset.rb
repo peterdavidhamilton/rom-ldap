@@ -1,11 +1,25 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/query_dsl'
 require 'rom/ldap/directory/ldif'
+require 'rom/ldap/dataset/dsl'
 
 module ROM
   module LDAP
-    # @option :base [String] Default search base defined in ROM.configuration
+    # Method chaining class to build search criteria,
+    #   finalised and reset once #each is called.
+    #
+    # @param directory [Directory] Directory object
+    #
+    # @param source [String] Relation name.
+    #   @example => "(&(objectclass=person)(uidnumber=*))"
+    #
+    # @option :limit [Integer] Pagination page(1).
+    #
+    # @option :offset [Integer] Pagination per_page(20).
+    #
+    # @option :base [String] Default search base defined in ROM.configuration.
+    #
+    # @option :criteria [Array] Initial query criteria AST.
     #
     # @api private
     class Dataset
@@ -15,64 +29,80 @@ module ROM
 
       param :directory, reader: :private
 
-      param :filter,
-        reader: :private,
-        type: Dry::Types['strict.string']
+      param :source,
+        reader:   false,
+        type:     Dry::Types['strict.string']
 
       option :base,
-        reader: :private,
-        type: Dry::Types['strict.string']
-
-      option :criteria,
-        reader: :private,
-        type: Dry::Types['strict.hash'],
-        default: proc { {} }
+        reader:   false,
+        type:     Dry::Types['strict.string']
 
       option :offset,
-        reader: false,
+        reader:   false,
         optional: true,
-        type: Dry::Types['strict.int']
+        type:     Dry::Types['strict.int']
 
       option :limit,
-        reader: false,
+        reader:   false,
         optional: true,
-        type: Dry::Types['strict.int']
+        type:     Dry::Types['strict.int']
+
+      option :criteria,
+        reader:   :private,
+        type:     Dry::Types['strict.array'],
+        default:  -> { [] }
 
       # @api public
       def opts
-        Hash[
-          offset:     @offset,
-          limit:      @limit,
-          criteria:   @criteria,
-          base:       @base,
-          pagination: paginated?
-        ]
+        {
+          base:   @base,
+          source: @source,
+          query:  query,
+          filter: filter,
+          offset: @offset,
+          limit:  @limit
+        }.freeze
       end
 
+      # Methods that define the query interface.
+      #
+      include DSL
+
+      # Used by Relation to forward methods to dataset
+      #
+      def self.dsl
+        DSL.public_instance_methods(false)
+      end
+
+
+      # Raw filter search.
+      # Temporarily replace dataset with new filter.
+      #
       # @return [ROM::LDAP::Dataset]
       #
-      # @param args [Hash] New arguments to chain.
+      # @param filter [String] Valid LDAP filter string
       #
-      # @api private
-      def merge!(args)
-        @criteria = Functions[:deep_merge][criteria, { "_#{__callee__}" => args }]
-        self
+      # @api public
+      def call(filter)
+        original  = @source
+        @criteria = []
+        @source   = filter
+        results   = each
+        @source   = original
+        results
       end
+      alias [] call
 
-      private :merge!
-
-      QueryDSL.query_methods.each do |meth|
-        alias_method meth, :merge!
-      end
-
-      # OPTIMIZE: Strange return structs to mirror Sequel behaviour for rom-sql
+      # Mirror Sequel dataset behaviour for rom-sql relation compatibility.
       #
       # @example
-      #   api.db.db.database_type => :apacheds
+      #   dataset.db.db.database_type => :apacheds
       #
       # @api public
       def db
-        ::OpenStruct.new(db: ::OpenStruct.new(database_type: directory.type))
+        db = ::OpenStruct.new
+        db[:database_type] = directory.type
+        ::OpenStruct.new(db: db)
       end
 
       # @return [ROM::LDAP::Dataset]
@@ -105,6 +135,8 @@ module ROM
         self
       end
 
+      # Initiate directory search and return some or all results before resetting criteria.
+      #
       # @return [Enumerator::Lazy, Array]
       #
       # @api public
@@ -115,32 +147,23 @@ module ROM
         block_given? ? results.send(__callee__, *args, &block) : results
       end
 
-      # Respond to repository methods by first calling #each
+      # Respond to Relation methods by returning finalised search results.
       #
       alias as each
       alias map_to each
       alias map_with each
       alias one! each
       alias one each
-      alias to_a each
       alias with each
+      alias to_a each
 
-      # Combine original relation filter with search criteria
-      #
-      # @return [String]
-      #
-      # @api public
-      def filter_string
-        query_dsl[criteria, filter]
-      end
-
-      # Inspect dataset revealing current filter criteria
+      # Inspect dataset revealing current filter and base.
       #
       # @return [String]
       #
       # @api public
       def inspect
-        %(<##{self.class} filter="#{filter_string}" base="#{@base}">)
+        %(<##{self.class} filter="#{filter}" base="#{@base}">)
       end
 
       # True if password binds for the filtered dataset
@@ -151,7 +174,7 @@ module ROM
       #
       # @api public
       def authenticated?(password)
-        directory.bind_as(filter: filter_string, password: password)
+        directory.bind_as(filter: query, password: password)
       end
 
       # @return [Boolean]
@@ -168,20 +191,20 @@ module ROM
         each.size
       end
 
+      # Unrestricted count of every entry under the base with base entry deducted.
+      #
       # @return [Integer]
       #
       # @api public
       def total
-        results = directory.total(filter_string)
-        reset!
-        results
+        directory.base_total - 1
       end
 
       # @return [Boolean]
       #
       # @api public
       def include?(key)
-        results = directory.include?(filter_string, key)
+        results = directory.include?(query, key)
         reset!
         results
       end
@@ -218,17 +241,42 @@ module ROM
 
       private
 
+      # Convert the full query to an LDAP filter string
+      #
+      # @return [String]
+      #
+      # @api private
+      def filter
+        Functions[:to_ldap][query]
+      end
+
+      # Combine original relation dataset name (LDAP filter string)
+      #   with search criteria (AST).
+      #
+      # @return [String]
+      #
+      # @api private
+      def query
+        return source_to_ast if criteria.empty?
+        [:con_and, [source_to_ast, criteria]]
+      end
+
+      # Convert the relation's source filter string to a query AST.
+      #
+      # @return [Array]
+      #
+      # @api private
+      def source_to_ast
+        Functions[:to_ast][@source]
+      end
+
       # @return [Array<Hash>]
       #
       # @api private
       def search(&block)
-        results = directory.search(filter_string, base: base, &block)
+        results = directory.search(query, base: @base, &block)
         reset!
         results
-      end
-
-      def query_dsl
-        @query_dsl ||= QueryDSL.new
       end
 
       # Reset the current criteria
@@ -237,7 +285,7 @@ module ROM
       #
       # @api private
       def reset!
-        @criteria = {}
+        @criteria = []
         self
       end
 

@@ -32,6 +32,10 @@ RSpec.shared_context 'directory' do
     }
   end
 
+  let(:new_format_proc) do
+    ->(key) { ROM::LDAP::Functions.to_method_name(key) }
+  end
+
   let(:formatter) { nil }
 
 end

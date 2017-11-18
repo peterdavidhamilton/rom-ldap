@@ -17,9 +17,7 @@ module ROM
           end
 
           def to_method_name!
-            if formatter.nil?
-              use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
-            end
+            use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
           end
 
           def from_ldif(ldif)
@@ -94,6 +92,7 @@ module ROM
           @canonical.inspect
         end
 
+        alias to_str to_s
         alias inspect to_s
 
         def to_json
