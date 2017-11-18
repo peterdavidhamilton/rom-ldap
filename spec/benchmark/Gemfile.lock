@@ -1,6 +1,6 @@
 GIT
   remote: bb:ldap-ber
-  revision: 8756d9b7fb5f46c391d1efb66b1384c9c92f7b87
+  revision: 1d1dda0dc2cbb63a197abfe2ab2858be4601b160
   branch: develop
   specs:
     ldap-ber (0.0.1)
@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: bb:rom-ldap
-  revision: fb1f91143b8e9bb6bb6d15a4768cce31e74f33fd
+  revision: 2bf465d7f923946020c69fbe739875fa49126928
   branch: feature/ast
   specs:
     rom-ldap (0.0.7)
@@ -36,6 +36,7 @@ GEM
     dry-core (0.4.1)
       concurrent-ruby (~> 1.0)
     dry-equalizer (0.2.0)
+    dry-inflector (0.1.0)
     dry-initializer (2.3.0)
     dry-logic (0.4.2)
       dry-container (~> 0.2, >= 0.2.6)
@@ -69,15 +70,16 @@ GEM
     pry-byebug (3.5.0)
       byebug (~> 9.1)
       pry (~> 0.10)
-    rom-core (4.0.2)
+    rom-core (4.1.0)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.6)
       dry-core (~> 0.3)
       dry-equalizer (~> 0.2)
+      dry-inflector (~> 0.1)
       dry-initializer (~> 2.0)
       dry-types (~> 0.12, >= 0.12.1)
-      rom-mapper (~> 1.0, >= 1.0.2)
-    rom-mapper (1.0.2)
+      rom-mapper (~> 1.1)
+    rom-mapper (1.1.0)
       dry-core (~> 0.3, >= 0.3.1)
       dry-equalizer (~> 0.2)
       dry-struct (~> 0.3)

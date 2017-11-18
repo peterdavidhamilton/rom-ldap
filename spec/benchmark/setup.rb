@@ -26,7 +26,17 @@ directory = { server: "#{host}:#{port}", username: admin, password: password}
 conf = ROM::Configuration.new(:ldap, directory, base: base, logger: logger)
 
 
-# ROM::LDAP::Directory::Entity.to_method_name!
+ROM::LDAP::Directory::Entity.to_method_name!
+
+
+# ROM::LDAP::Directory::Entity.use_formatter(
+#   ->(key) {
+#     key = key.to_s.downcase.tr('-', '')
+#     key = key[0..-2] if key[-1] == '='
+#     key.to_sym
+#   }
+# )
+
 
 conf.relation(:infer_hash) do
   schema(filter, infer: true)
@@ -40,8 +50,8 @@ end
 
 conf.relation(:explicit_struct) do
   schema(filter) do
-    attribute 'uid',       Types::String, read: Types::Single::String
-    attribute 'uidNumber', Types::Int,    read: Types::Single::Int
+    attribute :uid,       Types::String, read: Types::Single::String
+    attribute :uid_number, Types::Int,    read: Types::Single::Int
   end
   auto_struct true
 end

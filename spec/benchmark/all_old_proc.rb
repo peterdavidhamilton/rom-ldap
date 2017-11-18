@@ -1,10 +1,19 @@
 require_relative 'setup'
 
 # Comparison:
-# rom-ldap explicit hash:      504.0 i/s
-# rom-ldap inferred hash:      502.5 i/s - same-ish: difference falls within error
-#               net-ldap:      430.5 i/s - 1.17x  slower
+# rom-ldap explicit hash:      477.1 i/s
+# rom-ldap inferred hash:      458.8 i/s - same-ish: difference falls within error
+#             net-ldap:        431.0 i/s - 1.11x  slower
 #
+# custom function
+ROM::LDAP::Directory::Entity.use_formatter(
+  ->(key) {
+    key = key.to_s.downcase.tr('-', '')
+    key = key[0..-2] if key[-1] == '='
+    key.to_sym
+  }
+)
+
 Benchmark.ips do |bm|
 
   bm.config(time: 5, warmup: 0.5, iterations: 2)

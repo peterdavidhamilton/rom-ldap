@@ -1,10 +1,12 @@
 require_relative 'setup'
 
 # Comparison:
-# rom-ldap explicit hash:      504.0 i/s
-# rom-ldap inferred hash:      502.5 i/s - same-ish: difference falls within error
-#               net-ldap:      430.5 i/s - 1.17x  slower
+#               net-ldap:      429.5 i/s
+# rom-ldap explicit hash:      248.9 i/s - 1.73x  slower
+# rom-ldap inferred hash:      241.6 i/s - 1.78x  slower
 #
+# Enable snake-case function
+
 Benchmark.ips do |bm|
 
   bm.config(time: 5, warmup: 0.5, iterations: 2)
@@ -12,13 +14,14 @@ Benchmark.ips do |bm|
   #
   # Structs inferred and explicit
   #
-  # bm.report('rom-ldap inferred struct') do
-  #   @infer_struct.to_a
-  # end
+  bm.report('rom-ldap inferred struct') do
+    binding.pry
+    @infer_struct.to_a
+  end
 
-  # bm.report('rom-ldap explicit struct') do
-  #   @explicit_struct.to_a
-  # end
+  bm.report('rom-ldap explicit struct') do
+    @explicit_struct.to_a
+  end
 
   #
   # Hashes inferred and explicit
