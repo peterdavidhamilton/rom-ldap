@@ -14,7 +14,6 @@ module ROM
           new(dataset[raw])
         end
 
-
         # Returns empty dataset if the filtered entity cannot bind.
         #
         # @return [Relation]
@@ -102,8 +101,7 @@ module ROM
         # Fetch a tuple identified by the pk
         #
         # @example
-        #   users.fetch(1001)
-        #   # {:id => 1, name: "Jane"}
+        #   users.fetch(1001) # => {:id => 1, name: "Jane"}
         #
         # @return [Hash]
         #
@@ -225,23 +223,31 @@ module ROM
         end
         alias pluck select
 
-        # Filters by regexp
+        # Filters entities by pattern against canonical hash.
         #
-        # @example
-        #   relation.grep(sn: /regexp/)
+        # @see Directory::Entity.to_str
+        #
+        # @param pattern [Mixed]
         #
         # @return [Relation]
         #
-        # def grep(options)
-        #   new(
-        #     dataset.map do |e|
-        #       attribute = options.keys.first
-        #       regexp    = options.values.first
-        #       e[attribute].grep(regex)
-        #     end
-        #   )
-        # .detect {|f| f["age"] > 35 }
-        # end
+        # @example
+        #   relation.find(/regexp/)
+        #   relation.find(23..67)
+        #
+        # @api public
+        def find(pattern)
+          new(dataset.grep(pattern))
+        end
+
+        # Filters entities by inverse of pattern
+        #
+        # @see #find
+        #
+        # @api public
+        def find_inverse(pattern)
+          new(dataset.grep_v(pattern))
+        end
 
         # Qualifies all columns in a relation
         #

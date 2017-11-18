@@ -92,6 +92,7 @@ module ROM
           @canonical.inspect
         end
 
+        alias to_str to_s
         alias inspect to_s
 
         def to_json
