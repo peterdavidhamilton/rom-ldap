@@ -18,6 +18,15 @@ module ROM
         super
       end
 
+      UUID_REGEX = /\A
+                  [\da-fA-F]{8}-
+                  ([\da-fA-F]{4}-){3}
+                  [\da-fA-F]{12}
+                  \z/x.freeze
+
+      UUID   = Types::Strict::String.constrained(format: UUID_REGEX)
+      Octet  = Types.Constructor(::String, ->(v) { v.force_encoding('UTF-8') })
+      Postal = Types.Constructor(::String, ->(v) { v.split('$') })
       Serial = Int.meta(primary_key: true)
 
       module Single

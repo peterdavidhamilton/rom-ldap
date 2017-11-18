@@ -57,6 +57,13 @@ module ROM
         [vendor_name, vendor_version]
       end
 
+
+      #
+      #
+      # def reconnect
+      #   connection.connect
+      # end
+
       # Directory attributes identifiers and descriptions
       #
       # @return [Array<Hash>]

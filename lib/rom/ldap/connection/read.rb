@@ -112,7 +112,7 @@ module ROM
 
           more_pages = false
 
-          if result_pdu && result_pdu.success? && controls
+          if result_pdu&.success? && controls
             controls.each do |c|
               next unless c.oid == PAGED_RESULTS
               more_pages = false

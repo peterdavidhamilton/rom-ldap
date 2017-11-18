@@ -13,7 +13,7 @@ module ROM
         #
         # @api public
         def equals(args)
-          save! *array_arguments(args)
+          chain(*array_arguments(args))
         end
         alias where equals
 
@@ -25,7 +25,7 @@ module ROM
         #
         # @api public
         def unequals(args)
-          save! *[:con_not, array_arguments(args)]
+          chain(:con_not, array_arguments(args))
         end
 
         # Presence filter aliased as 'has', 'exists'.
@@ -36,7 +36,7 @@ module ROM
         #
         # @api public
         def present(attribute)
-          save! *[:op_eq, attribute, :wildcard]
+          chain(:op_eq, attribute, :wildcard)
         end
         alias has present
         alias exists present
@@ -49,58 +49,54 @@ module ROM
         #
         # @api public
         def missing(attribute)
-          save! *[:con_not, [:op_eq, attribute, :wildcard]]
+          chain(:con_not, [:op_eq, attribute, :wildcard])
         end
         alias hasnt missing
 
-
         def gt(args)
-          save! *[:con_not, [:op_lte, *args.to_a[0]]]
+          chain(:con_not, [:op_lte, *args.to_a[0]])
         end
         alias above gt
 
         def lt(args)
-          save! *[:con_not, [:op_gte, *args.to_a[0]]]
+          chain(:con_not, [:op_gte, *args.to_a[0]])
         end
         alias below lt
 
-
         def gte(args)
-          save! *[:op_gte, *args.to_a[0]]
+          chain(:op_gte, *args.to_a[0])
         end
 
         def lte(args)
-          save! *[:op_lte, *args.to_a[0]]
+          chain(:op_lte, *args.to_a[0])
         end
 
         def begins(args)
-          save! *wildcard_arguments(args, right: WILDCARD)
+          chain(*wildcard_arguments(args, right: WILDCARD))
         end
         # alias starts begins
 
         def ends(args)
-          save! *wildcard_arguments(args, left: WILDCARD)
+          chain(*wildcard_arguments(args, left: WILDCARD))
         end
         # alias suffix ends
 
         def contains(args)
-          save! *wildcard_arguments(args, left: WILDCARD, right: WILDCARD)
+          chain(*wildcard_arguments(args, left: WILDCARD, right: WILDCARD))
         end
         alias matches contains
 
         def excludes(args)
-          save! *[:con_not, wildcard_arguments(args, left: WILDCARD, right: WILDCARD)]
+          chain(:con_not, wildcard_arguments(args, left: WILDCARD, right: WILDCARD))
         end
 
-
-
         def within(args)
-          save! *[:con_and, range_arguments(args)]
+          chain(:con_and, range_arguments(args))
         end
         alias between within
 
         def outside(args)
-          save! *[:con_not, [:con_and, range_arguments(args)]]
+          chain(:con_not, [:con_and, range_arguments(args)])
         end
 
         private
@@ -108,7 +104,7 @@ module ROM
         # Update the criteria
         #
         # @api private
-        def save!(*exprs)
+        def chain(*exprs)
           @criteria.unshift(*exprs)
           self
         end
@@ -123,7 +119,7 @@ module ROM
         def array_arguments(args)
           attribute, values = args.to_a[0]
           exprs = Array(values).map { |val| [:op_eq, attribute, escape(val)] }
-          (exprs.size >= 2) ? [:con_or, exprs] : exprs.flatten
+          exprs.size >= 2 ? [:con_or, exprs] : exprs.flatten
         end
 
         # Process values >= 1
