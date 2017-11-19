@@ -50,9 +50,9 @@ RSpec.describe ROM::LDAP::Relation do
 
     let(:formatter) { new_format_proc }
 
-    it 'make suitable method names' do
-      expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
-    end
+    # it 'make suitable method names' do
+    #   expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
+    # end
 
     it '#limit' do
       names = customers.limit(2).to_a.collect { |t| t[:given_name] }
@@ -71,9 +71,9 @@ RSpec.describe ROM::LDAP::Relation do
 
     let(:formatter) { old_format_proc }
 
-    it 'make suitable method names' do
-      expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
-    end
+    # it 'make suitable method names' do
+    #   expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
+    # end
 
     it '#first' do
       expect(customers.first[:givenname]).to eql(['test1'])

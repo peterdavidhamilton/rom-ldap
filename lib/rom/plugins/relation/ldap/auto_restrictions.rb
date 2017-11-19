@@ -36,7 +36,6 @@ module ROM
           # @api private
           def self.restriction_methods(schema)
             mod = Module.new
-
             methods = schema.attributes.each_with_object([]) do |attribute, generated|
               meth_name = :"by_#{attribute.name}"
 
@@ -44,6 +43,7 @@ module ROM
 
               mod.module_eval do
                 define_method(meth_name) do |value|
+                  # where(attribute.original_name => value)
                   where(attribute.name => value)
                 end
               end

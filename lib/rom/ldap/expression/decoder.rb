@@ -15,10 +15,12 @@ module ROM
           when request(:con_not) then [:con_not, ber.first, nil]
 
           when request(:equality_match)
-            [:op_eq, ber.first, ber.last] if ber.last == WILDCARD
+            # [:op_eql, ber.first, ber.last] if ber.last == WILDCARD
+            [:op_eql, *ber] if ber.last == WILDCARD
 
           when request(:substring)  then substr(ber)
-          when request(:op_gte)     then [:op_gte, ber.first.to_s, ber.last.to_s]
+          when request(:op_gte)     then [:op_gte, *ber.map(&:to_s)]
+          # when request(:op_gte)     then [:op_gte, ber.first.to_s, ber.last.to_s]
           when request(:op_lte)     then [:op_lte, ber.first.to_s, ber.last.to_s]
           when request(:is_present) then [:present, ber.to_s]
           when request(:op_ext)     then extensible(ber)
@@ -84,7 +86,7 @@ module ROM
 
           str += WILDCARD unless final
 
-          [:op_eq, ber.first.to_s, str]
+          [:op_eql, ber.first.to_s, str]
         end
 
         def identifier(ber)

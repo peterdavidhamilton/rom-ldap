@@ -57,21 +57,35 @@ module ROM
         [vendor_name, vendor_version]
       end
 
-
       #
       #
       # def reconnect
       #   connection.connect
       # end
 
-      # Directory attributes identifiers and descriptions
+
+      # Directory attributes identifiers and descriptions.
+      # Memoised.
+      # Marks directory as loaded once attrs are cached.
       #
       # @return [Array<Hash>]
       #
       # @api public
       def attribute_types
         types = schema_attribute_types.flat_map(&method(:parse_attribute_type))
-        types.flatten.reject(&:nil?).sort_by(&:first)
+        list  = types.flatten.reject(&:nil?).sort_by(&:first).freeze
+        # NB: push attributes in to the function module
+        Functions.attribute_list = list
+        @loaded = true
+        list
+      end
+
+
+      # Switch used to check if root has been loaded.
+      # Otherwise to_exp function loops.
+      #
+      def loaded?
+        !!@loaded
       end
 
       private

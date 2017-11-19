@@ -10,10 +10,11 @@ module ROM
         # @example
         #   relation.where(uid: 'pete')
         #   relation.where(uid: %w[pete leanda])
+        #   relation.where(uid: 'leanda', sn: 'hamilton')
         #
         # @api public
         def equals(args)
-          chain(*array_arguments(args))
+          chain(*array_dsl(args))
         end
         alias where equals
 
@@ -25,7 +26,7 @@ module ROM
         #
         # @api public
         def unequals(args)
-          chain(:con_not, array_arguments(args))
+          chain(:con_not, array_dsl(args))
         end
 
         # Presence filter aliased as 'has', 'exists'.
@@ -36,7 +37,7 @@ module ROM
         #
         # @api public
         def present(attribute)
-          chain(:op_eq, attribute, :wildcard)
+          chain(:op_eql, attribute, :wildcard)
         end
         alias has present
         alias exists present
@@ -49,7 +50,7 @@ module ROM
         #
         # @api public
         def missing(attribute)
-          chain(:con_not, [:op_eq, attribute, :wildcard])
+          chain(:con_not, [:op_eql, attribute, :wildcard])
         end
         alias hasnt missing
 
@@ -72,31 +73,31 @@ module ROM
         end
 
         def begins(args)
-          chain(*wildcard_arguments(args, right: WILDCARD))
+          chain(*match_dsl(args, right: WILDCARD))
         end
         # alias starts begins
 
         def ends(args)
-          chain(*wildcard_arguments(args, left: WILDCARD))
+          chain(*match_dsl(args, left: WILDCARD))
         end
         # alias suffix ends
 
         def contains(args)
-          chain(*wildcard_arguments(args, left: WILDCARD, right: WILDCARD))
+          chain(*match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
         alias matches contains
 
         def excludes(args)
-          chain(:con_not, wildcard_arguments(args, left: WILDCARD, right: WILDCARD))
+          chain(:con_not, match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
 
         def within(args)
-          chain(:con_and, range_arguments(args))
+          chain(:con_and, cover_dsl(args))
         end
         alias between within
 
         def outside(args)
-          chain(:con_not, [:con_and, range_arguments(args)])
+          chain(:con_not, [:con_and, cover_dsl(args)])
         end
 
         private
@@ -109,17 +110,36 @@ module ROM
           self
         end
 
-        # Handle potential arrays of arguments with an 'either or join'
+        # Handle potential arrays of arguments with a join.
         #
         # @param args [Array]
         #
         # @return [Array]
         #
+        # @example
+        #   array_dsl({sn: 'hamilton', gn: %w[leanda peter]})
+        #     # =>
+        #
         # @api private
-        def array_arguments(args)
-          attribute, values = args.to_a[0]
-          exprs = Array(values).map { |val| [:op_eq, attribute, escape(val)] }
-          exprs.size >= 2 ? [:con_or, exprs] : exprs.flatten
+        def array_dsl(args)
+          expressions = args.map do |left, right|
+            values = Array(right).map { |v| [:op_eql, left, escape(v)] }
+            join_dsl(:con_or, values)
+          end
+          join_dsl(:con_and, expressions)
+        end
+
+        # Apply Union (|) or Intersection (&) if two or more.
+        # Use :con_or for multiple values of an attribute.
+        # Used :con_and for multiple attributes.
+        #
+        # @param operator [Symbol] :con_or
+        #
+        # @param ary [Array] [[op, left, right],[op, left, right]]
+        #
+        # @api private
+        def join_dsl(operator, ary)
+          ary.size >= 2 ? [operator, ary] : ary.first
         end
 
         # Process values >= 1
@@ -132,10 +152,10 @@ module ROM
         # @return [Array]
         #
         # @api private
-        def wildcard_arguments(args, left: EMPTY_STRING, right: EMPTY_STRING)
+        def match_dsl(args, left: EMPTY_STRING, right: EMPTY_STRING)
           attribute, value = args.to_a[0]
           value = left + escape(value) + right
-          [:op_eq, attribute, value]
+          [:op_eql, attribute, value]
         end
 
         # Process values >= 1
@@ -145,9 +165,9 @@ module ROM
         # @return [Array]
         #
         # @api private
-        def range_arguments(args)
+        def cover_dsl(args)
           attribute, range = args.to_a[0]
-          lower, *rest, upper = range.to_a
+          lower, *_, upper = range.to_a
 
           lower = [:op_gte, attribute, lower]
           upper = [:op_lte, attribute, upper]

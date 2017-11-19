@@ -53,7 +53,7 @@ module ROM
         # Tokenise the operator, attribute, value parts of an expression.
         #
         # @example
-        #   => [:op_eq, 'uidNumber', :wildcard]
+        #   => [:op_eql, 'uidNumber', :wildcard]
         #
         # @return [Array]
         #
@@ -62,6 +62,7 @@ module ROM
           scanner.scan(WS_REGEX)
           scanner.scan(ATTR_REGEX)
           attribute = scanner.matched
+          # attribute = id_attribute(scanner.matched)
 
           scanner.scan(WS_REGEX)
           scanner.scan(OP_REGEX)

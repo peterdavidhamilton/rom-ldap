@@ -105,6 +105,11 @@ module ROM
         ::OpenStruct.new(db: db)
       end
 
+      # NB: rom-sql hits this.
+      def sql
+        #noop
+      end
+
       # @return [ROM::LDAP::Dataset]
       #
       # @param offset [Integer] Integer value to start pagination range.
@@ -163,7 +168,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(<##{self.class} filter="#{filter}" base="#{@base}">)
+        %(#<#{self.class}: "#{filter}" base="#{@base}">)
       end
 
       # True if password binds for the filtered dataset
@@ -220,14 +225,14 @@ module ROM
 
       #
       # @api public
-      def modify(tuples, args)
-        tuples.map { |t| directory.modify(*t[:dn], args.map { |k, v| [:replace, k, v] }) }
+      def modify(entries, tuple)
+        entries.map { |e| directory.modify(*e[:dn], tuple) }
       end
 
       #
       # @api public
-      def delete(tuples)
-        tuples.map { |t| directory.delete(*t[:dn]) }
+      def delete(entries)
+        entries.map { |e| directory.delete(*e[:dn]) }
       end
 
       # Output the dataset as an LDIF string.

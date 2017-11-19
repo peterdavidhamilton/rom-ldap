@@ -46,7 +46,6 @@ module ROM
             log(__callee__, "LDAP implementation #{vendor_name} is unknown")
             @type = :unknown
           end
-
           self
         end
 
@@ -68,7 +67,6 @@ module ROM
           attrs = attrs.empty? ? ROOT_DSE_ATTRS : attrs
 
           query(
-            filter:     nil,
             base:       EMPTY_BASE,
             scope:      SCOPE_BASE_OBJECT,
             attributes: attrs,

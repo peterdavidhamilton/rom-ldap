@@ -88,6 +88,12 @@ module ROM
 
         alias to_hash to_h
 
+        def to_a
+          to_h.to_a
+        end
+
+        alias to_ary to_a
+
         def to_s
           @canonical.inspect
         end

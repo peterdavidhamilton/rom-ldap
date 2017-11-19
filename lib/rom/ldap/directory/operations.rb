@@ -5,13 +5,12 @@ module ROM
         #
         # @param options [Hash]
         #
-        # @return [Array<Hash>]
+        # @return [Array<Entity>]
         #
         # @api public
         def query(options)
           set  = []
           base ||= self.class.default_base
-
           filter = options.delete(:filter) || self.class.default_filter
           expr   = to_exp(filter)
 
@@ -52,14 +51,16 @@ module ROM
         #
         # @option :password [String]
         #
-        # @option :version [Integer] defaults to server value or class attribute
-        #
         # @return [Boolean]
         #
         # @api public
-        def bind_as(filter:, password:, version: vendor_version)
-          version ||= self.class.ldap_version
-          connection.bind_as(filter: filter, password: password, version: version)
+        def bind_as(filter:, password:)
+          if entity = query(filter: filter, max_results: 1).first
+            password = password.call if password.respond_to?(:call)
+            connection.bind(username: entity.dn, password: password)
+          else
+            false
+          end
         end
 
         # Used by gateway[filter] to infer schema. Limited to 100.
@@ -77,7 +78,7 @@ module ROM
         #
         # @api public
         def base_total
-          query(filter: self.class.default_filter, base: base, attributes: %i[cn]).count
+          query(base: base, attributes: %i[cn]).count
         end
 
         # @param tuple [Hash]
@@ -86,8 +87,8 @@ module ROM
         #
         # @api public
         def add(tuple)
-          trans   = tuple_translation(tuple)
-          payload = LDAP::Functions[:rename_keys, trans][tuple.dup]
+          payload = tuple_translation(tuple)
+
           args    = LDAP::Functions[:coerce_tuple_in][payload]
           dn      = args.delete(:dn)
 
@@ -97,15 +98,37 @@ module ROM
           result.success?
         end
 
+        # @param dn [String]
         #
-        # @return [Boolean]
+        # @param tuple [Hash]
+        #
+        # @return [Hash,Boolean]
         #
         # @api public
-        def modify(dn, operations)
-          raise OperationError, 'distinguished name is required' if dn.nil?
+        def modify(dn, tuple)
+          # raise OperationError, 'distinguished name is required' if dn.nil?
+          payload    = tuple_translation(tuple)
+
+          operations = payload.map { |attribute, value| [:replace, attribute, value] }
+
+          connection.modify(dn: dn, operations: operations)
+
           result = connection.modify(dn: dn, operations: operations)
+
           log(__callee__, dn)
-          result.success?
+
+          result.success? ? find_by_dn(dn) : false
+        end
+
+        # Find an entry by its RDN.
+        #
+        # @param dn [String]
+        #
+        # @return [Entity]
+        #
+        def find_by_dn(dn)
+          rdn = dn.split(',').first.split('=')
+          query(filter: [:op_eql, *rdn], max_results: 1).first
         end
 
         #
@@ -115,11 +138,33 @@ module ROM
         #
         # @api public
         def delete(dn)
-          raise OperationError, 'distinguished name is required' if dn.nil?
+          # raise OperationError, 'distinguished name is required' if dn.nil?
           result = connection.delete(dn: dn)
           log(__callee__, dn)
           result.success?
         end
+
+
+
+        # conn.modify(args)
+
+        # def add_attribute(dn, attribute, value)
+        #   modify(:dn => dn, :operations => [[:add, attribute, value]])
+        # end
+
+        # def delete_tree(args)
+        #    delete(args.merge(:control_codes => [[Net::LDAP::LDAPControls::DELETE_TREE, true]]))
+        # end
+
+        # def delete_attribute(dn, attribute)
+        #   modify(:dn => dn, :operations => [[:delete, attribute, nil]])
+        # end
+
+        # def replace_attribute(dn, attribute, value)
+        #   modify(:dn => dn, :operations => [[:replace, attribute, value]])
+        # end
+
+
 
         private
 
@@ -129,13 +174,29 @@ module ROM
           pageable? && max_results.nil?
         end
 
-        # map from :uid_number => 'uidNumber'
+        # Build transaltion hash
         #
+        # @return [Hash] { :uid_number => 'uidNumber' }
+        #
+        # TODO: move tuple_translation to a function and chain them
+        # OPTIMIZE: Functions[:to_tuple][tuple, attribute_types]
+        #
+        # @api private
         def tuple_translation(tuple)
           attributes = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
-          attributes.map { |a| a.values_at(:name, :original) }.to_h
+          trans = attributes.map { |a| a.values_at(:name, :original) }.to_h
+          LDAP::Functions[:rename_keys, trans][tuple.dup]
         end
 
+        # Export a query as a nested Expression.
+        # If the directory has loaded it passes the parsed directory attributes array
+        # to the function in order to map canonical attribute names to their LDAP originals.
+        #
+        # @param filter [String]
+        #
+        # @return [Expression]
+        #
+        # @api private
         def to_exp(filter)
           Functions[:to_exp][filter]
         end

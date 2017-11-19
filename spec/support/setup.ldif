@@ -11,38 +11,38 @@ version: 1
 #
 # Top Levels
 #
-dn: ou=users,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: users
+# dn: ou=users,dc=example,dc=com
+# objectClass: top
+# objectClass: organizationalUnit
+# ou: users
 
-dn: ou=groups,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: groups
+# dn: ou=groups,dc=example,dc=com
+# objectClass: top
+# objectClass: organizationalUnit
+# ou: groups
 
 #
 # Groups
 #
-dn: cn=empty,ou=groups,dc=example,dc=com
-cn: Empty Group
-objectClass: top
-objectClass: posixGroup
-gidNumber: 9997
+# dn: cn=empty,ou=groups,dc=example,dc=com
+# cn: Empty Group
+# objectClass: top
+# objectClass: posixGroup
+# gidNumber: 9997
 
-# 10 'test' customers below are members
-dn: cn=customers,ou=groups,dc=example,dc=com
-cn: Test Customers
-objectClass: top
-objectClass: posixGroup
-gidNumber: 9998
+# # 10 'test' customers below are members
+# dn: cn=customers,ou=groups,dc=example,dc=com
+# cn: Test Customers
+# objectClass: top
+# objectClass: posixGroup
+# gidNumber: 9998
 
-# static group available for generated users
-dn: cn=staff,ou=groups,dc=example,dc=com
-cn: Factory Staff
-objectClass: top
-objectClass: posixGroup
-gidNumber: 9999
+# # static group available for generated users
+# dn: cn=staff,ou=groups,dc=example,dc=com
+# cn: Factory Staff
+# objectClass: top
+# objectClass: posixGroup
+# gidNumber: 9999
 
 
 #
@@ -237,17 +237,17 @@ uidNumber: 10
 
 
 
-dn: cn=user_group,ou=groups,dc=example,dc=com
-cn: user_group
-objectClass: groupOfNames
-member: uid=test1,ou=users,dc=example,dc=com
-member: uid=test2,ou=users,dc=example,dc=com
-member: uid=test3,ou=users,dc=example,dc=com
-member: uid=test4,ou=users,dc=example,dc=com
-member: uid=test5,ou=users,dc=example,dc=com
-member: uid=test6,ou=users,dc=example,dc=com
-member: uid=test7,ou=users,dc=example,dc=com
-member: uid=test8,ou=users,dc=example,dc=com
-member: uid=test9,ou=users,dc=example,dc=com
-member: uid=test10,ou=users,dc=example,dc=com
+# dn: cn=user_group,ou=groups,dc=example,dc=com
+# cn: user_group
+# objectClass: groupOfNames
+# member: uid=test1,ou=users,dc=example,dc=com
+# member: uid=test2,ou=users,dc=example,dc=com
+# member: uid=test3,ou=users,dc=example,dc=com
+# member: uid=test4,ou=users,dc=example,dc=com
+# member: uid=test5,ou=users,dc=example,dc=com
+# member: uid=test6,ou=users,dc=example,dc=com
+# member: uid=test7,ou=users,dc=example,dc=com
+# member: uid=test8,ou=users,dc=example,dc=com
+# member: uid=test9,ou=users,dc=example,dc=com
+# member: uid=test10,ou=users,dc=example,dc=com
 

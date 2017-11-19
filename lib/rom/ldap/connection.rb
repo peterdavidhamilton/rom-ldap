@@ -34,6 +34,16 @@ module ROM
       # TODO: NetTCP timeout in here
       # socket_read(length, buffer, timeout)
 
+
+      # Map and reraise Net::TCPClient errors.
+      #
+      # @api private
+      def socket_write(*)
+        super
+      rescue *ERROR_MAP.keys => e
+        raise ERROR_MAP.fetch(e.class, Error), e
+      end
+
       # @api private
       def ldap_read(syntax = ::BER::ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)

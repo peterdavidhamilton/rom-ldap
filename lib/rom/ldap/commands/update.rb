@@ -20,6 +20,8 @@ module ROM
 
         private
 
+        # @param tuples [Array<Hash>] update entries returned by directory
+        #
         def finalize(tuples, *)
           tuples.map { |t| relation.output_schema[t] }
         end

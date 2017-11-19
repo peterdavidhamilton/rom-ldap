@@ -5,8 +5,9 @@ module ROM
   module LDAP
     include Dry::Core::Constants
 
-    WILDCARD = '*'.freeze
-    NEW_LINE = "\n".freeze
+    WILDCARD   = '*'.freeze
+    NEW_LINE   = "\n".freeze
+    EMPTY_BASE = EMPTY_STRING
 
     CONSTRUCTORS = {
       con_and: '&', # intersection
@@ -20,7 +21,7 @@ module ROM
       op_ext: ':=',
       op_gte: '>=',
       op_lte: '<=',
-      op_eq:  '='
+      op_eql: '='
     }.freeze
 
     VALUES = {
@@ -62,6 +63,27 @@ module ROM
     OP_REGEX      = Regexp.union(*OPERATORS.values)
     BRANCH_REGEX  = Regexp.union(OR_REGEX, AND_REGEX)
 
+
+    #
+    # Type Builder
+    #
+    STRING_MATCHERS = %w[
+      caseExactIA5Match
+      caseExactMatch
+      caseIgnoreIA5Match
+      caseIgnoreListMatch
+      caseIgnoreMatch
+      distinguishedNameMatch
+      numericStringMatch
+      numericStringOrderingMatch
+      numericStringSubstringsMatch
+      objectIdentifierMatch
+      octetStringMatch
+      protocolInformationMatch
+      telephoneNumberMatch
+      telephoneNumberSubstringsMatch
+    ].freeze
+
     #
     # Schema files
     #
@@ -84,12 +106,10 @@ module ROM
     SCOPE_SINGLE_LEVEL = 1
     SCOPE_SUBTREE      = 2
 
-    EMPTY_BASE = EMPTY_STRING
-
     SCOPES = [SCOPE_BASE_OBJECT, SCOPE_SINGLE_LEVEL, SCOPE_SUBTREE].freeze
 
     #
-    # Aliase Dereferencing
+    # Alias Dereferencing
     #
     DEREF_NEVER  = 0
     DEREF_SEARCH = 1
@@ -97,6 +117,11 @@ module ROM
     DEREF_ALWAYS = 3
 
     DEREF_ALL = [DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS].freeze
+
+    #
+    # Operation Tokens
+    #
+    MODIFY_OPERATIONS = { add: 0, delete: 1, replace: 2 }.freeze
 
     #
     # Root DSE (DSA-specific entry) - attributes for all implementations

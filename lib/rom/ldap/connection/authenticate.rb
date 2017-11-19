@@ -7,6 +7,8 @@ module ROM
       #
       # @option :password
       #
+      # @option :version [Integer] Defaults to 3.
+      #
       # @option :method [Symbol] Defaults to simple.
       #
       # @api public
@@ -32,21 +34,7 @@ module ROM
         pdu
       end
 
-      # @option :filter [String] Should identify a single entity.
-      #   Filtering by DN is recommended.
-      #
-      # @option :password [String]
-      #
-      # @return [Boolean] True if password matches first result.
-      #
-      # @api public
-      def bind_as(filter:, password:)
-        if entity = search(filter: filter, size: 1).first
-          password = password.call if password.respond_to?(:call)
 
-          bind(username: entity.dn, password: password) # ? entity : false
-        end
-      end
 
       # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)
       #   case method

@@ -59,17 +59,17 @@ module ROM
         alias ldap_controls   controls
 
         def inspect
-          %(<##{self.class}
-            type=#{pdu_type}
+          %(#<#{self.class}
+            type="#{pdu_type}"
             result_code=#{result_code}
-            message=#{message}
-            info=#{info}
+            message="#{message}"
+            info="#{info}"
             success?=#{success?}
             referral?=#{referral?}
             failure?=#{failure?}
-            error_message=#{error_message}
-            matched_dn=#{matched_dn}
-            bind_as=#{bind_parameters}
+            error_message="#{error_message}"
+            matched_dn="#{matched_dn}"
+            bind_as="#{bind_parameters}"
             >
           )
         end

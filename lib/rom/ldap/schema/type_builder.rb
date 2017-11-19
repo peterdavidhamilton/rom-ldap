@@ -69,38 +69,25 @@ module ROM
             name:         attribute_name,
             source:       schema,
             multiple:     multiple,
-            description:  attribute[:description],
-            matcher:      attribute[:matcher],
-            oid:          attribute[:oid],
-            read:         read_type
+            read:         read_type,
+            **attribute.slice(:description, :original, :matcher, :oid)
           )
         end
 
         private
 
+        # OPTIMIZE: used repeatedly so move to a function
+        # Select the attribute whose formatted name matches the attribute name.
+        #
+        # @param name [Symbol, String]
+        #
         # @return [Hash]
         #
         # @api private
-        def by_name(name)
-          attributes.select { |a| a[:name].downcase.eql?(name) }.first
+        def by_name(attribute_name)
+          attributes.select { |a| a[:name] == attribute_name }.first
+          # LDAP::Functions[:lookup].call(attributes, attribute_name)
         end
-
-        STRING_MATCHERS = %w[
-          caseExactIA5Match
-          caseExactMatch
-          caseIgnoreIA5Match
-          caseIgnoreListMatch
-          caseIgnoreMatch
-          distinguishedNameMatch
-          numericStringMatch
-          numericStringOrderingMatch
-          numericStringSubstringsMatch
-          objectIdentifierMatch
-          octetStringMatch
-          protocolInformationMatch
-          telephoneNumberMatch
-          telephoneNumberSubstringsMatch
-        ].freeze
 
         # @return [String]
         #

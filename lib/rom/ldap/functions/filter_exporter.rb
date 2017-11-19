@@ -29,13 +29,14 @@ module ROM
         # @return [String]
         #
         # @example
-        #   => [:op_eq, 'uidNumber', :wildcard]
+        #   => [:op_eql, 'uidNumber', :wildcard]
         #
         # @api private
         def parse_expression(ast)
-          op, attribute, val = ast
-          operator = id_operator(op)
-          value    = id_value(val)
+          op, attr, val = ast
+          operator  = id_operator(op)
+          value     = id_value(val)
+          attribute = id_attribute(attr)
 
           wrap(attribute, operator, value)
         end
@@ -45,12 +46,12 @@ module ROM
         # @return [String]
         #
         # @example
-        #   => [:con_not, [:op_eq, 'uidNumber', :wildcard]]
+        #   => [:con_not, [:op_eql, 'uidNumber', :wildcard]]
         #   => [
         #         :con_and,
         #         [
-        #           [:op_eq, 'uidNumber', :wildcard],
-        #           [:op_eq, 'registered', true]
+        #           [:op_eql, 'uidNumber', :wildcard],
+        #           [:op_eql, 'registered', true]
         #         ]
         #      ]
         #

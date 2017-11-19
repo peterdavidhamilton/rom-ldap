@@ -13,12 +13,12 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
             :con_or,
             [
               [:op_prx, 'cn', 'John'],
-              [:op_eq, 'sn', 'Smith']
+              [:op_eql, 'sn', 'Smith']
             ]
           ],
           [
             :con_not,
-            [:op_eq, 'uid', :wildcard]
+            [:op_eql, 'uid', :wildcard]
           ]
         ]
       ]
@@ -34,7 +34,7 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
         :con_and,
         [
           [:op_prx, 'gn', 'Peter'],
-          [:op_eq, 'sn', 'Hamilton'],
+          [:op_eql, 'sn', 'Hamilton'],
         ]
       ]
     )
@@ -54,7 +54,7 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
         :con_or,
         [
           [:op_prx, 'cn', 'Peter Hamilton'],
-          [:op_eq, 'mail', :wildcard],
+          [:op_eql, 'mail', :wildcard],
           [:op_gte, 'uid', 500],
         ]
       ]
@@ -70,7 +70,7 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
     end
 
     it 'equals' do
-      ast = exporter.call([:op_eq, 'mail', '*@peterdavidhamilton.com'])
+      ast = exporter.call([:op_eql, 'mail', '*@peterdavidhamilton.com'])
       expect(ast).to eql('(mail=*@peterdavidhamilton.com)')
     end
 

@@ -29,15 +29,15 @@ module ROM
 
       def to_raw_rfc2254
         case op
-        when :con_not then       "!(#{left}=#{right})"
-        when :op_eq, :bineq then "#{left}=#{right}"
-        when :op_ext  then       "#{left}:=#{right}"
-        when :op_prx  then       "#{left}~=#{right}"
-        when :op_gte  then       "#{left}>=#{right}"
-        when :op_lte  then       "#{left}<=#{right}"
-        when :con_and then       "&(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
-        when :con_or  then       "|(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
-        when :con_not then       "!(#{left.to_raw_rfc2254})"
+        when :con_not then        "!(#{left}=#{right})"
+        when :op_eql, :bineq then "#{left}=#{right}"
+        when :op_ext  then        "#{left}:=#{right}"
+        when :op_prx  then        "#{left}~=#{right}"
+        when :op_gte  then        "#{left}>=#{right}"
+        when :op_lte  then        "#{left}<=#{right}"
+        when :con_and then        "&(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
+        when :con_or  then        "|(#{left.to_raw_rfc2254})(#{right.to_raw_rfc2254})"
+        when :con_not then        "!(#{left.to_raw_rfc2254})"
         end
       end
 
@@ -61,7 +61,7 @@ module ROM
         binding.pry
 
         case op
-        when :op_eq
+        when :op_eql
           if right == WILDCARD
             yield(:present, left)
           elsif right.index WILDCARD
@@ -107,7 +107,7 @@ module ROM
       # @api private
       def match(entry)
         case op
-        when :op_eq
+        when :op_eql
           if right == WILDCARD
             binding.pry
             # (l = entry[left]) && !l.empty?

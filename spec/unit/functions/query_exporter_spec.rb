@@ -13,7 +13,7 @@ RSpec.describe ROM::LDAP::Functions::QueryExporter do
         [
           :con_and,
           [
-            [:op_eq, 'objectclass', 'person'],
+            [:op_eql, 'objectclass', 'person'],
             [:op_gte, 'uidnumber', '34'],
             [:op_prx,  'mail', '*@example.com']
           ]
@@ -34,10 +34,10 @@ RSpec.describe ROM::LDAP::Functions::QueryExporter do
           [
             :con_and,
             [
-              [:op_eq, 'objectclass', 'person'],
+              [:op_eql, 'objectclass', 'person'],
               [:op_lte, 'uidnumber', '2'],
-              [:op_eq, 'sn', 'hamilton'],
-              [:op_eq, 'givenname', 'peter']
+              [:op_eql, 'sn', 'hamilton'],
+              [:op_eql, 'givenname', 'peter']
             ]
           ]
         ]
@@ -77,8 +77,8 @@ RSpec.describe ROM::LDAP::Functions::QueryExporter do
         [
           :con_or,
           [
-            [:op_eq, 'uidnumber', :wildcard],
-            [:op_eq, 'mail',      :wildcard]
+            [:op_eql, 'uidnumber', :wildcard],
+            [:op_eql, 'mail',      :wildcard]
           ]
         ]
       )
@@ -95,9 +95,9 @@ RSpec.describe ROM::LDAP::Functions::QueryExporter do
         [
           :con_and,
           [
-            [:op_eq, 'objectclass', 'person'],
-            [:op_eq, 'uidnumber',   :wildcard],
-            [:op_eq, 'blocked',     true]
+            [:op_eql, 'objectclass', 'person'],
+            [:op_eql, 'uidnumber',   :wildcard],
+            [:op_eql, 'blocked',     true]
           ]
         ]
       )
@@ -111,13 +111,13 @@ RSpec.describe ROM::LDAP::Functions::QueryExporter do
       ast = exporter.call(string).to_s
 
       expect(ast).to eql(
-        "[:con_and, [[:con_or, [[:op_prx, \"cn\", \"John\"], [:op_eq, \"sn\", \"Smith\"]]], [:con_not, [:op_eq, \"uid\", :wildcard]]]]"
+        "[:con_and, [[:con_or, [[:op_prx, \"cn\", \"John\"], [:op_eql, \"sn\", \"Smith\"]]], [:con_not, [:op_eql, \"uid\", :wildcard]]]]"
 
         # [
         #   :con_and,
         #   [
-        #     [:con_or,  [[:op_prx, 'cn', 'John'], [:op_eq, 'sn', 'Smith']]],
-        #     [:con_not, [:op_eq, 'uid', :wildcard]]
+        #     [:con_or,  [[:op_prx, 'cn', 'John'], [:op_eql, 'sn', 'Smith']]],
+        #     [:con_not, [:op_eql, 'uid', :wildcard]]
         #   ]
         # ]
       )

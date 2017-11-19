@@ -128,7 +128,8 @@ module ROM
             server:           server[:server],
             connect_timeout:  options[:timeout],
             read_timeout:     options[:timeout],
-            write_timeout:    options[:timeout]
+            write_timeout:    options[:timeout],
+            close_on_error:   false
             # on_connect: proc {}
             # proxy_server:
           )

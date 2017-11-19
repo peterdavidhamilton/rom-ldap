@@ -59,7 +59,7 @@ module ROM
         def call
           case op
 
-          when :op_eq
+          when :op_eql
             if right == WILDCARD
               left.to_s.to_ber_contextspecific(7)
 

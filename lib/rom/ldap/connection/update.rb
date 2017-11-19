@@ -68,11 +68,9 @@ module ROM
 
       private
 
-      MODIFY_OPERATIONS = { add: 0, delete: 1, replace: 2 }.freeze
-
       def modify_ops(operations = EMPTY_ARRAY)
         operations.each_with_object([]) do |(op, attr, values), ops|
-          op_ber = MODIFY_OPERATIONS[op.to_sym].to_ber_enumerated
+          op_ber = MODIFY_OPERATIONS[op].to_ber_enumerated
 
           values = [values].flat_map { |v| v&.to_ber }.to_ber_set
 

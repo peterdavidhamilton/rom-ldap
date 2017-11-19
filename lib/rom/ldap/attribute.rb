@@ -21,6 +21,13 @@ module ROM
         meta[:oid]
       end
 
+      # The attrbiute name as it appears in the server's schema.
+      #
+      # @return [String]
+      def original_name
+        meta[:original]
+      end
+
       #
       # @return [LDAP::Attribute]
       #

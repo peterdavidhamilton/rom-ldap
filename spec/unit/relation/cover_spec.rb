@@ -17,8 +17,7 @@ RSpec.describe ROM::LDAP::Relation do
     let(:relation) { relations[:people].within(uniqueidentifier: 3..9) }
 
     it 'source filter' do
-      # relation.search('ting=ting')
-      expect(relation.source).to eql('(&(objectclass=person)(gidnumber=1))')
+      expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
     end
 
     it 'chained criteria' do
@@ -30,8 +29,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_eq, 'objectclass', 'person'],
-                [:op_eq, 'gidnumber', '1']
+                [:op_eql, 'objectClass', 'person'],
+                [:op_eql, 'gidNumber', '1']
               ]
             ],
             # criteria
@@ -49,7 +48,7 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectclass=person)(gidnumber=1))(&(uniqueidentifier>=3)(uniqueidentifier<=9)))'
+        '(&(&(objectClass=person)(gidNumber=1))(&(uniqueIdentifier>=3)(uniqueIdentifier<=9)))'
       )
     end
 
@@ -64,7 +63,7 @@ RSpec.describe ROM::LDAP::Relation do
     let(:relation) { relations[:people].between(uniqueidentifier: -1..12) }
 
     it 'source filter' do
-      expect(relation.source).to eql('(&(objectclass=person)(gidnumber=1))')
+      expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
     end
 
     it 'chained criteria' do
@@ -76,8 +75,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_eq, 'objectclass', 'person'],
-                [:op_eq, 'gidnumber', '1']
+                [:op_eql, 'objectClass', 'person'],
+                [:op_eql, 'gidNumber', '1']
               ]
             ],
             # criteria
@@ -95,7 +94,7 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectclass=person)(gidnumber=1))(&(uniqueidentifier>=-1)(uniqueidentifier<=12)))'
+        '(&(&(objectClass=person)(gidNumber=1))(&(uniqueIdentifier>=-1)(uniqueIdentifier<=12)))'
       )
     end
 
@@ -110,7 +109,7 @@ RSpec.describe ROM::LDAP::Relation do
     let(:relation) { relations[:people].between(uniqueidentifier: 30..100) }
 
     it 'source filter' do
-      expect(relation.source).to eql('(&(objectclass=person)(gidnumber=1))')
+      expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
     end
 
     it 'chained criteria' do
@@ -122,8 +121,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_eq, 'objectclass', 'person'],
-                [:op_eq, 'gidnumber', '1']
+                [:op_eql, 'objectClass', 'person'],
+                [:op_eql, 'gidNumber', '1']
               ]
             ],
             # criteria
@@ -141,7 +140,7 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectclass=person)(gidnumber=1))(&(uniqueidentifier>=30)(uniqueidentifier<=100)))'
+        '(&(&(objectClass=person)(gidNumber=1))(&(uniqueIdentifier>=30)(uniqueIdentifier<=100)))'
       )
     end
 
