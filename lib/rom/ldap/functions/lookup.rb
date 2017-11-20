@@ -10,11 +10,9 @@ module ROM
       # @return [String] original attribute name used on server.
       #
       # # @api private
-      def id_attribute(attribute_name)
-        attribute = LDAP::Functions[:find_attr].call(attribute_name)
-        attribute.fetch(:original, attribute_name)
+      def id_attribute(attr_name)
+        Functions[:find_attr].call(attr_name).fetch(:original, attr_name)
       end
-
 
 
       # @param val [Symbol,String]

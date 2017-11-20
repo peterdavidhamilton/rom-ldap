@@ -11,16 +11,6 @@ module ROM
     class Relation < ROM::Relation
       adapter :ldap
 
-      # struct_namespace LDAP:Struct
-
-      defines :base
-      defines :users
-      defines :groups
-
-      users '(&(objectclass=person)(uid=*))'.freeze
-      # users '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
-      groups '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
-
       include LDAP
       include Reading
       include Writing
@@ -43,6 +33,20 @@ module ROM
         event[:dataset].opts[:filter]
       end
 
+      #
+      # LDAP specific class attributes.
+      #
+
+      defines :base
+      defines :branches
+      defines :groups
+      defines :users
+
+      branches EMPTY_HASH
+      groups   '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
+      users    '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
+
+      # struct_namespace LDAP:Struct
       schema_class      Schema
       schema_attr_class Attribute
       schema_inferrer   Schema::Inferrer.new.freeze
@@ -107,13 +111,6 @@ module ROM
       # @api public
       def assoc(name)
         associations[name].call
-      end
-
-      # Compliments #root method with an alternative search base
-      #
-      # @api public
-      def branch
-        base(self.class.base)
       end
 
       def project(*names)

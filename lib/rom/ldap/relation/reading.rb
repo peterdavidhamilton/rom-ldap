@@ -2,6 +2,26 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
+        # Specify an alternative search base for the dataset or resets it.
+        #
+        # @example
+        #   relation.base("cn=department,ou=users,dc=org")
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def base(alt_base = self.class.base)
+          new(dataset.search_base(alt_base))
+        end
+
+        # Compliments #root method with an alternative search base
+        #
+        # @param key [Symbol]
+        #
+        # @api public
+        def branch(key)
+          base(self.class.branches[key])
+        end
 
         # Standard directory query. Supersede criteria with the given filter string.
         #
@@ -146,18 +166,6 @@ module ROM
         # @api public
         def last
           dataset.reverse_each.first
-        end
-
-        # Specify an alternative search base for the dataset.
-        #
-        # @example
-        #   relation.base("cn=department,ou=users,dc=org")
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def base(alt_base)
-          new(dataset.search_base(alt_base))
         end
 
         # Orders the dataset by a given attribute

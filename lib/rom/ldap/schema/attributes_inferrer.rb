@@ -1,5 +1,4 @@
 require 'rom/initializer'
-require 'dry/core/cache'
 require 'rom/ldap/schema/type_builder'
 
 module ROM
@@ -8,14 +7,12 @@ module ROM
       # @api private
       class AttributesInferrer
         extend Initializer
-        extend Dry::Core::Cache
 
         option :attr_class, optional: true
 
         # @api private
         def call(schema, gateway)
-          attributes    = directory_attributes(gateway)
-          type_builder  = TypeBuilder.new(attributes)
+          type_builder  = TypeBuilder.new
           dataset       = schema.name.dataset
           columns       = dataset_attributes(gateway, dataset)
 
@@ -46,15 +43,7 @@ module ROM
         #
         # @api private
         def dataset_attributes(gateway, dataset)
-          fetch_or_store(gateway, dataset) do
-            gateway[dataset].flat_map(&:attribute_names).uniq.sort
-          end
-        end
-
-        def directory_attributes(gateway)
-          fetch_or_store(gateway, 'types') do
-            gateway.attribute_types
-          end
+          gateway[dataset].flat_map(&:attribute_names).uniq.sort
         end
       end
     end

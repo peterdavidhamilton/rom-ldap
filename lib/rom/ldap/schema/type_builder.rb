@@ -42,20 +42,15 @@ module ROM
       #
       # @see <https://docs.oracle.com/cd/E19450-01/820-6173/def-attribute-type.html>
       #
-      # @param attributes [Array<Hash>]
-      #
       # @api private
       class TypeBuilder
-        extend Initializer
-
-        param :attributes
 
         # @param attribute_name [String, Symbol]
         #
         # @param schema [Schema] Relation schema object.
         #
         def call(attribute_name, schema)
-          attribute = by_name(attribute_name) || EMPTY_HASH
+          attribute = Functions[:find_attr].call(attribute_name)
           multiple  = !attribute[:single]
           primitive = map_type(attribute)
           ruby_type = Types.const_get(primitive)
@@ -75,19 +70,6 @@ module ROM
         end
 
         private
-
-        # OPTIMIZE: used repeatedly so move to a function
-        # Select the attribute whose formatted name matches the attribute name.
-        #
-        # @param name [Symbol, String]
-        #
-        # @return [Hash]
-        #
-        # @api private
-        def by_name(attribute_name)
-          attributes.select { |a| a[:name] == attribute_name }.first
-          # LDAP::Functions[:lookup].call(attributes, attribute_name)
-        end
 
         # Hash#slice alternative, will be available from Ruby release 2.5.0.
         #

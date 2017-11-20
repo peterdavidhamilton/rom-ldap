@@ -14,27 +14,15 @@ module ROM
       import Transproc::ArrayTransformations
       import Transproc::HashTransformations
 
-
-
-
-      unless defined? @@attribute_list
-        @@attribute_list = EMPTY_ARRAY
-      end
-
-      def self.attribute_list=(list)
-        @@attribute_list = list
-      end
-
-      def self.attribute_list
-        @@attribute_list
-      end
-
-
       def self.find_attr(attr_name)
-        attribute_list.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
+        list =  if contain?(:attribute_list)
+                  t(:attribute_list).call
+                else
+                  EMPTY_ARRAY
+                end
+
+        list.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
       end
-
-
 
       def self.string_input(attribute)
         case attribute

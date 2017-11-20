@@ -34,7 +34,7 @@ module ROM
 
       param :connection
 
-      option :base #,        default: -> { self.class.default_base }
+      option :base
       option :timeout,     default: -> { 30 }
       option :max_results, default: -> { 1_000_000 }
       option :logger,      default: -> { ::Logger.new(STDOUT) }
@@ -88,19 +88,15 @@ module ROM
       #
       # @api public
       def attribute_types
-        types = schema_attribute_types.flat_map(&method(:parse_attribute_type))
-        list  = types.flatten.reject(&:nil?).sort_by(&:first).freeze
-        Functions.attribute_list = list
-        @loaded = true
-        list
-      end
-
-
-      # Switch used to check if root has been loaded.
-      # Otherwise to_exp function loops.
-      #
-      def loaded?
-        !!@loaded
+        if Functions.contain?(:attribute_list)
+          Functions[:attribute_list].call
+        else
+          Functions.register :attribute_list, -> do
+            types = schema_attribute_types.flat_map(&method(:parse_attribute_type))
+            types.flatten.reject(&:nil?).sort_by(&:first).freeze
+          end
+          Functions[:attribute_list].call
+        end
       end
 
       private
@@ -153,7 +149,7 @@ module ROM
         end
       end
 
-      memoize :root, :sub_schema, :attribute_types
+      memoize :root, :sub_schema
     end
   end
 end
