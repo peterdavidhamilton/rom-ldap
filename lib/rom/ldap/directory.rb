@@ -57,24 +57,39 @@ module ROM
         [vendor_name, vendor_version]
       end
 
+      # If fail_on_error => true, this reopens the connection
       #
-      #
-      # def reconnect
-      #   connection.connect
-      # end
+      # @api public
+      def reconnect
+        connection.connect
+      end
 
 
       # Directory attributes identifiers and descriptions.
-      # Memoised.
+      # NB: push attributes in to the function module
       # Marks directory as loaded once attrs are cached.
       #
       # @return [Array<Hash>]
+      #
+      # @example
+      #   [{
+      #            :name => "cn",
+      #        :original => "cn",
+      #     :description => "RFC2256: common name(s) for which the entity is known by",
+      #             :oid => "1.3.6.1.4.1.1466.115.121.1.15",
+      #         :matcher => "caseIgnoreMatch",
+      #          :substr => "caseIgnoreSubstringsMatch",
+      #        :ordering => nil,
+      #          :single => false,
+      #      :modifiable => false,
+      #           :usage => "userApplications",
+      #          :source => "system"
+      #   }]
       #
       # @api public
       def attribute_types
         types = schema_attribute_types.flat_map(&method(:parse_attribute_type))
         list  = types.flatten.reject(&:nil?).sort_by(&:first).freeze
-        # NB: push attributes in to the function module
         Functions.attribute_list = list
         @loaded = true
         list

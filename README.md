@@ -1,5 +1,11 @@
 # ROM LDAP Adapter
 
+## Introduction
+
+ROM-LDAP is an adapter for LDAP directories and provides a convenient query interface,
+type coercion and operational commands. Internally it uses ldap-ber which is a rewrite of
+core code from the net-ldap gem and a refactored version of net-ldap connection class.
+
 ## Test Options
 
 - *host:* '127.0.0.1'
@@ -37,4 +43,7 @@ Server Implementations:
 
 ## TODO
 
-- add instrumentation to connection/dsl/api classes
+- Make test suite more fun with custom data and schemas.
+- Add missing specs, clone from rom-sql.
+- Fix gte and lte operations.
+- Tidy functions to employ chaining more methods.
