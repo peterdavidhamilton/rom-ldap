@@ -1,0 +1,108 @@
+version: 1
+
+#########################################################
+# @see https://en.wikipedia.org/wiki/International_Code_of_Zoological_Nomenclature
+#
+# attributeTypes: species, genus, family, order
+# objectClasses:  reptilia, aves, mammalia
+#########################################################
+
+# Species - mandatory for all zoological classes
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1001,ou=attributeTypes,cn=other,ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-description: The species of the animal
+m-equality: caseIgnoreMatch
+m-name: species
+# caseExactMatch
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1001
+
+# Genus - optional
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1002,ou=attributeTypes,cn=other,ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-description: The genus of the animal
+m-equality: caseIgnoreMatch
+m-name: genus
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1002
+
+# Family - optional
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1003,ou=attributeTypes,cn=other,ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-description: The family of the animal
+m-equality: caseIgnoreMatch
+m-name: family
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1003
+
+# Order - optional
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1004,ou=attributeTypes,cn=other,ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-description: The order of the animal
+m-equality: caseIgnoreMatch
+m-name: order
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1004
+
+
+#########################################################
+#
+# Object Classes
+#
+#########################################################
+
+# Reptilia - reptiles - 1001
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1001,ou=objectClasses,cn=other,ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Reptiles
+m-may: cn
+m-must: species
+m-supobjectclass: top
+m-name: reptilia
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1001
+m-typeobjectclass: STRUCTURAL
+
+# Aves - birds - 1002
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1002,ou=objectClasses,cn=other,ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Birds
+m-may: cn
+m-must: species
+m-supobjectclass: top
+m-name: aves
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1002
+m-typeobjectclass: STRUCTURAL
+
+# Mammalia - mammals - 1003
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1003,ou=objectClasses,cn=other,ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Mammals
+m-may: cn
+m-must: species
+m-supobjectclass: top
+m-name: mammalia
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1003
+m-typeobjectclass: STRUCTURAL
+

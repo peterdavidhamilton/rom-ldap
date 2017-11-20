@@ -9,8 +9,8 @@ GIT
 
 GIT
   remote: bb:rom-ldap
-  revision: 2bf465d7f923946020c69fbe739875fa49126928
-  branch: feature/ast
+  revision: e7f5dd372cdddb830803cbe463257954b67f4408
+  branch: develop
   specs:
     rom-ldap (0.0.7)
       dry-core (~> 0.3)
@@ -36,7 +36,7 @@ GEM
     dry-core (0.4.1)
       concurrent-ruby (~> 1.0)
     dry-equalizer (0.2.0)
-    dry-inflector (0.1.0)
+    dry-inflector (0.1.1)
     dry-initializer (2.3.0)
     dry-logic (0.4.2)
       dry-container (~> 0.2, >= 0.2.6)

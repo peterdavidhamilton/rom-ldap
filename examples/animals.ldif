@@ -1,0 +1,65 @@
+version: 1
+
+#########################################################
+#
+# Organisational Units
+#
+#########################################################
+
+dn: ou=animals,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: animals
+
+dn: ou=groups,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+#########################################################
+#
+# Animals
+#
+#########################################################
+
+dn: cn=Red Fox,ou=animals,dc=example,dc=com
+cn: Red Fox
+species: Vulpes vulpes
+genus: Vulpes
+family: Canidae
+order: Carnivora
+objectClass: mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 12345
+
+dn: cn=American Robin,ou=animals,dc=example,dc=com
+cn: American Robin
+species: Turdus migratorius
+genus: Turdus
+family: Turdidae
+order: Passeriformes
+objectClass: aves
+objectClass: extensibleObject
+objectClass: top
+populationCount: 12345
+
+#########################################################
+#
+# Animal Groups
+#
+#########################################################
+
+dn: cn=wild,ou=groups,dc=example,dc=com
+cn: Wild Animals
+gidNumber: 0001
+objectClass: groupOfNames
+member: cn=Red Fox,ou=animals,dc=example,dc=com
+member: cn=American Robin,ou=animals,dc=example,dc=com
+
+dn: cn=domestic,ou=groups,dc=example,dc=com
+cn: Domesticated Animals
+gidNumber: 0002
+objectClass: groupOfNames
+# member:
+

@@ -4,5 +4,5 @@ gem 'pry',        platforms: %i[jruby rbx]
 gem 'pry-byebug', platforms: :mri
 gem 'net-ldap'
 gem 'ldap-ber', git: 'bb:ldap-ber', branch: 'develop'
-gem 'rom-ldap', git: 'bb:rom-ldap', branch: 'feature/ast'
+gem 'rom-ldap', git: 'bb:rom-ldap', branch: 'develop'
 gem 'benchmark-ips'

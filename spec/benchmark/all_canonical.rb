@@ -15,7 +15,7 @@ Benchmark.ips do |bm|
   # Structs inferred and explicit
   #
   bm.report('rom-ldap inferred struct') do
-    binding.pry
+    # binding.pry
     @infer_struct.to_a
   end
 

@@ -1,6 +1,11 @@
 require_relative 'setup'
 
 # Comparison:
+# rom-ldap explicit hash:      485.0 i/s
+# rom-ldap inferred hash:      474.7 i/s - same-ish: difference falls within error
+#               net-ldap:      431.6 i/s - same-ish: difference falls within error
+
+# Comparison:
 # rom-ldap explicit hash:      477.1 i/s
 # rom-ldap inferred hash:      458.8 i/s - same-ish: difference falls within error
 #             net-ldap:        431.0 i/s - 1.11x  slower
