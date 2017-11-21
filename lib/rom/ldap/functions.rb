@@ -23,17 +23,40 @@ module ROM
         attrs.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
       end
 
-      # @param attribute [?]
+      # Build translated tuple
       #
-      # @return [String]
+      # @param tuple [Hash] input arguments for directory #add and #modify
+      #
+      # @return [Hash] Stringified hash
+      #   NB: Directory#add will receive a hash with key :dn
+      #
+      # @example
+      #   {
+      #      dn: 'uid=zippy,ou=users,dc=example,dc=com',
+      #      'apple-imhandle' => '@zippy',
+      #      'gidNumber' => '1',
+      #      'givenName' => 'Franz',
+      #   }
       #
       # @api public
-      def self.string_input(attribute)
-        case attribute
-        when Numeric    then attribute.to_s
-        when Enumerable then attribute.map(&:to_s)
-        when Hash       then attribute.to_json
-        when String     then attribute
+      def self.tuplify(tuple, matrix)
+        fn = t(:rename_keys, matrix) >> t(:map_values, t(:stringify))
+        fn.call(tuple)
+      end
+
+      # Ensure tuple values are strings
+      #
+      # @param value [Mixed]
+      #
+      # @return [String, Array<String>]
+      #
+      # @api public
+      def self.stringify(value)
+        case value
+        when Numeric    then value.to_s
+        when Enumerable then value.map(&:to_s)
+        when Hash       then value.to_json
+        when String     then value
         end
       end
 
@@ -69,13 +92,12 @@ module ROM
         Dry::Core::Inflector.underscore(value)
       end
 
+      # Function applied to Directory::Entity to format incoming attribute names.
+      #
+      # @api public
       def self.to_method_name(value)
         fn = t(:to_string) >> t(:to_underscore) >> t(:to_symbol)
         fn.call(value)
-      end
-
-      def self.coerce_tuple_in(tuple)
-        t(:map_values, t(:string_input)).call(tuple)
       end
 
       # 'filter' to 'query'

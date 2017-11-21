@@ -97,10 +97,8 @@ module ROM
         #
         # @api public
         def add(tuple)
-          payload = tuple_translation(tuple)
-
-          args    = Functions[:coerce_tuple_in][payload]
-          dn      = args.delete(:dn)
+          args = payload(tuple)
+          dn   = args.delete(:dn)
 
           raise OperationError, 'distinguished name is required' if dn.nil?
           result = connection.add(dn: dn, attrs: args)
@@ -117,11 +115,11 @@ module ROM
         #
         # @api public
         def modify(dn, tuple)
-          payload    = tuple_translation(tuple)
-          operations = payload.map { |attribute, value| [:replace, attribute, value] }
-          result     = connection.modify(dn: dn, ops: operations)
-          log(__callee__, dn)
+          args   = payload(tuple)
+          ops    = args.map { |attribute, value| [:replace, attribute, value] }
+          result = connection.modify(dn: dn, ops: ops)
 
+          log(__callee__, dn)
           result.success? ? by_dn(dn).first : false
         end
 
@@ -145,20 +143,12 @@ module ROM
           pageable? && max_results.nil?
         end
 
-        # Build transaltion hash
-        #
-        # @return [Hash] { :uid_number => 'uidNumber' }
-        #
-        # TODO: move tuple_translation to a function and chain them
-        # OPTIMIZE: Functions[:to_tuple][tuple, attribute_types]
-        #
-        # @api private
-        def tuple_translation(tuple)
-          attributes = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
-          trans = attributes.map { |a| a.values_at(:name, :original) }.to_h
-          Functions[:rename_keys, trans][tuple.dup]
-        end
+        def payload(tuple)
+          attributes  = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
+          transmatrix = attributes.map { |a| a.values_at(:name, :original) }.to_h
 
+          Functions[:tuplify].call(tuple.dup, transmatrix)
+        end
       end
     end
   end
