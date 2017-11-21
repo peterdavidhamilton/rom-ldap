@@ -15,6 +15,7 @@ module ROM
         end
 
         # Compliments #root method with an alternative search base
+        # selected from a class level hash.
         #
         # @param key [Symbol]
         #
@@ -73,15 +74,6 @@ module ROM
 
         # @return [Boolean]
         #
-        # @param key
-        #
-        # @api public
-        def include?(key)
-          dataset.include?(key)
-        end
-
-        # @return [Boolean]
-        #
         # @api public
         def one?
           dataset.one?
@@ -115,7 +107,11 @@ module ROM
         #
         # @return [Relation]
         def by_pk(pk)
-          where(primary_key => pk)
+          if primary_key == :dn
+            new(dataset.fetch(pk))
+          else
+            where(primary_key => pk)
+          end
         end
 
         # Fetch a tuple identified by the pk

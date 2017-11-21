@@ -39,6 +39,7 @@ module ROM
       option :max_results, default: -> { 1_000_000 }
       option :logger,      default: -> { ::Logger.new(STDOUT) }
 
+      attr_reader :result # PDU object
 
       # Dry::Monitor::Notifications.new(:app)
 

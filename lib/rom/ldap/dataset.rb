@@ -27,7 +27,7 @@ module ROM
       include Enumerable
       include Dry::Equalizer(:criteria)
 
-      param :directory, reader: :private
+      param :directory
 
       param :source,
         reader:   false,
@@ -92,6 +92,12 @@ module ROM
         results
       end
       alias [] call
+
+      # Find by Distinguished Name
+      #
+      def fetch(dn)
+        directory.by_dn(dn)
+      end
 
       # Mirror Sequel dataset behaviour for rom-sql relation compatibility.
       #
@@ -203,15 +209,6 @@ module ROM
       # @api public
       def total
         directory.base_total - 1
-      end
-
-      # @return [Boolean]
-      #
-      # @api public
-      def include?(key)
-        results = directory.include?(query, key)
-        reset!
-        results
       end
 
       # @param tuple [Hash]

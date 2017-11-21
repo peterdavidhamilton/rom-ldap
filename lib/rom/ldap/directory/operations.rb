@@ -22,7 +22,15 @@ module ROM
           set.sort_by(&:dn)
         end
 
-        attr_reader :result # PDU object
+        # Find an entry by its RDN.
+        #
+        # @param dn [String]
+        #
+        # @return [Entity]
+        #
+        def by_dn(dn)
+          query(base: dn, max_results: 1)
+        end
 
         # Query results as array of hashes ordered by Distinguished Name
         #
@@ -95,6 +103,7 @@ module ROM
           raise OperationError, 'distinguished name is required' if dn.nil?
           result = connection.add(dn: dn, attributes: args)
           log(__callee__, dn)
+
           result.success?
         end
 
@@ -106,29 +115,14 @@ module ROM
         #
         # @api public
         def modify(dn, tuple)
-          # raise OperationError, 'distinguished name is required' if dn.nil?
           payload    = tuple_translation(tuple)
-
           operations = payload.map { |attribute, value| [:replace, attribute, value] }
 
           connection.modify(dn: dn, operations: operations)
-
           result = connection.modify(dn: dn, operations: operations)
-
           log(__callee__, dn)
 
-          result.success? ? find_by_dn(dn) : false
-        end
-
-        # Find an entry by its RDN.
-        #
-        # @param dn [String]
-        #
-        # @return [Entity]
-        #
-        def find_by_dn(dn)
-          rdn = dn.split(',').first.split('=')
-          query(filter: [:op_eql, *rdn], max_results: 1).first
+          result.success? ? by_dn(dn).first : false
         end
 
         #
@@ -143,28 +137,6 @@ module ROM
           log(__callee__, dn)
           result.success?
         end
-
-
-
-        # conn.modify(args)
-
-        # def add_attribute(dn, attribute, value)
-        #   modify(:dn => dn, :operations => [[:add, attribute, value]])
-        # end
-
-        # def delete_tree(args)
-        #    delete(args.merge(:control_codes => [[Net::LDAP::LDAPControls::DELETE_TREE, true]]))
-        # end
-
-        # def delete_attribute(dn, attribute)
-        #   modify(:dn => dn, :operations => [[:delete, attribute, nil]])
-        # end
-
-        # def replace_attribute(dn, attribute, value)
-        #   modify(:dn => dn, :operations => [[:replace, attribute, value]])
-        # end
-
-
 
         private
 

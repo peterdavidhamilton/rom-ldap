@@ -59,7 +59,7 @@ module ROM
         if attribute
           attribute.alias || attribute.name
         else
-          :id
+          :dn
         end
       end
 

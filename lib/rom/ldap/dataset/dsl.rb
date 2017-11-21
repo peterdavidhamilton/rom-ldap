@@ -75,12 +75,10 @@ module ROM
         def begins(args)
           chain(*match_dsl(args, right: WILDCARD))
         end
-        # alias starts begins
 
         def ends(args)
           chain(*match_dsl(args, left: WILDCARD))
         end
-        # alias suffix ends
 
         def contains(args)
           chain(*match_dsl(args, left: WILDCARD, right: WILDCARD))
@@ -147,6 +145,7 @@ module ROM
         # @param args [Array]
         #
         # @options :left [String] prepended to value - used for wildcard
+        #
         # @options :right [String] appended to value - used for wildcard
         #
         # @return [Array]
