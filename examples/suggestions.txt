@@ -27,5 +27,4 @@ https://en.wikipedia.org/wiki/Starfish
 https://en.wikipedia.org/wiki/Platypus
 https://en.wikipedia.org/wiki/Duck
 
-https://en.wikipedia.org/wiki/Elephant
 https://en.wikipedia.org/wiki/Elephant_shrew

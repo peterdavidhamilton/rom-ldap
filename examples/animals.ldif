@@ -28,7 +28,7 @@ species: Homo sapiens
 genus: Homo
 family: Hominidae
 order: Primates
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 7582530942
@@ -39,7 +39,7 @@ species: Vulpes vulpes
 genus: Vulpes
 family: Canidae
 order: Carnivora
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -50,7 +50,7 @@ species: Turdus migratorius
 genus: Turdus
 family: Turdidae
 order: Passeriformes
-objectClass: Aves
+objectClass: aves
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -61,7 +61,7 @@ species: Equus zebra
 genus: Equus
 family: Equidae
 order: Perissodactyla
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -72,7 +72,7 @@ species: Testudo graeca
 genus: Testudo
 family: Testudinidae
 order: Testudines
-objectClass: Reptilia
+objectClass: reptilia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -83,7 +83,7 @@ species: Helarctos malayanus
 genus: Helarctos
 family: Ursidae
 order: Carnivora
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -94,7 +94,7 @@ species: Dendrobates tinctorius
 genus: Dendrobates
 family: Dendrobatidae
 order: Anura
-objectClass: Amphibia
+objectClass: amphibia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -105,7 +105,7 @@ species: Phoenicoparrus jamesi
 genus: Phoenicoparrus
 family: Phoenicopteridae
 order: Phoenicopteriformes
-objectClass: Aves
+objectClass: aves
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -116,7 +116,7 @@ species: Pongo borneo
 genus: Pongo
 family: Hominidae
 order: Primates
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -127,7 +127,7 @@ species: Felis silvestris
 genus: Felis
 family: Felidae
 order: Carnivora
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -138,7 +138,7 @@ species: Canis lupus
 genus: Canis
 family: Canidae
 order: Carnivora
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -149,7 +149,7 @@ species: Panthera leo
 genus: Panthera
 family: Felidae
 order: Carnivora
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
@@ -160,11 +160,23 @@ species: Ailuropoda melanoleuca
 genus: Ailuropoda
 family: Ursidae
 order: Carnivora
-objectClass: Mammalia
+objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
 # conservationStatus: 3.1
+
+dn: cn=Asian Elephant,ou=animals,dc=example,dc=com
+cn: Asian Elephant
+species: Elephas maximus
+genus: Elephas
+family: Elephantidae
+order: Proboscidea
+objectClass: mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
 
 #########################################################
 #

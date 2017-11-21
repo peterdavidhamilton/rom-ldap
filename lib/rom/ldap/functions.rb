@@ -23,7 +23,7 @@ module ROM
         attrs.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
       end
 
-      # Build translated tuple
+      # Build tuple from arguments. Translates keys into original schema names.
       #
       # @param tuple [Hash] input arguments for directory #add and #modify
       #

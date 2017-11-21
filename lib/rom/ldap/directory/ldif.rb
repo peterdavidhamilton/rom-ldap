@@ -24,11 +24,11 @@ module ROM
           Array(tuples).each do |t|
             t.sort.each do |key, values|
               values.each do |value|
-                ary << if value_is_binary?(value)
-                         "#{key}:: #{new_value(value)}"
-                       else
-                         "#{key}: #{value}"
-                       end
+                ary <<  if value_is_binary?(value)
+                          "#{key}:: #{new_value(value)}"
+                        else
+                          "#{key}: #{value}"
+                        end
               end
             end
             ary << NEW_LINE

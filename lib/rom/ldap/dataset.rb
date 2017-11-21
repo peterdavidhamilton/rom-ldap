@@ -1,6 +1,5 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/directory/ldif'
 require 'rom/ldap/dataset/dsl'
 
 module ROM
@@ -93,12 +92,6 @@ module ROM
       end
       alias [] call
 
-      # Find by Distinguished Name
-      #
-      def fetch(dn)
-        directory.by_dn(dn)
-      end
-
       # Mirror Sequel dataset behaviour for rom-sql relation compatibility.
       #
       # @example
@@ -148,7 +141,7 @@ module ROM
 
       # Initiate directory search and return some or all results before resetting criteria.
       #
-      # @return [Enumerator::Lazy, Array]
+      # @return [Enumerator::Lazy<Entity>, Array<Entity>]
       #
       # @api public
       def each(*args, &block)
@@ -211,6 +204,19 @@ module ROM
         directory.base_total - 1
       end
 
+      # Find by Distinguished Name
+      #
+      # @param dn [String]
+      #
+      # @return [Array<Entity>]
+      #
+      # @api public
+      def fetch(dn)
+        directory.by_dn(dn)
+      end
+
+      # Interface to Directory#add
+      #
       # @param tuple [Hash]
       #
       # @return [Boolean]
@@ -220,12 +226,18 @@ module ROM
         directory.add(tuple)
       end
 
+      # Interface to Directory#modify
+      #
+      # @param entries [Array<Entity>] Entries to modify received from command.
+      #
+      # @param tuple [Changeset, Hash] Modification params
       #
       # @api public
       def modify(entries, tuple)
         entries.map { |e| directory.modify(*e[:dn], tuple) }
       end
 
+      # Interface to Directory#delete
       #
       # @api public
       def delete(entries)
@@ -238,7 +250,9 @@ module ROM
       #
       # @api public
       def to_ldif
-        @ldif ||= Directory::LDIF.new(each).to_ldif #(comment: Time.now)
+# binding.pry
+#         each.map(&:to_ldif)
+        directory.to_ldif(each.to_a)
       end
 
       private

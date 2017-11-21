@@ -1,4 +1,4 @@
-require 'rom/ldap/directory/ldif'
+# require 'rom/ldap/directory/ldif'
 require 'rom/ldap/functions'
 
 module ROM
@@ -20,11 +20,11 @@ module ROM
             use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
           end
 
-          def from_ldif(ldif)
-            LDIF.read_ldif(ldif)
-          end
+          # def from_ldif(ldif)
+          #   LDIF.read_ldif(ldif)
+          # end
 
-          alias _load from_ldif
+          # alias _load from_ldif
         end
 
         extend ClassMethods
@@ -109,8 +109,8 @@ module ROM
           @source.hash
         end
 
-        def to_ldif(_ = nil)
-          LDIF.new(self).to_ldif(comment: Time.now)
+        def to_ldif
+          LDIF.new(@canonical).to_ldif(comment: Time.now)
         end
 
         def respond_to_missing?(*args)
@@ -126,7 +126,7 @@ module ROM
 
         private
 
-        alias _dump to_ldif
+        # alias _dump to_ldif
 
         def store_source(key, value)
           @source[key] = Array(value)

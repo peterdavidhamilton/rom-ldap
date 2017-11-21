@@ -66,10 +66,13 @@ animals   = container.relations[:animals]
 #
 # Example Relation Methods
 #
-binding.pry
+# binding.pry
+
+# pluck certain attributes
+animals.select(:cn, :object_class).to_a
 
 # grep the entity - matches within arrays
-animals.find(/Mammalia/).select(:cn, :object_class).to_a
+animals.where(objectclass: 'mammalia').find(/Homo/).count
 
 # return a single struct
 animals.with(auto_struct: true).where(cn: 'human').one.species
@@ -92,6 +95,7 @@ animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 # animals.pets.page(1).search('(cn=*house*)').first
 # animals.pets.page(2).pager
 
+animals.matches
 # animals.common_birds.to_a
 
 # reveal inferred attributes and coerced types
