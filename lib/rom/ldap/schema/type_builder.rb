@@ -74,7 +74,7 @@ module ROM
         # Hash#slice alternative, will be available from Ruby release 2.5.0.
         #
         def extract_meta(attribute)
-          attribute.select do |k,_|
+          attribute.select do |k, _|
             %i[description original matcher oid].include?(k)
           end
         end

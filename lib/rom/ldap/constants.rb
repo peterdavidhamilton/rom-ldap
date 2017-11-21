@@ -63,7 +63,6 @@ module ROM
     OP_REGEX      = Regexp.union(*OPERATORS.values)
     BRANCH_REGEX  = Regexp.union(OR_REGEX, AND_REGEX)
 
-
     #
     # Type Builder
     #

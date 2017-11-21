@@ -4,17 +4,17 @@ RSpec.describe ROM::LDAP::Relation do
   include_context 'factories'
 
   # [
-  #   { uid: 'huey', uniqueidentifier: 1 },
-  #   { uid: 'dewey', uniqueidentifier: 4 },
-  #   { uid: 'louie', uniqueidentifier: 9 },
-  #   { uid: 'donald', uniqueidentifier: 16 }
+  #   { uid: 'dewey',   uidnumber: 4  },
+  #   { uid: 'donald',  uidnumber: 16 },
+  #   { uid: 'huey',    uidnumber: 1  },
+  #   { uid: 'louie',   uidnumber: 9  }
   # ]
   #
   let(:user_names) { %w[huey dewey louie donald] }
 
-  describe '#gte uniqueidentifier >= 5' do
+  describe '#gte uidnumber >= 5' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].gte(uniqueidentifier: 5) }
+    let(:relation) { relations[:people].gte(uidnumber: 5) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -34,7 +34,7 @@ RSpec.describe ROM::LDAP::Relation do
               ]
             ],
             # criteria
-            [:op_gte, :uniqueidentifier, 5]
+            [:op_gte, :uidnumber, 5]
           ]
         ]
       )
@@ -42,16 +42,16 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(uniqueIdentifier>=5))'
+        '(&(&(objectClass=person)(gidNumber=1))(uidNumber>=5))'
       )
     end
 
     it 'result' do
-      results = relation.with(auto_struct: false).select(:uid, :uniqueidentifier).to_a
+      results = relation.with(auto_struct: false).select(:uid, :uidnumber).to_a
       expect(results).to eql(
         [
-          { uid: 'louie', uniqueidentifier: 9 },
-          { uid: 'donald', uniqueidentifier: 16 }
+          { uid: 'donald', uidnumber: 16 },
+          { uid: 'louie', uidnumber: 9 }
         ]
       )
     end
@@ -59,9 +59,9 @@ RSpec.describe ROM::LDAP::Relation do
 
 
 
-  describe '#gt uniqueidentifier > 9' do
+  describe '#gt uidnumber > 9' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].gt(uniqueidentifier: 9) }
+    let(:relation) { relations[:people].gt(uidnumber: 9) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -83,7 +83,7 @@ RSpec.describe ROM::LDAP::Relation do
             # criteria
             [
               :con_not,
-              [:op_lte, :uniqueidentifier, 9]
+              [:op_lte, :uidnumber, 9]
             ]
           ]
         ]
@@ -92,15 +92,15 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(!(uniqueIdentifier<=9)))'
+        '(&(&(objectClass=person)(gidNumber=1))(!(uidNumber<=9)))'
       )
     end
 
     it 'result' do
-      results = relation.with(auto_struct: false).select(:uid, :uniqueidentifier).to_a
+      results = relation.with(auto_struct: false).select(:uid, :uidnumber).to_a
       expect(results).to eql(
         [
-          { uid: 'donald', uniqueidentifier: 16 }
+          { uid: 'donald', uidnumber: 16 }
         ]
       )
     end
@@ -108,9 +108,9 @@ RSpec.describe ROM::LDAP::Relation do
 
 
 
-  describe '#lte uniqueidentifier <= 9' do
+  describe '#lte uidnumber <= 9' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].lte(uniqueidentifier: 9) }
+    let(:relation) { relations[:people].lte(uidnumber: 9) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -130,7 +130,7 @@ RSpec.describe ROM::LDAP::Relation do
               ]
             ],
             # criteria
-            [:op_lte, :uniqueidentifier, 9]
+            [:op_lte, :uidnumber, 9]
           ]
         ]
       )
@@ -138,17 +138,17 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(uniqueIdentifier<=9))'
+        '(&(&(objectClass=person)(gidNumber=1))(uidNumber<=9))'
       )
     end
 
     it 'result' do
-      results = relation.with(auto_struct: false).select(:uid, :uniqueidentifier).to_a
+      results = relation.with(auto_struct: false).select(:uid, :uidnumber).to_a
       expect(results).to eql(
         [
-          { uid: 'huey', uniqueidentifier: 1 },
-          { uid: 'dewey', uniqueidentifier: 4 },
-          { uid: 'louie', uniqueidentifier: 9 },
+          { uid: 'dewey', uidnumber: 4 },
+          { uid: 'huey', uidnumber: 1 },
+          { uid: 'louie', uidnumber: 9 }
         ]
       )
     end
@@ -156,9 +156,9 @@ RSpec.describe ROM::LDAP::Relation do
 
 
 
-  describe '#lt uniqueidentifier < 4' do
+  describe '#lt uidnumber < 4' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].lt(uniqueidentifier: 4) }
+    let(:relation) { relations[:people].lt(uidnumber: 4) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -180,7 +180,7 @@ RSpec.describe ROM::LDAP::Relation do
             # criteria
             [
               :con_not,
-              [:op_gte, :uniqueidentifier, 4]
+              [:op_gte, :uidnumber, 4]
             ]
           ]
         ]
@@ -189,15 +189,15 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(!(uniqueIdentifier>=4)))'
+        '(&(&(objectClass=person)(gidNumber=1))(!(uidNumber>=4)))'
       )
     end
 
     it 'result' do
-      results = relation.with(auto_struct: false).select(:uid, :uniqueidentifier).to_a
+      results = relation.with(auto_struct: false).select(:uid, :uidnumber).to_a
       expect(results).to eql(
         [
-          { uid: 'huey', uniqueidentifier: 1 }
+          { uid: 'huey', uidnumber: 1 }
         ]
       )
     end

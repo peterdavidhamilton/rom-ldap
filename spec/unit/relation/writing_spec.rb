@@ -30,7 +30,7 @@ RSpec.describe ROM::LDAP::Relation do
           appleimhandle: 'bruce-wayne',
           objectclass: %w[extensibleobject inetorgperson apple-user]
         )
-      ).to be(true)
+      ).to be_kind_of(ROM::LDAP::Directory::Entity)
 
       expect(accounts.where(uid: 'batman').one[:cn]).to eql(['The Dark Knight'])
       expect(accounts.where(uid: 'batman').one[:appleimhandle]).to eql(['bruce-wayne'])

@@ -40,17 +40,17 @@ module ROM
       #
       #   @example
       #     ROM.container(:ldap,
-      #       {server:, username:, password:},
-      #       {base: '', max_results: 100, timeout: 3}
+      #       { server:, username:, password: },
+      #       { base: '', max_results: 100, timeout: 3 }
       #     )
       #
-      #   @param [Hash] passed to ROM::LDAP::Connection#new
+      #   @param server [Hash] Passed to ROM::LDAP::Connection#new
       #
-      #   @param options [Hash] default server options
+      #   @param options [Hash] ROM::LDAP::Directory options
       #
-      #   @option options [Integer] :time Directory timeout in seconds
+      #   @option options :timeout [Integer] Directory timeout in seconds
       #
-      #   @option options [Integer] :size Directory result limit
+      #   @option options :max_results [Integer] Directory result limit
       #
       # @return [LDAP::Gateway]
       #

@@ -16,7 +16,6 @@ RSpec.shared_context 'relations' do
       schema('(&(objectClass=person)(gidNumber=1))') do
         attribute :uid,               ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
         attribute :uidnumber,         ROM::LDAP::Types::Serial, read: ROM::LDAP::Types::Single::Int
-        attribute :uniqueidentifier,  ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::Int
         attribute :gidnumber,         ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::Int
         attribute :dn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
         attribute :userpassword,      ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String

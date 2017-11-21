@@ -7,7 +7,8 @@ AllCops:
   Exclude:
     - doc/**/*
     - log/*
-  TargetRubyVersion: 2.4
+    - 'spec/**/*.rb'
+  TargetRubyVersion: 2.3
 
 Style/LambdaCall:
   Enabled: false

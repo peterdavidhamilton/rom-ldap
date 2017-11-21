@@ -4,17 +4,17 @@ RSpec.describe ROM::LDAP::Relation do
   include_context 'factories'
 
   # [
-  #   { uid: 'zippy', uniqueidentifier: 1 },
-  #   { uid: 'george', uniqueidentifier: 4 },
-  #   { uid: 'bungle', uniqueidentifier: 9 },
-  #   { uid: 'geoffrey', uniqueidentifier: 16 }
+  #   { uid: 'bungle',   uidnumber: 9   },
+  #   { uid: 'geoffrey', uidnumber: 16  },
+  #   { uid: 'george',   uidnumber: 4   },
+  #   { uid: 'zippy',    uidnumber: 1   }
   # ]
   #
   let(:user_names) { %w[zippy george bungle geoffrey] }
 
-  describe '#within uniqueidentifier 3..9' do
+  describe '#within uidnumber 3..9' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].within(uniqueidentifier: 3..9) }
+    let(:relation) { relations[:people].within(uidnumber: 3..9) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -37,8 +37,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_gte, :uniqueidentifier, 3],
-                [:op_lte, :uniqueidentifier, 9]
+                [:op_gte, :uidnumber, 3],
+                [:op_lte, :uidnumber, 9]
               ]
             ]
           ]
@@ -48,7 +48,7 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(&(uniqueIdentifier>=3)(uniqueIdentifier<=9)))'
+        '(&(&(objectClass=person)(gidNumber=1))(&(uidNumber>=3)(uidNumber<=9)))'
       )
     end
 
@@ -58,9 +58,9 @@ RSpec.describe ROM::LDAP::Relation do
   end
 
 
-  describe '#between (alias) uniqueidentifier -1..12' do
+  describe '#between (alias) uidnumber -1..12' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].between(uniqueidentifier: -1..12) }
+    let(:relation) { relations[:people].between(uidnumber: -1..12) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -83,8 +83,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_gte, :uniqueidentifier, -1],
-                [:op_lte, :uniqueidentifier, 12]
+                [:op_gte, :uidnumber, -1],
+                [:op_lte, :uidnumber, 12]
               ]
             ]
           ]
@@ -94,7 +94,7 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(&(uniqueIdentifier>=-1)(uniqueIdentifier<=12)))'
+        '(&(&(objectClass=person)(gidNumber=1))(&(uidNumber>=-1)(uidNumber<=12)))'
       )
     end
 
@@ -104,9 +104,9 @@ RSpec.describe ROM::LDAP::Relation do
   end
 
 
-  describe '#outside uniqueidentifier 30..100' do
+  describe '#outside uidnumber 30..100' do
     let(:formatter) { old_format_proc }
-    let(:relation) { relations[:people].between(uniqueidentifier: 30..100) }
+    let(:relation) { relations[:people].between(uidnumber: 30..100) }
 
     it 'source filter' do
       expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -129,8 +129,8 @@ RSpec.describe ROM::LDAP::Relation do
             [
               :con_and,
               [
-                [:op_gte, :uniqueidentifier, 30],
-                [:op_lte, :uniqueidentifier, 100]
+                [:op_gte, :uidnumber, 30],
+                [:op_lte, :uidnumber, 100]
               ]
             ]
           ]
@@ -140,12 +140,12 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'combined filter' do
       expect(relation.filter).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(&(uniqueIdentifier>=30)(uniqueIdentifier<=100)))'
+        '(&(&(objectClass=person)(gidNumber=1))(&(uidNumber>=30)(uidNumber<=100)))'
       )
     end
 
     it 'result' do
-      # results = relation.with(auto_struct: false).select(:uniqueidentifier).to_a
+      # results = relation.with(auto_struct: false).select(:uidnumber).to_a
       # expect(results.map(&:values)).to cover(4)
       expect(relation.count).to eql(0)
     end

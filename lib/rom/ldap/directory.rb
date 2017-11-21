@@ -3,8 +3,6 @@ require 'dry/core/class_attributes'
 require 'rom/support/memoizable'
 require 'timeout'
 
-# require 'dry-monitor'
-
 require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/sub_schema'
 require 'rom/ldap/directory/capabilities'
@@ -14,8 +12,6 @@ module ROM
   module LDAP
     class Directory
       extend Initializer
-      # extend Notifications::Listener
-
       extend Dry::Core::ClassAttributes
 
       defines :ldap_version
@@ -32,20 +28,15 @@ module ROM
       include Operations
       include Capabilities
 
-      param :connection
+      param :connection, reader: :private
 
       option :base
       option :timeout,     default: -> { 30 }
       option :max_results, default: -> { 1_000_000 }
       option :logger,      default: -> { ::Logger.new(STDOUT) }
 
-      attr_reader :result # PDU object
-
-      # Dry::Monitor::Notifications.new(:app)
-
-      # subscribe('configuration.directory', adapter: :ldap) do |event|
-      #   binding.pry
-      # end
+      # PDU object
+      attr_reader :result
 
       # @return [Array<String>]
       #
@@ -102,6 +93,17 @@ module ROM
 
       private
 
+      # require 'dry-monitor'
+      # extend Notifications::Listener
+      # Dry::Monitor::Notifications.new(:app)
+      # subscribe('configuration.directory', adapter: :ldap) do |event|
+      #   binding.pry
+      # end
+
+      # Consolidated method for logging activity.
+      # OPTIMIZE: consider dry-monitor use in this class.
+      #
+      # @api private
       def log(caller = nil, message = nil, level = :info)
         logger.send(level, "#{self.class}##{caller} #{message}")
 

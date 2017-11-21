@@ -28,7 +28,7 @@ module ROM
               const = scanner.matched
               branches = []
 
-              while branch = parse
+              while (branch = parse)
                 branches << branch
               end
 

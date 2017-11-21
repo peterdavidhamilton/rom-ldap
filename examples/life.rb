@@ -15,7 +15,7 @@ conf = ROM::Configuration.new(
     :ldap,
     { server: '127.0.0.1:10389', username: 'uid=admin,ou=system', password: 'secret' },
     { base: 'dc=example,dc=com' }
-  ],
+  ]
 )
 
 conf.relation(:animals, adapter: :ldap) do
@@ -50,7 +50,6 @@ conf.relation(:animals, adapter: :ldap) do
   def bears
     by_family('ursidae')
   end
-
 
   def common
     gte(population_count: 1_000_000)
@@ -89,7 +88,6 @@ animals.base('cn=human,ou=animals,dc=example,dc=com').one
 animals.by_pk('cn=Lion,ou=animals,dc=example,dc=com')
 animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 
-
 # animals.zoo.search('(cn=*)').population_count
 # animals.pets.page(1).search('(cn=*house*)').first
 # animals.pets.page(2).pager
@@ -98,4 +96,3 @@ animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 
 # reveal inferred attributes and coerced types
 animals.schema.to_h
-

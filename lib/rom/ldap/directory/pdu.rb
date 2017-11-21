@@ -5,7 +5,7 @@ require 'rom/ldap/directory/entity'
 module ROM
   module LDAP
     class Directory
-      # Protocol Data Units
+      # LDAP Message Protocol Data Unit (PDU)
       #
       class PDU
         Error = Class.new(RuntimeError)

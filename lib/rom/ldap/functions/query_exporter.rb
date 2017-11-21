@@ -30,7 +30,7 @@ module ROM
               const    = id_constructor(scanner.matched)
               branches = []
 
-              while branch = parse
+              while (branch = parse)
                 branches << branch
               end
 

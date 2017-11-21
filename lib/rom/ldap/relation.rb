@@ -51,7 +51,8 @@ module ROM
       schema_attr_class Attribute
       schema_inferrer   Schema::Inferrer.new.freeze
       schema_dsl        Schema::DSL
-      forward           *Dataset.dsl
+
+      forward(*Dataset.dsl)
 
       def primary_key
         attribute = schema.find(&:primary_key?)

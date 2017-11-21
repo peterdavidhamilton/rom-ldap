@@ -1,9 +1,6 @@
 require 'transproc'
 require 'dry/core/inflector'
-
-require 'rom/ldap/functions/query_exporter'
-require 'rom/ldap/functions/filter_exporter'
-require 'rom/ldap/functions/expression_exporter'
+require 'rom/ldap/functions/exporters'
 
 module ROM
   module LDAP
@@ -14,16 +11,23 @@ module ROM
       import Transproc::ArrayTransformations
       import Transproc::HashTransformations
 
-      def self.find_attr(attr_name)
-        list =  if contain?(:attribute_list)
-                  t(:attribute_list).call
-                else
-                  EMPTY_ARRAY
-                end
+      extend Exporters
 
-        list.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
+      # @param attr_name [String, Symbol] Canonical name of the attribute
+      #
+      # @return [Hash] Attribute
+      #
+      # @api public
+      def self.find_attr(attr_name)
+        attrs = contain?(:attribute_list) ? t(:attribute_list).call : EMPTY_ARRAY
+        attrs.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
       end
 
+      # @param attribute [?]
+      #
+      # @return [String]
+      #
+      # @api public
       def self.string_input(attribute)
         case attribute
         when Numeric    then attribute.to_s
@@ -74,7 +78,6 @@ module ROM
         t(:map_values, t(:string_input)).call(tuple)
       end
 
-
       # 'filter' to 'query'
       #
       # @param input [String]
@@ -111,20 +114,6 @@ module ROM
         else
           expression[to_ldap(input)]
         end
-      end
-
-      private
-
-      def self.query
-        @composer ||= QueryExporter.new
-      end
-
-      def self.filter
-        @decomposer ||= FilterExporter.new
-      end
-
-      def self.expression
-        @parser ||= ExpressionExporter.new
       end
     end
   end

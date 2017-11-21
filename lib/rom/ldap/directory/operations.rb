@@ -12,7 +12,7 @@ module ROM
           set  = []
           base ||= self.class.default_base
           filter = options.delete(:filter) || self.class.default_filter
-          expr   = to_exp(filter)
+          expr   = Functions[:to_exp][filter]
 
           @result = connection.search(base: base, expression: expr, **options) do |entity|
             set << entity
@@ -52,7 +52,7 @@ module ROM
         rescue Timeout::Error
           log(__callee__, "timed out after #{timeout} seconds", :warn)
         ensure
-          log(__callee__, to_ldap(filter))
+          log(__callee__, Functions[:to_ldap][filter])
         end
 
         # @option :filter [String]
@@ -63,7 +63,7 @@ module ROM
         #
         # @api public
         def bind_as(filter:, password:)
-          if entity = query(filter: filter, max_results: 1).first
+          if (entity = query(filter: filter, max_results: 1).first)
             password = password.call if password.respond_to?(:call)
             connection.bind(username: entity.dn, password: password)
           else
@@ -80,7 +80,7 @@ module ROM
           query(filter: filter, max_results: 100, attributes_only: true, unlimited: false)
         end
 
-        # Count everything within the base, inclusive.
+        # Count everything within the current base, inclusive of base entry.
         #
         # @return [Integer]
         #
@@ -89,37 +89,37 @@ module ROM
           query(base: base, attributes: %i[cn]).count
         end
 
-        # @param tuple [Hash]
+        # @param tuple [Hash] tuple using formatted attribute names.
         #
-        # @return [Boolean]
+        # @return [Entity, Boolean] created LDAP entry or false.
+        #
+        # @example - must include valid dn
         #
         # @api public
         def add(tuple)
           payload = tuple_translation(tuple)
 
-          args    = LDAP::Functions[:coerce_tuple_in][payload]
+          args    = Functions[:coerce_tuple_in][payload]
           dn      = args.delete(:dn)
 
           raise OperationError, 'distinguished name is required' if dn.nil?
-          result = connection.add(dn: dn, attributes: args)
+          result = connection.add(dn: dn, attrs: args)
           log(__callee__, dn)
 
-          result.success?
+          result.success? ? by_dn(dn).first : false
         end
 
-        # @param dn [String]
+        # @param dn [String] distinguished name.
         #
-        # @param tuple [Hash]
+        # @param tuple [Hash] tuple using formatted attribute names.
         #
-        # @return [Hash,Boolean]
+        # @return [Entity, Boolean] updated LDAP entry or false.
         #
         # @api public
         def modify(dn, tuple)
           payload    = tuple_translation(tuple)
           operations = payload.map { |attribute, value| [:replace, attribute, value] }
-
-          connection.modify(dn: dn, operations: operations)
-          result = connection.modify(dn: dn, operations: operations)
+          result     = connection.modify(dn: dn, ops: operations)
           log(__callee__, dn)
 
           result.success? ? by_dn(dn).first : false
@@ -132,7 +132,6 @@ module ROM
         #
         # @api public
         def delete(dn)
-          # raise OperationError, 'distinguished name is required' if dn.nil?
           result = connection.delete(dn: dn)
           log(__callee__, dn)
           result.success?
@@ -157,25 +156,9 @@ module ROM
         def tuple_translation(tuple)
           attributes = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
           trans = attributes.map { |a| a.values_at(:name, :original) }.to_h
-          LDAP::Functions[:rename_keys, trans][tuple.dup]
+          Functions[:rename_keys, trans][tuple.dup]
         end
 
-        # Export a query as a nested Expression.
-        # If the directory has loaded it passes the parsed directory attributes array
-        # to the function in order to map canonical attribute names to their LDAP originals.
-        #
-        # @param filter [String]
-        #
-        # @return [Expression]
-        #
-        # @api private
-        def to_exp(filter)
-          Functions[:to_exp][filter]
-        end
-
-        def to_ldap(filter)
-          Functions[:to_ldap][filter]
-        end
       end
     end
   end

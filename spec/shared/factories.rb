@@ -15,10 +15,9 @@ RSpec.shared_context 'factories' do
 
   before do
     factories.define(:person, relation: :people) do |f|
-      f.sequence(:uniqueidentifier) { |n| n * n }
       f.uid           'foo'
-      f.uidnumber     { fake(:number, :number, 4) }
       f.gidnumber     { 1 }
+      f.sequence(:uidnumber) { |n| n * n }
       f.dn            'uid=foo,ou=users,dc=example,dc=com'
       f.userpassword  ROM::LDAP::Directory::Password.generate(:sha, 'foo')
       f.cn            { fake(:name, :name_with_middle) }

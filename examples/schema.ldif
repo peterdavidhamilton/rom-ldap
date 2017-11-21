@@ -6,6 +6,14 @@ version: 1
 # 1.3.6.1.4.1.18055.0.4.1.2.1001-10
 # species, genus, family, order, populationCount
 #
+#
+# "( 1.3.6.1.4.1.18055.0.4.1.2.1001 NAME 'species' DESC 'The scientific name of the animal' EQUALITY caseIgnoreMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE USAGE userApplications X-SCHEMA 'other' )",
+# "( 1.3.6.1.4.1.18055.0.4.1.2.1002 NAME 'genus' DESC 'The first part of the binomial species name of the animal' EQUALITY caseIgnoreMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE USAGE userApplications X-SCHEMA 'other' )",
+# "( 1.3.6.1.4.1.18055.0.4.1.2.1003 NAME 'family' DESC 'The family classification of the animal' EQUALITY caseIgnoreMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE USAGE userApplications X-SCHEMA 'other' )",
+# "( 1.3.6.1.4.1.18055.0.4.1.2.1004 NAME 'order' DESC 'The order (sub-class) of the animal' EQUALITY caseIgnoreMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE USAGE userApplications X-SCHEMA 'other' )",
+# "( 1.3.6.1.4.1.18055.0.4.1.2.1010 NAME 'populationCount' DESC 'The estimated number of animals' EQUALITY integerMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE USAGE userApplications X-SCHEMA 'other' )",
+#
+#
 #########################################################
 
 # Species - 1001 mandatory for all zoological classes

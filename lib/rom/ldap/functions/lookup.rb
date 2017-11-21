@@ -1,7 +1,6 @@
 module ROM
   module LDAP
     module Lookup
-
       # @see TypeBuilder#by_name
       # Map formatted name back to ldap name
       #
@@ -13,7 +12,6 @@ module ROM
       def id_attribute(attr_name)
         Functions[:find_attr].call(attr_name).fetch(:original, attr_name)
       end
-
 
       # @param val [Symbol,String]
       #
