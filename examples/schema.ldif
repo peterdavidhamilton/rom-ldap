@@ -1,71 +1,105 @@
 version: 1
 
 #########################################################
-# @see https://en.wikipedia.org/wiki/International_Code_of_Zoological_Nomenclature
 #
-# attributeTypes: species, genus, family, order
-# objectClasses:  reptilia, aves, mammalia
+# Attribute Types
+# 1.3.6.1.4.1.18055.0.4.1.2.1001-10
+# species, genus, family, order, populationCount
+#
 #########################################################
 
-# Species - mandatory for all zoological classes
+# Species - 1001 mandatory for all zoological classes
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1001,ou=attributeTypes,cn=other,ou=schema
 objectClass: metaAttributeType
 objectClass: metaTop
 objectClass: top
 m-collective: FALSE
-m-description: The species of the animal
+m-singleValue: TRUE
+m-description: The scientific name of the animal
 m-equality: caseIgnoreMatch
 m-name: species
-# caseExactMatch
 m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1001
 
-# Genus - optional
+# Genus - 1002 optional
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1002,ou=attributeTypes,cn=other,ou=schema
 objectClass: metaAttributeType
 objectClass: metaTop
 objectClass: top
 m-collective: FALSE
-m-description: The genus of the animal
+m-singleValue: TRUE
+m-description: The first part of the binomial species name of the animal
 m-equality: caseIgnoreMatch
 m-name: genus
 m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1002
 
-# Family - optional
+# Family - 1003 optional
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1003,ou=attributeTypes,cn=other,ou=schema
 objectClass: metaAttributeType
 objectClass: metaTop
 objectClass: top
 m-collective: FALSE
-m-description: The family of the animal
+m-singleValue: TRUE
+m-description: The family classification of the animal
 m-equality: caseIgnoreMatch
 m-name: family
 m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1003
 
-# Order - optional
+# Order - optional 1004
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1004,ou=attributeTypes,cn=other,ou=schema
 objectClass: metaAttributeType
 objectClass: metaTop
 objectClass: top
 m-collective: FALSE
-m-description: The order of the animal
+m-singleValue: TRUE
+m-description: The order (sub-class) of the animal
 m-equality: caseIgnoreMatch
 m-name: order
 m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1004
 
+# populationCount 1010
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1010,ou=attributeTypes,cn=other,ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-singleValue: TRUE
+m-description: The estimated number of animals
+m-equality: integerMatch
+m-name: populationCount
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.27
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1010
+
 
 #########################################################
 #
 # Object Classes
+# 1.3.6.1.4.1.18055.0.4.1.3.1000-4
+# Amphibia, Reptilia, Aves, Mammalia
 #
 #########################################################
+
+# Amphibia - amphibians - 1000
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1000,ou=objectClasses,cn=other,ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Amphibians
+m-may: cn
+m-may: populationCount
+m-must: species
+m-supobjectclass: top
+m-name: Amphibia
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1000
+m-typeobjectclass: STRUCTURAL
 
 # Reptilia - reptiles - 1001
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1001,ou=objectClasses,cn=other,ou=schema
@@ -74,9 +108,10 @@ objectClass: metaTop
 objectClass: top
 m-description: Reptiles
 m-may: cn
+m-may: populationCount
 m-must: species
 m-supobjectclass: top
-m-name: reptilia
+m-name: Reptilia
 m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1001
 m-typeobjectclass: STRUCTURAL
 
@@ -87,9 +122,10 @@ objectClass: metaTop
 objectClass: top
 m-description: Birds
 m-may: cn
+m-may: populationCount
 m-must: species
 m-supobjectclass: top
-m-name: aves
+m-name: Aves
 m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1002
 m-typeobjectclass: STRUCTURAL
 
@@ -100,9 +136,10 @@ objectClass: metaTop
 objectClass: top
 m-description: Mammals
 m-may: cn
+m-may: populationCount
 m-must: species
 m-supobjectclass: top
-m-name: mammalia
+m-name: Mammalia
 m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1003
 m-typeobjectclass: STRUCTURAL
 

@@ -11,10 +11,10 @@ objectClass: top
 objectClass: organizationalUnit
 ou: animals
 
-dn: ou=groups,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: groups
+# dn: ou=groups,dc=example,dc=com
+# objectClass: top
+# objectClass: organizationalUnit
+# ou: groups
 
 #########################################################
 #
@@ -22,16 +22,27 @@ ou: groups
 #
 #########################################################
 
+dn: cn=Human,ou=animals,dc=example,dc=com
+cn: Human
+species: Homo sapiens
+genus: Homo
+family: Hominidae
+order: Primates
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 7582530942
+
 dn: cn=Red Fox,ou=animals,dc=example,dc=com
 cn: Red Fox
 species: Vulpes vulpes
 genus: Vulpes
 family: Canidae
 order: Carnivora
-objectClass: mammalia
+objectClass: Mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 12345
+populationCount: 0
 
 dn: cn=American Robin,ou=animals,dc=example,dc=com
 cn: American Robin
@@ -39,10 +50,121 @@ species: Turdus migratorius
 genus: Turdus
 family: Turdidae
 order: Passeriformes
-objectClass: aves
+objectClass: Aves
 objectClass: extensibleObject
 objectClass: top
-populationCount: 12345
+populationCount: 0
+
+dn: cn=Zebra,ou=animals,dc=example,dc=com
+cn: Zebra
+species: Equus zebra
+genus: Equus
+family: Equidae
+order: Perissodactyla
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Spur-thighed Tortoise,ou=animals,dc=example,dc=com
+cn: Spur-thighed Tortoise
+species: Testudo graeca
+genus: Testudo
+family: Testudinidae
+order: Testudines
+objectClass: Reptilia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Sun Bear,ou=animals,dc=example,dc=com
+cn: Sun Bear
+species: Helarctos malayanus
+genus: Helarctos
+family: Ursidae
+order: Carnivora
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Poison dart Frog,ou=animals,dc=example,dc=com
+cn: Poison dart Frog
+species: Dendrobates tinctorius
+genus: Dendrobates
+family: Dendrobatidae
+order: Anura
+objectClass: Amphibia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=James's Flamingo,ou=animals,dc=example,dc=com
+cn: James's Flamingo
+species: Phoenicoparrus jamesi
+genus: Phoenicoparrus
+family: Phoenicopteridae
+order: Phoenicopteriformes
+objectClass: Aves
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Orangutan,ou=animals,dc=example,dc=com
+cn: Orangutan
+species: Pongo borneo
+genus: Pongo
+family: Hominidae
+order: Primates
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Cat,ou=animals,dc=example,dc=com
+cn: Cat
+species: Felis silvestris
+genus: Felis
+family: Felidae
+order: Carnivora
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Dog,ou=animals,dc=example,dc=com
+cn: Dog
+species: Canis lupus
+genus: Canis
+family: Canidae
+order: Carnivora
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Lion,ou=animals,dc=example,dc=com
+cn: Lion
+species: Panthera leo
+genus: Panthera
+family: Felidae
+order: Carnivora
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+
+dn: cn=Giant Panda,ou=animals,dc=example,dc=com
+cn: Giant Panda
+species: Ailuropoda melanoleuca
+genus: Ailuropoda
+family: Ursidae
+order: Carnivora
+objectClass: Mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+# conservationStatus: 3.1
 
 #########################################################
 #
@@ -52,14 +174,20 @@ populationCount: 12345
 
 dn: cn=wild,ou=groups,dc=example,dc=com
 cn: Wild Animals
-gidNumber: 0001
 objectClass: groupOfNames
 member: cn=Red Fox,ou=animals,dc=example,dc=com
 member: cn=American Robin,ou=animals,dc=example,dc=com
+member: cn=Sun Bear,ou=animals,dc=example,dc=com
+member: cn=Zebra,ou=animals,dc=example,dc=com
+member: cn=Poison dart Frog,ou=animals,dc=example,dc=com
+member: cn=James's flamingo,ou=animals,dc=example,dc=com
+member: cn=Orangutan,ou=animals,dc=example,dc=com
+
 
 dn: cn=domestic,ou=groups,dc=example,dc=com
 cn: Domesticated Animals
-gidNumber: 0002
 objectClass: groupOfNames
-# member:
+member: cn=Spur-thighed Tortoise,ou=animals,dc=example,dc=com
+member: cn=Cat,ou=animals,dc=example,dc=com
+member: cn=Dog,ou=animals,dc=example,dc=com
 
