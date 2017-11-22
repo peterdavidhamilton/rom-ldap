@@ -54,28 +54,46 @@ module ROM
         end
         alias hasnt missing
 
+        # Greater than filter
+        #
+        # @api public
         def gt(args)
           chain(:con_not, [:op_lte, *args.to_a[0]])
         end
         alias above gt
 
+        # Less than filter
+        #
+        # @api public
         def lt(args)
           chain(:con_not, [:op_gte, *args.to_a[0]])
         end
         alias below lt
 
+        # Greater than or equal filter
+        #
+        # @api public
         def gte(args)
           chain(:op_gte, *args.to_a[0])
         end
 
+        # Less than or equal filter
+        #
+        # @api public
         def lte(args)
           chain(:op_lte, *args.to_a[0])
         end
 
+        # Starts with filter
+        #
+        # @api public
         def begins(args)
           chain(*match_dsl(args, right: WILDCARD))
         end
 
+        # Ends with filter
+        #
+        # @api public
         def ends(args)
           chain(*match_dsl(args, left: WILDCARD))
         end

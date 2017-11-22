@@ -7,7 +7,6 @@ require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/sub_schema'
 require 'rom/ldap/directory/capabilities'
 require 'rom/ldap/directory/operations'
-require 'rom/ldap/directory/ldif'
 
 module ROM
   module LDAP
@@ -56,12 +55,6 @@ module ROM
       def reconnect
         connection.connect
       end
-
-      # def to_ldif(tuples)
-      #   binding.pry
-      #   # LDIF.new(tuples.map(&method(:payload))).to_ldif #(comment: Time.now)
-      #   tuples.map(&:to_ldif)
-      # end
 
       # Register/fetch parsed directory attributes in the Functions container.
       #

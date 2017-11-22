@@ -104,28 +104,24 @@ RSpec.describe ROM::LDAP::Relation do
       expect(accounts.count).to eql(11)
     end
 
-    # FIXME: retain DN at first position
     it '#to_ldif' do
       export = <<~LDIF
-        version: 3
-
-        cn: test1
         dn: uid=test1,ou=users,dc=example,dc=com
-        gidnumber: 9998
-        givenname: test1
         mail: test1@example.com
-        objectclass: top
-        objectclass: inetOrgPerson
-        objectclass: person
-        objectclass: organizationalPerson
-        objectclass: extensibleObject
+        givenName: test1
         sn: test1
+        cn: test1
+        objectClass: top
+        objectClass: inetOrgPerson
+        objectClass: person
+        objectClass: organizationalPerson
+        objectClass: extensibleObject
+        gidNumber: 9998
+        uidNumber: 1
+        userPassword: {SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw=
         uid: test1
-        uidnumber: 1
-        userpassword: {SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw=
 
       LDIF
-      # userpassword:: e1NIQX10RVNzQm1FL3lOWTNsYjZhMEw2dlZRRVpOcXc9
 
       expect(accounts.where(uid: 'test1').to_ldif).to eql(export)
     end

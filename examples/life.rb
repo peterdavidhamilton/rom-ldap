@@ -7,7 +7,9 @@ $LOAD_PATH.unshift(cwd)
 require 'pry-byebug'
 require 'rom-ldap'
 
-# Apply a function to coerce all entity attributes into acceptible ruby method names.
+# Apply a function to convert all entity
+# attributes into acceptible ruby method names.
+#
 ROM::LDAP::Directory::Entity.to_method_name!
 
 conf = ROM::Configuration.new(
@@ -66,7 +68,7 @@ animals   = container.relations[:animals]
 #
 # Example Relation Methods
 #
-# binding.pry
+binding.pry
 
 # pluck certain attributes
 animals.select(:cn, :object_class).to_a
@@ -76,6 +78,7 @@ animals.where(objectclass: 'mammalia').find(/Homo/).count
 
 # return a single struct
 animals.with(auto_struct: true).where(cn: 'human').one.species
+animals.with(auto_struct: true).matches(cn: 'man').one
 animals.with(auto_struct: true).equals(cn: 'orangutan').one.cn
 
 # map over multiple structs
@@ -95,7 +98,7 @@ animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 # animals.pets.page(1).search('(cn=*house*)').first
 # animals.pets.page(2).pager
 
-animals.matches
+animals.matches(cn: 'phant').count
 # animals.common_birds.to_a
 
 # reveal inferred attributes and coerced types

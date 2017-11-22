@@ -3,47 +3,35 @@ require 'dry/initializer'
 module ROM
   module LDAP
     class Directory
-      # @param tuples [Array<Hash>]
+      # Export Entity objects as LDIF files.
       #
-      # @option :version [Integer]
-      #
-      # @option :comments [String]
+      # @param tuple [Entity]
       #
       # @api private
       class LDIF
         extend Dry::Initializer
 
-        param  :tuples
+        param :tuple
 
-        def to_ldif(version: 3, comment: nil)
+        def to_ldif
           ary = []
-
-          ary << "version: #{version}\n"
-          ary << comment if comment
-
-          Array(tuples).each do |t|
-            t.sort.each do |key, values|
-              values.each do |value|
-                ary <<  if value_is_binary?(value)
-                          "#{key}:: #{new_value(value)}"
-                        else
-                          "#{key}: #{value}"
-                        end
-              end
-            end
-            ary << NEW_LINE
+          tuple.each do |key, values|
+            values.each { |value| ary << key_value_pair(key, value) }
           end
+          ary << NEW_LINE
 
-          block_given? ? ary.map(&:yield) : ary.join(NEW_LINE)
-        end
-
-        def from_ldif(file)
-          input = ::StringIO.new(file)
-          binding.pry
-
+          ary.join(NEW_LINE)
         end
 
         private
+
+        def key_value_pair(key, value)
+          if value_is_binary?(value)
+            "#{key}:: #{new_value(value)}"
+          else
+            "#{key}: #{value}"
+          end
+        end
 
         def value_is_binary?(value)
           value = value.to_s

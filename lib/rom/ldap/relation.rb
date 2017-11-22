@@ -24,8 +24,6 @@ module ROM
         relation.dataset do
           # puts to_ldif
           self # <ROM::LDAP::Dataset filter='(gidnumber=1050)'>
-
-          # db => OpenStruct { :db => OpenStruct { :database_type => :apacheds } }
         end
       end
 
@@ -36,7 +34,6 @@ module ROM
       #
       # LDAP specific class attributes.
       #
-
       defines :base
       defines :branches
       defines :groups
