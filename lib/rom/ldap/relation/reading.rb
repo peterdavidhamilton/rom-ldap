@@ -78,7 +78,6 @@ module ROM
         def one?
           dataset.one?
         end
-
         alias distinct? one?
         alias unique? one?
 
@@ -88,7 +87,6 @@ module ROM
         def any?
           dataset.any?
         end
-
         alias exist? any?
 
         # @return [Boolean]

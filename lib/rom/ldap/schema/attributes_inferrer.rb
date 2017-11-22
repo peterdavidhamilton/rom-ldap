@@ -12,9 +12,9 @@ module ROM
 
         # @api private
         def call(schema, gateway)
-          type_builder  = TypeBuilder.new
-          dataset       = schema.name.dataset
-          columns       = dataset_attributes(gateway, dataset)
+          type_builder = TypeBuilder.new(gateway.attribute_types)
+          dataset      = schema.name.dataset
+          columns      = dataset_attributes(gateway, dataset)
 
           inferred = columns.map do |name|
             type = type_builder.call(name, schema.name)
@@ -33,13 +33,11 @@ module ROM
 
         private
 
-        # Attributes used by filtered entries
-        #
-        # @example
-        #   dataset_attributes(ROM::LDAP::Gateway, "(cn=*)")
-        #     # =>  [:cn, :dn, :givenname, :mail, :objectclass, :sn]
+        # Canonical attribute names used within dataset
         #
         # @return [Array<Symbol>]
+        #
+        # @example => [:cn, :dn, :given_name, :mail, :object_class, :sn]
         #
         # @api private
         def dataset_attributes(gateway, dataset)

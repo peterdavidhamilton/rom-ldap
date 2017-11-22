@@ -1,6 +1,7 @@
 require 'ber'
 require 'rom/ldap/types'
 require 'rom/initializer'
+
 module ROM
   module LDAP
     class Schema
@@ -42,15 +43,21 @@ module ROM
       #
       # @see <https://docs.oracle.com/cd/E19450-01/820-6173/def-attribute-type.html>
       #
+      # @param attributes [Array<Hash>]
+      #
       # @api private
       class TypeBuilder
+        extend Initializer
+
+        param :attributes
 
         # @param attribute_name [String, Symbol]
         #
         # @param schema [Schema] Relation schema object.
         #
+        # @api public
         def call(attribute_name, schema)
-          attribute = Functions[:find_attr].call(attribute_name)
+          attribute = by_name(attribute_name) || EMPTY_HASH
           multiple  = !attribute[:single]
           primitive = map_type(attribute)
           ruby_type = Types.const_get(primitive)
@@ -73,12 +80,21 @@ module ROM
 
         # Hash#slice alternative, will be available from Ruby release 2.5.0.
         #
-        def extract_meta(attribute)
-          attribute.select do |k, _|
-            %i[description original matcher oid].include?(k)
-          end
+        # @api private
+        def extract_meta(hash)
+          hash.select { |k, _| %i[description original matcher oid].include?(k) }
         end
 
+        # Select the attribute whose formatted name matches the attribute name.
+        #
+        # @param name [Symbol, String]
+        #
+        # @return [Hash]
+        #
+        # @api private
+        def by_name(attribute_name)
+          attributes.select { |a| a[:name] == attribute_name }.first
+        end
 
         # @return [String]
         #

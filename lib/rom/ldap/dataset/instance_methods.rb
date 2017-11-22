@@ -76,16 +76,13 @@ module ROM
           entries.map { |e| directory.delete(*e[:dn]) }
         end
 
-        # OPTIMIZE: dataset string export formats call method on entity in the same way
-        # FIXME: JSON and YAML need to output datasets not individual entities.
-
         # Output the dataset as an LDIF string
         #
         # @return [String]
         #
         # @api public
         def to_ldif
-          each.map(&:to_ldif).to_a.join
+          export(:ldif)
         end
 
         # Output the dataset as JSON
@@ -94,7 +91,7 @@ module ROM
         #
         # @api public
         def to_json
-          each.map(&:to_json).to_a.join
+          export(:json)
         end
 
         # Output the dataset as YAML
@@ -103,7 +100,24 @@ module ROM
         #
         # @api public
         def to_yaml
-          each.map(&:to_yaml).to_a.join
+          export(:yaml)
+        end
+
+        private
+
+        # Handle different string output formats.
+        #
+        # @return [String]
+        #
+        # @api
+        def export(format)
+          case format
+          when :ldif then each.map(&:to_ldif).to_a.join
+          when :json then each.map(&:export).to_a.to_json
+          when :yaml then each.map(&:export).to_a.to_yaml
+          else
+            raise 'unknown LDAP dataset export format'
+          end
         end
       end
     end

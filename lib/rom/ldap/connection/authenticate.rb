@@ -40,12 +40,12 @@ module ROM
 
         # TODO: extract plain authentication
         def cleartext
-          #noop
+          # noop
         end
 
         # TODO: encrypted authentication
         def encrypted
-          #noop
+          # noop
         end
 
         # def setup_encryption(tls_options: {}, method:, timeout: nil, message_id: next_msgid)

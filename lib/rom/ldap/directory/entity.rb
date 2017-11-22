@@ -1,5 +1,5 @@
-require 'rom/ldap/directory/ldif'
 require 'rom/ldap/functions'
+require 'rom/ldap/directory/ldif'
 
 module ROM
   module LDAP
@@ -90,27 +90,31 @@ module ROM
         end
         alias to_ary to_a
 
-        # Print an LDIF string
-        #
-        def to_s
-          LDIF.new(@source).to_ldif
-        end
-        alias to_ldif to_s
-
         def to_str
           @canonical.inspect
         end
         alias inspect to_str
 
-        def to_json
-          @source.to_json
-        end
-
         # Return to first class objects from wrapped BER identified.
         #
-        def to_yaml
-          @source.map { |k, v| { k.to_s => v.to_a.map(&:to_s) } }.reduce(&:merge).to_yaml
+        def export
+          @source.map { |k, v| { k.to_s => v.to_a.map(&:to_s) } }.reduce(&:merge)
         end
+
+        def to_json
+          export.to_json
+        end
+
+        def to_yaml
+          export.to_yaml
+        end
+
+        # Print an LDIF string
+        #
+        def to_s
+          LDIF.new(export).to_ldif
+        end
+        alias to_ldif to_s
 
         def hash
           @source.hash

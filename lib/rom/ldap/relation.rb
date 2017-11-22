@@ -43,7 +43,6 @@ module ROM
       groups   '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
       users    '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
 
-      # struct_namespace LDAP:Struct
       schema_class      Schema
       schema_attr_class Attribute
       schema_inferrer   Schema::Inferrer.new.freeze
@@ -88,7 +87,6 @@ module ROM
         dataset.opts[:query]
       end
 
-
       # Original dataset in LDAP filter format.
       #
       # @return [String]
@@ -97,7 +95,6 @@ module ROM
       def source
         dataset.opts[:source]
       end
-
 
       # @api public
       def self.associations
