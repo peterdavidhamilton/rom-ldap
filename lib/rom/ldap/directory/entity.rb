@@ -96,6 +96,7 @@ module ROM
         alias inspect to_str
 
         # Return to first class objects from wrapped BER identified.
+        # Necessary for clean YAML output
         #
         def export
           @source.map { |k, v| { k.to_s => v.to_a.map(&:to_s) } }.reduce(&:merge)
@@ -111,10 +112,10 @@ module ROM
 
         # Print an LDIF string
         #
-        def to_s
+        def to_ldif
           LDIF.new(export).to_ldif
         end
-        alias to_ldif to_s
+        alias to_s to_ldif
 
         def hash
           @source.hash

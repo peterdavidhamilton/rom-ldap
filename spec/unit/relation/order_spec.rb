@@ -13,7 +13,7 @@ RSpec.describe ROM::LDAP::Relation do
   let(:user_names) { %w[huey dewey louie donald] }
 
   describe '#gte uidnumber >= 5' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].gte(uidnumber: 5) }
 
     it 'source filter' do
@@ -60,7 +60,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#gt uidnumber > 9' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].gt(uidnumber: 9) }
 
     it 'source filter' do
@@ -109,7 +109,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#lte uidnumber <= 9' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].lte(uidnumber: 9) }
 
     it 'source filter' do
@@ -157,7 +157,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#lt uidnumber < 4' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].lt(uidnumber: 4) }
 
     it 'source filter' do

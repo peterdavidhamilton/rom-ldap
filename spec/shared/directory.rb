@@ -24,7 +24,11 @@ RSpec.shared_context 'directory' do
     container.relations
   end
 
-  let(:old_format_proc) do
+  let(:reverse_proc) do
+    ->(key) { key.to_s.downcase.tr('-', '').reverse.to_sym }
+  end
+
+  let(:downcase_proc) do
     ->(key) {
       key = key.to_s.downcase.tr('-', '')
       key = key[0..-2] if key[-1] == '='
@@ -32,7 +36,7 @@ RSpec.shared_context 'directory' do
     }
   end
 
-  let(:new_format_proc) do
+  let(:method_name_proc) do
     ->(key) { ROM::LDAP::Functions.to_method_name(key) }
   end
 

@@ -13,7 +13,7 @@ RSpec.describe ROM::LDAP::Relation do
   let(:user_names) { %w[zippy george bungle geoffrey] }
 
   describe '#within uidnumber 3..9' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].within(uidnumber: 3..9) }
 
     it 'source filter' do
@@ -59,7 +59,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#between (alias) uidnumber -1..12' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].between(uidnumber: -1..12) }
 
     it 'source filter' do
@@ -105,7 +105,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#outside uidnumber 30..100' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].between(uidnumber: 30..100) }
 
     it 'source filter' do

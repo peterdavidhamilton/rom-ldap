@@ -30,7 +30,7 @@ conf = ROM::Configuration.new(
 module Entities
   class Animal < ROM::LDAP::Struct
     def common_name
-      cn.upcase
+      cn.first.upcase
     end
   end
 end

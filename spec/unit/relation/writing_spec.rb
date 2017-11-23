@@ -4,7 +4,7 @@ RSpec.describe ROM::LDAP::Relation do
   include_context 'relations'
 
   describe '#insert' do
-    let(:formatter) { old_format_proc }
+    let(:formatter) { downcase_proc }
 
     before { accounts.where(uid: 'batman').delete }
     after  { accounts.where(uid: 'batman').delete }

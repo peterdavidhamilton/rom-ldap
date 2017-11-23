@@ -33,9 +33,10 @@ module ROM
 
         private
 
-        # Canonical attribute names used within dataset
+        # Canonical attribute names used within dataset. Array contents are effect
+        # by the formatting proc.
         #
-        # @return [Array<Symbol>]
+        # @return [Array<Symbol, String>]
         #
         # @example => [:cn, :dn, :given_name, :mail, :object_class, :sn]
         #
