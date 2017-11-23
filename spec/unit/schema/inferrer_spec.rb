@@ -1,0 +1,28 @@
+require 'spec_helper'
+
+RSpec.describe ROM::LDAP::Schema::Inferrer do
+
+  describe 'interprets directory.attribute_types in to ruby classes' do
+    let(:formatter) { method_name_proc }
+
+    include_context 'relations'
+
+    subject(:schema) { accounts.schema.to_h }
+
+    it "has loaded the directory's schema" do
+      expect(accounts.dataset.directory.attribute_types).to_not be_empty
+    end
+
+    it 'has formatted attribute names' do
+      expect(schema.keys).to eql(
+        %i[apple_imhandle cn dn gid_number given_name mail
+          object_class sn uid uid_number user_password]
+      )
+    end
+
+    it 'has inferred attribute types' do
+      primitives = schema.values.map(&:type).map(&:primitive).uniq
+      expect(primitives).to eql([String, Array, Integer])
+    end
+  end
+end

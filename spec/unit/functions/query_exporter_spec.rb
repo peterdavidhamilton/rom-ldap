@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe ROM::LDAP::Functions::QueryExporter do
-  let(:exporter) { ROM::LDAP::Functions::QueryExporter.new }
+  subject(:exporter) { ROM::LDAP::Functions::QueryExporter.new }
 
   describe 'con_and' do
     let(:string) { '(&(objectclass=person)(uidnumber>=34)(mail~=*@example.com))' }

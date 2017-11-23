@@ -51,16 +51,32 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.by_class('mammalia').to_a
   end
 
-  def endangered_count
-    animals.endangered.count
+  def endangered
+    animals.endangered.to_a
+  end
+
+  def big_cat_count
+    animals.by_genus('panthera').count
   end
 
   def extinct_meat_eaters
-    animals.extinct.carnivores
+    animals.extinct.carnivores.to_a
   end
 
   def top_ten_by_genus
     animals.with(auto_struct: true).order(:genus).limit(10).to_a.map(&:common_name)
+  end
+
+  def apes_to_ldif
+    animals.great_apes.to_ldif
+  end
+
+  def reptiles_to_yaml
+    animals.by_class('reptilia').to_yaml
+  end
+
+  def birds_to_json
+    animals.by_class('aves').to_json
   end
 end
 
@@ -77,16 +93,17 @@ conf.relation(:animals, adapter: :ldap) do
   use :pagination
   per_page 4
   use :auto_restrictions
-  auto_struct true
   struct_namespace Entities
+  auto_struct true
 
   view(:endangered) do
-    schema { select { [:cn, :population_count] } }
-    relation { lt(population_count: 1_000_000) }
+    schema { project(:cn, :population_count) }
+    relation { lte(population_count: 1_000_000) }
   end
 
   view(:by_class) do
-    relation { |klass| where(objectclass: klass) }
+    schema { project(:species) }
+    relation { |klass| where(object_class: klass) }
   end
 
   # overload default relation root with a different search base
@@ -151,16 +168,12 @@ conf.relation(:animals, adapter: :ldap) do
     gte(population_count: num)
   end
 
-  # def endangered
-  #   lt(population_count: 1_000_000)
-  # end
-
   # essentially a join table
-  def members(dn)
-    group = fetch(dn)
-    entries = group.member
-    fetch entries
-  end
+  # def members(dn)
+  #   group = fetch(dn)
+  #   entries = group.member
+  #   fetch entries
+  # end
 end
 
 
@@ -192,16 +205,10 @@ animals.matches(cn: 'man').one
 animals.equals(cn: 'orangutan').one.cn
 
 
-# auto-magic finder methods
-animals.by_genus('panthera')
+repo.reptiles_to_yaml
 
-animals.members('cn=domestic,ou=groups,dc=example,dc=com').count
 
-# export to an LDIF string, or JSON or YAML
-animals.great_apes.to_ldif
-animals.great_apes.to_yaml
-animals.great_apes.to_json
-
+# animals.members('cn=domestic,ou=groups,dc=example,dc=com').count
 
 # return specific entries
 animals.by_pk('cn=Lion,ou=animals,dc=example,dc=com')
@@ -215,4 +222,3 @@ animals.matches(cn: 'phant').count
 # animals.common_birds.to_a
 
 
-repo.endangered_count

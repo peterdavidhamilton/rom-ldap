@@ -7,7 +7,7 @@ module ROM
     class Schema < ROM::Schema
       # Create a new relation based on the schema definition
       #
-      # @param [Relation] relation The source relation
+      # @param relation [Relation] The source relation
       #
       # @return [Relation]
       #
@@ -26,6 +26,8 @@ module ROM
       end
 
       # Return a new schema with attributes marked as qualified
+      #
+      # @param table_alias [?]
       #
       # @return [Schema]
       #

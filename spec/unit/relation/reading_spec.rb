@@ -3,9 +3,9 @@ require 'spec_helper'
 RSpec.describe ROM::LDAP::Relation do
 
   describe 'uncoerced attributes' do
-    include_context 'relations'
 
     let(:formatter) { nil }
+    include_context 'relations'
 
     it 'raise errors if unsuitable method names' do
       expect { customers.with(auto_struct: true).to_a }.to raise_error(

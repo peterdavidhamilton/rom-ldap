@@ -1,19 +1,21 @@
 require 'spec_helper'
 
+# Range DSL methods for numeric values between or beyond two bounds.
+#
+# [
+#   { uid: 'bungle',   uidnumber: 9   },
+#   { uid: 'geoffrey', uidnumber: 16  },
+#   { uid: 'george',   uidnumber: 4   },
+#   { uid: 'zippy',    uidnumber: 1   }
+# ]
+#
 RSpec.describe ROM::LDAP::Relation do
-  include_context 'factories'
 
-  # [
-  #   { uid: 'bungle',   uidnumber: 9   },
-  #   { uid: 'geoffrey', uidnumber: 16  },
-  #   { uid: 'george',   uidnumber: 4   },
-  #   { uid: 'zippy',    uidnumber: 1   }
-  # ]
-  #
+  let(:formatter) { downcase_proc }
+  include_context 'factories'
   let(:user_names) { %w[zippy george bungle geoffrey] }
 
   describe '#within uidnumber 3..9' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].within(uidnumber: 3..9) }
 
     it 'source filter' do
@@ -59,7 +61,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#between (alias) uidnumber -1..12' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].between(uidnumber: -1..12) }
 
     it 'source filter' do
@@ -105,7 +106,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#outside uidnumber 30..100' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].between(uidnumber: 30..100) }
 
     it 'source filter' do

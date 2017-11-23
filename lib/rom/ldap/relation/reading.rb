@@ -2,6 +2,36 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
+        # Output the dataset as an LDIF string
+        #
+        # @return [String]
+        #
+        # @example
+        #   relation.to_ldif
+        #
+        # @api public
+        def to_ldif
+          dataset.export(:ldif)
+        end
+
+        # Output the dataset as JSON
+        #
+        # @return [String]
+        #
+        # @api public
+        def to_json
+          dataset.export(:json)
+        end
+
+        # Output the dataset as YAML
+        #
+        # @return [String]
+        #
+        # @api public
+        def to_yaml
+          dataset.export(:yaml)
+        end
+
         # Specify an alternative search base for the dataset or resets it.
         #
         # @example
@@ -98,10 +128,11 @@ module ROM
 
         # Find tuple by primary_key - required by commands
         #
-        # Selects on certain attributes from tuples
+        # @param pk [Mixed] single values
         #
         # @example
         #   relation.by_pk(1001)
+        #   relation.by_pk('uid=test1,ou=users,dc=example,dc=com')
         #
         # @return [Relation]
         def by_pk(pk)
@@ -124,18 +155,6 @@ module ROM
         # @api public
         def fetch(pk)
           by_pk(pk).one!
-        end
-
-        # raw filter to LDIF
-        #
-        # @example
-        #   relation.to_ldif
-        #
-        # @return [String]
-        #
-        # @api public
-        def to_ldif
-          dataset.to_ldif
         end
 
         # First tuple from the relation

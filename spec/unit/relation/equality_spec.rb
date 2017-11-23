@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe ROM::LDAP::Relation do
-  include_context 'factories'
 
+  let(:formatter) { method_name_proc }
+  include_context 'factories'
   let(:user_names) { %w[barry billy bobby sally] }
 
   describe '#equals with single value' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].equals(uid: 'billy') }
 
     it 'source filter' do
@@ -43,7 +43,6 @@ RSpec.describe ROM::LDAP::Relation do
   end
 
  describe '#equals with multiple attributes' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].equals(uid: 'billy', mail: 'billy@example.com') }
 
     it 'source filter' do
@@ -88,7 +87,6 @@ RSpec.describe ROM::LDAP::Relation do
   end
 
   describe '#where (alias) with multiple values' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].where(uid: %w[billy sally]) }
 
     it 'source filter' do
@@ -135,7 +133,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#unequals with single value' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].unequals(uid: 'sally') }
 
     it 'source filter' do
@@ -179,7 +176,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#unequals with multiple values' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].unequals(uid: %w[billy sally]) }
 
     it 'source filter' do

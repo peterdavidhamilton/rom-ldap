@@ -38,13 +38,13 @@ module ROM
 
         # Find by Distinguished Name
         #
-        # @param dn [String]
+        # @param dn [String, Array<String>]
         #
         # @return [Array<Entity>]
         #
         # @api public
         def fetch(dn)
-          directory.by_dn(dn)
+          Array(dn).flat_map { |dn| directory.by_dn(dn) }
         end
 
         # Interface to Directory#add
@@ -75,35 +75,6 @@ module ROM
         def delete(entries)
           entries.map { |e| directory.delete(*e[:dn]) }
         end
-
-        # Output the dataset as an LDIF string
-        #
-        # @return [String]
-        #
-        # @api public
-        def to_ldif
-          export(:ldif)
-        end
-
-        # Output the dataset as JSON
-        #
-        # @return [String]
-        #
-        # @api public
-        def to_json
-          export(:json)
-        end
-
-        # Output the dataset as YAML
-        #
-        # @return [String]
-        #
-        # @api public
-        def to_yaml
-          export(:yaml)
-        end
-
-        private
 
         # Handle different string output formats.
         #

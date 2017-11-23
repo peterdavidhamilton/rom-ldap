@@ -2,9 +2,10 @@ require 'spec_helper'
 
 RSpec.describe 'type builder' do
 
+  let(:formatter) { nil }
   include_context 'relations'
 
-  let(:account) { accounts.to_a.first }
+  subject(:account) { accounts.to_a.first }
 
   it 'coerces integer values' do
     expect(account['uidNumber']).to eql([0])

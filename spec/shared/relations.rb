@@ -14,17 +14,17 @@ RSpec.shared_context 'relations' do
 
     conf.relation(:people) do
       schema('(&(objectClass=person)(gidNumber=1))') do
-        attribute :uid,               ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :uidnumber,         ROM::LDAP::Types::Serial, read: ROM::LDAP::Types::Single::Int
-        attribute :gidnumber,         ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::Int
-        attribute :dn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :userpassword,      ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :cn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :givenname,         ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :sn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :appleimhandle,     ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :mail,              ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-        attribute :objectclass,       ROM::LDAP::Types::Array,  read: ROM::LDAP::Types::Multiple::String
+        attribute :uid,           ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :uidnumber,     ROM::LDAP::Types::Serial, read: ROM::LDAP::Types::Single::Int
+        attribute :gidnumber,     ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::Int
+        attribute :dn,            ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :userpassword,  ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :cn,            ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :givenname,     ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :sn,            ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :appleimhandle, ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :mail,          ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+        attribute :objectclass,   ROM::LDAP::Types::Array,  read: ROM::LDAP::Types::Multiple::String
       end
 
       auto_struct true

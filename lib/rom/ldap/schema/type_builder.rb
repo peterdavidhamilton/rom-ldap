@@ -57,7 +57,7 @@ module ROM
         #
         # @api public
         def call(attribute_name, schema)
-          attribute = by_name(attribute_name) || EMPTY_HASH
+          attribute = attribute_by_name(attribute_name)
           multiple  = !attribute[:single]
           primitive = map_type(attribute)
           ruby_type = Types.const_get(primitive)
@@ -92,8 +92,8 @@ module ROM
         # @return [Hash]
         #
         # @api private
-        def by_name(attribute_name)
-          attributes.select { |a| a[:name] == attribute_name }.first
+        def attribute_by_name(attribute_name)
+          attributes.select { |a| a[:name] == attribute_name }.first || EMPTY_HASH
         end
 
         # @return [String]

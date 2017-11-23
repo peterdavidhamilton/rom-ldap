@@ -1,9 +1,8 @@
 require 'spec_helper'
 
-require 'rom/ldap/plugin/pagination'
-
 RSpec.describe 'Plugin / Pagination' do
 
+  let(:formatter) { nil }
   include_context 'relations'
 
   describe '#page' do

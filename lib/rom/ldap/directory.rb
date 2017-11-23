@@ -77,39 +77,21 @@ module ROM
       #
       # @api public
       def attribute_types
-        if Functions.contain?(:attribute_list)
-          Functions[:attribute_list].call
-        else
-          Functions.register :attribute_list, -> do
-            types = schema_attribute_types.flat_map(&method(:parse_attribute_type))
-            types.flatten.reject(&:nil?).sort_by(&:first).freeze
-          end
-          Functions[:attribute_list].call
-        end
+        # if Functions.contain?(:attribute_list)
+        #   list = Functions[:attribute_list].call
+        # else
+          list = build_attribute_list
+        #   Functions.register(:attribute_list) { list }
+        # end
+        # list
       end
 
       private
 
-      # require 'dry-monitor'
-      # extend Notifications::Listener
-      # Dry::Monitor::Notifications.new(:app)
-      # subscribe('configuration.directory', adapter: :ldap) do |event|
-      #   binding.pry
-      # end
-
-      # Consolidated method for logging activity.
-      # OPTIMIZE: consider dry-monitor use in this class.
-      #
-      # @api private
-      def log(caller = nil, message = nil, level = :info)
-        logger.send(level, "#{self.class}##{caller} #{message}")
-
-        if result.failure?
-          logger.error("#{self.class}##{caller} #{result.error_message}")
-        end
-        if result.message
-          logger.debug("#{self.class}##{caller} #{result.message}")
-        end
+      def build_attribute_list
+        types = schema_attribute_types
+        parsed_types = types.flat_map(&method(:parse_attribute_type))
+        parsed_types.flatten.reject(&:nil?).sort_by(&:first).freeze
       end
 
       # Build hash from attribute definition.
@@ -146,6 +128,28 @@ module ROM
             usage:       type[/USAGE (\S+)/, 1],
             source:      type[/X-SCHEMA '(\S+)'/, 1]
           }
+        end
+      end
+
+
+      # require 'dry-monitor'
+      # extend Notifications::Listener
+      # Dry::Monitor::Notifications.new(:app)
+      # subscribe('configuration.directory', adapter: :ldap) do |event|
+      #   binding.pry
+      # end
+      # Consolidated method for logging activity.
+      # OPTIMIZE: consider dry-monitor use in this class.
+      #
+      # @api private
+      def log(caller = nil, message = nil, level = :info)
+        logger.send(level, "#{self.class}##{caller} #{message}")
+
+        if result.failure?
+          logger.error("#{self.class}##{caller} #{result.error_message}")
+        end
+        if result.message
+          logger.debug("#{self.class}##{caller} #{result.message}")
         end
       end
 

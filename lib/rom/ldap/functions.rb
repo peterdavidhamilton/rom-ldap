@@ -75,9 +75,9 @@ module ROM
       def self.to_time(tuples)
         tuples.map do |time|
           begin
-            ten_k        = 10_000_000
-            since_1601   = 11_644_473_600
-            time         = (Integer(time) / ten_k) - since_1601
+            ten_k      = 10_000_000
+            since_1601 = 11_644_473_600
+            time       = (Integer(time) / ten_k) - since_1601
 
             ::Time.at(time)
           rescue ArgumentError
@@ -89,7 +89,7 @@ module ROM
       end
 
       def self.to_underscore(value)
-        Dry::Core::Inflector.underscore(value)
+        Dry::Core::Inflector.underscore(value.delete('= '))
       end
 
       # Function applied to Directory::Entity to format incoming attribute names.

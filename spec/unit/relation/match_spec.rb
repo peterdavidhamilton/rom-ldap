@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe ROM::LDAP::Relation do
-  include_context 'factories'
 
+  let(:formatter) { downcase_proc }
+  include_context 'factories'
   let(:user_names) { %w[rita sue bob] }
 
   describe '#present' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].present('uidNumber') }
 
     it 'source filter' do
@@ -83,7 +83,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#begins' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].begins(uid: 'b') }
 
     it 'source filter' do
@@ -121,7 +120,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#ends' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].ends(uid: 'a') }
 
     it 'source filter' do
@@ -159,7 +157,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#contains' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].contains(uid: 'o') }
 
     it 'source filter' do
@@ -197,7 +194,6 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#excludes' do
-    let(:formatter) { downcase_proc }
     let(:relation) { relations[:people].excludes(uid: 'i') }
 
     it 'source filter' do

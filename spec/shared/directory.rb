@@ -25,21 +25,15 @@ RSpec.shared_context 'directory' do
   end
 
   let(:reverse_proc) do
-    ->(key) { key.to_s.downcase.tr('-', '').reverse.to_sym }
+    ->(key) { key.to_s.downcase.tr('-= ', '').reverse.to_sym }
   end
 
   let(:downcase_proc) do
-    ->(key) {
-      key = key.to_s.downcase.tr('-', '')
-      key = key[0..-2] if key[-1] == '='
-      key.to_sym
-    }
+    ->(key) { key.to_s.downcase.tr('-= ', '').to_sym }
   end
 
   let(:method_name_proc) do
     ->(key) { ROM::LDAP::Functions.to_method_name(key) }
   end
-
-  let(:formatter) { nil }
 
 end
