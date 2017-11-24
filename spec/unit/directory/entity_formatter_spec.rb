@@ -18,8 +18,29 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       end
 
       it 'uses the actual attribute name like "gidNumber" or "apple-imhandle"' do
-        keys = %w[apple-imhandle cn dn gidNumber givenName
-                  mail objectClass sn uid uidNumber userPassword]
+        keys = %w[
+          apple-imhandle
+          cn
+          createTimestamp
+          creatorsName
+          dn
+          entryCSN
+          entryDN
+          entryParentId
+          entryUUID
+          gidNumber
+          givenName
+          mail
+          nbChildren
+          nbSubordinates
+          objectClass
+          pwdHistory
+          sn
+          subschemaSubentry
+          uid
+          uidNumber
+          userPassword
+        ]
         expect(accounts.schema.to_h.keys).to eq(keys)
       end
     end
@@ -33,8 +54,29 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       end
 
       it 'produces lowercase symbol attribute names like :gidnumber' do
-        keys = %i[appleimhandle cn dn gidnumber givenname
-                  mail objectclass sn uid uidnumber userpassword]
+        keys = %i[
+          appleimhandle
+          cn
+          createtimestamp
+          creatorsname
+          dn
+          entrycsn
+          entrydn
+          entryparentid
+          entryuuid
+          gidnumber
+          givenname
+          mail
+          nbchildren
+          nbsubordinates
+          objectclass
+          pwdhistory
+          sn
+          subschemasubentry
+          uid
+          uidnumber
+          userpassword
+        ]
         expect(accounts.schema.to_h.keys).to eq(keys)
       end
     end
@@ -48,8 +90,29 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       end
 
       it 'produces snake_case symbol attribute names like :gid_number' do
-        keys = %i[apple_imhandle cn dn gid_number given_name
-                  mail object_class sn uid uid_number user_password]
+           keys = %i[
+            apple_imhandle
+            cn
+            create_timestamp
+            creators_name
+            dn
+            entry_csn
+            entry_dn
+            entry_parent_id
+            entry_uuid
+            gid_number
+            given_name
+            mail
+            nb_children
+            nb_subordinates
+            object_class
+            pwd_history
+            sn
+            subschema_subentry
+            uid
+            uid_number
+            user_password
+          ]
         expect(accounts.schema.to_h.keys).to eq(keys)
       end
     end
@@ -63,8 +126,29 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       end
 
       it 'produces names like :rebmundig' do
-        keys = %i[diu drowssapresu eldnahmielppa emannevig liam nc nd ns
-                  rebmundig rebmundiu ssalctcejbo]
+        keys = %i[
+            ditnerapyrtne
+            diu
+            diuuyrtne
+            drowssapresu
+            eldnahmielppa
+            emannevig
+            emansrotaerc
+            liam
+            nc
+            nd
+            ndyrtne
+            nerdlihcbn
+            ns
+            nscyrtne
+            pmatsemitetaerc
+            rebmundig
+            rebmundiu
+            setanidrobusbn
+            ssalctcejbo
+            yrotsihdwp
+            yrtnebusamehcsbus
+          ]
         expect(accounts.schema.to_h.keys).to eq(keys)
       end
     end

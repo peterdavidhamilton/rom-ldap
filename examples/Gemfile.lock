@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: bb:rom-ldap
-  revision: 59af84144a685a852313a0dedbfe98a374069e9a
+  revision: 9c9ed71d43cd2a974ac504c7963e0f8dcf7f1e53
   branch: develop
   specs:
     rom-ldap (0.0.7)

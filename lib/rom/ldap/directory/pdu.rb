@@ -59,8 +59,8 @@ module ROM
         alias ldap_controls   controls
 
         def inspect
-          <<~EOF
-          #<#{self.class}
+          <<~PDU
+            #<#{self.class}
             type="#{pdu_type}"
             result_code=#{result_code}
             message="#{message}"
@@ -72,7 +72,7 @@ module ROM
             matched_dn="#{matched_dn}"
             bind_as="#{bind_parameters}"
             >
-          EOF
+          PDU
         end
 
         alias to_s inspect

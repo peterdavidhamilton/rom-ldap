@@ -6,8 +6,12 @@ module ROM
     include Dry::Core::Constants
 
     WILDCARD   = '*'.freeze
+    OP_ATTRS   = '+'.freeze
     NEW_LINE   = "\n".freeze
     EMPTY_BASE = EMPTY_STRING
+
+    # Including :create_timestamp, :modify_timestamp, :entry_uuid
+    ALL_ATTRIBUTES = [WILDCARD, OP_ATTRS].freeze
 
     CONSTRUCTORS = {
       con_and: '&', # intersection
@@ -81,6 +85,22 @@ module ROM
       protocolInformationMatch
       telephoneNumberMatch
       telephoneNumberSubstringsMatch
+      uuidMatch
+    ].freeze
+
+    INTEGER_MATCHERS = %w[
+      integerMatch
+      integerOrderingMatch
+    ].freeze
+
+    TIME_MATCHERS = %w[
+      csnMatch
+      generalizedTimeMatch
+      generalizedTimeOrderingMatch
+    ].freeze
+
+    BOOLEAN_MATCHERS = %w[
+      booleanMatch
     ].freeze
 
     #

@@ -15,14 +15,35 @@ RSpec.describe ROM::LDAP::Schema::Inferrer do
 
     it 'has formatted attribute names' do
       expect(schema.keys).to eql(
-        %i[apple_imhandle cn dn gid_number given_name mail
-          object_class sn uid uid_number user_password]
+        %i[
+          apple_imhandle
+          cn
+          create_timestamp
+          creators_name
+          dn
+          entry_csn
+          entry_dn
+          entry_parent_id
+          entry_uuid
+          gid_number
+          given_name
+          mail
+          nb_children
+          nb_subordinates
+          object_class
+          pwd_history
+          sn
+          subschema_subentry
+          uid
+          uid_number
+          user_password
+        ]
       )
     end
 
     it 'has inferred attribute types' do
       primitives = schema.values.map(&:type).map(&:primitive).uniq
-      expect(primitives).to eql([String, Array, Integer])
+      expect(primitives).to eql([String, Time, Array, Integer])
     end
   end
 end

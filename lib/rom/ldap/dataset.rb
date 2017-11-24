@@ -75,7 +75,6 @@ module ROM
         DSL.public_instance_methods(false)
       end
 
-
       # Raw filter search.
       # Temporarily replace dataset with new filter.
       #
@@ -88,9 +87,9 @@ module ROM
         original  = @source
         @criteria = []
         @source   = filter
-        results   = each
+        @entities = each
         @source   = original
-        results
+        @entities
       end
       alias [] call
 
@@ -104,11 +103,6 @@ module ROM
         db = ::OpenStruct.new
         db[:database_type] = directory.type
         ::OpenStruct.new(db: db)
-      end
-
-      # NB: rom-sql hits this.
-      def sql
-        #noop
       end
 
       # @return [ROM::LDAP::Dataset]
@@ -141,16 +135,26 @@ module ROM
         self
       end
 
-      # Initiate directory search and return some or all results before resetting criteria.
+      # Iterate over @entities or populate with a directory search.
+      # Reset @criteria and @entities.
       #
-      # @return [Enumerator::Lazy<Entity>, Array<Entity>]
+      # @return [Enumerator::Lazy<Directory::Entity>]
       #
       # @api public
       def each(*args, &block)
-        results = search.lazy
-        reset!
-        results = paginate(results) if paginated?
-        block_given? ? results.send(__callee__, *args, &block) : results
+        results = @entities ||= search.lazy
+        @entities = nil
+        @criteria = []
+
+        if paginated?
+          results = results.to_a[page_range].lazy || EMPTY_ARRAY.lazy
+        end
+
+        if block_given?
+          results.each(*args, &block)
+        else
+          results
+        end
       end
 
       # Respond to Relation methods by returning finalised search results.
@@ -207,24 +211,7 @@ module ROM
       #
       # @api private
       def search(&block)
-        results = directory.search(query, base: @base, &block)
-        reset!
-        results
-      end
-
-      # Reset the current criteria
-      #
-      # @return [ROM::LDAP::Dataset]
-      #
-      # @api private
-      def reset!
-        @criteria = []
-        self
-      end
-
-      # @api private
-      def paginate(results)
-        results.to_a[page_range] || EMPTY_ARRAY
+        directory.search(query, base: @base, &block)
       end
 
       # @api private

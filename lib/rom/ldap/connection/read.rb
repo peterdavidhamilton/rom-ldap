@@ -38,7 +38,7 @@ module ROM
           max_time: nil,
           scope: SCOPE_SUBTREE,
           deref: DEREF_NEVER,
-          attributes: EMPTY_ARRAY,
+          attributes: ALL_ATTRIBUTES,
           attributes_only: false,
           return_referrals: false,
           sort: false, # %w[dn]

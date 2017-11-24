@@ -137,13 +137,13 @@ module ROM
         end
       end
 
-
       # require 'dry-monitor'
       # extend Notifications::Listener
       # Dry::Monitor::Notifications.new(:app)
       # subscribe('configuration.directory', adapter: :ldap) do |event|
       #   binding.pry
       # end
+
       # Consolidated method for logging activity.
       # OPTIMIZE: consider dry-monitor use in this class.
       #

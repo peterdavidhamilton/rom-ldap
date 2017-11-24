@@ -1,6 +1,8 @@
 require 'rom/ldap/functions'
 require 'rom/ldap/directory/ldif'
 
+using ::Compatibility
+
 module ROM
   module LDAP
     class Directory
@@ -45,8 +47,22 @@ module ROM
         def [](key, alt = EMPTY_ARRAY)
           @canonical[self.class.rename(key)] || alt
         end
-
         alias fetch []
+
+        # Prune unwanted keys from internal hashes.
+        # Uses ::Compatibility#slice refinement unless Ruby >= 2.5.0
+        #
+        # @param keys [Array<Symbol, String>] Entity attributes to keep
+        #
+        # @return [self]
+        #
+        # @api public
+        def select(*keys)
+          source_keys = translation_map.fetch_values(*keys)
+          @canonical  = @canonical.slice(*keys)
+          @source     = @source.slice(*source_keys)
+          self
+        end
 
         def first(key)
           value = self[key]

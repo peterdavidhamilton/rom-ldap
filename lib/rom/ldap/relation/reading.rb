@@ -240,7 +240,7 @@ module ROM
         #
         # @api public
         def select(*args)
-          new(dataset.map { |e| e.select { |k, _v| args.include?(k) } })
+          new(dataset.select(*args))
         end
         alias pluck select
 

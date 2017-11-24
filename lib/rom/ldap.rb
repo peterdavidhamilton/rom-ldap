@@ -1,4 +1,7 @@
 require 'rom/core'
+
+require 'rom/refinements/hash'
+
 require 'rom/ldap/version'
 require 'rom/ldap/constants'
 require 'rom/ldap/connection'

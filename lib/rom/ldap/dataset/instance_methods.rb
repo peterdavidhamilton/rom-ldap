@@ -38,13 +38,13 @@ module ROM
 
         # Find by Distinguished Name
         #
-        # @param dn [String, Array<String>]
+        # @param dns [String, Array<String>]
         #
         # @return [Array<Entity>]
         #
         # @api public
-        def fetch(dn)
-          Array(dn).flat_map { |dn| directory.by_dn(dn) }
+        def fetch(dns)
+          Array(dns).flat_map { |dn| directory.by_dn(dn) }
         end
 
         # Interface to Directory#add
@@ -74,6 +74,14 @@ module ROM
         # @api public
         def delete(entries)
           entries.map { |e| directory.delete(*e[:dn]) }
+        end
+
+        # @return [Dataset]
+        #
+        # @api public
+        def select(*args)
+          @entities = each.map { |entity| entity.select(*args) }
+          self
         end
 
         # Handle different string output formats.

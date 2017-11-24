@@ -47,6 +47,10 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.to_a
   end
 
+  def all_as_hash
+    animals.with(auto_struct: false).to_a
+  end
+
   def mammals
     animals.by_class('mammalia').to_a
   end
@@ -64,7 +68,7 @@ class AnimalRepo < ROM::Repository[:animals]
   end
 
   def top_ten_by_genus
-    animals.with(auto_struct: true).order(:genus).limit(10).to_a.map(&:common_name)
+    animals.order(:genus).limit(10).to_a.map(&:common_name)
   end
 
   def apes_to_ldif
@@ -72,12 +76,13 @@ class AnimalRepo < ROM::Repository[:animals]
   end
 
   def reptiles_to_yaml
-    animals.by_class('reptilia').to_yaml
+    animals.by_class('reptilia').select(:cn, :species).to_yaml
   end
 
   def birds_to_json
     animals.by_class('aves').to_json
   end
+
 end
 
 
@@ -87,13 +92,7 @@ end
 conf.relation(:animals, adapter: :ldap) do
   gateway :directory
   base    'dc=example,dc=com'.freeze
-
-  schema  '(species=*)', as: :animals, infer: true do
-    attribute 'createTimestamp', ROM::LDAP::Types::Time
-    attribute 'modifyTimestamp', ROM::LDAP::Types::Time
-    attribute 'entryUUID',       ROM::LDAP::Types::String
-  end
-
+  schema  '(species=*)', as: :animals, infer: true
   branches animals: 'ou=animals,dc=example,dc=com',
            extinct: 'ou=extinct,ou=animals,dc=example,dc=com'
   use :pagination

@@ -2,6 +2,8 @@ require 'ber'
 require 'rom/ldap/types'
 require 'rom/initializer'
 
+using ::Compatibility
+
 module ROM
   module LDAP
     class Schema
@@ -72,18 +74,11 @@ module ROM
             source:   schema,
             multiple: multiple,
             read:     read_type,
-            **extract_meta(attribute)
+            **attribute.slice(:description, :original, :matcher, :oid)
           )
         end
 
         private
-
-        # Hash#slice alternative, will be available from Ruby release 2.5.0.
-        #
-        # @api private
-        def extract_meta(hash)
-          hash.select { |k, _| %i[description original matcher oid].include?(k) }
-        end
 
         # Select the attribute whose formatted name matches the attribute name.
         #
@@ -93,7 +88,7 @@ module ROM
         #
         # @api private
         def attribute_by_name(attribute_name)
-          attributes.select { |a| a[:name] == attribute_name }.first || EMPTY_HASH
+          attributes.detect { |a| a[:name] == attribute_name } || EMPTY_HASH
         end
 
         # @return [String]
@@ -101,19 +96,14 @@ module ROM
         # @api private
         def map_type(attribute)
           case attribute[:matcher]
-          when 'booleanMatch'
-            'Bool'
-          when 'integerMatch', 'integerOrderingMatch'
-            'Int'
-          when 'generalizedTimeMatch', 'generalizedTimeOrderingMatch'
-            'Time'
           when nil
-            type = attribute[:single] ? 'String' : 'Array'
-
-            ::BER.lookup(:oid, attribute[:oid]) || type
-          when *STRING_MATCHERS then 'String'
+            primitive = attribute[:single] ? 'String' : 'Array'
+            ::BER.lookup(:oid, attribute[:oid]) || primitive
+          when *STRING_MATCHERS  then 'String'
+          when *BOOLEAN_MATCHERS then 'Bool'
+          when *INTEGER_MATCHERS then 'Int'
+          when *TIME_MATCHERS    then 'Time'
           else
-            puts "#{self.class}##{__callee__} #{attribute[:matcher]} not known"
             'Array'
           end
         end
