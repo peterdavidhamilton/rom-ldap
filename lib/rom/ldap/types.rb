@@ -28,6 +28,7 @@ module ROM
       Octet  = Types.Constructor(::String, ->(v) { v.force_encoding('UTF-8') })
       Postal = Types.Constructor(::String, ->(v) { v.split('$') })
       Serial = Int.meta(primary_key: true)
+      DN     = String.meta(primary_key: true)
 
       module Single
         String = Types.Constructor(::String,    ->(v) { v.first.to_s                 })

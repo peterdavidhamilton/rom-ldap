@@ -143,6 +143,9 @@ module ROM
           pageable? && max_results.nil?
         end
 
+        # Tuplify operation input, using a translation hash to rename keys.
+        #
+        # @api private
         def payload(tuple)
           attributes  = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
           transmatrix = attributes.map { |a| a.values_at(:name, :original) }.to_h

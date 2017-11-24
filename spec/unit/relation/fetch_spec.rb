@@ -5,6 +5,10 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
   let(:formatter) { nil }
   include_context 'directory'
 
+  after(:each) do
+    reset_attributes!
+  end
+
   describe '#fetch default primary_key' do
     before do
       use_formatter(formatter)
@@ -17,7 +21,7 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     let(:relation) { relations.foo }
 
     it 'returns a single tuple identified by the pk' do
-      expect(relation.fetch('uid=test1,ou=users,dc=example,dc=com')['uidNumber']).to eql([1])
+      expect(relation.fetch('uid=test1,ou=users,dc=example,dc=com')['uidNumber']).to eql(1)
     end
 
     it 'raises when tuple was not found' do

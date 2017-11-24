@@ -11,38 +11,38 @@ version: 1
 #
 # Top Levels
 #
-# dn: ou=users,dc=example,dc=com
-# objectClass: top
-# objectClass: organizationalUnit
-# ou: users
+dn: ou=users,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: users
 
-# dn: ou=groups,dc=example,dc=com
-# objectClass: top
-# objectClass: organizationalUnit
-# ou: groups
+dn: ou=groups,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
 
 #
 # Groups
 #
-# dn: cn=empty,ou=groups,dc=example,dc=com
-# cn: Empty Group
-# objectClass: top
-# objectClass: posixGroup
-# gidNumber: 9997
+dn: cn=empty,ou=groups,dc=example,dc=com
+cn: Empty Group
+objectClass: top
+objectClass: posixGroup
+gidNumber: 9997
 
-# # 10 'test' customers below are members
-# dn: cn=customers,ou=groups,dc=example,dc=com
-# cn: Test Customers
-# objectClass: top
-# objectClass: posixGroup
-# gidNumber: 9998
+# 10 'test' customers below are members
+dn: cn=customers,ou=groups,dc=example,dc=com
+cn: Test Customers
+objectClass: top
+objectClass: posixGroup
+gidNumber: 9998
 
-# # static group available for generated users
-# dn: cn=staff,ou=groups,dc=example,dc=com
-# cn: Factory Staff
-# objectClass: top
-# objectClass: posixGroup
-# gidNumber: 9999
+# static group available for generated users
+dn: cn=staff,ou=groups,dc=example,dc=com
+cn: Factory Staff
+objectClass: top
+objectClass: posixGroup
+gidNumber: 9999
 
 
 #

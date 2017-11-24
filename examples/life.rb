@@ -87,7 +87,13 @@ end
 conf.relation(:animals, adapter: :ldap) do
   gateway :directory
   base    'dc=example,dc=com'.freeze
-  schema  '(species=*)', as: :animals, infer: true
+
+  schema  '(species=*)', as: :animals, infer: true do
+    attribute 'createTimestamp', ROM::LDAP::Types::Time
+    attribute 'modifyTimestamp', ROM::LDAP::Types::Time
+    attribute 'entryUUID',       ROM::LDAP::Types::String
+  end
+
   branches animals: 'ou=animals,dc=example,dc=com',
            extinct: 'ou=extinct,ou=animals,dc=example,dc=com'
   use :pagination

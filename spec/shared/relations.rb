@@ -3,6 +3,7 @@ RSpec.shared_context 'relations' do
   include_context 'directory'
 
   before do
+    # use_formatter(formatter)
     ROM::LDAP::Directory::Entity.use_formatter(formatter)
 
     conf.relation(:accounts) do
@@ -35,10 +36,17 @@ RSpec.shared_context 'relations' do
       use :auto_restrictions
       auto_struct false
     end
+
+    # reload_attributes!
+    relations[:accounts].dataset.directory.attribute_types
   end
 
   let(:accounts)  { container.relations[:accounts]  }
   let(:customers) { container.relations[:customers] }
   let(:people)    { container.relations[:people]    }
 
+  after do
+    # reset_attributes!
+    ROM::LDAP::Directory.attributes = nil
+  end
 end

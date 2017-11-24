@@ -56,7 +56,15 @@ module ROM
         connection.connect
       end
 
-      # Register/fetch parsed directory attributes in the Functions container.
+      # Cache built attributes array as class variable.
+      # Allows specs to trigger rebuilding by deleting and allows functions access.
+      #
+      # @api public
+      class << self
+        attr_accessor :attributes
+      end
+
+      # Parsed array of all directory attributes.
       #
       # @return [Array<Hash>]
       #
@@ -77,21 +85,19 @@ module ROM
       #
       # @api public
       def attribute_types
-        # if Functions.contain?(:attribute_list)
-        #   list = Functions[:attribute_list].call
-        # else
-          list = build_attribute_list
-        #   Functions.register(:attribute_list) { list }
-        # end
-        # list
+        self.class.attributes ||= build_attribute_list
       end
 
       private
 
+      # Output changes depending on Directory::Entity.formatter
+      #
+      # @api private
       def build_attribute_list
-        types = schema_attribute_types
-        parsed_types = types.flat_map(&method(:parse_attribute_type))
-        parsed_types.flatten.reject(&:nil?).sort_by(&:first).freeze
+        schema_attribute_types
+          .flat_map(&method(:parse_attribute_type))
+          .flatten.reject(&:nil?)
+          .sort_by(&:first).freeze
       end
 
       # Build hash from attribute definition.

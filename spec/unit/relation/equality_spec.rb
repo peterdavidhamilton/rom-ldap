@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe ROM::LDAP::Relation do
 
-  let(:formatter) { method_name_proc }
+  let(:formatter) { downcase_proc }
   include_context 'factories'
   let(:user_names) { %w[barry billy bobby sally] }
 

@@ -5,16 +5,7 @@ version: 1
 # attributeTypes: 'apple-imhandle'
 #########################################################
 
-#olcAttributeTypes: {15}( 1.3.6.1.4.1.63.1000.1.1.1.1.21 NAME 'apple-imhandle'
-# DESC 'IM handle (service:account name)' EQUALITY caseExactMatch SUBSTR caseEx
-# actSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-#
-# attributetype ( 1.3.6.1.4.1.63.1000.1.1.1.1.21 NAME 'apple-imhandle'
-#   DESC 'IM handle (service:account name)'
-#   EQUALITY caseExactMatch
-#   SUBSTR caseExactSubstringsMatch
-#   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-dn: m-oid=1.3.6.1.4.1.63.1000.1.1.1.1.21,ou=attributeTypes,cn=other,ou=schema
+dn: m-oid=1.3.6.1.4.1.63.1000.1.1.1.1.21, ou=attributeTypes, cn=rom, ou=schema
 objectClass: metaAttributeType
 objectClass: metaTop
 objectClass: top
@@ -32,32 +23,11 @@ m-oid: 1.3.6.1.4.1.63.1000.1.1.1.1.21
 # objectClasses: 'apple-user'
 #########################################################
 
-#objectclass (
-#  1.3.6.1.4.1.63.1000.1.1.2.1
-#  NAME 'apple-user'
-#  SUP top
-#  AUXILIARY
-#  DESC 'apple user account'
-#  MAY ( apple-user-homeurl $ apple-user-class $
-#    apple-user-homequota $ apple-user-mailattribute $
-#    apple-user-printattribute $ apple-mcxflags $
-#    apple-mcxsettings $ apple-user-adminlimits $
-#    apple-user-picture $ apple-user-authenticationhint $
-#    apple-user-homesoftquota $ apple-user-passwordpolicy $
-#    apple-keyword $ apple-generateduid $ authAuthority $
-#    acctFlags $ pwdLastSet $ logonTime $ logoffTime $
-#    kickoffTime $ homeDrive $ scriptPath $ profilePath $
-#    userWorkstations $ smbHome $ rid $ primaryGroupID ) )
-dn: m-oid=1.3.6.1.4.1.63.1000.1.1.2.1,ou=objectClasses,cn=other,ou=schema
+dn: m-oid=1.3.6.1.4.1.63.1000.1.1.2.1, ou=objectClasses, cn=rom, ou=schema
 objectClass: metaObjectClass
 objectClass: metaTop
 objectClass: top
 m-description: apple user account
-# m-may: apple-user-homeurl
-# m-may: apple-user-class
-# m-may: apple-user-homequota
-# m-may: apple-user-picture
-# m-may: apple-generateduid
 m-may: apple-imhandle
 m-supobjectclass: top
 m-name: apple-user

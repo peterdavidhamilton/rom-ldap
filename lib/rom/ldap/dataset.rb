@@ -11,7 +11,7 @@ module ROM
     # @param directory [Directory] Directory object
     #
     # @param source [String] Relation name.
-    #   @example => "(&(objectclass=person)(uidnumber=*))"
+    #   @example => "(&(objectClass=person)(uidNumber=*))"
     #
     # @option :limit [Integer] Pagination page(1).
     #

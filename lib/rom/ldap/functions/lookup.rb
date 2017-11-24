@@ -1,16 +1,20 @@
 module ROM
   module LDAP
     module Lookup
-      # @see TypeBuilder#by_name
       # Map formatted name back to ldap name
       #
       # @param attribute [String, Symbol] canonical attribute name used in application.
       #
       # @return [String] original attribute name used on server.
       #
+      # @example
+      #   id_attribute(:uid_number) => 'uidNumber'
+      #
       # # @api private
       def id_attribute(attr_name)
-        Functions[:find_attr].call(attr_name).fetch(:original, attr_name)
+        dir_attrs = Directory.attributes || EMPTY_ARRAY
+        attribute = dir_attrs.detect { |a| a[:name].eql?(attr_name) }
+        attribute ? attribute[:original] : attr_name
       end
 
       # @param val [Symbol,String]

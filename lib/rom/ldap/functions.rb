@@ -13,30 +13,35 @@ module ROM
 
       extend Exporters
 
-      # @param attr_name [String, Symbol] Canonical name of the attribute
-      #
-      # @return [Hash] Attribute
-      #
-      # @api public
-      def self.find_attr(attr_name)
-        attrs = contain?(:attribute_list) ? t(:attribute_list).call : EMPTY_ARRAY
-        attrs.select { |a| a[:name] == attr_name }.first || EMPTY_HASH
-      end
-
-      # Build tuple from arguments. Translates keys into original schema names.
+      # Build tuple from arguments.
+      # Translates keys into original schema names and stringify values.
       #
       # @param tuple [Hash] input arguments for directory #add and #modify
       #
-      # @return [Hash] Stringified hash
+      # @return [Hash]
       #   NB: Directory#add will receive a hash with key :dn
       #
       # @example
-      #   {
-      #      dn: 'uid=zippy,ou=users,dc=example,dc=com',
-      #      'apple-imhandle' => '@zippy',
-      #      'gidNumber' => '1',
-      #      'givenName' => 'Franz',
-      #   }
+      #
+      #   Functions[:tuplify].(
+      #     {
+      #       dn: 'uid=zippy,ou=users,dc=example,dc=com',
+      #       apple_imhandle: '@zippy',
+      #       gid_number: 1,
+      #       given_name: 'Franz'
+      #     }, {
+      #       apple_imhandle: 'apple-imhandle',
+      #       gid_number: 'gidNumber',
+      #       given_name: 'givenName'
+      #     }
+      #   )
+      #
+      #     =>  {
+      #       dn: 'uid=zippy,ou=users,dc=example,dc=com',
+      #       'apple-imhandle' => '@zippy',
+      #       'gidNumber' => '1',
+      #       'givenName' => 'Franz',
+      #     }
       #
       # @api public
       def self.tuplify(tuple, matrix)
@@ -124,8 +129,7 @@ module ROM
 
       # 'query' or 'filter' to 'expression'
       #
-      # @param input [Array,String]
-      # @param attributes [Array<Hash>]
+      # @param input [Array, String]
       #
       # @return [Expression]
       #
