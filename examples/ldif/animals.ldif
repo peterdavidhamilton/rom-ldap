@@ -11,6 +11,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: animals
 
+dn: ou=extinct,ou=animals,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: extinct
+
 # dn: ou=groups,dc=example,dc=com
 # objectClass: top
 # objectClass: organizationalUnit
@@ -32,6 +37,7 @@ objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 7582530942
+extinct: FALSE
 
 dn: cn=Red Fox,ou=animals,dc=example,dc=com
 cn: Red Fox
@@ -43,6 +49,7 @@ objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=American Robin,ou=animals,dc=example,dc=com
 cn: American Robin
@@ -54,6 +61,7 @@ objectClass: aves
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=Zebra,ou=animals,dc=example,dc=com
 cn: Zebra
@@ -65,6 +73,7 @@ objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=Spur-thighed Tortoise,ou=animals,dc=example,dc=com
 cn: Spur-thighed Tortoise
@@ -76,6 +85,7 @@ objectClass: reptilia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=Sun Bear,ou=animals,dc=example,dc=com
 cn: Sun Bear
@@ -87,6 +97,7 @@ objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=Poison dart Frog,ou=animals,dc=example,dc=com
 cn: Poison dart Frog
@@ -98,6 +109,7 @@ objectClass: amphibia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=James's Flamingo,ou=animals,dc=example,dc=com
 cn: James's Flamingo
@@ -109,6 +121,7 @@ objectClass: aves
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+extinct: FALSE
 
 dn: cn=Orangutan,ou=animals,dc=example,dc=com
 cn: Orangutan
@@ -120,6 +133,8 @@ objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
+description: The King of the Swingers
+extinct: FALSE
 
 dn: cn=Cat,ou=animals,dc=example,dc=com
 cn: Cat
@@ -130,7 +145,8 @@ order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 0
+populationCount: 1234567689
+extinct: FALSE
 
 dn: cn=Dog,ou=animals,dc=example,dc=com
 cn: Dog
@@ -141,7 +157,9 @@ order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 0
+populationCount: 999090909
+description: Man's Best Friend
+extinct: FALSE
 
 dn: cn=Lion,ou=animals,dc=example,dc=com
 cn: Lion
@@ -152,7 +170,8 @@ order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 0
+populationCount: 40000
+extinct: FALSE
 
 dn: cn=Giant Panda,ou=animals,dc=example,dc=com
 cn: Giant Panda
@@ -163,8 +182,8 @@ order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 0
-# conservationStatus: 3.1
+populationCount: 1000
+extinct: FALSE
 
 dn: cn=Asian Elephant,ou=animals,dc=example,dc=com
 cn: Asian Elephant
@@ -175,8 +194,32 @@ order: Proboscidea
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 0
+populationCount: 2000
+extinct: FALSE
 
+dn: cn=Elephant Shrew,ou=animals,dc=example,dc=com
+cn: Elephant Shrew
+species: Rhynchocyon petersi
+genus: Rhynchocyon
+family: Macroscelididae
+order: Macroscelidea
+objectClass: mammalia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 100000
+extinct: FALSE
+
+dn: cn=Dodo,ou=extinct,ou=animals,dc=example,dc=com
+cn: Dodo
+species: Raphus cucullatus
+genus: Raphus
+family: Columbidae
+order:  Columbiformes
+objectClass: aves
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+extinct: TRUE
 
 #########################################################
 #

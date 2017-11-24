@@ -23,8 +23,5 @@ https://en.wikipedia.org/wiki/Pig
 https://en.wikipedia.org/wiki/Robin
 https://en.wikipedia.org/wiki/Seahorse
 https://en.wikipedia.org/wiki/Starfish
-
 https://en.wikipedia.org/wiki/Platypus
 https://en.wikipedia.org/wiki/Duck
-
-https://en.wikipedia.org/wiki/Elephant_shrew

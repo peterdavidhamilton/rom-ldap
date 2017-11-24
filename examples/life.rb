@@ -44,7 +44,7 @@ class AnimalRepo < ROM::Repository[:animals]
   struct_namespace Entities
 
   def all
-    animals.to_a
+    animals.order(:modify_timestamp).to_a
   end
 
   def all_as_hash
@@ -65,6 +65,10 @@ class AnimalRepo < ROM::Repository[:animals]
 
   def extinct_meat_eaters
     animals.extinct.carnivores.to_a
+  end
+
+  def extinct_vegetarians
+    animals.extinct.vegetarians.to_a
   end
 
   def top_ten_by_genus
@@ -169,16 +173,21 @@ conf.relation(:animals, adapter: :ldap) do
     where(objectclass: 'mammalia')
   end
 
+  def vegetarians
+    unequals(order: 'carnivora')
+  end
+
   def population_above(num)
     gte(population_count: num)
   end
 
   # essentially a join table
-  # def members(dn)
+  def members(dn)
+    binding.pry
   #   group = fetch(dn)
   #   entries = group.member
   #   fetch entries
-  # end
+  end
 end
 
 
@@ -212,6 +221,7 @@ animals.equals(cn: 'orangutan').one.cn
 
 repo.reptiles_to_yaml
 
+animals.where(extinct: true).to_a
 
 # animals.members('cn=domestic,ou=groups,dc=example,dc=com').count
 
