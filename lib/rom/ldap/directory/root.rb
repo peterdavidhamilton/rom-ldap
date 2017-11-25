@@ -4,6 +4,8 @@ module ROM
       module Root
         # Set instance variables like directory_type
         #
+        # @see Gateway#directory
+        #
         # @return [ROM::LDAP::Directory]
         #
         # @api public
@@ -33,10 +35,13 @@ module ROM
               forest = root.first('forestFunctionality').to_i
               dom    = root.first('domainFunctionality').to_i
 
+              time   = Functions[:to_time][root['currentTime']].first
+
               @supported_capabilities   = caps
               @controller_functionality = dc
               @forest_functionality     = forest
               @domain_functionality     = dom
+              @directory_time           = time
               @vendor_name              = 'Microsoft'
               @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
               @directory_type           = :active_directory
@@ -58,7 +63,7 @@ module ROM
 
         # Representation of directory RootDSE
         #
-        # @return [BER::Entity]
+        # @return [Directory::Entity]
         #
         # @param attrs [Array<Symbol>] optional array of desired attributes
         #
@@ -89,6 +94,13 @@ module ROM
         # @api private
         attr_reader :forest_functionality
 
+        # LDAP server internal clock (Active Directory)
+        #
+        # @return [Time]
+        #
+        # @api private
+        attr_reader :directory_time
+
         # @return [Array<String>]
         #
         # @api private
@@ -98,14 +110,14 @@ module ROM
         #
         # @api private
         def vendor_name
-          @vendor_name ||= root.first('vendorName')
+          root.first('vendorName')
         end
 
         # @return [String]
         #
         # @api private
         def vendor_version
-          @vendor_version ||= root.first('vendorVersion')
+          root.first('vendorVersion')
         end
 
         # @return [Array<String>]

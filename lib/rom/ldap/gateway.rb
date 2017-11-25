@@ -68,7 +68,7 @@ module ROM
       #
       # @param filter [String]
       #
-      # @return [Array<ROM::LDAP::Directory::Entity>]
+      # @return [Array<Directory::Entity>]
       #
       # @api public
       def [](filter)
@@ -120,6 +120,11 @@ module ROM
 
       alias directory_type database_type
 
+      # Create or return existing Connection instance and bind if username
+      #
+      # @return [Connection]
+      #
+      # @api public
       def connection
         if connected?
           @conn
@@ -142,7 +147,8 @@ module ROM
 
       private
 
-      # Wrapper for Connection and Logger
+      # Wrapper for Connection and Logger.
+      # NB public access to this is through gateway.dataset.directory
       #
       # @return [Directory] ldap server object
       #

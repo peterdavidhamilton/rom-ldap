@@ -5,7 +5,11 @@ RSpec.shared_context 'directory' do
   end
 
   let(:ldap_options) do
-    { base: 'ou=users,dc=example,dc=com' }
+    {
+      base:  'ou=users,dc=example,dc=com',
+      # logger: Logger.new(IO::NULL)
+      logger: Logger.new(File.open('./log/test.log', 'a'))
+    }
   end
 
   let(:conf) do
@@ -23,6 +27,10 @@ RSpec.shared_context 'directory' do
   let(:relations) do
     container.relations
   end
+
+  #
+  # Example functions to format attributes.
+  #
 
   let(:reverse_proc) do
     ->(key) { key.to_s.downcase.tr('-= ', '').reverse.to_sym }

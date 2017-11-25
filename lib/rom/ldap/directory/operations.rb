@@ -73,11 +73,17 @@ module ROM
 
         # Used by gateway[filter] to infer schema. Limited to 100.
         #
-        # @return [Integer]
+        # @return [Array<Directory::Entity>]
         #
         # @api public
         def attributes(filter)
-          query(filter: filter, max_results: 100, attributes_only: true, unlimited: false)
+          query(
+            filter: filter,
+            base: base,
+            max_results: 100,
+            attributes_only: true,
+            unlimited: false
+          )
         end
 
         # Count everything within the current base, inclusive of base entry.

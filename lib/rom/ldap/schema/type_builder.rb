@@ -2,6 +2,7 @@ require 'ber'
 require 'rom/ldap/types'
 require 'rom/initializer'
 
+# Hash#slice
 using ::Compatibility
 
 module ROM
@@ -41,7 +42,7 @@ module ROM
       # - An optional attribute usage string indicating the context in which the attribute is to be used.
       # - An optional flag that indicates whether the attribute can be modified by external clients.
       #
-      # @see Directory.parse_attribute_type
+      # @see Directory.attributes
       #
       # @see <https://docs.oracle.com/cd/E19450-01/820-6173/def-attribute-type.html>
       #
@@ -80,7 +81,7 @@ module ROM
 
         private
 
-        # Select the attribute whose formatted name matches the attribute name.
+        # Attribute whose formatted name matches the attribute name.
         #
         # @param name [Symbol, String]
         #
