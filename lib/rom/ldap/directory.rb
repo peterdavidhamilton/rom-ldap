@@ -3,6 +3,7 @@ require 'dry/core/class_attributes'
 require 'rom/support/memoizable'
 require 'timeout'
 
+require 'rom/ldap/functions'
 require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/sub_schema'
 require 'rom/ldap/directory/capabilities'
@@ -19,7 +20,7 @@ module ROM
       defines :default_filter
 
       ldap_version   3
-      default_base   EMPTY_STRING
+      default_base   EMPTY_BASE
       default_filter '(objectClass=*)'.freeze
 
       include Memoizable
@@ -30,7 +31,7 @@ module ROM
 
       param :connection, reader: :private
 
-      option :base
+      option :base,        default: -> { self.class.default_base }
       option :timeout,     default: -> { 30 }
       option :max_results, default: -> { 1_000_000 }
       option :logger,      default: -> { ::Logger.new(STDOUT) }
@@ -90,7 +91,7 @@ module ROM
 
       private
 
-      # Output changes depending on Directory::Entity.formatter
+      # Output changes depending on Directory::Entry.formatter
       #
       # @api private
       def build_attribute_list
@@ -122,7 +123,7 @@ module ROM
 
         Array(attribute_names).map do |name|
           {
-            name:        Entity.rename(name),
+            name:        Entry.rename(name),
             original:    name,
             description: type[/DESC '(.+)' [A-Z]+/, 1],
             oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),

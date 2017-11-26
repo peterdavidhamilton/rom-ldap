@@ -2,31 +2,11 @@ module ROM
   module LDAP
     class Directory
       module Operations
-        #
-        # @param options [Hash]
-        #
-        # @return [Array<Entity>]
-        #
-        # @api public
-        def query(options)
-          set  = []
-          base ||= self.class.default_base
-          filter = options.delete(:filter) || self.class.default_filter
-          expr   = Functions[:to_exp][filter]
-
-          @result = connection.search(base: base, expression: expr, **options) do |entity|
-            set << entity
-            yield entity if block_given?
-          end
-
-          set.sort_by(&:dn)
-        end
-
-        # Find an entry by its RDN.
+        # Find an entry by distinguished name.
         #
         # @param dn [String]
         #
-        # @return [Entity]
+        # @return [Entry]
         #
         def by_dn(dn)
           query(base: dn, max_results: 1)
@@ -34,14 +14,16 @@ module ROM
 
         # Query results as array of hashes ordered by Distinguished Name
         #
-        # @param filter [String]
+        # @param ast [Array]
         #
-        # @return [Array<Hash>]
+        # @option :base [String]
+        #
+        # @return [Array<Directory::Entry>]
         #
         # @api public
-        def search(filter, base: nil, &block)
+        def search(ast, base: nil, &block)
           Timeout.timeout(timeout) do
-            results = query(filter: filter,
+            results = query(filter: ast,
                             base: base,
                             max_results: max_results,
                             deref: DEREF_ALWAYS,
@@ -52,7 +34,7 @@ module ROM
         rescue Timeout::Error
           log(__callee__, "timed out after #{timeout} seconds", :warn)
         ensure
-          log(__callee__, Functions[:to_ldap][filter])
+          log(__callee__, Functions[:to_ldap][ast])
         end
 
         # @option :filter [String]
@@ -73,7 +55,7 @@ module ROM
 
         # Used by gateway[filter] to infer schema. Limited to 100.
         #
-        # @return [Array<Directory::Entity>]
+        # @return [Array<Directory::Entry>]
         #
         # @api public
         def attributes(filter)
@@ -97,7 +79,7 @@ module ROM
 
         # @param tuple [Hash] tuple using formatted attribute names.
         #
-        # @return [Entity, Boolean] created LDAP entry or false.
+        # @return [Entry, Boolean] created LDAP entry or false.
         #
         # @example - must include valid dn
         #
@@ -117,7 +99,7 @@ module ROM
         #
         # @param tuple [Hash] tuple using formatted attribute names.
         #
-        # @return [Entity, Boolean] updated LDAP entry or false.
+        # @return [Entry, Boolean] updated LDAP entry or false.
         #
         # @api public
         def modify(dn, tuple)
@@ -142,6 +124,26 @@ module ROM
         end
 
         private
+
+        # Use connection to communicate with server.
+        #
+        # @param options [Hash]
+        #
+        # @return [Array<Entry>]
+        #
+        # @api private
+        def query(options)
+          set    = []
+          filter = options.delete(:filter) || self.class.default_filter
+          expr   = Functions[:to_exp][filter]
+
+          @result = connection.search(base: base, expression: expr, **options) do |entity|
+            set << entity
+            yield entity if block_given?
+          end
+
+          set.sort_by(&:dn)
+        end
 
         # Is the server capable of paging and has a user defined limit not been set.
         #

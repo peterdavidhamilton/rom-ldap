@@ -1,3 +1,5 @@
+require 'dry/equalizer'
+require 'dry/core/cache'
 require 'rom/ldap/functions'
 require 'rom/ldap/directory/ldif'
 
@@ -6,7 +8,7 @@ using ::Compatibility
 module ROM
   module LDAP
     class Directory
-      class Entity
+      class Entry
         module ClassMethods
           attr_reader :formatter
 
@@ -24,6 +26,9 @@ module ROM
         end
 
         extend ClassMethods
+        extend Dry::Core::Cache
+
+        include Dry::Equalizer(:to_h, :to_a, :to_str, :to_json, :to_ldif)
 
         def initialize(dn = nil, attributes = EMPTY_ARRAY)
           @dn = dn
@@ -36,23 +41,20 @@ module ROM
             store_canonical('dn', dn)
             store_canonical(key, value)
           end
-
-          @source.freeze
-          @canonical.freeze
         end
 
         attr_reader :dn
         attr_reader :source
 
         def [](key, alt = EMPTY_ARRAY)
-          @canonical[self.class.rename(key)] || alt
+          @canonical[rename(key)] || alt
         end
         alias fetch []
 
         # Prune unwanted keys from internal hashes.
         # Uses ::Compatibility#slice refinement unless Ruby >= 2.5.0
         #
-        # @param keys [Array<Symbol, String>] Entity attributes to keep
+        # @param keys [Array<Symbol, String>] Entry attributes to keep
         #
         # @return [self]
         #
@@ -150,12 +152,21 @@ module ROM
 
         private
 
+        # @api private
         def store_source(key, value)
           @source[key] = Array(value)
         end
 
+        # @api private
         def store_canonical(key, value)
-          @canonical[self.class.rename(key)] = Array(value)
+          @canonical[rename(key)] = Array(value)
+        end
+
+        # Cache renamed key to improve performance two fold in benchmarks.
+        #
+        # @api private
+        def rename(key)
+          fetch_or_store(key, self.class.formatter) { self.class.rename(key) }
         end
       end
     end

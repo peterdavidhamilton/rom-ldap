@@ -68,7 +68,7 @@ module ROM
       #
       # @param filter [String]
       #
-      # @return [Array<Directory::Entity>]
+      # @return [Array<Directory::Entry>]
       #
       # @api public
       def [](filter)

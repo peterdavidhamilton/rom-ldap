@@ -23,9 +23,8 @@ module ROM
     #
     # @api private
     class Dataset
-      extend  Initializer
+      extend Initializer
       include Enumerable
-      include Dry::Equalizer(:criteria)
 
       param :directory
 
@@ -75,7 +74,7 @@ module ROM
         DSL.public_instance_methods(false)
       end
 
-      # Raw filter search.
+      # Raw filter search - overload filter
       # Temporarily replace dataset with new filter.
       #
       # @return [ROM::LDAP::Dataset]
@@ -87,9 +86,9 @@ module ROM
         original  = @source
         @criteria = []
         @source   = filter
-        @entities = each
+        results   = each
         @source   = original
-        @entities
+        results
       end
       alias [] call
 
@@ -135,15 +134,15 @@ module ROM
         self
       end
 
-      # Iterate over @entities or populate with a directory search.
-      # Reset @criteria and @entities.
+      # Iterate over @entries or populate with a directory search.
+      # Reset @criteria and @entries.
       #
-      # @return [Enumerator::Lazy<Directory::Entity>]
+      # @return [Enumerator::Lazy<Directory::Entry>]
       #
       # @api public
       def each(*args, &block)
-        results = @entities ||= search.lazy
-        @entities = nil
+        results = @entries ||= search.lazy
+        @entries = nil
         @criteria = []
 
         if paginated?
@@ -155,6 +154,14 @@ module ROM
         else
           results
         end
+      end
+
+      # @return [Dataset]
+      #
+      # @api public
+      def select(*args)
+        @entries = each.map { |entry| entry.select(*args) }
+        self
       end
 
       # Respond to Relation methods by returning finalised search results.

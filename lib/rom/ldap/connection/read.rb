@@ -26,7 +26,7 @@ module ROM
         #
         # @option :unlimited [Boolean] Exceed the default 1_000 limit.
         #
-        # @return [Entity, PDU]
+        # @return [Entry, PDU]
         #
         # @yield [Array<BER::Struct>]
         #

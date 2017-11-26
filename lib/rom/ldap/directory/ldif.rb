@@ -3,9 +3,9 @@ require 'dry/initializer'
 module ROM
   module LDAP
     class Directory
-      # Export Entity objects as LDIF files.
+      # Export Entry objects as LDIF files.
       #
-      # @param tuple [Entity]
+      # @param tuple [Entry]
       #
       # @api private
       class LDIF

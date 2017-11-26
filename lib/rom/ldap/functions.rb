@@ -97,7 +97,7 @@ module ROM
         Dry::Core::Inflector.underscore(value.delete('= '))
       end
 
-      # Function applied to Directory::Entity to format incoming attribute names.
+      # Function applied to Directory::Entry to format incoming attribute names.
       #
       # @api public
       def self.to_method_name(value)

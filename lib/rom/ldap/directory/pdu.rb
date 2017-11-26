@@ -1,6 +1,6 @@
 require 'ber'
 require 'ostruct'
-require 'rom/ldap/directory/entity'
+require 'rom/ldap/directory/entry'
 
 module ROM
   module LDAP
@@ -171,7 +171,7 @@ module ROM
           check_sequence_size(sequence, 2)
           parse_sequence(sequence)
           decode_result
-          @search_entry = Entity.new(*sequence)
+          @search_entry = Entry.new(*sequence)
         end
 
         def parse_ldap_result(sequence)

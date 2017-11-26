@@ -11,7 +11,7 @@ require 'pry-byebug'
 # Apply a function to convert all entity
 # attributes into acceptible ruby method names.
 #
-ROM::LDAP::Directory::Entity.to_method_name!
+ROM::LDAP::Directory::Entry.to_method_name!
 
 #
 # ROM-LDAP Configuration

@@ -63,7 +63,7 @@ module ROM
 
         # Representation of directory RootDSE
         #
-        # @return [Directory::Entity]
+        # @return [Directory::Entry]
         #
         # @param attrs [Array<Symbol>] optional array of desired attributes
         #

@@ -1,19 +1,19 @@
 require 'spec_helper'
 
 #
-# Entity.use_formatter(proc) defines the proc that
+# Entry.use_formatter(proc) defines the proc that
 # will rename an entity's attributes name
 #
-RSpec.describe ROM::LDAP::Directory::Entity do
-  describe 'Entity.formatter' do
+RSpec.describe ROM::LDAP::Directory::Entry do
+  describe 'Entry.formatter' do
 
-    let(:entity) { ROM::LDAP::Directory::Entity }
+    subject(:entity) { ROM::LDAP::Directory::Entry }
 
     describe 'when nil' do
       let(:formatter) { nil }
       include_context 'relations'
 
-      it 'Entity.rename works' do
+      it 'Entry.rename works' do
         expect(entity.rename('=HELLO World')).to eql('=HELLO World')
       end
 
@@ -49,7 +49,7 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       let(:formatter) { downcase_proc }
       include_context 'relations'
 
-      it 'Entity.rename works' do
+      it 'Entry.rename works' do
         expect(entity.rename('=HELLO World')).to eql(:helloworld)
       end
 
@@ -85,7 +85,7 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       let(:formatter) { method_name_proc }
       include_context 'relations'
 
-      it 'Entity.rename works' do
+      it 'Entry.rename works' do
         expect(entity.rename('=HELLO World')).to eql(:hello_world)
       end
 
@@ -121,7 +121,7 @@ RSpec.describe ROM::LDAP::Directory::Entity do
       let(:formatter) { reverse_proc }
       include_context 'relations'
 
-      it 'Entity.rename works' do
+      it 'Entry.rename works' do
         expect(entity.rename('=HELLO World')).to eql(:dlrowolleh)
       end
 

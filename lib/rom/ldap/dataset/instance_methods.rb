@@ -40,7 +40,7 @@ module ROM
         #
         # @param dns [String, Array<String>]
         #
-        # @return [Array<Entity>]
+        # @return [Array<Entry>]
         #
         # @api public
         def fetch(dns)
@@ -60,7 +60,7 @@ module ROM
 
         # Interface to Directory#modify
         #
-        # @param entries [Array<Entity>] Entries to modify received from command.
+        # @param entries [Array<Entry>] Entries to modify received from command.
         #
         # @param tuple [Changeset, Hash] Modification params
         #
@@ -74,14 +74,6 @@ module ROM
         # @api public
         def delete(entries)
           entries.map { |e| directory.delete(*e[:dn]) }
-        end
-
-        # @return [Dataset]
-        #
-        # @api public
-        def select(*args)
-          @entities = each.map { |entity| entity.select(*args) }
-          self
         end
 
         # Handle different string output formats.

@@ -4,7 +4,7 @@ RSpec.shared_context 'relations' do
 
   before do
     # use_formatter(formatter)
-    ROM::LDAP::Directory::Entity.use_formatter(formatter)
+    ROM::LDAP::Directory::Entry.use_formatter(formatter)
 
     conf.relation(:accounts) do
       schema('(&(objectClass=person)(uid=*))', as: :accounts, infer: true)

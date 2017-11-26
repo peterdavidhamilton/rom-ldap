@@ -246,7 +246,7 @@ module ROM
 
         # Filters entities by pattern against canonical hash.
         #
-        # @see Directory::Entity.to_str
+        # @see Directory::Entry.to_str
         #
         # @param pattern [Mixed]
         #
