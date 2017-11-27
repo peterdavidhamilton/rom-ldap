@@ -153,7 +153,8 @@ module ROM
         logger.send(level, "#{self.class}##{caller} #{message}")
 
         if result.failure?
-          logger.error("#{self.class}##{caller} #{result.error_message}")
+          # logger.error("#{self.class}##{caller} #{result.error_message}")
+          logger.error("#{self.class}##{caller} #{result.info}")
         end
         if result.message
           logger.debug("#{self.class}##{caller} #{result.message}")

@@ -36,17 +36,6 @@ module ROM
           directory.base_total - 1
         end
 
-        # Find by Distinguished Name
-        #
-        # @param dns [String, Array<String>]
-        #
-        # @return [Array<Entry>]
-        #
-        # @api public
-        def fetch(dns)
-          Array(dns).flat_map { |dn| directory.by_dn(dn) }
-        end
-
         # Interface to Directory#add
         #
         # @param tuple [Hash]
@@ -60,20 +49,22 @@ module ROM
 
         # Interface to Directory#modify
         #
-        # @param entries [Array<Entry>] Entries to modify received from command.
-        #
         # @param tuple [Changeset, Hash] Modification params
         #
+        # @return [Array<Directory::Entry, Boolean>]
+        #
         # @api public
-        def modify(entries, tuple)
-          entries.map { |e| directory.modify(*e[:dn], tuple) }
+        def modify(tuple)
+          entries.map { |e| directory.modify(e.dn, tuple) }
         end
 
         # Interface to Directory#delete
         #
+        # @return [Array<Directory::Entry, Boolean>]
+        #
         # @api public
-        def delete(entries)
-          entries.map { |e| directory.delete(*e[:dn]) }
+        def delete
+          entries.map { |e| directory.delete(e.dn) }
         end
 
         # Handle different string output formats.

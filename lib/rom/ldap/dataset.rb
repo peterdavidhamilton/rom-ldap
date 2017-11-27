@@ -156,6 +156,18 @@ module ROM
         end
       end
 
+      # Find by Distinguished Name
+      #
+      # @param dns [String, Array<String>]
+      #
+      # @return [Dataset]
+      #
+      # @api public
+      def fetch(dns)
+        @entries = Array(dns).flat_map { |dn| directory.by_dn(dn) }
+        self
+      end
+
       # @return [Dataset]
       #
       # @api public

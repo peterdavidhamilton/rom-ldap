@@ -1,5 +1,4 @@
 require 'rom/initializer'
-require 'rom/ldap/schema/type_builder'
 
 module ROM
   module LDAP
@@ -8,11 +7,11 @@ module ROM
       class AttributesInferrer
         extend Initializer
 
+        option :type_builder
         option :attr_class, optional: true
 
         # @api private
         def call(schema, gateway)
-          type_builder = TypeBuilder.new(gateway.attribute_types)
           dataset      = schema.name.dataset
           columns      = dataset_attributes(gateway, dataset)
 

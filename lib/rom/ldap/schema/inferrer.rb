@@ -1,3 +1,4 @@
+require 'rom/ldap/schema/type_builder'
 require 'rom/ldap/schema/attributes_inferrer'
 require 'rom/ldap/attribute'
 
@@ -7,7 +8,9 @@ module ROM
       # @api private
       class Inferrer < ROM::Schema::Inferrer
         attributes_inferrer ->(schema, gateway, options) do
-          AttributesInferrer.new(options).call(schema, gateway)
+          builder  = TypeBuilder.new(gateway.attribute_types)
+          inferrer = AttributesInferrer.new(type_builder: builder, **options)
+          inferrer.call(schema, gateway)
         end
 
         attr_class LDAP::Attribute

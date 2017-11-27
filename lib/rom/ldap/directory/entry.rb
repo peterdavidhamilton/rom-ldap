@@ -67,12 +67,12 @@ module ROM
         end
 
         def first(key)
-          value = self[key]
+          value = fetch(key)
           value&.first
         end
 
         def last(key)
-          value = self[key]
+          value = fetch(key)
           value&.last
         end
 
@@ -140,11 +140,11 @@ module ROM
         end
 
         def respond_to_missing?(*args)
-          !!self[args.first]
+          !!fetch(args.first)
         end
 
         def method_missing(method, *args, &block)
-          value = self[method]
+          value = fetch(method)
           return value unless value.empty?
           return @canonical.public_send(method, *args, &block) if @canonical.respond_to?(method)
           super
@@ -152,17 +152,23 @@ module ROM
 
         private
 
+        # Build @source hash
+        #
         # @api private
         def store_source(key, value)
           @source[key] = Array(value)
         end
 
+        # Build @canonical hash of renamed keys
+        #
         # @api private
         def store_canonical(key, value)
           @canonical[rename(key)] = Array(value)
         end
 
         # Cache renamed key to improve performance two fold in benchmarks.
+        #
+        # @param key [String, Symbol]
         #
         # @api private
         def rename(key)

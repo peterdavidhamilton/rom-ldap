@@ -42,7 +42,7 @@ module ROM
 
             else
               expr = parse_expression
-             end
+            end
 
             expr if expr && scanner.scan(CLOSE_REGEX)
           end
