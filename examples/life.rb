@@ -39,7 +39,7 @@ end
 # ROM-LDAP Repository
 #
 class AnimalRepo < ROM::Repository[:animals]
-  commands :create, update: [:by_pk, :by_cn], delete: [:by_pk, :by_cn]
+  commands :create, update: %i[by_pk by_cn], delete: %i[by_pk by_cn]
 
   struct_namespace Entities
 
@@ -86,9 +86,7 @@ class AnimalRepo < ROM::Repository[:animals]
   def birds_to_json
     animals.by_class('aves').to_json
   end
-
 end
-
 
 #
 # ROM-LDAP Relation demo
@@ -184,19 +182,19 @@ conf.relation(:animals, adapter: :ldap) do
   # essentially a join table
   def members(dn)
     binding.pry
-  #   group = fetch(dn)
-  #   entries = group.member
-  #   fetch entries
+    #   group = fetch(dn)
+    #   entries = group.member
+    #   fetch entries
   end
 end
-
-
-
-
 
 container = ROM.container(conf)
 animals   = container.relations[:animals]
 repo      = AnimalRepo.new(container)
+
+# adminstrator
+animals.base('').search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
+animals.base('').search('(uid=test1)').one
 
 binding.pry
 
@@ -204,7 +202,6 @@ binding.pry
 # reveal inferred attributes and coerced types
 #
 animals.schema.to_h
-
 
 # pluck certain attributes
 animals.with(auto_struct: true).select(:cn, :object_class).to_a
@@ -217,7 +214,6 @@ animals.where(objectclass: 'mammalia').find(/Homo/).count
 animals.where(cn: 'human').one.species
 animals.matches(cn: 'man').one
 animals.equals(cn: 'orangutan').one.cn
-
 
 repo.reptiles_to_yaml
 
@@ -234,6 +230,7 @@ animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 # animals.pets.page(2).pager
 
 animals.matches(cn: 'phant').count
+animals.matches(cn: 'ant').to_a
 # animals.common_birds.to_a
 
 

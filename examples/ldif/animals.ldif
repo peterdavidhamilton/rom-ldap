@@ -209,6 +209,59 @@ objectClass: top
 populationCount: 100000
 extinct: FALSE
 
+dn: cn=Leopard Gecko,ou=animals,dc=example,dc=com
+cn: Leopard Gecko
+species: Eublepharis macularius
+genus: Eublepharis
+family: Eublepharidae
+order: Squamata
+objectClass: reptilia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 90000
+extinct: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Leopard_gecko
+
+dn: cn=Common Newt,ou=animals,dc=example,dc=com
+cn: Common Newt
+species: Lissotriton vulgaris
+genus: Lissotriton
+family: Salamandridae
+order: Caudata
+objectClass: amphibia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 2000000
+extinct: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Smooth_newt
+
+dn: cn=Reef Manta Ray,ou=animals,dc=example,dc=com
+cn: Reef Manta Ray
+species: Manta alfredi
+genus: Manta
+family: Myliobatidae
+order:  Myliobatiformes
+objectClass: chondrichthyes
+objectClass: extensibleObject
+objectClass: top
+populationCount: 8000
+extinct: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Reef_manta_ray
+
+dn: cn=Panther Chameleon,ou=animals,dc=example,dc=com
+cn: Panther Chameleon
+species: Furcifer pardalis
+genus: Furcifer
+family: Chamaeleonidae
+order: Squamata
+objectClass: reptilia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 8000
+extinct: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Panther_chameleon
+
+
 dn: cn=Dodo,ou=extinct,ou=animals,dc=example,dc=com
 cn: Dodo
 species: Raphus cucullatus

@@ -22,7 +22,7 @@ module ROM
                   [\da-fA-F]{8}-
                   ([\da-fA-F]{4}-){3}
                   [\da-fA-F]{12}
-                  \z/x.freeze
+                  \z/x
 
       UUID   = Types::Strict::String.constrained(format: UUID_REGEX)
       Octet  = Types.Constructor(::String, ->(v) { v.force_encoding('UTF-8') })
