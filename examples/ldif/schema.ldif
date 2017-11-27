@@ -19,7 +19,7 @@ ou: objectClasses
 #
 # Attribute Types
 # 1.3.6.1.4.1.18055.0.4.1.2.1001-10
-# species, genus, family, order, populationCount
+# species, genus, family, order, extinct, endangered, populationCount
 #
 #########################################################
 
@@ -92,6 +92,20 @@ m-name: extinct
 m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1005
+
+# extinct 1006
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1006, ou=attributeTypes, cn=wildlife, ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-singleValue: TRUE
+m-description: The conservation status of the animal
+m-equality: booleanMatch
+m-name: endangered
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1006
 
 # populationCount 1010
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1010, ou=attributeTypes, cn=wildlife, ou=schema

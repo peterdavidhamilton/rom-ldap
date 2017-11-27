@@ -192,11 +192,12 @@ container = ROM.container(conf)
 animals   = container.relations[:animals]
 repo      = AnimalRepo.new(container)
 
-# adminstrator
+# administrator
 animals.base('').search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
 animals.base('').search('(uid=test1)').one
 
 binding.pry
+animals.with(auto_struct: false).matches(cn: '熊').to_a
 
 #
 # reveal inferred attributes and coerced types

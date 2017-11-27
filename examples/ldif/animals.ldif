@@ -36,8 +36,11 @@ order: Primates
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
+description: Modern humans are the only extant members of the subtribe Hominina, a branch of the tribe Hominini belonging to the family of great apes.
 populationCount: 7582530942
 extinct: FALSE
+endangered: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Human
 
 dn: cn=Red Fox,ou=animals,dc=example,dc=com
 cn: Red Fox
@@ -65,6 +68,7 @@ extinct: FALSE
 
 dn: cn=Zebra,ou=animals,dc=example,dc=com
 cn: Zebra
+cn: Mountain Zebra
 species: Equus zebra
 genus: Equus
 family: Equidae
@@ -72,8 +76,11 @@ order: Perissodactyla
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
+description: Like all extant zebras, mountain zebras are boldly striped in black or dark brown and no two individuals look exactly alike.
 populationCount: 0
 extinct: FALSE
+endangered: TRUE
+labeledURI: https://en.wikipedia.org/wiki/Mountain_zebra
 
 dn: cn=Spur-thighed Tortoise,ou=animals,dc=example,dc=com
 cn: Spur-thighed Tortoise
@@ -89,18 +96,21 @@ extinct: FALSE
 
 dn: cn=Sun Bear,ou=animals,dc=example,dc=com
 cn: Sun Bear
+cn: Honey Bear
 species: Helarctos malayanus
 genus: Helarctos
 family: Ursidae
 order: Carnivora
+description: The sun bear's fur is usually jet-black, short, and sleek with some under-wool; some individual sun bears are reddish or gray.
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 0
 extinct: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Sun_bear
 
-dn: cn=Poison dart Frog,ou=animals,dc=example,dc=com
-cn: Poison dart Frog
+dn: cn=Poison Dart Frog,ou=animals,dc=example,dc=com
+cn: Poison Dart Frog
 species: Dendrobates tinctorius
 genus: Dendrobates
 family: Dendrobatidae
@@ -138,6 +148,7 @@ extinct: FALSE
 
 dn: cn=Cat,ou=animals,dc=example,dc=com
 cn: Cat
+cn: Domestic Cat
 species: Felis silvestris
 genus: Felis
 family: Felidae
@@ -150,6 +161,7 @@ extinct: FALSE
 
 dn: cn=Dog,ou=animals,dc=example,dc=com
 cn: Dog
+cn: Domestic Dog
 species: Canis lupus
 genus: Canis
 family: Canidae
@@ -175,6 +187,10 @@ extinct: FALSE
 
 dn: cn=Giant Panda,ou=animals,dc=example,dc=com
 cn: Giant Panda
+cn: Cat Bear
+cn: 猫熊
+cn: Bear Cat
+cn: 熊猫
 species: Ailuropoda melanoleuca
 genus: Ailuropoda
 family: Ursidae
@@ -182,11 +198,14 @@ order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
-populationCount: 1000
+populationCount: 50
 extinct: FALSE
+endangered: TRUE
+labeledURI: https://en.wikipedia.org/wiki/Giant_panda
 
 dn: cn=Asian Elephant,ou=animals,dc=example,dc=com
 cn: Asian Elephant
+cn: Asiatic Elephant
 species: Elephas maximus
 genus: Elephas
 family: Elephantidae
@@ -195,7 +214,9 @@ objectClass: mammalia
 objectClass: extensibleObject
 objectClass: top
 populationCount: 2000
+endangered: TRUE
 extinct: FALSE
+labeledURI: https://en.wikipedia.org/wiki/Asian_elephant
 
 dn: cn=Elephant Shrew,ou=animals,dc=example,dc=com
 cn: Elephant Shrew
@@ -233,6 +254,7 @@ objectClass: extensibleObject
 objectClass: top
 populationCount: 2000000
 extinct: FALSE
+endangered: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Smooth_newt
 
 dn: cn=Reef Manta Ray,ou=animals,dc=example,dc=com
@@ -247,6 +269,20 @@ objectClass: top
 populationCount: 8000
 extinct: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Reef_manta_ray
+
+dn: cn=Platypus,ou=animals,dc=example,dc=com
+cn: Platypus
+cn: Duck-billed Platypus
+species: Ornithorhynchus anatinus
+genus: Ornithorhynchus
+family: Ornithorhynchidae
+order:  Monotremata
+description: The Platypus is a semi-aquatic egg-laying mammal endemic to eastern Australia, including Tasmania.
+description: It is one of the few species of venomous mammals; the male has a spur on the hind foot that delivers a venom capable of causing severe pain to humans.
+objectClass: mammalia
+objectClass: extensibleObject
+objectClass: top
+labeledURI: https://en.wikipedia.org/wiki/Platypus
 
 dn: cn=Panther Chameleon,ou=animals,dc=example,dc=com
 cn: Panther Chameleon
@@ -290,6 +326,7 @@ member: cn=Zebra,ou=animals,dc=example,dc=com
 member: cn=Poison dart Frog,ou=animals,dc=example,dc=com
 member: cn=James's flamingo,ou=animals,dc=example,dc=com
 member: cn=Orangutan,ou=animals,dc=example,dc=com
+member: cn=Platypus,ou=animals,dc=example,dc=com
 
 
 dn: cn=domestic,ou=groups,dc=example,dc=com
