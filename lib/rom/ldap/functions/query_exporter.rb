@@ -70,7 +70,8 @@ module ROM
 
           scanner.scan(WS_REGEX)
           scanner.scan(VAL_REGEX)
-          value = id_value(scanner.matched)
+          # value = id_value(scanner.matched)
+          value = Functions[:identify_value].call(scanner.matched)
 
           [operator, attribute, value]
         end

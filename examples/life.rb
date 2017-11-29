@@ -6,6 +6,7 @@ $LOAD_PATH.unshift(cwd)
 
 require 'rom-ldap'
 require 'rom-repository'
+require 'rom-changeset'
 require 'pry-byebug'
 
 # Apply a function to convert all entity
@@ -16,7 +17,7 @@ ROM::LDAP::Directory::Entry.to_method_name!
 #
 # ROM-LDAP Configuration
 #
-conf = ROM::Configuration.new(
+configuration = ROM::Configuration.new(
   directory: [
     :ldap,
     { server: '127.0.0.1:10389', username: 'uid=admin,ou=system', password: 'secret' },
@@ -88,10 +89,36 @@ class AnimalRepo < ROM::Repository[:animals]
   end
 end
 
+
+class CreateAnimal < ROM::Commands::Create[:ldap]
+  relation :animals
+  register_as :create
+end
+
+class UpdateAnimal < ROM::Commands::Update[:ldap]
+  relation :animals
+  result :one
+  register_as :update
+end
+
+class DeleteAnimal < ROM::Commands::Delete[:ldap]
+  relation :animals
+  result :one
+  register_as :delete
+end
+
+
+class NewAnimal < ROM::Changeset::Create[:animals]
+  map do |tuple|
+    tuple.merge(dn: "cn=#{tuple[:cn]},ou=animals,dc=example,dc=com")
+  end
+end
+
+
 #
 # ROM-LDAP Relation demo
 #
-conf.relation(:animals, adapter: :ldap) do
+configuration.relation(:animals, adapter: :ldap) do
   gateway :directory
   base    'dc=example,dc=com'.freeze
   schema  '(species=*)', as: :animals, infer: true
@@ -168,7 +195,7 @@ conf.relation(:animals, adapter: :ldap) do
   # Query DSL methods
   #
   def mammals
-    where(objectclass: 'mammalia')
+    where(object_class: 'mammalia')
   end
 
   def vegetarians
@@ -188,15 +215,62 @@ conf.relation(:animals, adapter: :ldap) do
   end
 end
 
-container = ROM.container(conf)
+
+configuration.register_command(CreateAnimal)
+configuration.register_command(UpdateAnimal)
+configuration.register_command(DeleteAnimal)
+
+
+container = ROM.container(configuration)
 animals   = container.relations[:animals]
 repo      = AnimalRepo.new(container)
+
+
+create_animals = container.commands[:animals][:create]
+update_animal  = container.commands[:animals][:update]
+delete_animal  = container.commands[:animals][:delete]
+
+
+
+new_animals = [
+  {
+    cn:               'Chinstrap Penguin',
+    order:            'Sphenisciformes',
+    family:           'Spheniscidae',
+    genus:            'Pygoscelis',
+    species:          'Pygoscelis antarcticus',
+    object_class:     %w[extensibleObject aves],
+    population_count: 10_000,
+    extinct:          false,
+    endangered:       false
+  },
+  {
+    cn:               'Black Jumping Salamander',
+    order:            'Caudata',
+    family:           'Plethodontidae',
+    genus:            'Ixalotriton',
+    species:          'Ixalotriton niger',
+    object_class:     %w[extensibleObject amphibia],
+    population_count: 2_000,
+    extinct:          false,
+    endangered:       false
+  }
+]
+
+changeset = animals.changeset(NewAnimal, new_animals)
+create_animals.call(changeset)
+binding.pry
+
+update_animal.by_cn('Black Jumping Salamander').call(endangered: true)
+
+
+delete_animal.by_cn('Chinstrap Penguin').call
+
 
 # administrator
 animals.base('').search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
 animals.base('').search('(uid=test1)').one
 
-binding.pry
 animals.with(auto_struct: false).matches(cn: '熊').to_a
 
 #

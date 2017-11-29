@@ -42,23 +42,19 @@ module ROM
         val.is_a?(Symbol) ? OPERATORS[val] : OPERATORS.invert[val]
       end
 
-      # @param sym [Symbol,String]
-      #
-      # @example
-      #   id_value(true) => 'TRUE'
-      #   id_value('TRUE') => true
-      #   id_value('peter hamilton') => 'peter hamilton'
-      #
-      # @return [Symbol,String,Boolean]
-      #
-      # @api private
-      def id_value(val)
-        if val.is_a?(Symbol)
-          VALUES.fetch(val, val)
-        else
-          VALUES.invert.fetch(val, val)
-        end
-      end
+      # # @param sym [Symbol,String]
+      # #
+      # # @example
+      # #   id_value(true) => 'TRUE'
+      # #   id_value('TRUE') => true
+      # #   id_value('peter hamilton') => 'peter hamilton'
+      # #
+      # # @return [Symbol,String,Boolean]
+      # #
+      # # @api private
+      # def id_value(val)
+      #   Functions[:identify_value].call(val)
+      # end
     end
   end
 end

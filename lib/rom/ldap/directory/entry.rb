@@ -67,12 +67,12 @@ module ROM
         end
 
         def first(key)
-          value = fetch(key)
+          value = self[key]
           value&.first
         end
 
         def last(key)
-          value = fetch(key)
+          value = self[key]
           value&.last
         end
 
@@ -140,11 +140,11 @@ module ROM
         end
 
         def respond_to_missing?(*args)
-          !!fetch(args.first)
+          !!self[args.first]
         end
 
         def method_missing(method, *args, &block)
-          value = fetch(method)
+          value = self[method]
           return value unless value.empty?
           return @canonical.public_send(method, *args, &block) if @canonical.respond_to?(method)
           super

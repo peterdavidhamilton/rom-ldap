@@ -5,9 +5,7 @@ module ROM
         adapter :ldap
 
         def execute
-          tuples = relation.dataset.entries
-          relation.dataset.delete(tuples)
-          tuples
+          relation.delete
         end
       end
     end

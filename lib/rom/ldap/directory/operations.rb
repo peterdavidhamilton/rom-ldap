@@ -102,14 +102,22 @@ module ROM
         # @return [Entry, Boolean] updated LDAP entry or false.
         #
         # @api public
-        def modify(dn, tuple)
+        def modify(dn, tuple) # third param :replace
           args   = payload(tuple)
+          # TODO: MODIFY_OPERATIONS :add, :delete, :replace - handle adding another cn
           ops    = args.map { |attribute, value| [:replace, attribute, value] }
           result = connection.modify(dn: dn, ops: ops)
 
           log(__callee__, dn)
           result.success? ? by_dn(dn).first : false
         end
+        # def replace_attribute
+        # end
+        # def add_attribute
+        # end
+        # def delete_attribute
+        # end
+
 
         #
         # @param dn [String]
