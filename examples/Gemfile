@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'ldap-ber', git: 'bb:ldap-ber', branch: 'develop'
-gem 'rom-ldap', git: 'bb:rom-ldap', branch: 'develop'
+gem 'rom-ldap', git: 'bb:rom-ldap', branch: 'feature/associations'
 gem 'rom-repository'
+gem 'rom-changeset'
 gem 'pry-byebug'

@@ -1,5 +1,5 @@
 require 'transproc'
-require 'dry/core/inflector'
+require 'rom/support/inflector'
 require 'rom/ldap/functions/exporters'
 
 module ROM
@@ -45,8 +45,29 @@ module ROM
       #
       # @api public
       def self.tuplify(tuple, matrix)
-        fn = t(:rename_keys, matrix) >> t(:map_values, t(:stringify))
+        fn = t(:rename_keys, matrix) >>
+             t(:map_values, t(:identify_value)) >>
+             t(:map_values, t(:stringify))
         fn.call(tuple)
+      end
+
+      # @param sym [Symbol,String]
+      #
+      # @example
+      #   id_value(true) => 'TRUE'
+      #   id_value('TRUE') => true
+      #   id_value('peter hamilton') => 'peter hamilton'
+      #
+      # @return [Symbol,String,Boolean]
+      #
+      # @api public
+      def self.identify_value(val)
+        case val
+        when Symbol, TrueClass, FalseClass
+          VALUES.fetch(val, val)
+        else
+          VALUES.invert.fetch(val, val)
+        end
       end
 
       # Ensure tuple values are strings
@@ -94,7 +115,7 @@ module ROM
       end
 
       def self.to_underscore(value)
-        Dry::Core::Inflector.underscore(value.delete('= '))
+        Inflector.underscore(value.delete('= '))
       end
 
       # Function applied to Directory::Entry to format incoming attribute names.

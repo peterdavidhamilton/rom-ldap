@@ -5,8 +5,7 @@ module ROM
         adapter :ldap
 
         def execute(tuples)
-          # Array([tuples]).flatten
-          [tuples].flatten.each { |tuple| relation.insert(tuple) }
+          Array(tuples).each { |tuple| relation.insert(tuple) }
         end
       end
     end
