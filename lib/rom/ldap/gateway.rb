@@ -84,13 +84,6 @@ module ROM
         directory.attribute_types
       end
 
-      # Disconnect from the gateway's directory
-      #
-      # @api public
-      def disconnect
-        directory.disconnect
-      end
-
       # Return dataset with the given name
       #
       # @param filter [String] a filtered dataset
@@ -157,6 +150,9 @@ module ROM
         @dir ||= Directory.new(connection, options).load_rootdse!
       end
 
+      # Disconnect from the server
+      #
+      # @api public
       def disconnect
         connection.close
       end
