@@ -30,7 +30,7 @@ module ROM
       def to_raw_rfc2254
         case op
         when :con_not then        "!(#{left}=#{right})"
-        when :op_eql, :bineq then "#{left}=#{right}"
+        when :op_eql, :op_bineq then "#{left}=#{right}"
         when :op_ext  then        "#{left}:=#{right}"
         when :op_prx  then        "#{left}~=#{right}"
         when :op_gte  then        "#{left}>=#{right}"
@@ -75,13 +75,6 @@ module ROM
           yield(op, left.execute(&block))
         else
           yield(op, left, right)
-
-          binding.pry
-
-        # when :op_gte
-        #   yield(:op_gte, left, right)
-        # when :op_lte
-        #   yield(:op_lte, left, right)
         end || EMPTY_ARRAY
       end
 
@@ -102,23 +95,23 @@ module ROM
         end
       end
 
-      # @return [Boolean]
-      #
-      # @api private
-      def match(entry)
-        case op
-        when :op_eql
-          if right == WILDCARD
-            binding.pry
-            # (l = entry[left]) && !l.empty?
-            (l = entry[left]) && l.any?
-          else
-            (l = entry[left]) && (l = Array(l)) && l.index(right)
-          end
-        else
-          raise FilterError, "Unknown filter type in match: #{op}"
-        end
-      end
+      # # @return [Boolean]
+      # #
+      # # @api private
+      # def match(entry)
+      #   case op
+      #   when :op_eql
+      #     if right == WILDCARD
+      #       binding.pry
+      #       # (l = entry[left]) && !l.empty?
+      #       (l = entry[left]) && l.any?
+      #     else
+      #       (l = entry[left]) && (l = Array(l)) && l.index(right)
+      #     end
+      #   else
+      #     raise FilterError, "Unknown filter type in match: #{op}"
+      #   end
+      # end
     end
   end
 end
