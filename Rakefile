@@ -1,10 +1,10 @@
-begin
-  require 'pry-byebug'
-rescue LoadError
-end if ENV['PRY']
+if ENV['PRY']
+  begin
+    require 'pry-byebug'
+  rescue LoadError
+  end
+end
 
 require 'bundler/gem_tasks'
-
-Rake.add_rakelib 'rakelib'
 
 task default: [:spec]
