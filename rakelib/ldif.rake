@@ -11,7 +11,7 @@ def ldapmodify(file:)
   admin    = config.fetch(:admin, 'uid=admin,ou=system')
   password = config.fetch(:password, 'secret')
 
-  system "ldapmodify -h #{host} -p #{port} -D #{admin} -w #{password} -a -f #{file}"
+  system "ldapmodify -h #{host} -p #{port} -D #{admin} -w #{password} -a -c -f #{file}"
 end
 
 def config
