@@ -87,6 +87,10 @@ class AnimalRepo < ROM::Repository[:animals]
   def birds_to_json
     animals.by_class('aves').to_json
   end
+
+  def with_keeper
+    animals.combine(:account)
+  end
 end
 
 
@@ -206,6 +210,10 @@ configuration.relation(:animals, adapter: :ldap) do
     gte(population_count: num)
   end
 
+  def detailed
+    present(:description)
+  end
+
   # essentially a join table
   def members(dn)
     binding.pry
@@ -263,6 +271,7 @@ binding.pry
 
 update_animal.by_cn('Black Jumping Salamander').call(endangered: true)
 
+# changeset = animals.changeset(new_animals).associate()
 
 delete_animal.by_cn('Chinstrap Penguin').call
 

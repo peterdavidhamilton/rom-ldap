@@ -63,6 +63,7 @@ module ROM
         }.freeze
       end
 
+
       # Methods that define the query interface.
       #
       include DSL

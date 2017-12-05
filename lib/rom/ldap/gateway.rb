@@ -138,17 +138,16 @@ module ROM
         end
       end
 
-      private
-
       # Wrapper for Connection and Logger.
-      # NB public access to this is through gateway.dataset.directory
       #
       # @return [Directory] ldap server object
       #
-      # @api private
+      # @api public
       def directory
         @dir ||= Directory.new(connection, options).load_rootdse!
       end
+
+      private
 
       # Disconnect from the server
       #

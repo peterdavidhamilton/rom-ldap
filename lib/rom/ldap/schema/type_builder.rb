@@ -81,6 +81,7 @@ module ROM
 
         private
 
+        # OPTIMIZE: also used in Attribute
         # Attribute whose formatted name matches the attribute name.
         #
         # @param name [Symbol, String]

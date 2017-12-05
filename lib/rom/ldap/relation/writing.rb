@@ -25,26 +25,26 @@ module ROM
         #     object_class: %w[extensibleObject inetOrgPerson apple-user]
         #   }
         #
-        # @param args [Hash]
+        # @param tuple [Hash]
         #
         # @return [Array<Directory::Entry, Boolean>]
         #
         # @api public
-        def insert(args)
-          dataset.add(args)
+        def insert(tuple)
+          dataset.add(tuple)
         end
 
         # @example
         #   repo.update(2000, mail: 'fear_the_bat@gotham.com')
         #   #=>  {}
         #
-        # @param args [Hash]
+        # @param tuple [Hash]
         #
         # @return [Array<Directory::Entry, Boolean>]
         #
         # @api public
-        def update(args)
-          dataset.modify(args)
+        def update(tuple)
+          dataset.modify(tuple)
         end
 
         # @example

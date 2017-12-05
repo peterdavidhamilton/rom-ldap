@@ -274,21 +274,26 @@ module ROM
         #
         # This method is intended to be used internally within a relation object
         #
-        # @example
-        #   users.qualified.dataset.sql
-        #   # SELECT "users"."id", "users"."name" ...
-        #
         # @return [Relation]
         #
         # @api public
         def qualified
-          binding.pry
           schema.qualified.call(self)
         end
 
-        def join(*args)
+
+        #
+        # Associations
+        #
+        #
+
+        # @example
+        #   join(:accounts, id: :uid_number)
+        #
+        def join(*args, &block)
           binding.pry
         end
+
       end
     end
   end
