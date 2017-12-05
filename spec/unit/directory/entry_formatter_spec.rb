@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 #
 # Entry.use_formatter(proc) defines the proc that
 # will rename an entity's attributes name

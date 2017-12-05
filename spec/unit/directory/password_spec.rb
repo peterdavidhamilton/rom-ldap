@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Directory::Password do
 
   subject(:pwd) { ROM::LDAP::Directory::Password }

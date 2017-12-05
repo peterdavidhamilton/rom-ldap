@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 # Order DSL methods for numeric values ordered by size.
 #
 # [

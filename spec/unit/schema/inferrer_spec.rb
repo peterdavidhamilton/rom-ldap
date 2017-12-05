@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Schema::Inferrer do
 
   describe 'interprets directory.attribute_types in to ruby classes' do

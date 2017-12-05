@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Schema do
 
   describe '#primary_keys' do

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Relation do
 
   describe '#insert downcase' do

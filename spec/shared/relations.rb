@@ -38,7 +38,8 @@ RSpec.shared_context 'relations' do
     end
 
     # reload_attributes!
-    relations[:accounts].dataset.directory.attribute_types
+    # relations[:accounts].dataset.directory.attribute_types
+    directory.attribute_types
   end
 
   let(:accounts)  { container.relations[:accounts]  }
@@ -47,6 +48,7 @@ RSpec.shared_context 'relations' do
 
   after do
     # reset_attributes!
-    ROM::LDAP::Directory.attributes = nil
+    # ROM::LDAP::Directory.attributes = nil
+    directory.class.attributes = nil
   end
 end

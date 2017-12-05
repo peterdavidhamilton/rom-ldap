@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Types do
 
   # describe 'ROM::LDAP::Types::Input' do
