@@ -1,5 +1,6 @@
 require 'rom/ldap/types'
 require 'rom/ldap/schema'
+require 'rom/ldap/wrap'
 require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
 require 'rom/ldap/transaction'
@@ -43,10 +44,11 @@ module ROM
       groups   '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
       users    '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
 
-      schema_class      Schema
-      schema_attr_class Attribute
-      schema_inferrer   Schema::Inferrer.new.freeze
-      schema_dsl        Schema::DSL
+      schema_class      LDAP::Schema
+      schema_attr_class LDAP::Attribute
+      schema_inferrer   LDAP::Schema::Inferrer.new.freeze
+      schema_dsl        LDAP::Schema::DSL
+      wrap_class        LDAP::Wrap
 
       forward(*Dataset.dsl)
 
@@ -112,21 +114,22 @@ module ROM
         with(schema: schema.project(*names.flatten))
       end
 
-      def exclude(*names)
-        with(schema: schema.exclude(*names.flatten))
-      end
+      # def exclude(*names)
+      #   with(schema: schema.exclude(*names.flatten))
+      # end
 
-      def rename(mapping)
-        with(schema: schema.rename(mapping))
-      end
+      # def rename(mapping)
+      #   with(schema: schema.rename(mapping))
+      # end
 
-      def prefix(prefix)
-        with(schema: schema.prefix(prefix))
-      end
+      # def prefix(prefix)
+      #   with(schema: schema.prefix(prefix))
+      # end
 
-      def wrap(prefix = dataset.name)
-        with(schema: schema.wrap(prefix))
-      end
+      # def wrap(prefix = dataset.name)
+      #   with(schema: schema.wrap(prefix))
+      # end
+
     end
   end
 end

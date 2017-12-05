@@ -203,6 +203,18 @@ extinct: FALSE
 endangered: TRUE
 labeledURI: https://en.wikipedia.org/wiki/Giant_panda
 
+dn: cn=Koala,ou=animals,dc=example,dc=com
+cn: Koala
+cn: Koala Bear
+species: Phascolarctos cinereus
+genus: Phascolarctos
+family: Phascolarctidae
+order:  Diprotodontia
+objectClass: mammalia
+objectClass: extensibleObject
+objectClass: top
+labeledURI: https://en.wikipedia.org/wiki/Koala
+
 dn: cn=Asian Elephant,ou=animals,dc=example,dc=com
 cn: Asian Elephant
 cn: Asiatic Elephant

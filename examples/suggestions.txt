@@ -6,7 +6,6 @@ https://en.wikipedia.org/wiki/Echidna
 https://en.wikipedia.org/wiki/Giraffe
 https://en.wikipedia.org/wiki/Jay
 https://en.wikipedia.org/wiki/Kangaroo
-https://en.wikipedia.org/wiki/Koala
 https://en.wikipedia.org/wiki/Lemur
 https://en.wikipedia.org/wiki/Meerkat
 https://en.wikipedia.org/wiki/Mole

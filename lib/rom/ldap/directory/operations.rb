@@ -104,13 +104,14 @@ module ROM
         # @api public
         def modify(dn, tuple) # third param :replace
           args   = payload(tuple)
-          # TODO: MODIFY_OPERATIONS :add, :delete, :replace - handle adding another cn
           ops    = args.map { |attribute, value| [:replace, attribute, value] }
           result = connection.modify(dn: dn, ops: ops)
 
           log(__callee__, dn)
           result.success? ? by_dn(dn).first : false
         end
+
+        # TODO: MODIFY_OPERATIONS :add, :delete, :replace - handle adding another cn
         # def replace_attribute
         # end
         # def add_attribute
@@ -160,6 +161,8 @@ module ROM
         end
 
         # Tuplify operation input, using a translation hash to rename keys.
+        #
+        # @param tuple [Hash]
         #
         # @api private
         def payload(tuple)

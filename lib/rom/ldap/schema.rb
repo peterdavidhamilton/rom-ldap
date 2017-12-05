@@ -36,6 +36,28 @@ module ROM
         new(map { |attr| attr.qualified(table_alias) })
       end
 
+
+      # Join with another schema
+      #
+      # @param [Schema] other The other schema to join with
+      #
+      # @return [Schema]
+      #
+      # @api public
+      def join(other)
+        merge(other.joined)
+      end
+
+      # Return a new schema with all attributes marked as joined
+      #
+      # @return [Schema]
+      #
+      # @api public
+      def joined
+        new(map(&:joined))
+      end
+
+
       # Return an empty schema
       #
       # @return [Schema]
@@ -61,7 +83,7 @@ module ROM
         end
       end
 
-      memoize :qualified, :project_pk # :canonical, :joined,
+      memoize :qualified, :project_pk, :canonical, :joined
     end
   end
 end
