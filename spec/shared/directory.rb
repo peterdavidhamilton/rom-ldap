@@ -20,8 +20,12 @@ RSpec.shared_context 'directory' do
     ROM.container(conf)
   end
 
-  let(:conn) do
+  let(:connection) do
     conf.gateways[:default].connection
+  end
+
+  let(:directory) do
+    conf.gateways[:default].directory
   end
 
   let(:relations) do

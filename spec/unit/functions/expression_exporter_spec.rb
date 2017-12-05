@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Functions::ExpressionExporter do
 
   let(:exporter) { ROM::LDAP::Functions::ExpressionExporter.new }

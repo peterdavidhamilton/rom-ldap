@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe 'Plugin / Pagination' do
 
   let(:formatter) { nil }

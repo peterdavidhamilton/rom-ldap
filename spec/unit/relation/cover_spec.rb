@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 # Range DSL methods for numeric values between or beyond two bounds.
 #
 # [

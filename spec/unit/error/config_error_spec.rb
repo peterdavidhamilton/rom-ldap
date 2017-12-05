@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::ConfigError do
 
   # describe 'invalid search size' do

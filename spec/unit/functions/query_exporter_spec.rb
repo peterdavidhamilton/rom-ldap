@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe ROM::LDAP::Functions::QueryExporter do
   subject(:exporter) { ROM::LDAP::Functions::QueryExporter.new }
 
