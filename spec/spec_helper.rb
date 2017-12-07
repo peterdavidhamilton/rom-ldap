@@ -22,6 +22,11 @@ end if ENV['PRY']
 
 require 'rom-ldap'
 
+require 'dry-types'
+module Types
+  include Dry::Types.module
+end
+
 require 'pathname'
 SPEC_ROOT = root = Pathname(__FILE__).dirname
 TMP_PATH  = root.join('../tmp')

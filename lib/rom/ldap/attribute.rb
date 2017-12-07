@@ -7,7 +7,6 @@ module ROM
     #
     # @api public
     class Attribute < ROM::Attribute
-
       extend Dry::Core::Cache
 
       # @api private

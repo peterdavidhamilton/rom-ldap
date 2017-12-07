@@ -11,8 +11,13 @@ module ROM
       class ExpressionExporter
         include Lookup
 
+        # @param string [String]
+        #
+        # @return [Expression]
+        #
+        # @api public
         def call(string)
-          @scanner = StringScanner.new(string)
+          @scanner = StringScanner.new(string.to_str)
           parse
         end
 
