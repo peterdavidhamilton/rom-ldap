@@ -30,7 +30,7 @@ module ROM
 
       param :source,
         reader:   false,
-        type:     Dry::Types['strict.string']
+        type:     Dry::Types['string']
 
       option :base,
         reader:   false,
@@ -87,9 +87,9 @@ module ROM
         original  = @source
         @criteria = []
         @source   = filter
-        results   = each
+        @entries  = each
         @source   = original
-        results
+        self
       end
       alias [] call
 
@@ -179,13 +179,13 @@ module ROM
 
       # Respond to Relation methods by returning finalised search results.
       #
-      alias as each
-      alias map_to each
-      alias map_with each
-      alias one! each
-      alias one each
-      alias with each
-      alias to_a each
+      alias_method :as,       :each
+      alias_method :one!,     :each
+      alias_method :map_to,   :each
+      alias_method :map_with, :each
+      alias_method :one,      :each
+      alias_method :to_a,     :each
+      alias_method :with,     :each
 
       # Inspect dataset revealing current filter and base.
       #

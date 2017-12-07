@@ -11,10 +11,13 @@ module ROM
 
         # Called by Directory#query to generate the expression which is passed to Connection#search
         #
+        # @param ast [Array]
+        #
         # @return [Expression]
         #
+        # @api public
         def call(ast)
-          case ast.size
+          case ast.to_ary.size
           when 2 then parse(ast)
           when 3 then parse_expression(ast)
           end

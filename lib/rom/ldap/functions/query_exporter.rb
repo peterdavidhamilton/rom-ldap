@@ -10,8 +10,13 @@ module ROM
       class QueryExporter
         include Lookup
 
+        # @param string [String]
+        #
+        # @return [Array]
+        #
+        # @api public
         def call(string)
-          @scanner = StringScanner.new(string)
+          @scanner = StringScanner.new(string.to_str)
           parse
         end
 

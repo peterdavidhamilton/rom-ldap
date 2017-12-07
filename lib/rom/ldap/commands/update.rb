@@ -4,6 +4,8 @@ module ROM
       class Update < ROM::Commands::Update
         adapter :ldap
 
+        # use :schema
+
         after :finalize
 
         def execute(tuple)
