@@ -9,6 +9,8 @@ module ROM
         # @return [Entry]
         #
         def by_dn(dn)
+          connection.connect
+
           query(base: dn, max_results: 1)
         end
 
@@ -22,6 +24,8 @@ module ROM
         #
         # @api public
         def search(ast, base: nil, &block)
+          connection.connect
+
           Timeout.timeout(timeout) do
             results = query(filter: ast,
                             base: base,
@@ -81,10 +85,12 @@ module ROM
         #
         # @return [Entry, Boolean] created LDAP entry or false.
         #
-        # @example - must include valid dn
+        # @example - must include valid :dn
         #
         # @api public
         def add(tuple)
+          connection.connect
+
           args = payload(tuple)
           dn   = args.delete(:dn)
 
@@ -103,6 +109,8 @@ module ROM
         #
         # @api public
         def modify(dn, tuple) # third param :replace
+          connection.connect
+
           args   = payload(tuple)
           ops    = args.map { |attribute, value| [:replace, attribute, value] }
           result = connection.modify(dn: dn, ops: ops)
@@ -127,6 +135,8 @@ module ROM
         #
         # @api public
         def delete(dn)
+          connection.connect
+
           result = connection.delete(dn: dn)
           log(__callee__, dn)
           result.success?

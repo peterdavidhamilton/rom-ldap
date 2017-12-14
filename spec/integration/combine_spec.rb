@@ -20,7 +20,7 @@ RSpec.describe 'Combine relations' do
 
   it 'combine' do
 
-    binding.pry
+    # binding.pry
     # tags = container.relations[:tags]
 
     # relation = users.combine_with(tasks.for_users.combine_with(tags.for_tasks))
