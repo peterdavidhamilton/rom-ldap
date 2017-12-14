@@ -1,5 +1,4 @@
-require 'bundler'
-Bundler.setup
+require 'bundler/setup'
 
 if RUBY_ENGINE == 'ruby' && ENV['COVERAGE'] == 'true'
   require 'yaml'
@@ -18,7 +17,7 @@ end
 begin
   require 'pry-byebug'
 rescue LoadError
-end if ENV['PRY']
+end
 
 require 'rom-ldap'
 

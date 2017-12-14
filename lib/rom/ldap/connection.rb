@@ -92,7 +92,7 @@ module ROM
       #
       # @api private
       def validate_response(pdu, error_klass, pdu_response)
-        raise(*error_klass) if !pdu || pdu.app_tag != pdu_response
+        raise(*error_klass) unless pdu&.app_tag == pdu_response
       end
     end
   end

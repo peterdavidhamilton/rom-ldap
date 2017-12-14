@@ -150,15 +150,10 @@ module ROM
       #
       # @api private
       def log(caller = nil, message = nil, level = :info)
-        logger.send(level, "#{self.class}##{caller} #{message}")
-
-        if result.failure?
-          # logger.error("#{self.class}##{caller} #{result.error_message}")
-          logger.error("#{self.class}##{caller} #{result.info}")
-        end
-        if result.message
-          logger.debug("#{self.class}##{caller} #{result.message}")
-        end
+        meth = "#{self.class}##{caller}"
+        logger.send(level, "#{meth} #{message}")
+        logger.error("#{meth} #{result.info}")    if result&.failure?
+        logger.debug("#{meth} #{result.message}") if result&.message
       end
 
       memoize :root, :sub_schema

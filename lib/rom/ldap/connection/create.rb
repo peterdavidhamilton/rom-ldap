@@ -25,6 +25,8 @@ module ROM
           request = [dn.to_ber, ber_attrs.to_ber_sequence].to_ber_appsequence(pdu_request)
           ldap_write(request, nil, message_id)
           pdu = queued_read(message_id)
+
+          # TODO: log dn and attrs if pdu.nil? before raising to help debugging.
           validate_response(pdu, error_klass, pdu_response)
           pdu
         end
