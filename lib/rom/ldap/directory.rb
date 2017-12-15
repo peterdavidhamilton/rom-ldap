@@ -34,10 +34,17 @@ module ROM
       option :base,        default: -> { self.class.default_base }
       option :timeout,     default: -> { 30 }
       option :max_results, default: -> { 1_000_000 }
-      option :logger,      default: -> { ::Logger.new(STDOUT) }
+      option :logger,      default: -> { DEFAULT_LOGGER }
 
       # PDU object
       attr_reader :result
+
+
+
+      # binding.pry
+      # require 'dry/monitor/notifications'
+      # notifications = Dry::Monitor::Notifications.new(:directory)
+
 
       # @return [Array<String>]
       #
@@ -136,24 +143,6 @@ module ROM
             source:      type[/X-SCHEMA '(\S+)'/, 1]
           }
         end
-      end
-
-      # require 'dry-monitor'
-      # extend Notifications::Listener
-      # Dry::Monitor::Notifications.new(:app)
-      # subscribe('configuration.directory', adapter: :ldap) do |event|
-      #   binding.pry
-      # end
-
-      # Consolidated method for logging activity.
-      # OPTIMIZE: consider dry-monitor use in this class.
-      #
-      # @api private
-      def log(caller = nil, message = nil, level = :info)
-        meth = "#{self.class}##{caller}"
-        logger.send(level, "#{meth} #{message}")
-        logger.error("#{meth} #{result.info}")    if result&.failure?
-        logger.debug("#{meth} #{result.message}") if result&.message
       end
 
       memoize :root, :sub_schema

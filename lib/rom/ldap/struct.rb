@@ -4,28 +4,6 @@ module ROM
   module LDAP
     class Struct < ROM::Struct
       constructor_type(:schema)
-      # TODO: include Person module if objectclasses include 'person' or 'inetorgperson' ?
-      module Person
-        def user_name
-          shortcut(:uid, :cn)
-        end
-
-        def first_name
-          shortcut(:gn, :givenname)
-        end
-
-        def last_name
-          shortcut(:sn)
-        end
-
-        def display_name
-          shortcut(:displayname, :cn)
-        end
-
-        def id
-          shortcut(:uidnumber)
-        end
-      end
 
       # Remove unused attributes when converting to Hash
       #

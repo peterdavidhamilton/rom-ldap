@@ -13,11 +13,25 @@ RSpec.describe ROM::LDAP::Relation do
       expect(accounts.where(uid: 'bar').delete).to eql([])
     end
 
-    it '#insert -> #update -> #delete' do
+    it '#insert returns false on failure' do
+      expect(
+        accounts.insert(
+          dn: 'uid=batman,ou=users,dc=example,dc=com',
+          cn: 'The Dark Knight',
+          uid: 'batman',
+          sn: 'Wayne',
+          objectclass: %w[top]
+        )
+      ).to eql(false)
+    end
+
+    it '#insert raises error if missing dn' do
       expect { accounts.insert(cn: 'The Dark Knight') }.to raise_error(
         ROM::LDAP::OperationError, 'distinguished name is required'
       )
+    end
 
+    it '#insert -> #update -> #delete' do
       expect(
         accounts.insert(
           dn: 'uid=batman,ou=users,dc=example,dc=com',
@@ -53,11 +67,13 @@ RSpec.describe ROM::LDAP::Relation do
       expect(accounts.where(uid: 'bar').delete).to eql([])
     end
 
-    it '#insert -> #update -> #delete' do
+    it '#insert raises error if missing dn' do
       expect { accounts.insert(cn: 'The Dark Knight') }.to raise_error(
         ROM::LDAP::OperationError, 'distinguished name is required'
       )
+    end
 
+    it '#insert -> #update -> #delete' do
       expect(
         accounts.insert(
           dn: 'uid=batman,ou=users,dc=example,dc=com',

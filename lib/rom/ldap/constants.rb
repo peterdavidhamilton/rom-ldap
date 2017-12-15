@@ -1,9 +1,12 @@
 require 'psych'
+require 'logger'
 require 'dry/core/constants'
 
 module ROM
   module LDAP
     include Dry::Core::Constants
+
+    DEFAULT_LOGGER = ::Logger.new(STDOUT)
 
     WILDCARD   = '*'.freeze
     OP_ATTRS   = '+'.freeze
