@@ -14,18 +14,18 @@ module ROM
         #
         # @api public
         def modify(dn:, ops:)
-          pdu_request  = pdu_lookup(:modify_request)
-          pdu_response = pdu_lookup(:modify_response)
-          error_klass  = [ResponseMissingOrInvalidError, 'response missing or invalid']
-          message_id   = next_msgid
-          operations   = modify_ops(ops)
+          connect
+          pdu_request = pdu_lookup(:modify_request)
+          message_id  = next_msgid
+          operations  = modify_ops(ops)
 
           request = [dn.to_ber, operations.to_ber_sequence].to_ber_appsequence(pdu_request)
 
           ldap_write(request, nil, message_id)
-          pdu = queued_read(message_id)
-          validate_response(pdu, error_klass, pdu_response)
-          pdu
+
+          result = queued_read(message_id)
+
+          validate_pdu(result: result, response: :modify_response)
         end
 
         # @option :old_dn [String] current distinguished name
@@ -40,18 +40,19 @@ module ROM
         #
         # @api public
         def rename(old_dn:, new_rdn:, delete_attrs: false, new_superior: nil)
-          pdu_request  = pdu_lookup(:modify_rdn_request)
-          pdu_response = pdu_lookup(:modify_rdn_response)
-          error_klass  = [ResponseMissingOrInvalidError, 'response missing or invalid']
-          message_id   = next_msgid
+          connect
+          pdu_request = pdu_lookup(:modify_rdn_request)
+          message_id  = next_msgid
 
           request = [old_dn, new_rdn, delete_attrs].map(&:to_ber)
           request << new_superior.to_ber_contextspecific(0) if new_superior
+          request = request.to_ber_appsequence(pdu_request)
 
-          ldap_write(request.to_ber_appsequence(pdu_request), nil, message_id)
-          pdu = queued_read(message_id)
-          validate_response(pdu, error_klass, pdu_response)
-          pdu
+          ldap_write(request, nil, message_id)
+
+          result = queued_read(message_id)
+
+          validate_pdu(result: result, response: :modify_rdn_response)
         end
 
         # @option :dn [String] distinguished name
@@ -64,20 +65,18 @@ module ROM
         #
         # @api public
         def password_modify(dn:, old_pwd:, new_pwd:)
-          pdu_request  = pdu_lookup(:extended_request)
-          pdu_response = pdu_lookup(:extended_response)
-          error_klass  = [ResponseMissingError, 'response missing or invalid']
-          message_id   = next_msgid
-
-          context = PASSWORD_MODIFY.to_ber_contextspecific(0)
-          payload = [old_pwd.to_ber(0x81), new_pwd.to_ber(0x82)]
-          ext_seq = [context, payload.to_ber_sequence.to_ber(0x81)]
-          request = ext_seq.to_ber_appsequence(pdu_request)
+          connect
+          pdu_request = pdu_lookup(:extended_request)
+          message_id  = next_msgid
+          context     = PASSWORD_MODIFY.to_ber_contextspecific(0)
+          payload     = [old_pwd.to_ber(0x81), new_pwd.to_ber(0x82)]
+          ext_seq     = [context, payload.to_ber_sequence.to_ber(0x81)]
+          request     = ext_seq.to_ber_appsequence(pdu_request)
 
           ldap_write(request, nil, message_id)
-          pdu = queued_read(message_id)
-          validate_response(pdu, error_klass, pdu_response)
-          pdu
+          result = queued_read(message_id)
+
+          validate_pdu(result: result, response: :extended_response)
         end
 
         private

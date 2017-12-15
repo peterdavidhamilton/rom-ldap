@@ -157,7 +157,7 @@ module ROM
         end
       end
 
-      # Find by Distinguished Name
+      # Find by Distinguished Name(s)
       #
       # @param dns [String, Array<String>]
       #

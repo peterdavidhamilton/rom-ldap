@@ -3,7 +3,7 @@ require 'ber'
 using ::BER
 
 require 'net/tcp_client'
-require 'rom/ldap/directory/pdu'
+require 'rom/ldap/pdu'
 require 'rom/ldap/connection/authenticate'
 require 'rom/ldap/connection/create'
 require 'rom/ldap/connection/read'
@@ -49,7 +49,7 @@ module ROM
         return unless ber_object = socket.read_ber(syntax)
         # return unless ber_object = socket_read(syntax, nil, read_timeout)
         # return unless ber_object = read(syntax)
-        Directory::PDU.new(ber_object)
+        PDU.new(ber_object)
       end
 
       # @api private
@@ -88,11 +88,20 @@ module ROM
         @msgid += 1
       end
 
-      # @return [Exception, Nil]
+      # @option :result   [PDU]
+      # @option :response [Symbol] key for expected response integer
+      # @option :error    [Symbol] key for appropriate exception
+      #
+      # @return [PDU, Exception]
       #
       # @api private
-      def validate_response(pdu, error_klass, pdu_response)
-        raise(*error_klass) unless pdu&.app_tag == pdu_response
+      def validate_pdu(result:, response:, error: :missing_or_invalid)
+        valid = result&.app_tag == pdu_lookup(response)
+
+        logger.debug("#{result.class} #{result.message}") if result&.message
+        logger.error("#{result.class} #{result.info}")    if result&.failure?
+
+        valid ? result : raise(*ERRORS.fetch(error))
       end
     end
   end

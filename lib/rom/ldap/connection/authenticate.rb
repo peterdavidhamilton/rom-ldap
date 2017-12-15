@@ -18,22 +18,24 @@ module ROM
         #
         # @api public
         def bind(username:, password:, version: 3, method: :simple)
-          pdu_request  = pdu_lookup(:bind_request)
-          pdu_response = pdu_lookup(:bind_result)
-          error_klass  = [NoBindResultError, 'no bind result']
-          message_id   = next_msgid
+          connect
+          pdu_request = pdu_lookup(:bind_request)
+          message_id  = next_msgid
 
           request = [
             version.to_ber,
             username.to_ber,
             password.to_ber_contextspecific(0)
-
           ].to_ber_appsequence(pdu_request)
 
           ldap_write(request, nil, message_id)
-          pdu = queued_read(message_id)
-          validate_response(pdu, error_klass, pdu_response)
-          pdu
+          result = queued_read(message_id)
+
+          validate_pdu(
+            result: result,
+            error: :no_bind_result,
+            response: :bind_result
+          )
         end
 
         private

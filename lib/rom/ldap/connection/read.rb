@@ -45,6 +45,8 @@ module ROM
           unlimited: true
         )
 
+          connect
+
           raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
           raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 
@@ -57,6 +59,7 @@ module ROM
           result_pdu = nil
           query_limit = (0..126).cover?(max_results) ? max_results : 0
           counter = 0
+          pdu_request = pdu_lookup(:search_request)
 
           loop do
             request = [
@@ -68,7 +71,7 @@ module ROM
               attributes_only.to_ber,
               expression.to_ber,
               ber_attrs.to_ber_sequence
-            ].to_ber_appsequence(pdu_lookup(:search_request))
+            ].to_ber_appsequence(pdu_request)
 
             controls = []
 

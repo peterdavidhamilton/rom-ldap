@@ -9,8 +9,6 @@ module ROM
         # @return [Entry]
         #
         def by_dn(dn)
-          connection.connect
-
           query(base: dn, max_results: 1)
         end
 
@@ -24,8 +22,6 @@ module ROM
         #
         # @api public
         def search(ast, base: nil, &block)
-          connection.connect
-
           Timeout.timeout(timeout) do
             results = query(filter: ast,
                             base: base,
@@ -36,9 +32,6 @@ module ROM
             block_given? ? results.each(&block) : results
           end
         rescue Timeout::Error
-          log(__callee__, "timed out after #{timeout} seconds", :warn)
-        ensure
-          log(__callee__, Functions[:to_ldap][ast])
         end
 
         # @option :filter [String]
@@ -89,15 +82,10 @@ module ROM
         #
         # @api public
         def add(tuple)
-          connection.connect
-
           args = payload(tuple)
-          dn   = args.delete(:dn)
+          raise(OperationError, 'distinguished name is required') unless (dn = args.delete(:dn))
 
-          raise OperationError, 'distinguished name is required' if dn.nil?
           result = connection.add(dn: dn, attrs: args)
-          log(__callee__, dn)
-
           result.success? ? by_dn(dn).first : false
         end
 
@@ -109,13 +97,9 @@ module ROM
         #
         # @api public
         def modify(dn, tuple) # third param :replace
-          connection.connect
-
           args   = payload(tuple)
           ops    = args.map { |attribute, value| [:replace, attribute, value] }
           result = connection.modify(dn: dn, ops: ops)
-
-          log(__callee__, dn)
           result.success? ? by_dn(dn).first : false
         end
 
@@ -135,10 +119,7 @@ module ROM
         #
         # @api public
         def delete(dn)
-          connection.connect
-
           result = connection.delete(dn: dn)
-          log(__callee__, dn)
           result.success?
         end
 

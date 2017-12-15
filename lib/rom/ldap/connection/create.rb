@@ -12,23 +12,24 @@ module ROM
         #
         # @api public
         def add(dn:, attrs: EMPTY_ARRAY)
-          pdu_request  = pdu_lookup(:add_request)
-          pdu_response = pdu_lookup(:add_response)
-          error_klass  = [ResponseMissingOrInvalidError, 'response missing or invalid']
-          message_id   = next_msgid
+          connect
+          pdu_request = pdu_lookup(:add_request)
+          message_id  = next_msgid
 
-          ber_attrs    = attrs.each_with_object([]) do |(k, v), attributes|
+          ber_attrs = attrs.each_with_object([]) do |(k, v), attributes|
             ber_values = Array(v).map(&:to_ber).to_ber_set
             attributes << [k.to_s.to_ber, ber_values].to_ber_sequence
           end
 
-          request = [dn.to_ber, ber_attrs.to_ber_sequence].to_ber_appsequence(pdu_request)
-          ldap_write(request, nil, message_id)
-          pdu = queued_read(message_id)
+          request = [
+            dn.to_ber,
+            ber_attrs.to_ber_sequence
+          ].to_ber_appsequence(pdu_request)
 
-          # TODO: log dn and attrs if pdu.nil? before raising to help debugging.
-          validate_response(pdu, error_klass, pdu_response)
-          pdu
+          ldap_write(request, nil, message_id)
+          result = queued_read(message_id)
+
+          validate_pdu(result: result, response: :add_response)
         end
       end
     end
