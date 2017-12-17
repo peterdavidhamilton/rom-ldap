@@ -2,16 +2,6 @@ module ROM
   module LDAP
     class Dataset
       module InstanceMethods
-        # True if password binds for the filtered dataset
-        #
-        # @param password [String]
-        #
-        # @return [Boolean]
-        #
-        # @api public
-        def authenticated?(password)
-          directory.bind_as(filter: query, password: password)
-        end
 
         # @return [Boolean]
         #

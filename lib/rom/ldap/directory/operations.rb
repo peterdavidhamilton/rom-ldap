@@ -44,7 +44,8 @@ module ROM
         def bind_as(filter:, password:)
           if (entity = query(filter: filter, max_results: 1).first)
             password = password.call if password.respond_to?(:call)
-            connection.bind(username: entity.dn, password: password)
+            result   = connection.bind(username: entity.dn, password: password)
+            result.success?
           else
             false
           end
