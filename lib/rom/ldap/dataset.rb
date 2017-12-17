@@ -143,8 +143,7 @@ module ROM
       # @api public
       def each(*args, &block)
         results = @entries ||= search.lazy
-        @entries = nil
-        @criteria = []
+        reset!
 
         if paginated?
           results = results.to_a[page_range].lazy || EMPTY_ARRAY.lazy
@@ -175,6 +174,19 @@ module ROM
       def select(*args)
         @entries = each.map { |entry| entry.select(*args) }
         self
+      end
+
+      # Validate dataset user and password
+      #
+      # @param password [String]
+      #
+      # @return [Boolean]
+      #
+      # @api public
+      def bind(password)
+        result = directory.bind_as(filter: query, password: password)
+        reset!
+        result
       end
 
       # Respond to Relation methods by returning finalised search results.
@@ -242,6 +254,12 @@ module ROM
       # @api private
       def paginated?
         !!@limit && !!@offset
+      end
+
+      # @pi private
+      def reset!
+        @entries  = nil
+        @criteria = []
       end
     end
   end

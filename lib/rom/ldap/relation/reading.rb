@@ -65,22 +65,13 @@ module ROM
           new(dataset[raw])
         end
 
-        # Returns empty dataset if the filtered entity cannot bind.
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def authenticate(password)
-          dataset.authenticated?(password) ? new(dataset) : new(EMPTY_ARRAY)
-        end
-
         # Returns True if the filtered entity can bind.
         #
         # @return [Boolean]
         #
         # @api public
-        def authenticated?(password)
-          dataset.authenticated?(password)
+        def authenticate(password)
+          dataset.bind(password)
         end
 
         # Count the number of entries selected from the paginated dataset.
