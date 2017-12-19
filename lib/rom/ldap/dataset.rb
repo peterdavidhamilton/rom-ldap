@@ -142,18 +142,11 @@ module ROM
       #
       # @api public
       def each(*args, &block)
-        results = @entries ||= search.lazy
+        results = @entries ||= search
         reset!
-
-        if paginated?
-          results = results.to_a[page_range].lazy || EMPTY_ARRAY.lazy
-        end
-
-        if block_given?
-          results.each(*args, &block)
-        else
-          results
-        end
+        results = results.to_a.each(*args, &block) if block_given?
+        results = results[page_range] || EMPTY_ARRAY if paginated?
+        results.lazy
       end
 
       # Find by Distinguished Name(s)
