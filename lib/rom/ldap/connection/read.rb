@@ -45,7 +45,7 @@ module ROM
           unlimited: true
         )
 
-          connect
+          connect unless alive?
 
           raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
           raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
@@ -98,8 +98,10 @@ module ROM
               case pdu.app_tag
               when pdu_lookup(:search_returned_data)
                 counter += 1
+
                 # NB: Debugging output of each entry being processed
-                # logger.debug("#{counter}: #{pdu.search_entry.dn}")
+                logger.debug("#{counter}: #{pdu.search_entry.dn}") if ENV['DEBUG']
+
                 yield pdu.search_entry if block_given?
 
               when pdu_lookup(:search_result_referral)

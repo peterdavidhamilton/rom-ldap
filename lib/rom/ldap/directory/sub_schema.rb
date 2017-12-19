@@ -4,18 +4,24 @@ module ROM
       module SubSchema
         private
 
-        # Struct/Hash like object representing an LDAP entity for SubSchema
+        # Representation of directory SubSchema
         #
+        # @return [Directory::Entry]
+        #
+        # @api private
         def sub_schema
           query(
-            base:       sub_schema_entry,
-            scope:      SCOPE_BASE_OBJECT,
-            filter:     '(objectClass=subschema)',
-            attributes: %w[objectclasses attributetypes],
-            unlimited:  false
+            base:        sub_schema_entry,
+            scope:       SCOPE_BASE_OBJECT,
+            filter:      '(objectClass=subschema)',
+            attributes:  %w[objectClasses attributeTypes],
+            # unlimited:   false,
+            max_results: 1
           ).first
         end
 
+        # Distinguished name of subschema
+        #
         # @return [String]
         #
         # @api private

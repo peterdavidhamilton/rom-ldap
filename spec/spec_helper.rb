@@ -38,11 +38,11 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
   # config.warnings = warning_api_available
 
-  config.before(:suite) do
-    tmp_test_dir = TMP_PATH.join('test')
-    FileUtils.rm_r(tmp_test_dir) if File.exist?(tmp_test_dir)
-    FileUtils.mkdir_p(tmp_test_dir)
-  end
+  # config.before(:suite) do
+  #   tmp_test_dir = TMP_PATH.join('test')
+  #   FileUtils.rm_r(tmp_test_dir) if File.exist?(tmp_test_dir)
+  #   FileUtils.mkdir_p(tmp_test_dir)
+  # end
 
   config.before do
     module Test

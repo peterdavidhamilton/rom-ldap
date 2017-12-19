@@ -99,7 +99,7 @@ module ROM
         valid = result&.app_tag == pdu_lookup(response)
 
         logger.debug("#{result.class} #{result.message}") if result&.message
-        logger.error("#{result.class} #{result.info}")    if result&.failure?
+        logger.warn("#{result.class} #{result.info}") if result&.failure?
 
         valid ? result : raise(*ERRORS.fetch(error))
       end

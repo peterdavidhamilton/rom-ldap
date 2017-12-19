@@ -27,7 +27,7 @@ module ROM
             caps = root['supportedCapabilities'].sort
 
             if caps.empty?
-              log(__callee__, 'Active Directory version is unknown')
+              logger.info("#{self.class} unknown Active Directory version")
             else
               require 'rom/ldap/directory/vendors/active_directory'
 
@@ -37,18 +37,18 @@ module ROM
 
               time   = Functions[:to_time][root['currentTime']].first
 
+              @type                     = :active_directory
               @supported_capabilities   = caps
               @controller_functionality = dc
               @forest_functionality     = forest
               @domain_functionality     = dom
-              @directory_time           = time
+              @directory_time           = time # TODO: check against app time
               @vendor_name              = 'Microsoft'
               @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
-              @directory_type           = :active_directory
             end
 
           else
-            log(__callee__, "LDAP implementation #{vendor_name} is unknown")
+            logger.info("#{self.class} unknown directory implementation")
             @type = :unknown
           end
           self
@@ -110,14 +110,14 @@ module ROM
         #
         # @api private
         def vendor_name
-          root.first('vendorName')
+          @vendor_name ||= root.first('vendorName')
         end
 
         # @return [String]
         #
         # @api private
         def vendor_version
-          root.first('vendorVersion')
+          @vendor_version ||= root.first('vendorVersion')
         end
 
         # @return [Array<String>]
