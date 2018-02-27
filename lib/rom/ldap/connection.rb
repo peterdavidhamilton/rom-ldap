@@ -54,8 +54,10 @@ module ROM
 
       # @api private
       def ldap_write(request, controls = nil, message_id = next_msgid)
-        packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
-        socket_write(packet, write_timeout)
+        retry_on_connection_failure do
+          packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
+          socket_write(packet, write_timeout)
+        end
       end
 
       # @api private

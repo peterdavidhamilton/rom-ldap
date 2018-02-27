@@ -45,8 +45,6 @@ module ROM
           unlimited: true
         )
 
-          connect unless alive?
-
           raise ArgumentError, 'invalid search scope'              unless SCOPES.include?(scope)
           raise ArgumentError, 'invalid alias dereferencing value' unless DEREF_ALL.include?(deref)
 

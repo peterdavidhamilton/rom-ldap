@@ -12,20 +12,6 @@ module ROM
       param :left
       param :right, optional: true
 
-      #
-      # Constructors
-      #
-      def &(other)
-        self.class.new(:con_and, self, other)
-      end
-
-      def |(other)
-        self.class.new(:con_or, self, other)
-      end
-
-      def ~@
-        self.class.new(:con_not, self, nil)
-      end
 
       def to_raw_rfc2254
         case op
@@ -95,23 +81,29 @@ module ROM
         end
       end
 
-      # # @return [Boolean]
-      # #
-      # # @api private
-      # def match(entry)
-      #   case op
-      #   when :op_eql
-      #     if right == WILDCARD
-      #       binding.pry
-      #       # (l = entry[left]) && !l.empty?
-      #       (l = entry[left]) && l.any?
-      #     else
-      #       (l = entry[left]) && (l = Array(l)) && l.index(right)
-      #     end
-      #   else
-      #     raise FilterError, "Unknown filter type in match: #{op}"
-      #   end
-      # end
+
+
+      #
+      # Constructors
+      #
+      def &(other)
+        constructor(:con_and, other)
+      end
+
+      def |(other)
+        constructor(:con_or, other)
+      end
+
+      def ~@
+        constructor(:con_not)
+      end
+
+      private
+
+      def constructor(sym, other = nil)
+        self.class.new(sym, self, other)
+      end
+
     end
   end
 end

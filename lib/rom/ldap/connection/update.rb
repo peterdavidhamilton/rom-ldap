@@ -14,7 +14,6 @@ module ROM
         #
         # @api public
         def modify(dn:, ops:)
-          connect
           pdu_request = pdu_lookup(:modify_request)
           message_id  = next_msgid
           operations  = modify_ops(ops)
@@ -40,7 +39,6 @@ module ROM
         #
         # @api public
         def rename(old_dn:, new_rdn:, delete_attrs: false, new_superior: nil)
-          connect
           pdu_request = pdu_lookup(:modify_rdn_request)
           message_id  = next_msgid
 
@@ -65,7 +63,6 @@ module ROM
         #
         # @api public
         def password_modify(dn:, old_pwd:, new_pwd:)
-          connect
           pdu_request = pdu_lookup(:extended_request)
           message_id  = next_msgid
           context     = PASSWORD_MODIFY.to_ber_contextspecific(0)

@@ -12,7 +12,6 @@ module ROM
         #
         # @api public
         def add(dn:, attrs: EMPTY_ARRAY)
-          connect
           pdu_request = pdu_lookup(:add_request)
           message_id  = next_msgid
 

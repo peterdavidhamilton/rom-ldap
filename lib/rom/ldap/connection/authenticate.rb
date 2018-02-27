@@ -18,7 +18,6 @@ module ROM
         #
         # @api public
         def bind(username:, password:, version: 3, method: :simple)
-          connect
           pdu_request = pdu_lookup(:bind_request)
           message_id  = next_msgid
 
