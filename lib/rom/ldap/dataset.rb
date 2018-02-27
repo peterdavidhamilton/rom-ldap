@@ -93,17 +93,6 @@ module ROM
       end
       alias [] call
 
-      # Mirror Sequel dataset behaviour for rom-sql relation compatibility.
-      #
-      # @example
-      #   dataset.db.db.database_type => :apacheds
-      #
-      # @api public
-      def db
-        db = ::OpenStruct.new
-        db[:database_type] = directory.type
-        ::OpenStruct.new(db: db)
-      end
 
       # @return [ROM::LDAP::Dataset]
       #

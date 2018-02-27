@@ -16,15 +16,10 @@ module ROM
             formatter ? formatter[key] : key
           end
 
+          # @see ROM::LDAP.load_extensions :compatible_entry_attributes
+          #
           def use_formatter(function)
             @formatter = function
-          end
-
-          # Set Entry.rename to use the default transformer proc.
-          #
-          # @api public
-          def to_method_name!
-            use_formatter ->(key) { LDAP::Functions.to_method_name(key) }
           end
         end
 
