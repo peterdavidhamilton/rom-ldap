@@ -158,6 +158,14 @@ module ROM
         self
       end
 
+      # @return [Dataset]
+      #
+      # @api public
+      def shuffle
+        @entries = each.to_a.shuffle
+        self
+      end
+
       # Validate dataset user and password
       #
       # @param password [String]

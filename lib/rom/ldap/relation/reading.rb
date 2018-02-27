@@ -207,7 +207,7 @@ module ROM
         #
         # @api public
         def random
-          new(dataset.entries.shuffle)
+          new(dataset.shuffle)
         end
 
         # Reverses the dataset
