@@ -2,6 +2,12 @@ module ROM
   module LDAP
     class Directory
       module Root
+        # @return [Symbol]
+        #
+        # @api public
+        attr_reader :type
+
+
         # Set instance variables like directory_type
         #
         # @see Gateway#directory
@@ -11,55 +17,61 @@ module ROM
         # @api public
         def load_rootdse!
           case vendor_name
-          when /Apache/
-            @type = :apacheds
-            require 'rom/ldap/directory/vendors/apache_ds'
-          when /Apple/
-            @type = :open_directory
-            require 'rom/ldap/directory/vendors/open_directory'
-          when /Novell/
-            @type = :e_directory
-            require 'rom/ldap/directory/vendors/e_directory'
-          when /389/
-            @type = :three_eight_nine
-            require 'rom/ldap/directory/vendors/three_eight_nine'
-          when nil
-            caps = root['supportedCapabilities'].sort
-
-            if caps.empty?
-              logger.info("#{self.class} unknown Active Directory version")
-            else
-              require 'rom/ldap/directory/vendors/active_directory'
-
-              dc     = root.first('domainControllerFunctionality').to_i
-              forest = root.first('forestFunctionality').to_i
-              dom    = root.first('domainFunctionality').to_i
-
-              time   = Functions[:to_time][root['currentTime']].first
-
-              @type                     = :active_directory
-              @supported_capabilities   = caps
-              @controller_functionality = dc
-              @forest_functionality     = forest
-              @domain_functionality     = dom
-              @directory_time           = time # TODO: check against app time
-              @vendor_name              = 'Microsoft'
-              @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
-            end
-
+          when /Apache/ then @type = :apache_ds
+          when /Apple/  then @type = :open_directory
+          when /Novell/ then @type = :e_directory
+          when /389/    then @type = :three_eight_nine
+          when nil      then @type = :active_directory
           else
             logger.info("#{self.class} unknown directory implementation")
             @type = :unknown
           end
+
+          load_vendor_extension(type)
+
+          infer_microsoft_implementation if type.eql?(:active_directory)
+
           self
         end
 
-        # @return [Symbol]
-        #
-        # @api public
-        attr_reader :type
-
         private
+
+        # Load vendor specific extensions
+        #
+        # @return [Array]
+        #
+        # @param type [Symbol] type of LDAP implementation / vendor name
+        #
+        # @api private
+        def load_vendor_extension(type)
+          LDAP.load_extensions(type) unless type == :unknown
+        end
+
+        # Set instance variables for readers.
+        #
+        # @api private
+        def infer_microsoft_implementation
+          caps = root['supportedCapabilities'].sort
+
+          if caps.empty?
+            logger.info("#{self.class} unknown Active Directory version")
+          else
+            dc     = root.first('domainControllerFunctionality').to_i
+            forest = root.first('forestFunctionality').to_i
+            dom    = root.first('domainFunctionality').to_i
+
+            time   = Functions[:to_time][root['currentTime']].first
+
+            @supported_capabilities   = caps
+            @controller_functionality = dc
+            @forest_functionality     = forest
+            @domain_functionality     = dom
+            @directory_time           = time # TODO: check against app time
+            @vendor_name              = 'Microsoft'
+            @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
+          end
+        end
+
 
         # Representation of directory RootDSE
         #
