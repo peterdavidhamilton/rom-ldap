@@ -1,5 +1,8 @@
 require 'bundler/setup'
 
+# If "Too many open files - getcwd (Errno::EMFILE)" run this:
+# $ ulimit -n 1024
+
 if RUBY_ENGINE == 'ruby' && ENV['COVERAGE'] == 'true'
   require 'yaml'
   rubies = YAML.load(File.read(File.join(__dir__, '..', '.travis.yml')))['rvm']

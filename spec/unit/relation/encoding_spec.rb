@@ -27,11 +27,11 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     let(:relation) { relations[:accounts].where(uid: '李振藩') }
 
     it 'source filter' do
-      expect(relation.source).to eql('(&(objectClass=person)(uid=*))')
+      expect(relation.source_filter).to eql('(&(objectClass=person)(uid=*))')
     end
 
     it 'chained criteria' do
-      expect(relation.query).to eql(
+      expect(relation.query_ast).to eql(
         [
           :con_and,
           [
@@ -51,7 +51,7 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     end
 
     it 'combined filter' do
-      expect(relation.filter).to eql('(&(&(objectClass=person)(uid=*))(uid=李振藩))')
+      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(uid=*))(uid=李振藩))')
     end
 
     it 'result' do

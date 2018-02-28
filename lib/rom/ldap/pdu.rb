@@ -40,7 +40,7 @@ module ROM
           @app_tag    = tag.ber_identifier & 0x1f
           @controls   = ctrls || []
           @res        = {}
-        rescue Exception => e
+        rescue StandardError => e
           raise Error, "#{self.class}: #{e.message}"
         end
 

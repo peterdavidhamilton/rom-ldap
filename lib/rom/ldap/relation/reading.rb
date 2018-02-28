@@ -41,7 +41,7 @@ module ROM
         #
         # @api public
         def base(alt_base = self.class.base)
-          new(dataset.search_base(alt_base))
+          new(dataset.with(base: alt_base))
         end
 
         # Compliments #root method with an alternative search base
@@ -56,13 +56,13 @@ module ROM
 
         # Standard directory query. Supersede criteria with the given filter string.
         #
-        # @param raw [String] Valid LDAP filter string
+        # @param filter [String] Valid LDAP filter string
         #
         # @return [Relation]
         #
         # @api public
-        def search(raw)
-          new(dataset[raw])
+        def search(filter)
+          new(dataset.with(filter: filter))
         end
 
         # Returns True if the filtered entity can bind.
@@ -207,7 +207,7 @@ module ROM
         #
         # @api public
         def random
-          new(dataset.shuffle)
+          new(dataset.sort_by { rand })
         end
 
         # Reverses the dataset

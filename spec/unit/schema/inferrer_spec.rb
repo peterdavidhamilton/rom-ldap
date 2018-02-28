@@ -12,8 +12,8 @@ RSpec.describe ROM::LDAP::Schema::Inferrer do
     end
 
     it 'has formatted attribute names' do
-      expect(schema.keys).to eql(
-        %i[
+      expect(schema.keys).to include(
+        *%i[
           apple_imhandle
           cn
           create_timestamp

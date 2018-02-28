@@ -5,7 +5,9 @@ RSpec.describe 'Plugin / Pagination' do
 
   describe '#page' do
     it 'allow to call with stringify number' do
+      # FIXME: count works but not to_a
       expect(accounts.page('1').to_a.size).to eql(4)
+      # expect(accounts.page('1').count).to eql(4)
     end
 
     it 'preserves existing modifiers' do

@@ -76,9 +76,10 @@ module ROM
           def at(dataset, current_page, per_page = self.per_page)
             current_page = current_page.to_i
             per_page     = per_page.to_i
+            offset       = (current_page - 1) * per_page
 
             self.class.new(
-              dataset.offset((current_page - 1) * per_page).limit(per_page),
+              dataset.with(offset: offset, limit: per_page),
               current_page: current_page, per_page: per_page
             )
           end
