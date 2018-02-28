@@ -17,11 +17,11 @@ RSpec.describe ROM::LDAP::Relation do
     let(:relation) { relations[:people].within(uidnumber: 3..9) }
 
     it 'source filter' do
-      expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
+      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
     end
 
     it 'chained criteria' do
-      expect(relation.query).to eql(
+      expect(relation.query_ast).to eql(
         [
           :con_and,
           [
@@ -47,7 +47,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'combined filter' do
-      expect(relation.filter).to eql(
+      expect(relation.ldap_string).to eql(
         '(&(&(objectClass=person)(gidNumber=1))(&(uidNumber>=3)(uidNumber<=9)))'
       )
     end
@@ -62,11 +62,11 @@ RSpec.describe ROM::LDAP::Relation do
     let(:relation) { relations[:people].between(uidnumber: -1..12) }
 
     it 'source filter' do
-      expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
+      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
     end
 
     it 'chained criteria' do
-      expect(relation.query).to eql(
+      expect(relation.query_ast).to eql(
         [
           :con_and,
           [
@@ -92,7 +92,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'combined filter' do
-      expect(relation.filter).to eql(
+      expect(relation.ldap_string).to eql(
         '(&(&(objectClass=person)(gidNumber=1))(&(uidNumber>=-1)(uidNumber<=12)))'
       )
     end
@@ -107,11 +107,11 @@ RSpec.describe ROM::LDAP::Relation do
     let(:relation) { relations[:people].between(uidnumber: 30..100) }
 
     it 'source filter' do
-      expect(relation.source).to eql('(&(objectClass=person)(gidNumber=1))')
+      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
     end
 
     it 'chained criteria' do
-      expect(relation.query).to eql(
+      expect(relation.query_ast).to eql(
         [
           :con_and,
           [
@@ -137,7 +137,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'combined filter' do
-      expect(relation.filter).to eql(
+      expect(relation.ldap_string).to eql(
         '(&(&(objectClass=person)(gidNumber=1))(&(uidNumber>=30)(uidNumber<=100)))'
       )
     end

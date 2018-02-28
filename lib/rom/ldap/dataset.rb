@@ -5,12 +5,10 @@ require 'rom/ldap/dataset/instance_methods'
 
 module ROM
   module LDAP
-    # Method chaining class to build search criteria,
-    #   finalised and reset once #each is called.
     #
-    # @param directory [Directory] Directory object
+    # @option :directory [Directory] Directory object
     #
-    # @param source [String] Relation name.
+    # @option :filter [String] Relation name.
     #   @example => "(&(objectClass=person)(uidNumber=*))"
     #
     # @option :limit [Integer] Pagination page(1).
@@ -26,41 +24,37 @@ module ROM
       extend Initializer
       include Enumerable
 
-      param :directory
+      option :directory
 
-      param :source,
+      option :filter,
         reader:   false,
         type:     Dry::Types['string']
 
       option :base,
-        reader:   false,
+        reader:   :private,
         type:     Dry::Types['strict.string']
-
-      option :offset,
-        reader:   false,
-        optional: true,
-        type:     Dry::Types['strict.int']
-
-      option :limit,
-        reader:   false,
-        optional: true,
-        type:     Dry::Types['strict.int']
 
       option :criteria,
         reader:   :private,
         type:     Dry::Types['strict.array'],
         default:  -> { [] }
 
+      option :offset,
+        reader:   :private,
+        optional: true,
+        type:     Dry::Types['strict.int']
+
+      option :limit,
+        reader:   :private,
+        optional: true,
+        type:     Dry::Types['strict.int']
+
+
+      # @return [Hash] internal options
+      #
       # @api public
       def opts
-        {
-          base:   @base,
-          source: @source,
-          query:  query,
-          filter: filter,
-          offset: @offset,
-          limit:  @limit
-        }.freeze
+        options.merge(query_ast: query_ast, ldap_string: ldap_string).freeze
       end
 
 
@@ -75,68 +69,27 @@ module ROM
         DSL.public_instance_methods(false)
       end
 
-      # Raw filter search - overload filter
-      # Temporarily replace dataset with new filter.
-      #
       # @return [ROM::LDAP::Dataset]
       #
-      # @param filter [String] Valid LDAP filter string
+      # @param overrides [Hash] Alternative options
       #
       # @api public
-      def call(filter)
-        original  = @source
-        @criteria = []
-        @source   = filter
-        @entries  = each
-        @source   = original
-        self
-      end
-      alias [] call
-
-
-      # @return [ROM::LDAP::Dataset]
-      #
-      # @param offset [Integer] Integer value to start pagination range.
-      #
-      # @api public
-      def offset(offset)
-        @offset = offset
-        self
+      def with(overrides)
+        self.class.new(options.merge(overrides))
       end
 
-      # @return [ROM::LDAP::Dataset]
-      #
-      # @param limit [Integer] Value to calculate pagination range end.
-      #
-      # @api public
-      def limit(limit)
-        @limit = limit
-        self
-      end
 
-      # @return [ROM::LDAP::Dataset]
-      #
-      # @param base [String] Alternative search base.
-      #
-      # @api public
-      def search_base(base)
-        @base = base
-        self
-      end
-
-      # Iterate over @entries or populate with a directory search.
-      # Reset @criteria and @entries.
-      #
-      # @return [Enumerator::Lazy<Directory::Entry>]
+      # @return [Array<Directory::Entry>]
       #
       # @api public
       def each(*args, &block)
-        results = @entries ||= search
-        reset!
-        results = results.to_a.each(*args, &block) if block_given?
-        results = results[page_range] || EMPTY_ARRAY if paginated?
-        results.lazy
+        if paginated?
+          entries[page_range].each(*args, &block)
+        else
+          entries.each(*args, &block)
+        end
       end
+
 
       # Find by Distinguished Name(s)
       #
@@ -154,19 +107,11 @@ module ROM
       #
       # @api public
       def select(*args)
-        @entries = each.map { |entry| entry.select(*args) }
+        @entries = map { |entry| entry.select(*args) }
         self
       end
 
-      # @return [Dataset]
-      #
-      # @api public
-      def shuffle
-        @entries = each.to_a.shuffle
-        self
-      end
-
-      # Validate dataset user and password
+      # Validate the password against the filtered user.
       #
       # @param password [String]
       #
@@ -174,20 +119,9 @@ module ROM
       #
       # @api public
       def bind(password)
-        result = directory.bind_as(filter: query, password: password)
-        reset!
-        result
+        directory.bind_as(filter: query, password: password)
       end
 
-      # Respond to Relation methods by returning finalised search results.
-      #
-      alias_method :as,       :each
-      alias_method :one!,     :each
-      alias_method :map_to,   :each
-      alias_method :map_with, :each
-      alias_method :one,      :each
-      alias_method :to_a,     :each
-      alias_method :with,     :each
 
       # Inspect dataset revealing current filter and base.
       #
@@ -195,7 +129,7 @@ module ROM
       #
       # @api public
       def inspect
-        %(#<#{self.class}: "#{filter}" base="#{@base}">)
+        %(#<#{self.class}: "#{filter}" base="#{base}">)
       end
 
       private
@@ -205,8 +139,8 @@ module ROM
       # @return [String]
       #
       # @api private
-      def filter
-        Functions[:to_ldap][query]
+      def ldap_string
+        Functions[:to_ldap][query_ast]
       end
 
       # Combine original relation dataset name (LDAP filter string)
@@ -215,9 +149,12 @@ module ROM
       # @return [String]
       #
       # @api private
-      def query
-        return source_to_ast if criteria.empty?
-        [:con_and, [source_to_ast, criteria]]
+      def query_ast
+        if criteria.empty?
+          filter_ast
+        else
+          [:con_and, [filter_ast, criteria]]
+        end
       end
 
       # Convert the relation's source filter string to a query AST.
@@ -225,31 +162,30 @@ module ROM
       # @return [Array]
       #
       # @api private
-      def source_to_ast
-        Functions[:to_ast][@source]
+      def filter_ast
+        Functions[:to_ast][@filter]
       end
 
+      # Populate with a directory search or iterate over existing @entries.
+      #
       # @return [Array<Hash>]
       #
       # @api private
-      def search(&block)
-        directory.search(query, base: @base, &block)
+      def entries
+        results   = @entries || directory.search(query_ast, base: base)
+        @criteria = []
+        @entries  = nil
+        results
       end
 
       # @api private
       def page_range
-        @offset..(@offset + @limit - 1) if paginated?
+        offset..(offset + limit - 1)
       end
 
       # @api private
       def paginated?
-        !!@limit && !!@offset
-      end
-
-      # @pi private
-      def reset!
-        @entries  = nil
-        @criteria = []
+        limit && offset
       end
     end
   end

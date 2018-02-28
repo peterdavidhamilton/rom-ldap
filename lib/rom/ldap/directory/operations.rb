@@ -21,15 +21,13 @@ module ROM
         # @return [Array<Directory::Entry>]
         #
         # @api public
-        def search(ast, base: nil, &block)
+        def search(ast, base: nil)
           Timeout.timeout(timeout) do
-            results = query(filter: ast,
-                            base: base,
-                            max_results: max_results,
-                            deref: DEREF_ALWAYS,
-                            unlimited: unlimited?)
-
-            block_given? ? results.each(&block) : results
+            query(filter:      ast,
+                  base:        base,
+                  max_results: max_results,
+                  deref:       DEREF_ALWAYS,
+                  unlimited:   unlimited?)
           end
         rescue Timeout::Error
         end

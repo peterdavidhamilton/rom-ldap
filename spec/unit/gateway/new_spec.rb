@@ -12,7 +12,7 @@ RSpec.describe ROM::LDAP::Gateway do
   end
 
   it 'reveals directory vendor name' do
-    expect(gateway.directory_type).to eql(:apacheds)
+    expect(gateway.directory_type).to eql(:apache_ds)
   end
 
   # it 'call' do

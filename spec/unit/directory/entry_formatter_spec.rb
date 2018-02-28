@@ -39,7 +39,7 @@ RSpec.describe ROM::LDAP::Directory::Entry do
           uidNumber
           userPassword
         ]
-        expect(accounts.schema.to_h.keys).to eq(keys)
+        expect(accounts.schema.to_h.keys).to include(*keys)
       end
     end
 
@@ -75,7 +75,7 @@ RSpec.describe ROM::LDAP::Directory::Entry do
           uidnumber
           userpassword
         ]
-        expect(accounts.schema.to_h.keys).to eq(keys)
+        expect(accounts.schema.to_h.keys).to include(*keys)
       end
     end
 
@@ -111,7 +111,7 @@ RSpec.describe ROM::LDAP::Directory::Entry do
             uid_number
             user_password
           ]
-        expect(accounts.schema.to_h.keys).to eq(keys)
+        expect(accounts.schema.to_h.keys).to include(*keys)
       end
     end
 
@@ -147,7 +147,7 @@ RSpec.describe ROM::LDAP::Directory::Entry do
             yrotsihdwp
             yrtnebusamehcsbus
           ]
-        expect(accounts.schema.to_h.keys).to eq(keys)
+        expect(accounts.schema.to_h.keys).to include(*keys)
       end
     end
   end

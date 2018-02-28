@@ -4,6 +4,7 @@ RSpec.shared_context 'relations' do
 
   before do
     # use_formatter(formatter)
+    # ROM::LDAP.load_extensions :compatible_entry_attributes
     ROM::LDAP::Directory::Entry.use_formatter(formatter)
 
     conf.relation(:accounts) do

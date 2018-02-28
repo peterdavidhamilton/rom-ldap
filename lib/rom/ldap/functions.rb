@@ -97,7 +97,7 @@ module ROM
       # TODO: Transproc::Coercions::TRUE_VALUES is missing 'TRUE' #to_boolean
       def self.to_bool(tuples)
         # tuples.map { |t| Dry::Types['form.bool'][t] }
-        t(:map_array, -> t { Dry::Types['form.bool'][t] }).call(tuples)
+        t(:map_array, ->(t) { Dry::Types['form.bool'][t] }).call(tuples)
       end
 
       def self.to_time(tuples)

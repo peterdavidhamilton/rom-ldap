@@ -92,7 +92,11 @@ module ROM
       #
       # @api public
       def dataset(filter)
-        Dataset.new(directory, filter, base: options[:base])
+        Dataset.new(
+          directory: directory,
+          filter:    filter,
+          base:      options[:base]
+        )
       end
 
       # @param logger [Logger]

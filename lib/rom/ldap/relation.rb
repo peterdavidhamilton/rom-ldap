@@ -29,7 +29,7 @@ module ROM
       end
 
       subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        event[:dataset].opts[:filter]
+        event[:dataset].opts[:ldap_string]
       end
 
       #
@@ -76,8 +76,8 @@ module ROM
       # @return [String]
       #
       # @api public
-      def filter
-        dataset.opts[:filter]
+      def ldap_string
+        dataset.opts[:ldap_string]
       end
 
       # Current dataset in abstract query format.
@@ -85,8 +85,8 @@ module ROM
       # @return [String]
       #
       # @api public
-      def query
-        dataset.opts[:query]
+      def query_ast
+        dataset.opts[:query_ast]
       end
 
       # Original dataset in LDAP filter format.
@@ -94,8 +94,8 @@ module ROM
       # @return [String]
       #
       # @api public
-      def source
-        dataset.opts[:source]
+      def source_filter
+        dataset.opts[:filter]
       end
 
       # @api public
