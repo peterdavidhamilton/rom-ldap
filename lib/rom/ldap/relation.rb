@@ -6,6 +6,7 @@ require 'rom/ldap/attribute'
 require 'rom/ldap/transaction'
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
+require 'rom/ldap/relation/exporting'
 
 module ROM
   module LDAP
@@ -15,6 +16,7 @@ module ROM
       include LDAP
       include Reading
       include Writing
+      include Exporting
 
       extend Notifications::Listener
 

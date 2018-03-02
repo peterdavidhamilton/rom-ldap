@@ -1,16 +1,7 @@
 module ROM
   module LDAP
     class Dataset
-      module InstanceMethods
-
-        # Unrestricted count of every entry under the base with base entry deducted.
-        #
-        # @return [Integer]
-        #
-        # @api public
-        def total
-          directory.base_total - 1
-        end
+      module Writing
 
         # Interface to Directory#add
         #
@@ -43,20 +34,6 @@ module ROM
           map { |e| directory.delete(e.dn) }
         end
 
-        # Handle different string output formats.
-        #
-        # @return [String]
-        #
-        # @api
-        def export(format)
-          case format
-          when :ldif then map(&:to_ldif).join
-          when :json then map(&:export).to_json
-          when :yaml then map(&:export).to_yaml
-          else
-            raise 'unknown LDAP dataset export format'
-          end
-        end
       end
     end
   end

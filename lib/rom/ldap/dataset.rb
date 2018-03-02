@@ -1,7 +1,8 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/dataset/dsl'
-require 'rom/ldap/dataset/instance_methods'
+require 'rom/ldap/dataset/reading'
+require 'rom/ldap/dataset/writing'
+require 'rom/ldap/dataset/query_dsl'
 
 module ROM
   module LDAP
@@ -18,6 +19,8 @@ module ROM
     # @option :base [String] Default search base defined in ROM.configuration.
     #
     # @option :criteria [Array] Initial query criteria AST.
+    #
+    # @option :entries [Array] Tuples returned from directory.
     #
     # @api private
     class Dataset
@@ -49,24 +52,20 @@ module ROM
         optional: true,
         type:     Dry::Types['strict.int']
 
-
-      # @return [Hash] internal options
-      #
-      # @api public
-      def opts
-        options.merge(query_ast: query_ast, ldap_string: ldap_string).freeze
-      end
+      option :entries,
+        reader:   false,
+        optional: true,
+        type:     Dry::Types['strict.array']
 
 
-      # Methods that define the query interface.
-      #
-      include DSL
-      include InstanceMethods
+      include QueryDSL
+      include Reading
+      include Writing
 
       # Used by Relation to forward methods to dataset
       #
       def self.dsl
-        DSL.public_instance_methods(false)
+        QueryDSL.public_instance_methods(false)
       end
 
       # @return [ROM::LDAP::Dataset]
@@ -78,7 +77,15 @@ module ROM
         self.class.new(options.merge(overrides))
       end
 
+      # @return [Hash] internal options
+      #
+      # @api public
+      def opts
+        options.except(:directory).merge(query_ast: query_ast, ldap_string: ldap_string).freeze
+      end
 
+      #
+      #
       # @return [Array<Directory::Entry>]
       #
       # @api public
@@ -90,49 +97,27 @@ module ROM
         end
       end
 
-
-      # Find by Distinguished Name(s)
-      #
-      # @param dns [String, Array<String>]
-      #
-      # @return [Dataset]
-      #
-      # @api public
-      def fetch(dns)
-        @entries = Array(dns).flat_map { |dn| directory.by_dn(dn) }
-        self
-      end
-
-      # @return [Dataset]
-      #
-      # @api public
-      def select(*args)
-        @entries = map { |entry| entry.select(*args) }
-        self
-      end
-
-      # Validate the password against the filtered user.
-      #
-      # @param password [String]
-      #
-      # @return [Boolean]
-      #
-      # @api public
-      def bind(password)
-        directory.bind_as(filter: query, password: password)
-      end
-
-
       # Inspect dataset revealing current filter and base.
       #
       # @return [String]
       #
       # @api public
       def inspect
-        %(#<#{self.class}: "#{filter}" base="#{base}">)
+        %(#<#{self.class}: base="#{base}" #{query_ast}>)
       end
 
       private
+
+      # Update the criteria
+      #
+      # @api private
+      def chain(*exprs)
+        if options[:criteria].empty?
+          with(criteria: exprs)
+        else
+          with(criteria: [:con_and, [options[:criteria], exprs]])
+        end
+      end
 
       # Convert the full query to an LDAP filter string
       #
@@ -140,7 +125,7 @@ module ROM
       #
       # @api private
       def ldap_string
-        Functions[:to_ldap][query_ast]
+        Functions[:to_ldap].(query_ast)
       end
 
       # Combine original relation dataset name (LDAP filter string)
@@ -163,7 +148,7 @@ module ROM
       #
       # @api private
       def filter_ast
-        Functions[:to_ast][@filter]
+        Functions[:to_ast].(options[:filter])
       end
 
       # Populate with a directory search or iterate over existing @entries.
@@ -172,9 +157,9 @@ module ROM
       #
       # @api private
       def entries
-        results   = @entries || directory.search(query_ast, base: base)
-        @criteria = []
-        @entries  = nil
+        results = options[:entries] || directory.search(query_ast, base: base)
+        options[:criteria] = []
+        options[:entries]  = nil
         results
       end
 

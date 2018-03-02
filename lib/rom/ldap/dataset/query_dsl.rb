@@ -4,7 +4,7 @@ module ROM
       # AST Query Interface
       #
       # @api public
-      module DSL
+      module QueryDSL
         # Equality filter aliased as 'where'.
         #
         # @example
@@ -117,14 +117,6 @@ module ROM
         end
 
         private
-
-        # Update the criteria
-        #
-        # @api private
-        def chain(*exprs)
-          @criteria.unshift(*exprs)
-          self
-        end
 
         # Handle potential arrays of arguments with a join.
         #
