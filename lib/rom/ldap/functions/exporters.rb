@@ -5,7 +5,7 @@ require 'rom/ldap/functions/expression_exporter'
 module ROM
   module LDAP
     module Functions
-      # ClassMethods for Functions module
+      # Module methods for Functions
       #
       module Exporters
         private

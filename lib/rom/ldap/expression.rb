@@ -43,26 +43,26 @@ module ROM
 
       # @see [Filter::Expression::Decoder]
       #
-      def execute(&block)
-        binding.pry
+      # def execute(&block)
+      #   binding.pry
 
-        case op
-        when :op_eql
-          if right == WILDCARD
-            yield(:present, left)
-          elsif right.index WILDCARD
-            yield(:substring, left, right)
-          else
-            yield(:equality_match, left, right)
-          end
-        when :con_or, :con_and
-          yield(op, left.execute(&block), right.execute(&block))
-        when :con_not
-          yield(op, left.execute(&block))
-        else
-          yield(op, left, right)
-        end || EMPTY_ARRAY
-      end
+      #   case op
+      #   when :op_eql
+      #     if right == WILDCARD
+      #       yield(:present, left)
+      #     elsif right.index WILDCARD
+      #       yield(:substring, left, right)
+      #     else
+      #       yield(:equality_match, left, right)
+      #     end
+      #   when :con_or, :con_and
+      #     yield(op, left.execute(&block), right.execute(&block))
+      #   when :con_not
+      #     yield(op, left.execute(&block))
+      #   else
+      #     yield(op, left, right)
+      #   end || EMPTY_ARRAY
+      # end
 
       # Deal with chains of ANDs and ORs that are longer than two.
       # If both branches are of the specified type of operator,

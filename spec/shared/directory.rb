@@ -33,6 +33,10 @@ RSpec.shared_context 'directory' do
     container.relations
   end
 
+  let(:commands) do
+    container.commands
+  end
+
   #
   # Example functions to format attributes.
   #

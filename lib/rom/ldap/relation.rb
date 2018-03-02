@@ -3,7 +3,7 @@ require 'rom/ldap/schema'
 require 'rom/ldap/wrap'
 require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
-require 'rom/ldap/transaction'
+require 'rom/ldap/transaction' # WIP
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
 require 'rom/ldap/relation/exporting'
@@ -70,7 +70,8 @@ module ROM
       #
       # @api public
       def transaction(opts = EMPTY_HASH, &block)
-        Transaction.new(dataset.db).run(opts, &block)
+        binding.pry
+        Transaction.new(dataset.directory).run(opts, &block)
       end
 
       # Current dataset in LDAP filter format.
