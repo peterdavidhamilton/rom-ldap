@@ -130,6 +130,8 @@ module ROM
 
       # 'filter' to 'query'
       #
+      # @see QueryExporter
+      #
       # @param input [String]
       #
       # @return [Array]
@@ -141,6 +143,8 @@ module ROM
 
       # 'query' to 'filter'
       #
+      # @see FilterExporter
+      #
       # @param input [Array]
       #
       # @return [String]
@@ -151,6 +155,8 @@ module ROM
       end
 
       # 'query' or 'filter' to 'expression'
+      #
+      # @see ExpressionExporter
       #
       # @param input [Array, String]
       #

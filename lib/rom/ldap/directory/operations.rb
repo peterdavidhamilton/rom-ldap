@@ -102,15 +102,6 @@ module ROM
           result.success? ? by_dn(dn).first : false
         end
 
-        # TODO: MODIFY_OPERATIONS :add, :delete, :replace - handle adding another cn
-        # def replace_attribute
-        # end
-        # def add_attribute
-        # end
-        # def delete_attribute
-        # end
-
-
         #
         # @param dn [String]
         #
@@ -120,6 +111,15 @@ module ROM
         def delete(dn)
           result = connection.delete(dn: dn)
           result.success?
+        end
+
+
+        # TODO: Transactions WIP
+        #
+        # directory.transaction(opts) { yield(self) }
+        def transaction(opts, &block)
+          binding.pry
+          yield()
         end
 
         private

@@ -82,10 +82,18 @@ module ROM
 
       alias to_s inspect
 
+      # @return [Hash]
+      #
+      # @api public
       def result
         @res
       end
 
+      # Grep for error message
+      #
+      # @return [String]
+      #
+      # @api public
       def error_message
         @res.fetch(:error, EMPTY_STRING)[/comment: (.*), data/, 1]
       end
@@ -145,6 +153,9 @@ module ROM
         @res[:code], @res[:dn], @res[:error] = sequence
       end
 
+      # Splat the BER result
+      #
+      # @api private
       def decode_result
         @sym, @message, @info, @flag = BER.lookup(:result, result_code)
       end

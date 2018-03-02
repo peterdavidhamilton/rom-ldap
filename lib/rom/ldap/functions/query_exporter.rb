@@ -1,5 +1,5 @@
 require 'strscan'
-require_relative 'lookup'
+require 'rom/ldap/functions/lookup'
 
 module ROM
   module LDAP

@@ -6,6 +6,8 @@ require 'securerandom'
 module ROM
   module LDAP
     class Directory
+      # Encode passwords
+      #
       class Password
         def self.generate(type, password, salt = secure_salt )
           case type
