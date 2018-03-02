@@ -2,35 +2,6 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
-        # Output the dataset as an LDIF string
-        #
-        # @return [String]
-        #
-        # @example
-        #   relation.to_ldif
-        #
-        # @api public
-        def to_ldif
-          dataset.export(:ldif)
-        end
-
-        # Output the dataset as JSON
-        #
-        # @return [String]
-        #
-        # @api public
-        def to_json
-          dataset.export(:json)
-        end
-
-        # Output the dataset as YAML
-        #
-        # @return [String]
-        #
-        # @api public
-        def to_yaml
-          dataset.export(:yaml)
-        end
 
         # Specify an alternative search base for the dataset or resets it.
         #
@@ -48,6 +19,11 @@ module ROM
         # selected from a class level hash.
         #
         # @param key [Symbol]
+        #
+        # @example
+        #   Relation.branches { custom: 'branch_filter' }
+        #
+        #   relation.branch(:custom)
         #
         # @api public
         def branch(key)
@@ -80,7 +56,7 @@ module ROM
         #
         # @api public
         def count
-          dataset.count
+          dataset.__send__(__method__)
         end
 
         # Count the number of entries in the dataset.
@@ -90,14 +66,14 @@ module ROM
         #
         # @api public
         def total
-          dataset.total
+          dataset.__send__(__method__)
         end
 
         # @return [Boolean]
         #
         # @api public
         def one?
-          dataset.one?
+          dataset.__send__(__method__)
         end
         alias distinct? one?
         alias unique? one?
@@ -105,17 +81,25 @@ module ROM
         # @return [Boolean]
         #
         # @api public
-        def any?
-          dataset.any?
+        def any?(&block)
+          dataset.__send__(__method__, &block)
         end
         alias exist? any?
 
         # @return [Boolean]
         #
         # @api public
-        def none?
-          dataset.none?
+        def none?(&block)
+          dataset.__send__(__method__, &block)
         end
+
+        # @return [Boolean]
+        #
+        # @api public
+        def all?(&block)
+          dataset.__send__(__method__, &block)
+        end
+
 
         # Find tuple by primary_key - required by commands
         #
@@ -230,10 +214,53 @@ module ROM
         # @return [Relation]
         #
         # @api public
-        def select(*args)
-          new(dataset.select(*args))
+        def select(*args, &block)
+          schema.project(*args, &block).(self)
         end
-        alias pluck select
+        alias_method :project, :select
+        alias_method :pluck, :select
+
+
+                      # Restrict a relation to match criteria
+                      #
+                      # @overload where(conditions)
+                      #   Restrict a relation using a hash with conditions
+                      #
+                      #   @example
+                      #     users.where(name: 'Jane', age: 30)
+                      #
+                      #   @param [Hash] conditions A hash with conditions
+                      #
+                      # @overload where(conditions, &block)
+                      #   Restrict a relation using a hash with conditions and restriction DSL
+                      #
+                      #   @example
+                      #     users.where(name: 'Jane') { age > 18 }
+                      #
+                      #   @param [Hash] conditions A hash with conditions
+                      #
+                      # @overload where(&block)
+                      #   Restrict a relation using restriction DSL
+                      #
+                      #   @example
+                      #     users.where { age > 18 }
+                      #     users.where { (id < 10) | (id > 20) }
+                      #
+                      # @return [Relation]
+                      #
+                      # @api public
+                      # def where(*args, &block)
+                      #    if block
+                      #      where(*args).where(schema.canonical.restriction(&block))
+                      #    elsif args.size == 1 && args[0].is_a?(Hash)
+                      #      new(dataset.where(coerce_conditions(args[0])))
+                      #    elsif !args.empty?
+                      #      new(dataset.where(*args))
+                      #    else
+                      #      self
+                      #    end
+                      #  end
+
 
         # Filters entities by pattern against canonical hash.
         #
@@ -270,6 +297,29 @@ module ROM
         # @api public
         def qualified
           schema.qualified.call(self)
+        end
+
+
+        # Map tuples from the relation
+        #
+        # @example
+        #   users.map { |user| user[:id] }
+        #   # [1, 2, 3]
+        #
+        #   users.map(:id).to_a
+        #   # [1, 2, 3]
+        #
+        # @param [Symbol] key An optional name of the key for extracting values
+        #                     from tuples
+        #
+        # @api public
+        def map(key = nil, &block)
+          # FIXME: copy rom-sql/sequel by accepting an optional key
+          # if key
+          #   dataset.map(key, &block)
+          # else
+            dataset.map(&block)
+          # end
         end
 
 

@@ -1,9 +1,9 @@
 require 'dry/equalizer'
 require 'dry/core/cache'
 require 'rom/ldap/functions'
-require 'rom/ldap/directory/ldif'
 
 using ::Compatibility
+using ::LDIF
 
 module ROM
   module LDAP
@@ -26,7 +26,7 @@ module ROM
         extend ClassMethods
         extend Dry::Core::Cache
 
-        include Dry::Equalizer(:to_h, :to_a, :to_str, :to_json, :to_ldif)
+        include Dry::Equalizer(:to_h, :to_a, :to_str, :to_json, :to_ldif, :to_yaml)
 
         def initialize(dn = nil, attributes = EMPTY_ARRAY)
           @dn = dn
@@ -113,25 +113,13 @@ module ROM
 
         # Return to first class objects from wrapped BER identified.
         # Necessary for clean YAML output
-        #
-        def export
-          @source.map { |k, v| { k.to_s => v.to_a.map(&:to_s) } }.reduce(&:merge)
+        def encoded
+          @source.map { |k, v| { k.to_s => Array(v).map(&:to_s) } }.reduce(&:merge)
         end
 
-        def to_json
-          export.to_json
+        def to_s
+          encoded.to_ldif
         end
-
-        def to_yaml
-          export.to_yaml
-        end
-
-        # Print an LDIF string
-        #
-        def to_ldif
-          LDIF.new(export).to_ldif
-        end
-        alias to_s to_ldif
 
         def hash
           @source.hash
