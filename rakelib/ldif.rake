@@ -1,8 +1,9 @@
 require 'psych'
 
 # @example
-#   brake ldif\['schema'\]
-#   brake ldif\['setup'\]
+#   brake ldif[schema]
+#   brake ldif[apple]
+#   brake ldif[setup]
 desc 'Populate directory tree'
 task :ldif, [:file] do |t, args|
   ldapmodify(file: args[:file])

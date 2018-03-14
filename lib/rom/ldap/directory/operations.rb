@@ -84,6 +84,8 @@ module ROM
           args = payload(tuple)
           raise(OperationError, 'distinguished name is required') unless (dn = args.delete(:dn))
 
+          logger.debug("#{self.class} adding '#{dn}'")
+
           result = connection.add(dn: dn, attrs: args)
           result.success? ? by_dn(dn).first : false
         end
@@ -98,19 +100,27 @@ module ROM
         def modify(dn, tuple) # third param :replace
           args   = payload(tuple)
           ops    = args.map { |attribute, value| [:replace, attribute, value] }
+
+          logger.debug("#{self.class} modifying '#{dn}'")
+
           result = connection.modify(dn: dn, ops: ops)
           result.success? ? by_dn(dn).first : false
         end
 
         #
-        # @param dn [String]
+        # @param dn [String] distinguished name.
         #
-        # @return [Boolean]
+        # @return [Entry, Boolean] deleted LDAP entry or false.
         #
         # @api public
         def delete(dn)
+          entry = by_dn(dn).first
+          raise(OperationError, 'distinguished name not found') unless entry
+
+          logger.debug("#{self.class} deleting '#{dn}'")
+
           result = connection.delete(dn: dn)
-          result.success?
+          result.success? ? entry : false
         end
 
 
