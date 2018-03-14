@@ -40,6 +40,12 @@ module ROM
       attr_reader :result
 
 
+      # @return [String]
+      #
+      # @api public
+      def inspect
+        "#<#{self.class} servers=#{connection.servers} base='#{base}' ldap_versions=#{supported_versions} vendor='#{vendor_name}' release='#{vendor_version}' />"
+      end
 
       # binding.pry
       # require 'dry/monitor/notifications'
@@ -122,11 +128,12 @@ module ROM
       #
       # @api private
       def parse_attribute_type(type)
-        attribute_names = if type[/NAME '(\S+)'/, 1]
-                            type[/NAME '(\S+)'/, 1]
-                          elsif type[/NAME \( '(\S+)' '(\S+)' \)/]
-                            [Regexp.last_match(1), Regexp.last_match(2)]
-                          end
+        attribute_names =
+          if type[/NAME '(\S+)'/, 1]
+            type[/NAME '(\S+)'/, 1]
+          elsif type[/NAME \( '(\S+)' '(\S+)' \)/]
+            [Regexp.last_match(1), Regexp.last_match(2)]
+          end
 
         Array(attribute_names).map do |name|
           {
