@@ -14,47 +14,40 @@ RSpec.describe 'Commands / Delete' do
         result :one
       end
     end
+
+    accounts.insert(
+      dn: 'uid=black_panther,ou=users,dc=example,dc=com',
+      cn: 'King of Wakanda',
+      uid: 'black_panther',
+      givenname: "T'Challa",
+      sn: 'Udaku',
+      uidnumber: 1004,
+      gidnumber: 1050,
+      objectclass: %w[extensibleobject inetorgperson]
+    )
   end
 
-  # describe '#transaction' do
-  #   it 'deletes in normal way if no error raised' do
-  #     expect {
-  #       accounts.transaction do
-  #         delete_account.by_uid('test2').call
-  #       end
-  #     }.to change { accounts.count }.by(-1)
-  #   end
+  after  { accounts.where(uid: 'black_panther').delete }
 
-  #   it 'deletes nothing if error was raised' do
-  #     expect {
-  #       accounts.transaction do |t|
-  #         delete_account.by_uid('test2').call
-  #         t.rollback!
-  #       end
-  #     }.to_not change { accounts.count }
-  #   end
-  # end
+  describe '#call' do
+    it 'deletes all tuples in a restricted relation' do
+      entry  = delete_account.by_uid('black_panther').call
+      result = entry.select(:uidnumber, :uid).to_s
 
-  # describe '#call' do
-  #   it 'deletes all tuples in a restricted relation' do
-  #     result = delete_account.by_uid('test1').call
+      expect(result).to eql("uidnumber: 1004\nuid: black_panther\n\n")
+    end
 
-  #     # expect(result).to eql(id: 3, name: 'Jade')
-  #     expect(result).to eql(true)
-  #   end
+    it 're-raises database error' do
+      command = delete_account.by_uid('black_panther')
 
-  #   it 're-raises database error' do
-  #     command = delete_account.by_uid('test1')
+      expect(command.relation).to receive(:delete).and_raise(
+        ROM::LDAP::OperationError, 'distinguished name not found'
+      )
 
-  #     # TODO: raise error - currently returns empty dataset array
-  #     # expect(command.relation).to receive(:delete).and_raise(
-  #     #   Sequel::DatabaseError, 'totally wrong'
-  #     # )
-
-  #     expect {
-  #       command.call
-  #     }.to raise_error(ROM::SQL::DatabaseError, /totally wrong/)
-  #   end
-  # end
+      expect {
+        command.call
+      }.to raise_error(ROM::LDAP::OperationError, /distinguished name not found/)
+    end
+  end
 
 end
