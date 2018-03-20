@@ -1,7 +1,11 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
 cwd = File.expand_path(File.join(File.dirname(__FILE__), 'lib'))
 $LOAD_PATH.unshift(cwd)
 
 require 'pry-byebug'
+require 'awesome_print'
 require 'rom-ldap'
 require 'rom-repository'
 require 'rom-changeset'
@@ -48,6 +52,28 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.by_class('mammalia').to_a
   end
 
+  # [
+  #   ...
+  #   {
+  #     cn: ["Elephant Shrew"],
+  #     population_count: 100000
+  #   },
+  #   {
+  #     cn: [
+  #       "Giant Panda",
+  #       "Cat Bear",
+  #       "猫熊",
+  #       "Bear Cat",
+  #       "熊猫"
+  #     ],
+  #     population_count: 50
+  #   },
+  #   {
+  #     cn: ["James's Flamingo"],
+  #     population_count: 0
+  #   }
+  #   ...
+  # ]
   def endangered
     animals.endangered.to_a
   end
@@ -129,7 +155,7 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   view(:by_class) do
-    schema { project(:species) }
+    schema { project(:cn, :description, :species) }
     relation { |klass| where(object_class: klass) }
   end
 
@@ -165,7 +191,7 @@ configuration.relation(:animals, adapter: :ldap) do
   # Auto Restriction methods
   #
   def zebra
-    by_cn('ZEBRA')
+    by_cn('ZEBRA') # NB: case insensitive
   end
 
   def carnivores
@@ -188,7 +214,7 @@ configuration.relation(:animals, adapter: :ldap) do
   # Query DSL methods
   #
   def mammals
-    where(object_class: 'mammalia')
+    where(objectClass: 'mammalia') # NB: query either original or formatted attrs
   end
 
   def vegetarians
@@ -200,7 +226,7 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   def detailed
-    present(:description)
+    present(:description) # NB: where 'description' is present
   end
 
   # essentially a join table
@@ -254,23 +280,24 @@ new_animals = [
   }
 ]
 
-binding.pry
-
-
 
 changeset = animals.changeset(NewAnimal, new_animals)
 create_animals.call(changeset)
 
 
 update_animal.by_cn('Black Jumping Salamander').call(endangered: true)
+animals.endangered.to_a
 
 # changeset = animals.changeset(new_animals).associate()
 
+
+# Tidy up
 delete_animal.by_cn('Chinstrap Penguin').call
+delete_animal.by_cn('Black Jumping Salamander').call
 
 
-# administrator
-animals.base('').search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
+# administrator from whole tree
+animals.whole_tree.search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
 animals.base('').search('(uid=test1)').one
 
 animals.with(auto_struct: false).matches(cn: '熊').to_a
@@ -279,6 +306,10 @@ animals.with(auto_struct: false).matches(cn: '熊').to_a
 # reveal inferred attributes and coerced types
 #
 animals.schema.to_h
+# Attribute names stored in directory
+animals.schema.map(&:original_name)
+# Formatted attribute names of the Entry
+animals.schema.map(&:name)
 
 # pluck certain attributes
 animals.with(auto_struct: true).select(:cn, :object_class).to_a
@@ -289,25 +320,39 @@ animals.where(objectclass: 'mammalia').find(/Homo/).count
 
 # return a single struct
 animals.where(cn: 'human').one.species
-animals.matches(cn: 'man').one
+animals.matches(cn: 'hum').one
 animals.equals(cn: 'orangutan').one.cn
+
+animals.matches(cn: 'man').to_a
 
 repo.reptiles_to_yaml
 
 animals.where(extinct: true).to_a
 
-# animals.members('cn=domestic,ou=groups,dc=example,dc=com').count
 
 # return specific entries
 animals.by_pk('cn=Lion,ou=animals,dc=example,dc=com')
 animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 
-# animals.zoo.search('(cn=*)').population_count
-# animals.pets.page(1).search('(cn=*house*)').first
-# animals.pets.page(2).pager
+
+# pagination and mapping over a key
+animals.map(:description).to_a
+animals.page(1).map(:cn).to_a
+animals.per_page(6).page(2).map(:order).to_a
+animals.page(2).pager.next_page # =>
 
 animals.matches(cn: 'phant').count
 animals.matches(cn: 'ant').to_a
+
+
+
+# TODO:
+
+# animals.members('cn=domestic,ou=groups,dc=example,dc=com').count
+# animals.zoo.search('(cn=*)').population_count
+# animals.pets.page(1).search('(cn=*house*)').first
+# animals.pets.page(2).pager
 # animals.common_birds.to_a
 
 
+# =>

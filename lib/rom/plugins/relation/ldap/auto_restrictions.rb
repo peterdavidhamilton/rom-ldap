@@ -43,7 +43,6 @@ module ROM
 
               mod.module_eval do
                 define_method(meth_name) do |value|
-                  # where(attribute.original_name => value)
                   where(attribute.name => value)
                 end
               end

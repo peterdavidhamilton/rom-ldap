@@ -2,10 +2,7 @@
 # $ bundle exec ruby ./ruby-ldap.rb
 #
 
-# require 'bundler'
-# Bundler.setup
 require 'bundler/setup'
-
 require 'pry'
 require 'logger'
 require 'benchmark/ips'

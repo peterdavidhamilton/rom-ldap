@@ -100,6 +100,15 @@ module ROM
         end
       end
 
+
+      def map(key = nil, &block)
+        if key
+          each.map { |e| e.select(key) }.map(&block)
+        else
+          each.map(&block)
+        end
+      end
+
       # Inspect dataset revealing current filter and base.
       #
       # @return [String]
