@@ -4,6 +4,9 @@ require 'rom/ldap/dataset/reading'
 require 'rom/ldap/dataset/writing'
 require 'rom/ldap/dataset/query_dsl'
 
+# Hash#except
+using ::Compatibility
+
 module ROM
   module LDAP
     #

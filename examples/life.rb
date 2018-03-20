@@ -1,33 +1,16 @@
 cwd = File.expand_path(File.join(File.dirname(__FILE__), 'lib'))
 $LOAD_PATH.unshift(cwd)
 
-# rake ldif\['../../examples/schema'\]
-# rake ldif\['../../examples/animals'\]
-
+require 'pry-byebug'
 require 'rom-ldap'
 require 'rom-repository'
 require 'rom-changeset'
-require 'pry-byebug'
 
-# Apply a function to convert all entity
-# attributes into acceptible ruby method names.
-#
-ROM::LDAP::Directory::Entry.to_method_name!
 
-#
-# ROM-LDAP Configuration
-#
-configuration = ROM::Configuration.new(
-  directory: [
-    :ldap,
-    { server: '127.0.0.1:10389', username: 'uid=admin,ou=system', password: 'secret' },
-    { base: 'dc=example,dc=com' }
-  ]
-)
+# Attribute name formatter
+ROM::LDAP.load_extensions :compatible_entry_attributes
 
-#
-# ROM-LDAP Custom structs
-#
+# Custom struct
 module Entities
   class Animal < ROM::LDAP::Struct
     def common_name
@@ -36,11 +19,20 @@ module Entities
   end
 end
 
-#
-# ROM-LDAP Repository
-#
+# Configuration
+configuration = ROM::Configuration.new(
+  directory: [
+    :ldap,
+    { server: '127.0.0.1:10389', username: 'uid=admin,ou=system', password: 'secret' },
+    { base: 'dc=example,dc=com' }
+  ]
+)
+
+# Repository
 class AnimalRepo < ROM::Repository[:animals]
-  commands :create, update: %i[by_pk by_cn], delete: %i[by_pk by_cn]
+  commands :create,
+    update: %i[by_pk by_cn],
+    delete: %i[by_pk by_cn]
 
   struct_namespace Entities
 
@@ -93,7 +85,7 @@ class AnimalRepo < ROM::Repository[:animals]
   end
 end
 
-
+# Commands
 class CreateAnimal < ROM::Commands::Create[:ldap]
   relation :animals
   register_as :create
@@ -111,17 +103,14 @@ class DeleteAnimal < ROM::Commands::Delete[:ldap]
   register_as :delete
 end
 
-
+# Changeset
 class NewAnimal < ROM::Changeset::Create[:animals]
   map do |tuple|
     tuple.merge(dn: "cn=#{tuple[:cn]},ou=animals,dc=example,dc=com")
   end
 end
 
-
-#
-# ROM-LDAP Relation demo
-#
+# Relation
 configuration.relation(:animals, adapter: :ldap) do
   gateway :directory
   base    'dc=example,dc=com'.freeze
@@ -265,9 +254,13 @@ new_animals = [
   }
 ]
 
+binding.pry
+
+
+
 changeset = animals.changeset(NewAnimal, new_animals)
 create_animals.call(changeset)
-binding.pry
+
 
 update_animal.by_cn('Black Jumping Salamander').call(endangered: true)
 

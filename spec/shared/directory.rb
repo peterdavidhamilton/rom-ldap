@@ -7,7 +7,6 @@ RSpec.shared_context 'directory' do
   let(:ldap_options) do
     {
       base:  'ou=users,dc=example,dc=com',
-      # base:  'dc=example,dc=com',
       # logger: Logger.new(IO::NULL)
       logger: Logger.new(File.open('./log/test.log', 'a'))
     }

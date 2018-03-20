@@ -16,7 +16,10 @@ module ROM
             formatter ? formatter[key] : key
           end
 
-          # @see ROM::LDAP.load_extensions :compatible_entry_attributes
+          # @see 'rom/ldap/extensions/compatible_entry_attributes'
+          #
+          # @example
+          #   ROM::LDAP.load_extensions :compatible_entry_attributes
           #
           def use_formatter(function)
             @formatter = function
