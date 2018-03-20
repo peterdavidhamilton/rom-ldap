@@ -1,14 +1,15 @@
-require 'bundler'
-Bundler.setup
+#
+# $ bundle exec ruby ./ruby-ldap.rb
+#
+
+# require 'bundler'
+# Bundler.setup
+require 'bundler/setup'
 
 require 'pry'
 require 'logger'
 require 'benchmark/ips'
-
 require 'rom-ldap'
-
-Types = ROM::LDAP::Types
-
 require 'net-ldap'
 
 logger = Logger.new(IO::NULL)
@@ -25,8 +26,9 @@ base     = 'ou=users,dc=example,dc=com'
 directory = { server: "#{host}:#{port}", username: admin, password: password}
 conf = ROM::Configuration.new(:ldap, directory, base: base, logger: logger)
 
+# Attribute name formatter
+ROM::LDAP.load_extensions :compatible_entry_attributes
 
-ROM::LDAP::Directory::Entry.to_method_name!
 
 conf.relation(:infer) do
   schema(filter, infer: true)
@@ -35,16 +37,16 @@ end
 
 conf.relation(:explicit) do
   schema(filter) do
-    attribute :uid,               Types::String, read: Types::Single::String
-    attribute :cn,                Types::String, read: Types::Single::String
-    attribute :dn,                Types::String, read: Types::Single::String
-    attribute :given_name,        Types::String, read: Types::Single::String
-    attribute :sn,                Types::String, read: Types::Single::String
-    attribute :mail,              Types::String, read: Types::Single::String
-    attribute :user_password,     Types::String, read: Types::Single::String
-    attribute :uid_number,        Types::Int,    read: Types::Single::Int
-    attribute :create_timestamp,  Types::Time,   read: Types::Single::Time
-    attribute :object_class,      Types::Array,  read: Types::Array
+    attribute :uid,               ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :cn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :dn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :given_name,        ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :sn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :mail,              ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :user_password,     ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
+    attribute :uid_number,        ROM::LDAP::Types::Int,    read: ROM::LDAP::Types::Single::Int
+    attribute :create_timestamp,  ROM::LDAP::Types::Time,   read: ROM::LDAP::Types::Single::Time
+    attribute :object_class,      ROM::LDAP::Types::Array,  read: ROM::LDAP::Types::Array
   end
   auto_struct true
 end
@@ -65,7 +67,7 @@ Benchmark.ips do |bm|
   bm.config(time: 5, warmup: 0.5, iterations: 2)
 
   bm.report('net-ldap') do
-    @net_ldap.search(filter: filter, base: base, attributes: ['*', '+']).to_a
+    @net_ldap.search(filter: filter, base: base, attributes: %w[* +]).to_a
   end
 
   bm.report('rom-ldap inferred schema hash') do
