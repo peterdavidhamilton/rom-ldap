@@ -15,6 +15,18 @@ module ROM
           new(dataset.with(base: alt_base))
         end
 
+        # Change the search base to the whole directory tree.
+        #
+        # @example
+        #   relation.whole_tree
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def whole_tree
+          base(EMPTY_STRING)
+        end
+
         # Compliments #root method with an alternative search base
         # selected from a class level hash.
         #
@@ -309,17 +321,12 @@ module ROM
         #   users.map(:id).to_a
         #   # [1, 2, 3]
         #
-        # @param [Symbol] key An optional name of the key for extracting values
+        # @param key [Symbol] An optional name of the key for extracting values
         #                     from tuples
         #
         # @api public
         def map(key = nil, &block)
-          # FIXME: copy rom-sql/sequel by accepting an optional key
-          # if key
-          #   dataset.map(key, &block)
-          # else
-            dataset.map(&block)
-          # end
+          dataset.map(key, &block)
         end
 
 

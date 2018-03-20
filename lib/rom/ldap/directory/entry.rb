@@ -57,24 +57,22 @@ module ROM
         #
         # @param keys [Array<Symbol, String>] Entry attributes to keep
         #
-        # @return [self]
+        # @return [Entry]
         #
         # @api public
         def select(*keys)
-          source_keys = translation_map.fetch_values(*keys)
-          @canonical  = @canonical.slice(*keys)
-          @source     = @source.slice(*source_keys)
+          @canonical = @canonical.slice(*keys)
+          @source    = @source.slice(*keys.map { |k| translation_map[k] })
+
           self
         end
 
         def first(key)
-          value = self[key]
-          value&.first
+          self[key]&.first
         end
 
         def last(key)
-          value = self[key]
-          value&.last
+          self[key]&.last
         end
 
         def keys

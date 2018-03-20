@@ -6,10 +6,13 @@ AllCops:
     - Rakefile
   Exclude:
     - doc/**/*
+    - examples/**/*
     - log/*
     - spec/**/*.rb
+    - spec/**/*.gemspec
     - vendor/**/*
-  TargetRubyVersion: 2.3
+    - vendor/**/*
+  TargetRubyVersion: 2.5
 
 Style/LambdaCall:
   Enabled: false
