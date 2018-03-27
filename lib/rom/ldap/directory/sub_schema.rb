@@ -15,9 +15,8 @@ module ROM
             scope:       SCOPE_BASE_OBJECT,
             filter:      '(objectClass=subschema)',
             attributes:  %w[objectClasses attributeTypes],
-            # unlimited:   false,
             max_results: 1
-          ).first
+          ).first || raise(ResponseMissingError, 'no Directory#sub_schema returned')
         end
 
         # Distinguished name of subschema

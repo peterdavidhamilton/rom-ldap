@@ -34,7 +34,7 @@ module ROM
       option :base,        default: -> { self.class.default_base }
       option :timeout,     default: -> { 30 }
       option :max_results, default: -> { 1_000_000 }
-      option :logger,      default: -> { ::Logger.new(STDOUT) }
+      option :logger,      default: -> { ::Logger.new(IO::NULL) }
 
       # PDU object
       attr_reader :result

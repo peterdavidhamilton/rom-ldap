@@ -24,13 +24,16 @@ module Entities
 end
 
 # Configuration
-configuration = ROM::Configuration.new(
-  directory: [
-    :ldap,
-    { server: '127.0.0.1:10389', username: 'uid=admin,ou=system', password: 'secret' },
-    { base: 'dc=example,dc=com' }
-  ]
-)
+opts = {
+  uri:      '127.0.0.1:10389',
+  username: 'uid=admin,ou=system',
+  password: 'secret',
+  base:     'dc=example,dc=com',
+  timeout:  10,
+  logger:   Logger.new(STDOUT)
+}
+
+configuration = ROM::Configuration.new(:ldap, opts)
 
 # Repository
 class AnimalRepo < ROM::Repository[:animals]
@@ -138,7 +141,6 @@ end
 
 # Relation
 configuration.relation(:animals, adapter: :ldap) do
-  gateway :directory
   base    'dc=example,dc=com'.freeze
   schema  '(species=*)', as: :animals, infer: true
   branches animals: 'ou=animals,dc=example,dc=com',
@@ -295,6 +297,7 @@ animals.endangered.to_a
 delete_animal.by_cn('Chinstrap Penguin').call
 delete_animal.by_cn('Black Jumping Salamander').call
 
+binding.pry
 
 # administrator from whole tree
 animals.whole_tree.search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
