@@ -3,6 +3,8 @@ require 'rom/gateway'
 require 'rom/ldap/directory'
 require 'rom/ldap/dataset'
 
+using ::Compatibility
+
 module ROM
   module LDAP
     # LDAP gateway
@@ -15,13 +17,13 @@ module ROM
       #   @return [Object] configured gateway logger
       attr_reader :logger
 
+      # @!attribute [r] dir_opts
+      #   @return [Hash] Options passed to directory
+      attr_reader :dir_opts
+
       # @!attribute [r] options
       #   @return [Hash] Options passed to directory
       attr_reader :options
-
-      # @!attribute [r] options
-      #   @return [Hash] Options passed to connection
-      attr_reader :server
 
       # Initialize an LDAP gateway
       #
@@ -39,27 +41,23 @@ module ROM
       #   Connects to a database via params and options
       #
       #   @example
-      #     ROM.container(:ldap,
-      #       { server:, username:, password: },
-      #       { base: '', max_results: 100, timeout: 3 }
-      #     )
+      #     ROM.container(:ldap, options)
       #
-      #   @param server [Hash] Passed to ROM::LDAP::Connection#new
-      #
-      #   @param options [Hash] ROM::LDAP::Directory options
+      #   @option options :uri [String] Server URI '127.0.0.1:10389'
       #
       #   @option options :timeout [Integer] Directory timeout in seconds
+      #
+      #   @option options :base [String] Directory timeout in seconds
       #
       #   @option options :max_results [Integer] Directory result limit
       #
       # @return [LDAP::Gateway]
       #
       # @api public
-      def initialize(server = EMPTY_HASH, options = EMPTY_HASH)
-        @server  = server
-        @options = options
-        @logger  = options.fetch(:logger) { ::Logger.new(STDOUT) }
-        @conn    = nil
+      def initialize(options = EMPTY_HASH)
+        @options  = options
+        @dir_opts = options.slice(:base, :timeout, :max_results, :logger)
+        @logger   = options.fetch(:logger) { ::Logger.new(IO::NULL) }
 
         super()
       end
@@ -92,11 +90,7 @@ module ROM
       #
       # @api public
       def dataset(filter)
-        Dataset.new(
-          directory: directory,
-          filter:    filter,
-          base:      options[:base]
-        )
+        Dataset.new(directory: directory, filter: filter, base: options[:base])
       end
 
       # @param logger [Logger]
@@ -111,11 +105,9 @@ module ROM
       # @return [Symbol]
       #
       # @api public
-      def database_type
+      def directory_type
         directory.type
       end
-
-      alias directory_type database_type
 
       # Create or return existing Connection instance and bind if username
       #
@@ -127,17 +119,19 @@ module ROM
           @conn
         else
           @conn = Connection.new(
-            server:           server[:server],
+            server:           options[:uri],
             connect_timeout:  options[:timeout],
             read_timeout:     options[:timeout],
             write_timeout:    options[:timeout],
             close_on_error:   false
             # on_connect: proc {}
             # proxy_server:
+            # connect_retry_interval: 10.0,
+            # connect_retry_count: 1.day.to_i
           )
 
           @conn.use_logger(@logger)
-          bind! unless server[:username].nil?
+          bind! unless options[:username].nil?
           @conn
         end
       end
@@ -148,7 +142,7 @@ module ROM
       #
       # @api public
       def directory
-        @dir ||= Directory.new(connection, options).load_rootdse!
+        @dir ||= Directory.new(connection, dir_opts).load_rootdse!
       end
 
       private
@@ -165,7 +159,7 @@ module ROM
       end
 
       def bind!
-        connection.bind(username: server[:username], password: server[:password])
+        connection.bind(options.slice(:username, :password))
       end
     end
   end

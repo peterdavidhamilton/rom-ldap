@@ -44,7 +44,7 @@ module ROM
         #
         # @api private
         def load_vendor_extension(type)
-          LDAP.load_extensions(type) unless type == :unknown
+          LDAP.load_extensions(type) unless type.eql?(:unknown)
         end
 
         # Set instance variables for readers.
@@ -66,7 +66,7 @@ module ROM
             @controller_functionality = dc
             @forest_functionality     = forest
             @domain_functionality     = dom
-            @directory_time           = time # TODO: check against app time
+            @directory_time           = time
             @vendor_name              = 'Microsoft'
             @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
           end
@@ -88,7 +88,7 @@ module ROM
             scope:      SCOPE_BASE_OBJECT,
             attributes: attrs,
             unlimited:  false
-          ).first
+          ).first || raise(ResponseMissingError, 'no Directory#root returned')
         end
 
         # @return [Integer]
