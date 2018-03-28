@@ -1,20 +1,31 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
+#
+# A demonstration of rom-ldap using biological classification
+# and taxonomic hierarchy as an example dataset.
+#
+# `$ bundle exec ruby ./life.rb`
 
+#
+# Libraries
+# =============================================================================
 cwd = File.expand_path(File.join(File.dirname(__FILE__), 'lib'))
 $LOAD_PATH.unshift(cwd)
 
-require 'pry-byebug'
-require 'awesome_print'
+# debugging
+require 'pry-byebug'    # 'binding.pry'
+require 'awesome_print' # 'ap'
+
+# dependencies
 require 'rom-ldap'
 require 'rom-repository'
 require 'rom-changeset'
+require 'rom/transformer'
 
 
-# Attribute name formatter
-ROM::LDAP.load_extensions :compatible_entry_attributes
-
-# Custom struct
+#
+# Entity
+# =============================================================================
 module Entities
   class Animal < ROM::LDAP::Struct
     def common_name
@@ -23,19 +34,24 @@ module Entities
   end
 end
 
+#
 # Configuration
+# =============================================================================
 opts = {
-  uri:      '127.0.0.1:10389',
   username: 'uid=admin,ou=system',
   password: 'secret',
-  base:     'dc=example,dc=com',
-  timeout:  10,
-  logger:   Logger.new(STDOUT)
+  uri:      '127.0.0.1:10389',   # defaults to '127.0.0.1:389'
+  base:     'dc=example,dc=com', # defaults to ''
+  timeout:  10,                  # defaults to 30
+  logger:   Logger.new(STDOUT)   # defaults to null
 }
 
-configuration = ROM::Configuration.new(:ldap, opts)
+# configuration = ROM::Configuration.new(:ldap, opts)
+configuration = ROM::Configuration.new(default: [:ldap, opts], other: [:memory])
 
+#
 # Repository
+# =============================================================================
 class AnimalRepo < ROM::Repository[:animals]
   commands :create,
     update: %i[by_pk by_cn],
@@ -51,16 +67,13 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.with(auto_struct: false).to_a
   end
 
+  # relation view projecting cn, description, species
+  #
   def mammals
     animals.by_class('mammalia').to_a
   end
 
   # [
-  #   ...
-  #   {
-  #     cn: ["Elephant Shrew"],
-  #     population_count: 100000
-  #   },
   #   {
   #     cn: [
   #       "Giant Panda",
@@ -71,10 +84,6 @@ class AnimalRepo < ROM::Repository[:animals]
   #     ],
   #     population_count: 50
   #   },
-  #   {
-  #     cn: ["James's Flamingo"],
-  #     population_count: 0
-  #   }
   #   ...
   # ]
   def endangered
@@ -93,6 +102,19 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.extinct.vegetarians.to_a
   end
 
+  #
+  # [
+  #   "INDIAN PANGOLIN",
+  #   "GIANT PANDA",
+  #   "DOG",
+  #   "POISON DART FROG",
+  #   "ASIAN ELEPHANT",
+  #   "ZEBRA",
+  #   "LEOPARD GECKO",
+  #   "CAT",
+  #   "PANTHER CHAMELEON",
+  #   "SUN BEAR"
+  # ]
   def top_ten_by_genus
     animals.order(:genus).limit(10).to_a.map(&:common_name)
   end
@@ -109,12 +131,16 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.by_class('aves').to_json
   end
 
-  def with_keeper
-    animals.combine(:account)
+  # WIP
+  def with_researchers
+    # animals.combine(:researchers)
+    animals.combine(:researcher)
   end
 end
 
+#
 # Commands
+# =============================================================================
 class CreateAnimal < ROM::Commands::Create[:ldap]
   relation :animals
   register_as :create
@@ -132,17 +158,77 @@ class DeleteAnimal < ROM::Commands::Delete[:ldap]
   register_as :delete
 end
 
+#
 # Changeset
+# =============================================================================
 class NewAnimal < ROM::Changeset::Create[:animals]
   map do |tuple|
     tuple.merge(dn: "cn=#{tuple[:cn]},ou=animals,dc=example,dc=com")
   end
 end
 
+#
+# Mapper
+# =============================================================================
+class TransformAnimal < ROM::Transformer
+  relation    :animals
+  register_as :classification
+
+  map_array do
+    rename_keys modify_timestamp: :updated_at,
+                create_timestamp: :created_at
+
+    nest :taxonomy, %i[species order family genus]
+    nest :status,   %i[extinct endangered population_count]
+    nest :info,     %i[labeled_uri description cn]
+  end
+end
+
+#
 # Relation
+# =============================================================================
+configuration.relation(:researchers, adapter: :memory) do
+  gateway :other
+
+  schema(:researchers) do
+    attribute :id,      ROM::Types::Int
+    attribute :name,    ROM::Types::String
+    attribute :field,   ROM::Types::String
+  end
+
+  dataset do
+    data = [
+      { id: 1, name: 'George Edwards', field: 'ornithology' },
+      { id: 2, name: 'Dian Fossey', field: 'primatology' }
+    ]
+    ROM::Memory::Dataset.new(data)
+  end
+end
+
+# configuration.relation(:predators, adapter: :ldap) do
+#   schema '(species=*)', as: :animals, infer: true
+# end
+
 configuration.relation(:animals, adapter: :ldap) do
+  schema '(species=*)', as: :animals, infer: true do
+    attribute :cn,      ROM::LDAP::Types::Strings.meta(index: true) # multiple values
+
+    attribute :family,  ROM::LDAP::Types::String.meta(index: true)
+    attribute :genus,   ROM::LDAP::Types::String.meta(index: true)
+    attribute :order,   ROM::LDAP::Types::String.meta(index: true)
+    attribute :species, ROM::LDAP::Types::String.meta(index: true)
+
+    attribute :study,   ROM::LDAP::Types::String.meta(index: true, foreign_key: true),
+                        read: ROM::LDAP::Types::Symbol
+
+    associations do
+      # has_many :researchers
+      has_one :researcher
+      # has_many :predators
+    end
+  end
+
   base    'dc=example,dc=com'.freeze
-  schema  '(species=*)', as: :animals, infer: true
   branches animals: 'ou=animals,dc=example,dc=com',
            extinct: 'ou=extinct,ou=animals,dc=example,dc=com'
   use :pagination
@@ -162,9 +248,9 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   # overload default relation root with a different search base
-  # def root
-  #   branch(:animals)
-  # end
+  def root
+    branch(:animals)
+  end
 
   # alternative search base from predefined selection
   def extinct
@@ -213,10 +299,10 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   #
-  # Query DSL methods
+  # Query DSL methods like: where, unequals, gte, present
   #
   def mammals
-    where(objectClass: 'mammalia') # NB: query either original or formatted attrs
+    where(objectClass: 'mammalia')
   end
 
   def vegetarians
@@ -228,7 +314,7 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   def detailed
-    present(:description) # NB: where 'description' is present
+    present(:description)
   end
 
   # essentially a join table
@@ -240,23 +326,31 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 end
 
-
+#
+# Setup
+# =============================================================================
 configuration.register_command(CreateAnimal)
 configuration.register_command(UpdateAnimal)
 configuration.register_command(DeleteAnimal)
+configuration.register_command(DeleteAnimal)
+configuration.register_mapper(TransformAnimal)
 
+# attribute name formatter - loaded before ROM.container
+ROM::LDAP.load_extensions :compatible_entry_attributes
 
-container = ROM.container(configuration)
-animals   = container.relations[:animals]
-repo      = AnimalRepo.new(container)
+container      = ROM.container(configuration)
 
-
+# local variables
+animals        = container.relations[:animals]
+researchers    = container.relations[:researchers]
 create_animals = container.commands[:animals][:create]
 update_animal  = container.commands[:animals][:update]
 delete_animal  = container.commands[:animals][:delete]
+repo           = AnimalRepo.new(container)
 
-
-
+#
+# Data
+# =============================================================================
 new_animals = [
   {
     cn:               'Chinstrap Penguin',
@@ -267,7 +361,8 @@ new_animals = [
     object_class:     %w[extensibleObject aves],
     population_count: 10_000,
     extinct:          false,
-    endangered:       false
+    endangered:       false,
+    study:            'ornithology'
   },
   {
     cn:               'Black Jumping Salamander',
@@ -282,44 +377,59 @@ new_animals = [
   }
 ]
 
+#
+# Breakpoint - Try out the examples below or output using 'ap'
+# =============================================================================
+# binding.pry
 
+#
+# Examples
+# =============================================================================
+
+# attribute name is flexible
+animals.where(objectClass: 'top').count # => 23
+
+# filter by symbols
+animals.where(cn: :zebra).count # => 1
+
+# create new relation entries using a changeset
 changeset = animals.changeset(NewAnimal, new_animals)
 create_animals.call(changeset)
 
-
+# update attributes for a filtered dataset
 update_animal.by_cn('Black Jumping Salamander').call(endangered: true)
 animals.endangered.to_a
 
 # changeset = animals.changeset(new_animals).associate()
 
-
-# Tidy up
+# delete entries
 delete_animal.by_cn('Chinstrap Penguin').call
 delete_animal.by_cn('Black Jumping Salamander').call
 
-binding.pry
-
-# administrator from whole tree
+# find the directory administrator search the whole tree
 animals.whole_tree.search('(0.9.2342.19200300.100.1.1=admin)').one.to_h
 animals.base('').search('(uid=test1)').one
 
+# search using UTF-8 charset
 animals.with(auto_struct: false).matches(cn: '熊').to_a
 
-#
 # reveal inferred attributes and coerced types
-#
 animals.schema.to_h
-# Attribute names stored in directory
+
+# attribute names stored in directory
 animals.schema.map(&:original_name)
-# Formatted attribute names of the Entry
+
+# formatted attribute names of the Entry
 animals.schema.map(&:name)
 
-# pluck certain attributes
-animals.with(auto_struct: true).select(:cn, :object_class).to_a
-animals.with(auto_struct: false).select(:cn, :object_class).to_a
+# select/pluck/map certain attributes
+animals.select(:cn, :object_class).to_a
+animals.map(:cn).to_a
 
-# grep the entity - matches within arrays
+# grep the entity - also matches within arrays
 animals.where(objectclass: 'mammalia').find(/Homo/).count
+animals.where(object_class: 'mammalia').find(/Homo/).count
+animals.where(objectClass: 'mammalia').find(/Homo/).count
 
 # return a single struct
 animals.where(cn: 'human').one.species
@@ -328,34 +438,41 @@ animals.equals(cn: 'orangutan').one.cn
 
 animals.matches(cn: 'man').to_a
 
-repo.reptiles_to_yaml
-
 animals.where(extinct: true).to_a
-
 
 # return specific entries
 animals.by_pk('cn=Lion,ou=animals,dc=example,dc=com')
 animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
 
-
 # pagination and mapping over a key
 animals.map(:description).to_a
 animals.page(1).map(:cn).to_a
 animals.per_page(6).page(2).map(:order).to_a
-animals.page(2).pager.next_page # =>
+animals.page(2).pager.next_page
 
 animals.matches(cn: 'phant').count
-animals.matches(cn: 'ant').to_a
+animals.matches(cn: 'domestic').to_a
 
+# use ROM::Transformer (Transproc gem) to transform the tuples.
+animals.map_with(:classification).to_a.map { |a| a[:taxonomy] }
+
+# output relation as a YAML, LDIF or JSON
+repo.reptiles_to_yaml
+repo.apes_to_ldif
+repo.birds_to_json
 
 
 # TODO:
+# =============================================================================
+# merge LDAP with other relations
+# ap repo.with_researchers.to_a
+
+# animals.combine(:researchers)
+# ap animals.combine(:researcher).to_a
+# ap animals.combine(researchers).to_a
 
 # animals.members('cn=domestic,ou=groups,dc=example,dc=com').count
 # animals.zoo.search('(cn=*)').population_count
 # animals.pets.page(1).search('(cn=*house*)').first
 # animals.pets.page(2).pager
 # animals.common_birds.to_a
-
-
-# =>

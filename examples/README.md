@@ -1,6 +1,6 @@
 # README
 
-Examples of ROM-LDAP in practice.
+A demonstration of rom-ldap using biological classification and taxonomic hierarchy as an example dataset.
 
 - `$ cd rom-ldap/examples`
 - `$ bundle package --all`

@@ -121,6 +121,20 @@ m-syntax: 1.3.6.1.4.1.1466.115.121.1.27
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1010
 
+# study 1011
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1011, ou=attributeTypes, cn=wildlife, ou=schema
+objectClass: metaAttributeType
+objectClass: metaTop
+objectClass: top
+m-collective: FALSE
+m-singleValue: TRUE
+m-description: The field of study
+m-equality: caseIgnoreMatch
+m-name: study
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-usage: USER_APPLICATIONS
+m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1011
+
 
 #########################################################
 #
