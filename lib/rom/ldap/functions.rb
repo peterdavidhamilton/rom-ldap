@@ -94,10 +94,15 @@ module ROM
         t(:map_array, t(:to_symbol)).call(tuples)
       end
 
-      # TODO: Transproc::Coercions::TRUE_VALUES is missing 'TRUE' #to_boolean
+      # NB: Transproc::Coercions::TRUE_VALUES is missing 'TRUE'
+      # Overwrite #to_boolean for LDAP context.
+      #
+      def self.to_boolean(tuple)
+        Dry::Types['form.bool'][tuple]
+      end
+
       def self.to_bool(tuples)
-        # tuples.map { |t| Dry::Types['form.bool'][t] }
-        t(:map_array, ->(t) { Dry::Types['form.bool'][t] }).call(tuples)
+        t(:map_array, t(:to_boolean)).call(tuples)
       end
 
       def self.to_time(tuples)
