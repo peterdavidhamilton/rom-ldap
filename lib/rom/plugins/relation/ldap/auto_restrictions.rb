@@ -12,12 +12,13 @@ module ROM
         #     config.plugin(:ldap, relations: :auto_restrictions)
         #
         #     config.relation('(cn=*)', as: :users) do
-        #       schema(infer: true)
+        #       schema(infer: true) do
+        #         attribute :cn, Types::Strings.meta(index: true)
+        #       end
         #     end
         #   end
         #
-        #   # now `by_cn` is available automatically
-        #   rom.relations[:users].by_cn('jane@doe.org')
+        #   rom.relations[:users].by_cn('Directory Administrator')
         #
         # @api public
         module AutoRestrictions
@@ -37,8 +38,10 @@ module ROM
           def self.restriction_methods(schema)
             mod = Module.new
             methods = schema.attributes.each_with_object([]) do |attribute, generated|
-              meth_name = :"by_#{attribute.name}"
 
+              next unless attribute.indexed?
+
+              meth_name = :"by_#{attribute.name}"
               next if generated.include?(meth_name)
 
               mod.module_eval do
