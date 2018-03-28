@@ -127,6 +127,17 @@ module ROM
         meta[:original]
       end
 
+      # @api public
+      def indexed?
+        meta[:index].equal?(true)
+      end
+
+      # Returns a new attribute marked as indexed
+      #
+      # @api public
+      def indexed
+        meta(index: true)
+      end
 
       # Convert to string for ldap query using original name
       #
@@ -157,6 +168,23 @@ module ROM
         return self if qualified? && table_alias.nil?
         type = meta(qualified: table_alias || true)
       end
+
+
+      # TODO:
+      # Return a boolean expression with an equality operator
+      #
+      # @example
+      #   users.where { id.is(1) }
+      #
+      #   users.where(users[:id].is(1))
+      #
+      # @param [Object] other Any SQL-compatible object type
+      #
+      # @api public
+      # def is(other)
+      #   self =~ other
+      # end
+
 
       private
 

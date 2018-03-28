@@ -61,14 +61,10 @@ module ROM
         # @api public
         def call(attribute_name, schema)
           attribute = attribute_by_name(attribute_name)
-          multiple  = !attribute[:single]
           primitive = map_type(attribute)
+          multiple  = !attribute[:single] && primitive != 'Array'
           ruby_type = Types.const_get(primitive)
-          read_type = if multiple
-                        Types::Multiple.const_get(primitive)
-                      else
-                        Types::Single.const_get(primitive)
-                      end
+          read_type = multiple ? Types.const_get(Inflector.pluralize(primitive)) : ruby_type
 
           ruby_type.meta(
             name:     attribute_name,
