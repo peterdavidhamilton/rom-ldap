@@ -119,15 +119,15 @@ module ROM
           @conn
         else
           @conn = Connection.new(
-            server:           options[:uri],
+            server:           options.fetch(:uri, '127.0.0.1:389'),
             connect_timeout:  options[:timeout],
             read_timeout:     options[:timeout],
             write_timeout:    options[:timeout],
-            close_on_error:   false
-            # on_connect: proc {}
-            # proxy_server:
-            # connect_retry_interval: 10.0,
+            close_on_error:   false,
             # connect_retry_count: 1.day.to_i
+            # connect_retry_interval: 10.0,
+            # on_connect: proc {},
+            # proxy_server: ?,
           )
 
           @conn.use_logger(@logger)
