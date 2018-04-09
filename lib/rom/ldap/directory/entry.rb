@@ -31,48 +31,43 @@ module ROM
 
         include Dry::Equalizer(:to_h, :to_a, :to_str, :to_json, :to_ldif, :to_yaml)
 
-        def initialize(dn = nil, attributes = EMPTY_ARRAY)
-          @dn = dn
-          @source = {}
-          @canonical = {}
-
-          attributes.each do |key, value|
-            store_source('dn', dn)
-            store_source(key, value)
-            store_canonical('dn', dn)
-            store_canonical(key, value)
-          end
+        def initialize(dn, attributes = EMPTY_ARRAY)
+          @dn        = dn
+          @source    = build(dn, attributes)
+          @canonical = build(dn, attributes, original: false)
         end
 
         attr_reader :dn
         attr_reader :source
 
-        def [](key, alt = EMPTY_ARRAY)
-          @canonical[rename(key)] || alt
+        def [](key)
+          @canonical[rename(key)]
         end
-        alias fetch []
 
-        # Prune unwanted keys from internal hashes.
-        # Uses ::Compatibility#slice refinement unless Ruby >= 2.5.0
+        def fetch(key, alt = EMPTY_ARRAY)
+          @canonical.fetch(rename(key), alt)
+        end
+
+        # Prune unwanted keys from internal hashes. (update source then canonical)
         #
-        # @param keys [Array<Symbol, String>] Entry attributes to keep
+        # @param keys [Array <Symbol>] Entry attributes to keep
         #
         # @return [Entry]
         #
         # @api public
         def select(*keys)
-          @canonical = @canonical.slice(*keys)
-          @source    = @source.slice(*keys.map { |k| translation_map[k] })
-
+          source_keys = keys.map { |k| translation_map[k] }
+          @source    = @source.slice(*source_keys).freeze
+          @canonical = @canonical.slice(*keys).freeze
           self
         end
 
         def first(key)
-          self[key]&.first
+          fetch(key)&.first
         end
 
         def last(key)
-          self[key]&.last
+          fetch(key)&.last
         end
 
         def keys
@@ -113,7 +108,7 @@ module ROM
         alias inspect to_str
 
         # Return to first class objects from wrapped BER identified.
-        # Necessary for clean YAML output
+        # Necessary for clean export output.
         def encoded
           @source.map { |k, v| { k.to_s => Array(v).map(&:to_s) } }.reduce(&:merge)
         end
@@ -132,25 +127,20 @@ module ROM
 
         def method_missing(method, *args, &block)
           value = self[method]
-          return value unless value.empty?
+          return value unless value.nil?
           return @canonical.public_send(method, *args, &block) if @canonical.respond_to?(method)
           super
         end
 
         private
 
-        # Build @source hash
-        #
-        # @api private
-        def store_source(key, value)
-          @source[key] = Array(value)
-        end
-
-        # Build @canonical hash of renamed keys
-        #
-        # @api private
-        def store_canonical(key, value)
-          @canonical[rename(key)] = Array(value)
+        def build(dn, attributes, original: true)
+          attributes.each_with_object({}) do |(attribute, value), hash|
+            distinguished = original ? 'dn' : rename('dn')
+            attribute     = original ? attribute : rename(attribute)
+            hash[distinguished] = dn
+            hash[attribute]     = value
+          end.freeze
         end
 
         # Cache renamed key to improve performance two fold in benchmarks.

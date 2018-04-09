@@ -1,19 +1,17 @@
 RSpec.shared_context 'directory' do
 
   let(:server) do
-    { server: '127.0.0.1:10389', username: nil, password: nil }
-  end
-
-  let(:ldap_options) do
     {
-      base:  'ou=users,dc=example,dc=com',
-      # logger: Logger.new(IO::NULL)
-      logger: Logger.new(File.open('./log/test.log', 'a'))
+      username: nil,
+      password: nil,
+      uri:      '127.0.0.1:10389',
+      base:     'ou=users,dc=example,dc=com',
+      logger:   Logger.new(File.open('./log/test.log', 'a'))
     }
   end
 
   let(:conf) do
-    ROM::Configuration.new(:ldap, server, ldap_options)
+    ROM::Configuration.new(:ldap, server)
   end
 
   let(:container) do
