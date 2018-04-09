@@ -227,7 +227,7 @@ module ROM
         #
         # @api public
         def select(*args, &block)
-          schema.project(*args, &block).(self)
+          schema.project(*args, &block).(new(dataset.select(*args)))
         end
         alias_method :project, :select
         alias_method :pluck, :select

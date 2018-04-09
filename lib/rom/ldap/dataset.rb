@@ -84,8 +84,19 @@ module ROM
       #
       # @api public
       def opts
-        options.except(:directory).merge(query_ast: query_ast, ldap_string: ldap_string).freeze
+        options
+          .except(:directory)
+          .merge(query_ast: query_ast, ldap_string: ldap_string)
+          .freeze
       end
+
+      # @return [Dataset]
+      #
+      # @api public
+      def select(*args)
+        with(entries: map { |e| e.select(*args) })
+      end
+
 
       #
       #
@@ -93,6 +104,8 @@ module ROM
       #
       # @api public
       def each(*args, &block)
+        return entries.to_enum unless block_given?
+
         if paginated?
           entries[page_range].each(*args, &block)
         else
