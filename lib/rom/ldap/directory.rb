@@ -137,8 +137,8 @@ module ROM
 
         Array(attribute_names).map do |name|
           {
-            name:        Entry.rename(name),
-            original:    name,
+            name:        Entry.rename(name), # canonical
+            original:    name,               # source
             description: type[/DESC '(.+)' [A-Z]+/, 1],
             oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
             matcher:     type[/EQUALITY (\S+)/, 1],

@@ -28,7 +28,7 @@ module ROM
       attr_reader :logger
 
       def pdu_lookup(symbol)
-        ::BER.reverse_lookup(:pdu, symbol)
+        ::BER.reverse_lookup(:response, symbol)
       end
 
       # TODO: NetTCP timeout in here

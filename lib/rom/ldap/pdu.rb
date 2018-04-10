@@ -161,7 +161,7 @@ module ROM
       end
 
       def pdu_type
-        BER.lookup(:pdu, @app_tag) || raise(Error, "Unknown pdu_type: #{@app_tag}")
+        BER.lookup(:response, @app_tag) || raise(Error, "Unknown pdu_type: #{@app_tag}")
       end
 
       # @example

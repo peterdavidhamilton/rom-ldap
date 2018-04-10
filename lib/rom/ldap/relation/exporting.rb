@@ -13,6 +13,7 @@ module ROM
         #
         # @api public
         def export(format)
+          raise 'The dataset is no longer a Dataset class' unless dataset.is_a?(Dataset)
           dataset.export(format: format, keys: schema.to_h.keys)
         end
 
