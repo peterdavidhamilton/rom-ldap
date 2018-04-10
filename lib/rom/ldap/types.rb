@@ -6,13 +6,13 @@ module ROM
       include ROM::Types
 
       # Single Values --------
-      Octet   = Constructor(String,  ->(v) { Functions[:to_hex][v][0]     }).meta(octet: true)
+      Octet   = Constructor(String,  ->(v) { Functions[:to_hex][v][0] }).meta(octet: true)
       Binary  = Constructor(String,  ->(v) { Functions[:to_binary].(v[0]) }).meta(binary: true)
       String  = Constructor(String,  ->(v) { Functions[:stringify].(v[0]) })
-      Int     = Constructor(Integer, ->(v) { Functions[:to_int][v][0]     })
-      Symbol  = Constructor(Symbol,  ->(v) { Functions[:to_sym][v][0]     })
-      Time    = Constructor(Time,    ->(v) { Functions[:to_time][v][0]    })
-      Bool    = Constructor(Bool,    ->(v) { Functions[:to_bool][v][0]    })
+      Int     = Constructor(Integer, ->(v) { Functions[:to_int][v][0] })
+      Symbol  = Constructor(Symbol,  ->(v) { Functions[:to_sym][v][0] })
+      Time    = Constructor(Time,    ->(v) { Functions[:to_time][v][0] })
+      Bool    = Constructor(Bool,    ->(v) { Functions[:to_bool][v][0] })
 
       # Multiple Values --------
       Strings   = Array.constructor(Functions[:stringify])

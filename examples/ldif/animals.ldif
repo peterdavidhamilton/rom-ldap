@@ -42,6 +42,8 @@ extinct: FALSE
 endangered: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Human
 study: anthropology
+# audio:< file://~/Template.plist
+audio:< file://./recordings/human.wav
 
 dn: cn=Red Fox,ou=animals,dc=example,dc=com
 cn: Red Fox

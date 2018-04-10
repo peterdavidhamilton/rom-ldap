@@ -209,17 +209,17 @@ end
 #   schema '(species=*)', as: :animals, infer: true
 # end
 
+# TODO: aliased schema attribute names
 configuration.relation(:animals, adapter: :ldap) do
   schema '(species=*)', as: :animals, infer: true do
-    attribute :cn,      ROM::LDAP::Types::Strings.meta(index: true) # multiple values
-
+    # attribute :cn,      ROM::LDAP::Types::Strings.meta(index: true, alias: :common_names)
+    attribute :cn,      ROM::LDAP::Types::Strings.meta(index: true)
+    attribute :study,   ROM::LDAP::Types::Symbol.meta(index: true, foreign_key: true)
     attribute :family,  ROM::LDAP::Types::String.meta(index: true)
     attribute :genus,   ROM::LDAP::Types::String.meta(index: true)
     attribute :order,   ROM::LDAP::Types::String.meta(index: true)
     attribute :species, ROM::LDAP::Types::String.meta(index: true)
-
-    attribute :study,   ROM::LDAP::Types::String.meta(index: true, foreign_key: true),
-                        read: ROM::LDAP::Types::Symbol
+    # attribute :audio,   ROM::LDAP::Types::Binary
 
     associations do
       # has_many :researchers
@@ -380,7 +380,7 @@ new_animals = [
 #
 # Breakpoint - Try out the examples below or output using 'ap'
 # =============================================================================
-# binding.pry
+binding.pry
 
 #
 # Examples
