@@ -1,0 +1,4 @@
+dn: uid=root,ou=users,dc=example,dc=com
+changetype: modify
+add: description
+audio:< file://./recordings/human.wav

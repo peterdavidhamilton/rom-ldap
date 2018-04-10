@@ -8,6 +8,9 @@ using ::LDIF
 module ROM
   module LDAP
     class Directory
+      #
+      # Initialised by PDU#parse_search_return
+      #
       class Entry
         module ClassMethods
           attr_reader :formatter
@@ -26,19 +29,21 @@ module ROM
           end
         end
 
-        extend ClassMethods
         extend Dry::Core::Cache
+        extend ClassMethods
 
-        include Dry::Equalizer(:to_h, :to_a, :to_str, :to_json, :to_ldif, :to_yaml)
-
-        def initialize(dn, attributes = EMPTY_ARRAY)
-          @dn        = dn
-          @source    = build(dn, attributes)
-          @canonical = build(dn, attributes, original: false)
-        end
+        include Dry::Equalizer(:to_h, :to_a, :to_str)
 
         attr_reader :dn
         attr_reader :source
+        attr_reader :attributes
+
+        def initialize(dn, attributes = EMPTY_ARRAY)
+          @dn         = dn.to_s
+          @attributes = attributes.push(['dn', [dn]])
+          @source     = build
+          @canonical  = build(original: false)
+        end
 
         def [](key)
           @canonical[rename(key)]
@@ -48,6 +53,7 @@ module ROM
           @canonical.fetch(rename(key), alt)
         end
 
+        # FIXME: This is destructive and breaks if select is called twice
         # Prune unwanted keys from internal hashes. (update source then canonical)
         #
         # @param keys [Array <Symbol>] Entry attributes to keep
@@ -71,7 +77,7 @@ module ROM
         end
 
         def keys
-          @source.keys
+          source.keys
         end
 
         def attribute_names
@@ -82,15 +88,26 @@ module ROM
           attribute_names.zip(keys).to_h
         end
 
-        # Iterate over each canonical hash pair, or the values for a give attribute key.
+        # Iterate over canonical attributes, or the values for a give attribute.
         #
-        # @param key [Symbol]
+        # @param key [Symbol] canonical attribute name
         #
-        # @example
+        # @example entry.each(:object_class) { |e| puts e }
+        #
         def each(key = nil, &block)
-          key.nil? ? @canonical.each(&block) : self[key].each(&block)
+          key ? fetch(key).each(&block) : @canonical.each(&block)
         end
         alias each_attribute each
+
+        # Iterate over canonical attributes, or the values for a give attribute.
+        #
+        # @param key [Symbol] canonical attribute name
+        #
+        # @example entry.map(:object_class, &:to_sym)
+        #
+        def map(key = nil, &block)
+          key ? fetch(key).map(&block) : @canonical.map(&block)
+        end
 
         def to_h
           @canonical
@@ -107,22 +124,12 @@ module ROM
         end
         alias inspect to_str
 
-        # Return to first class objects from wrapped BER identified.
-        # Necessary for clean export output.
-        def encoded
-          @source.map { |k, v| { k.to_s => Array(v).map(&:to_s) } }.reduce(&:merge)
-        end
-
         def to_s
-          encoded.to_ldif
+          source.to_ldif
         end
 
         def hash
-          @source.hash
-        end
-
-        def respond_to_missing?(*args)
-          !!self[args.first]
+          source.hash
         end
 
         def method_missing(method, *args, &block)
@@ -134,13 +141,19 @@ module ROM
 
         private
 
-        def build(dn, attributes, original: true)
-          attributes.each_with_object({}) do |(attribute, value), hash|
-            distinguished = original ? 'dn' : rename('dn')
-            attribute     = original ? attribute : rename(attribute)
-            hash[distinguished] = dn
-            hash[attribute]     = value
-          end.freeze
+        # Merge dn with attributes as arrays of strings.
+        #
+        # @return [Hash]
+        #
+        # @api private
+        def build(original: true)
+          attributes.each_with_object({}) do |(attr, vals), h|
+            h[original ? attr.to_s : rename(attr)] = vals.map(&:to_s)
+          end
+        end
+
+        def respond_to_missing?(name, _include_private = false)
+          !!self[name]
         end
 
         # Cache renamed key to improve performance two fold in benchmarks.

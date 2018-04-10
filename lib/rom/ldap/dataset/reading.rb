@@ -37,9 +37,9 @@ module ROM
         # @api
         def export(format:, keys:)
           if count > 1
-            map { |entry| entry.select(*keys).encoded }.__send__(format)
+            map { |e| e.select(*keys).source }.__send__(format)
           else
-            first.select(*keys).encoded.__send__(format)
+            first.select(*keys).source.__send__(format)
           end
         end
 
