@@ -89,20 +89,39 @@ module ROM
           attributes.detect { |a| a[:name] == attribute_name } || EMPTY_HASH
         end
 
+        # Map attribute to Type using known OID or by inferring from the matchers.
+        #
+        # @param attribute [Hash]
+        #
         # @return [String]
         #
         # @api private
         def map_type(attribute)
-          case attribute[:matcher]
-          when nil
-            primitive = attribute[:single] ? 'String' : 'Array'
-            ::BER.lookup(:oid, attribute[:oid]) || primitive
+          by_oid(attribute[:oid]) || by_matcher(attribute[:matcher])
+        end
+
+        # @param oid [String]
+        #
+        # @return [String]
+        #
+        # @api private
+        def by_oid(oid)
+          ::BER.lookup(:oid, oid)
+        end
+
+        # @param matcher [String]
+        #
+        # @return [String]
+        #
+        # @api private
+        def by_matcher(matcher)
+          case matcher
           when *STRING_MATCHERS  then 'String'
           when *BOOLEAN_MATCHERS then 'Bool'
           when *INTEGER_MATCHERS then 'Int'
           when *TIME_MATCHERS    then 'Time'
           else
-            'Array'
+            'String'
           end
         end
       end

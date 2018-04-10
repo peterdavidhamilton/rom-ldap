@@ -183,6 +183,7 @@ module ROM
         end
 
         # Limits the dataset to a number of tuples
+        #   FIXME: prevents option to export as dataset is now an array
         #
         # @example
         #   relation.limit(6)

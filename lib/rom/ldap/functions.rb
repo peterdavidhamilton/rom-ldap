@@ -1,4 +1,5 @@
 require 'transproc'
+require 'base64'
 require 'rom/support/inflector'
 require 'rom/ldap/functions/exporters'
 
@@ -86,6 +87,47 @@ module ROM
         end
       end
 
+      def self.to_hexidecimal(value)
+        value.each_byte.map { |b| b.to_s(16) }.join.force_encoding(Encoding::UTF_8)
+      end
+
+      def self.to_hex(values)
+        t(:map_array, t(:to_hexidecimal)).call(values)
+      end
+
+      # def self.to_decimal(value)
+      #   value.each_byte.map { |b| b.to_s(10) }.join.force_encoding(Encoding::UTF_8)
+      # end
+
+      def self.to_binary(values)
+        t(:map_array, t(:to_base64)).call(values)
+      end
+
+      # @see https://en.wikipedia.org/wiki/List_of_file_signatures
+      # @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
+      # @see https://github.com/sdsykes/fastimage/blob/master/lib/fastimage.rb
+      def self.to_base64(value)
+        mime =
+          case value[0,2]
+          when 0xff.chr + 0xd8.chr
+            'image/jpeg'
+          when 0x89.chr + 'P'
+            'image/png'
+          when 'BM'
+            'image/bitmap'
+          when 'II', 'MM'
+            'image/tiff'
+          when 0xff.chr + 0xfb.chr, 'ID'
+            'audio/mpeg'
+          when 'WA'
+            'audio/x-wav'
+          else
+            'application/octet-stream'
+          end
+
+        ::Base64.strict_encode64(value).prepend("data:#{mime};base64,")
+      end
+
       def self.to_int(tuples)
         t(:map_array, t(:to_integer)).call(tuples)
       end
@@ -105,6 +147,7 @@ module ROM
         t(:map_array, t(:to_boolean)).call(tuples)
       end
 
+      # TODO: split and use map_array
       def self.to_time(tuples)
         tuples.map do |time|
           begin
