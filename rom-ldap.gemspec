@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.3.0'
 
-  spec.add_runtime_dependency 'dry-core', '~> 0.3'
+  spec.add_runtime_dependency 'dry-core', '~> 0.4'
   spec.add_runtime_dependency 'dry-types', '~> 0.12'
   spec.add_runtime_dependency 'rom-core', '~> 4.0'
   spec.add_runtime_dependency 'transproc'
