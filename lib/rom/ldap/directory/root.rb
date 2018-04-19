@@ -51,7 +51,7 @@ module ROM
         #
         # @api private
         def infer_microsoft_implementation
-          caps = root['supportedCapabilities'].sort
+          caps = root.fetch('supportedCapabilities').sort
 
           if caps.empty?
             logger.info("#{self.class} unknown Active Directory version")

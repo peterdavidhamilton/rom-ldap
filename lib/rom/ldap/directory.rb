@@ -140,7 +140,7 @@ module ROM
             name:        Entry.rename(name), # canonical
             original:    name,               # source
             description: type[/DESC '(.+)' [A-Z]+/, 1],
-            oid:         type[/SYNTAX (\S+)/, 1].tr("'", ''),
+            oid:         type[/SYNTAX (\S+)/, 1].to_s.tr("'", ''),
             matcher:     type[/EQUALITY (\S+)/, 1],
             substr:      type[/SUBSTR (\S+)/, 1],
             ordering:    type[/ORDERING (\S+)/, 1],
