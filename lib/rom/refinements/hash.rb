@@ -8,17 +8,18 @@
 #
 module Compatibility
   refine ::Hash do
+    unless RUBY_VERSION.to_f < 2.5
+      def slice(*keys)
+        hash = {}
+        keys.each { |key| hash[key] = fetch(key) if key?(key) }
+        hash
+      end
+    end
 
-    def slice(*keys)
-      hash = {}
-      keys.each { |key| hash[key] = fetch(key) if key?(key) }
-      hash
-    end unless RUBY_VERSION.to_f < 2.5
-
-
-    def except(*less_keys)
-      slice(*keys - less_keys)
-    end unless ::Hash.method_defined?(:except)
-
+    unless ::Hash.method_defined?(:except)
+      def except(*less_keys)
+        slice(*keys - less_keys)
+      end
+    end
   end
 end
