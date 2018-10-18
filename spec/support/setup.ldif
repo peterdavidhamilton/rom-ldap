@@ -1,12 +1,13 @@
+# $ convert -size 1x1 xc:white pixel.jpg
 version: 1
 
 #
 # Partition
 #
-# dn: dc=example,dc=com
-# dc: example
-# objectClass: top
-# objectClass: domain
+dn: dc=example,dc=com
+dc: example
+objectClass: top
+objectClass: domain
 
 #
 # Top Levels
@@ -45,6 +46,7 @@ objectClass: posixGroup
 gidNumber: 9999
 
 
+
 #
 # Admin
 #
@@ -61,6 +63,18 @@ sn: Administrator
 uid: root
 userPassword:: e1NIQX1XNnBoNU1tNVB6OEdnaVVMYlBnekczN21qOWc9
 uidNumber: 0
+# preferredLanguage: en
+# jpegPhoto:< file:///Users/pdh/Code/rom-ldap/spec/support/pixel.jpg
+# audio:< file:///Users/pdh/Code/rom-ldap/spec/support/beep.wav
+# apple-imhandle: @root
+# postalAddress: Somewhere, Over, The, Rainbow
+# c: UK
+# co: United Kingdom
+# homePhone: 01234 5678910
+# mobile: 07890 1234567
+# labeledURI: http://example.com
+
+
 
 #
 # Customers
