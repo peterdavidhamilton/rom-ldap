@@ -330,7 +330,6 @@ module ROM
           dataset.map(key, &block)
         end
 
-
         #
         # Associations
         #
@@ -339,10 +338,24 @@ module ROM
         # @example
         #   join(:accounts, id: :uid_number)
         #
-        def join(*args, &block)
-          binding.pry
-        end
+        def join(other, join_cond = EMPTY_HASH)
+          # binding.pry
 
+          if other.is_a?(Symbol) || other.is_a?(ROM::Relation::Name)
+            if join_cond.empty?
+              # ROM::LDAP::Associations::ManyToOne
+              associations[other].join(self)
+              # else
+              # new(dataset.__send__(type, other.to_sym, join_cond, opts, &block))
+            end
+          # elsif other.is_a?(Sequel::SQL::AliasedExpression)
+          #   new(dataset.__send__(type, other, join_cond, opts, &block))
+          # elsif other.respond_to?(:name) && other.name.is_a?(Relation::Name)
+          #   associations[other.name.key].join(type, self, other)
+          else
+            raise ArgumentError, "+other+ must be either a symbol or a relation, #{other.class} given"
+          end
+        end
       end
     end
   end
