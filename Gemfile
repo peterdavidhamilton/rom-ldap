@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'rom-core', github: 'rom-rb/rom', branch: 'master'
 gem 'ldap-ber', git: 'bb:ldap-ber', branch: 'develop'
 
 group :test do
