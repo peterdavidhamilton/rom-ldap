@@ -6,3 +6,5 @@ gem 'net-ldap'
 gem 'pry',        platforms: %i[jruby rbx]
 gem 'pry-byebug', platforms: :mri
 gem 'rom-ldap', git: 'bb:rom-ldap', branch: 'develop'
+
+gem 'rom-core', github: 'rom-rb/rom', branch: 'master'

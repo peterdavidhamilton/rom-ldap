@@ -9,7 +9,7 @@ _yardoc/
 coverage/
 db/
 doc/
-Gemfile.lock
+*Gemfile.lock
 log/*.log
 mkmf.log
 pkg/
