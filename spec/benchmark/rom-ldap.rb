@@ -20,8 +20,13 @@ filter   = '(&(objectclass=person)(uid=*))'
 base     = 'ou=users,dc=example,dc=com'
 
 # ROM-LDAP -------------------------------------
-directory = { server: "#{host}:#{port}", username: admin, password: password}
-conf = ROM::Configuration.new(:ldap, directory, base: base, logger: logger)
+conf = ROM::Configuration.new(:ldap,
+  servers:  ["#{host}:#{port}"],
+  username: admin,
+  password: password,
+  base:     base,
+  logger:   logger
+)
 
 # Attribute name formatter
 ROM::LDAP.load_extensions :compatible_entry_attributes
@@ -34,16 +39,16 @@ end
 
 conf.relation(:explicit) do
   schema(filter) do
-    attribute :uid,               ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :cn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :dn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :given_name,        ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :sn,                ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :mail,              ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :user_password,     ROM::LDAP::Types::String, read: ROM::LDAP::Types::Single::String
-    attribute :uid_number,        ROM::LDAP::Types::Int,    read: ROM::LDAP::Types::Single::Int
-    attribute :create_timestamp,  ROM::LDAP::Types::Time,   read: ROM::LDAP::Types::Single::Time
-    attribute :object_class,      ROM::LDAP::Types::Array,  read: ROM::LDAP::Types::Array
+    attribute :uid,               ROM::LDAP::Types::String
+    attribute :cn,                ROM::LDAP::Types::String
+    attribute :dn,                ROM::LDAP::Types::String
+    attribute :given_name,        ROM::LDAP::Types::String
+    attribute :sn,                ROM::LDAP::Types::String
+    attribute :mail,              ROM::LDAP::Types::String
+    attribute :user_password,     ROM::LDAP::Types::String
+    attribute :uid_number,        ROM::LDAP::Types::Integer
+    attribute :create_timestamp,  ROM::LDAP::Types::Time
+    attribute :object_class,      ROM::LDAP::Types::Strings
   end
   auto_struct true
 end
