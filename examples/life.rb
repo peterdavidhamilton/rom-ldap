@@ -40,7 +40,7 @@ end
 opts = {
   username: 'uid=admin,ou=system',
   password: 'secret',
-  uri:      '127.0.0.1:10389',   # defaults to '127.0.0.1:389'
+  servers:  %w[127.0.0.1:10389], # defaults to ['127.0.0.1:389']
   base:     'dc=example,dc=com', # defaults to ''
   timeout:  10,                  # defaults to 30
   logger:   Logger.new(STDOUT)   # defaults to null
@@ -191,9 +191,9 @@ configuration.relation(:researchers, adapter: :memory) do
   gateway :other
 
   schema(:researchers) do
-    attribute :id,      ROM::Types::Int
-    attribute :name,    ROM::Types::String
-    attribute :field,   ROM::Types::String
+    attribute :id,    ROM::Types::Integer
+    attribute :name,  ROM::Types::String
+    attribute :field, ROM::Types::String
   end
 
   dataset do

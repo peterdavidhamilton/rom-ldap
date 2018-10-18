@@ -288,6 +288,19 @@ endangered: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Smooth_newt
 study: herpetology
 
+dn: cn=Southern Sand Octopus,ou=animals,dc=example,dc=com
+cn: Southern Sand Octopus
+species: Octopus kaurna
+genus: Octopus
+family: Octopodidae
+order: Octopoda
+objectClass: cephalopoda
+objectClass: extensibleObject
+objectClass: top
+labeledURI: https://en.wikipedia.org/wiki/Octopus_kaurna
+study: teuthology
+
+
 dn: cn=Reef Manta Ray,ou=animals,dc=example,dc=com
 cn: Reef Manta Ray
 species: Manta alfredi
