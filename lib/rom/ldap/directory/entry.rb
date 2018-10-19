@@ -136,6 +136,7 @@ module ROM
           value = self[method]
           return value unless value.nil?
           return @canonical.public_send(method, *args, &block) if @canonical.respond_to?(method)
+
           super
         end
 

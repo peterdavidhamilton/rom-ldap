@@ -121,9 +121,11 @@ module ROM
             if result_pdu&.success? && controls
               controls.each do |c|
                 next unless c.oid == PAGED_RESULTS
+
                 more_pages = false
 
                 next unless c.value && !c.value.empty?
+
                 cookie = c.value.read_ber[1]
 
                 if cookie && !cookie.empty?

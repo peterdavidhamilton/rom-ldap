@@ -4,7 +4,6 @@ module ROM
   module LDAP
     class Dataset
       module Reading
-
         # NB: Not the same as Relation#fetch!!
         #
         # Find by Distinguished Name(s)
@@ -18,7 +17,6 @@ module ROM
           with(entries: Array(dns).flat_map { |dn| directory.by_dn(dn) })
         end
 
-
         # Validate the password against the filtered user.
         #
         # @param password [String]
@@ -30,16 +28,17 @@ module ROM
           directory.bind_as(filter: query_ast, password: password)
         end
 
-        # Handle different string output formats.
+        # Handle different string output formats i.e. LDIF, JSON, YAML
         #
         # @return [String]
         #
         # @api
         def export(format:, keys:)
-          if count > 1
-            map { |e| e.select(*keys).source }.__send__(format)
+          results = select(*keys).map(&:source)
+          if results.size > 1
+            results.__send__(format)
           else
-            first.select(*keys).source.__send__(format)
+            results.first.__send__(format)
           end
         end
 
@@ -51,7 +50,6 @@ module ROM
         def total
           directory.base_total - 1
         end
-
       end
     end
   end

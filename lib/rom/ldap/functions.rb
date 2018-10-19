@@ -108,7 +108,7 @@ module ROM
       # @see https://github.com/sdsykes/fastimage/blob/master/lib/fastimage.rb
       def self.to_base64(value)
         mime =
-          case value[0,2]
+          case value[0, 2]
           when 0xff.chr + 0xd8.chr
             'image/jpeg'
           when 0x89.chr + 'P'
@@ -150,17 +150,15 @@ module ROM
       # TODO: split and use map_array
       def self.to_time(tuples)
         tuples.map do |time|
-          begin
-            ten_k      = 10_000_000
-            since_1601 = 11_644_473_600
-            time       = (Integer(time) / ten_k) - since_1601
+          ten_k      = 10_000_000
+          since_1601 = 11_644_473_600
+          time       = (Integer(time) / ten_k) - since_1601
 
-            ::Time.at(time)
-          rescue ArgumentError
-            ::Time.parse(time).utc
-          rescue ArgumentError
-            nil
-          end
+          ::Time.at(time)
+        rescue ArgumentError
+          ::Time.parse(time).utc
+        rescue ArgumentError
+          nil
         end
       end
 

@@ -7,7 +7,6 @@ module ROM
         # @api public
         attr_reader :type
 
-
         # Set instance variables like directory_type
         #
         # @see Gateway#directory
@@ -71,7 +70,6 @@ module ROM
             @vendor_version           = ActiveDirectory::VERSION_NAMES[dom]
           end
         end
-
 
         # Representation of directory RootDSE
         #

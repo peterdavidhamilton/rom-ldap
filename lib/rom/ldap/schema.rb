@@ -36,7 +36,6 @@ module ROM
         new(map { |attr| attr.qualified(table_alias) })
       end
 
-
       # Join with another schema
       #
       # @param [Schema] other The other schema to join with
@@ -56,7 +55,6 @@ module ROM
       def joined
         new(map(&:joined))
       end
-
 
       # Return an empty schema
       #

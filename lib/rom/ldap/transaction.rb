@@ -12,7 +12,6 @@ module ROM
       end
 
       def run(opts = EMPTY_HASH)
-        binding.pry
         directory.transaction(opts) { yield(self) }
       rescue ::ROM::Transaction::Rollback
         # noop

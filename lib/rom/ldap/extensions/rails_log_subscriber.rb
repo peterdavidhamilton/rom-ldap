@@ -4,8 +4,6 @@ module ROM
   module LDAP
     class RailsLogSubscriber < ActiveSupport::LogSubscriber
       def ldap(event)
-        binding.pry
-
         return unless logger.debug?
 
         payload = event.payload

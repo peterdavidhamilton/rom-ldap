@@ -70,7 +70,6 @@ module ROM
       #
       # @api public
       def transaction(opts = EMPTY_HASH, &block)
-        binding.pry
         Transaction.new(dataset.directory).run(opts, &block)
       end
 
@@ -132,7 +131,6 @@ module ROM
       # def wrap(prefix = dataset.name)
       #   with(schema: schema.wrap(prefix))
       # end
-
     end
   end
 end

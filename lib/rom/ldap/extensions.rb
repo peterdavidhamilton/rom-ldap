@@ -39,6 +39,5 @@ module ROM
     register_extension(:three_eight_nine) do
       require 'rom/ldap/extensions/three_eight_nine'
     end
-
   end
 end

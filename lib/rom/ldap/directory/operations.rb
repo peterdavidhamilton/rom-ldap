@@ -29,7 +29,7 @@ module ROM
                   deref:       DEREF_ALWAYS,
                   unlimited:   unlimited?)
           end
-        rescue Timeout::Error
+        rescue Timeout::Error # => e
         end
 
         # @option :filter [String]
@@ -98,8 +98,8 @@ module ROM
         #
         # @api public
         def modify(dn, tuple) # third param :replace
-          args   = payload(tuple)
-          ops    = args.map { |attribute, value| [:replace, attribute, value] }
+          args = payload(tuple)
+          ops  = args.map { |attribute, value| [:replace, attribute, value] }
 
           logger.debug("#{self.class} modifying '#{dn}'")
 
@@ -123,12 +123,10 @@ module ROM
           result.success? ? entry : false
         end
 
-
         # TODO: Transactions WIP
         #
         # directory.transaction(opts) { yield(self) }
-        def transaction(opts, &block)
-          binding.pry
+        def transaction(_opts)
           yield()
         end
 
@@ -166,7 +164,7 @@ module ROM
         #
         # @api private
         def payload(tuple)
-          attributes  = attribute_types.select { |a| tuple.keys.include?(a[:name]) }
+          attributes  = attribute_types.select { |a| tuple.key?(a[:name]) }
           transmatrix = attributes.map { |a| a.values_at(:name, :original) }.to_h
 
           Functions[:tuplify].call(tuple.dup, transmatrix)

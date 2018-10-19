@@ -3,7 +3,7 @@ require 'rom/struct'
 module ROM
   module LDAP
     class Struct < ROM::Struct
-      constructor_type(:schema)
+      transform_types { |type| type.meta(omittable: true) }
 
       # Remove unused attributes when converting to Hash
       #

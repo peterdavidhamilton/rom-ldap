@@ -60,7 +60,6 @@ module ROM
         optional: true,
         type:     Dry::Types['strict.array']
 
-
       include QueryDSL
       include Reading
       include Writing
@@ -97,7 +96,6 @@ module ROM
         with(entries: map { |e| e.select(*args) })
       end
 
-
       #
       #
       # @return [Array<Directory::Entry>]
@@ -112,7 +110,6 @@ module ROM
           entries.each(*args, &block)
         end
       end
-
 
       def map(key = nil, &block)
         if key

@@ -9,6 +9,9 @@ module ROM
     class PDU
       extend Dry::Core::ClassAttributes
 
+      # Wrapper class around search results
+      # @see #parse_search_return
+      #
       defines :result_object
 
       result_object Directory::Entry
@@ -222,7 +225,7 @@ module ROM
           o.criticality = control[1]
           o.value       = control[2]
 
-          if o.criticality && o.criticality.is_a?(String)
+          if o.criticality&.is_a?(String)
             o.value       = o.criticality
             o.criticality = false
           end

@@ -11,15 +11,15 @@ module ROM
         private
 
         def query
-          @composer ||= QueryExporter.new
+          @query ||= QueryExporter.new
         end
 
         def filter
-          @decomposer ||= FilterExporter.new
+          @filter ||= FilterExporter.new
         end
 
         def expression
-          @parser ||= ExpressionExporter.new
+          @expression ||= ExpressionExporter.new
         end
       end
     end

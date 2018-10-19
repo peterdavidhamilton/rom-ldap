@@ -36,6 +36,7 @@ module LDIF
     def value_is_binary?(value)
       value = value.to_s
       return true if (value[0] == ':') || (value[0] == '<')
+
       value.each_byte do |byte|
         return true if (byte < 32) || (byte > 126)
       end

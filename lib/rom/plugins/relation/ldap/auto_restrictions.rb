@@ -38,7 +38,6 @@ module ROM
           def self.restriction_methods(schema)
             mod = Module.new
             methods = schema.attributes.each_with_object([]) do |attribute, generated|
-
               next unless attribute.indexed?
 
               meth_name = :"by_#{attribute.name}"
