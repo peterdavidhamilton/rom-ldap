@@ -112,7 +112,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'result' do
-      expect(relation.one.uid).to eql('bob')
+      expect(relation.one.mail).to eql('bob@example.com')
     end
   end
 
@@ -149,7 +149,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'result' do
-      expect(relation.one.uid).to eql('rita')
+      expect(relation.one.mail).to eql('rita@example.com')
     end
   end
 
@@ -186,7 +186,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'result' do
-      expect(relation.one.uid).to eql('bob')
+      expect(relation.one.mail).to eql('bob@example.com')
     end
   end
 

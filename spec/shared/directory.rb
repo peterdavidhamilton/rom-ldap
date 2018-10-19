@@ -4,7 +4,7 @@ RSpec.shared_context 'directory' do
     {
       username: nil,
       password: nil,
-      uri:      '127.0.0.1:10389',
+      servers:  ['127.0.0.1:10389'],
       base:     'ou=users,dc=example,dc=com',
       logger:   Logger.new(File.open('./log/test.log', 'a'))
     }

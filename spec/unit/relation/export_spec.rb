@@ -11,7 +11,7 @@ RSpec.describe ROM::LDAP::Relation do
     #
     let(:relation) do
       attributes = %i[cn dn gid_number given_name mail object_class sn uid uid_number user_password]
-      accounts.select(*attributes).where(uid: 'test1')
+      accounts.where(uid: 'test1').select(*attributes)
     end
 
     it '#to_msgpack' do

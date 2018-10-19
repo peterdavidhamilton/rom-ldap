@@ -4,11 +4,14 @@ RSpec.describe 'Commands / Delete' do
 
   include_context 'relations'
 
-  let(:account_commands) { commands[:accounts] }
-
-  let(:delete_account) { account_commands.delete }
-
   before do
+    # conf.relation(:accounts) do
+    #   schema('(&(objectClass=person)(uid=*))', as: :accounts, infer: true) do
+    #     attribute :uid, ROM::LDAP::Types::String.meta(index: true)
+    #   end
+    #   auto_struct false
+    # end
+
     conf.commands(:accounts) do
       define(:delete) do
         result :one
@@ -26,6 +29,10 @@ RSpec.describe 'Commands / Delete' do
       objectclass: %w[extensibleobject inetorgperson]
     )
   end
+
+  let(:account_commands) { commands[:accounts] }
+
+  let(:delete_account) { account_commands.delete }
 
   after  { accounts.where(uid: 'black_panther').delete }
 

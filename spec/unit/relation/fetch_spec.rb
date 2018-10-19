@@ -7,6 +7,9 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     reset_attributes!
   end
 
+  #
+  # Default Primary Key = DN
+  #
   describe '#fetch default primary_key' do
     before do
       use_formatter(formatter)
@@ -38,13 +41,16 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     end
   end
 
+  #
+  # Custom Primary Key = uidNumber
+  #
   describe '#fetch custom primary_key' do
     before do
       use_formatter(formatter)
 
       conf.relation(:foo) do
         schema(users, infer: true) do
-          attribute 'uidNumber', ROM::LDAP::Types::Serial
+          attribute 'uidNumber', ROM::LDAP::Types::Integer.meta(primary_key: true)
         end
       end
     end
@@ -52,7 +58,7 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     let(:relation) { relations.foo }
 
     it 'returns a single tuple identified by the pk' do
-      expect(relation.fetch(1)['uidNumber']).to eql(['1'])
+      expect(relation.fetch(1)['uidNumber']).to eql(1)
     end
 
     it 'raises when tuple was not found' do

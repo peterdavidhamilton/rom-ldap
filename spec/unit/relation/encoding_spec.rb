@@ -1,7 +1,6 @@
 RSpec.describe ROM::LDAP::Relation, helpers: true do
 
   let(:formatter) { method_name_proc }
-
   include_context 'relations'
 
   describe '#where using non-utf8 encoded string' do
@@ -55,7 +54,7 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     end
 
     it 'result' do
-      expect(relation.one[:uid]).to eql(['李振藩'])
+      expect(relation.one[:uid]).to eql('李振藩')
     end
   end
 end

@@ -20,9 +20,14 @@ RSpec.describe 'Combine relations' do
 
   it 'combine' do
 
-    # binding.pry
-    # tags = container.relations[:tags]
+    relations[:countries].to_a
+    # [{:name=>"India", :dn=>"cn=Pangolin,ou=animals,dc=example,dc=com"}]
 
+    countries.with_wildlife(predators.base).to_a
+    prey.base.join(:countries).to_a
+
+    # countries.with_wildlife([{dn: 'cn=Pangolin,ou=animals,dc=example,dc=com' }])
+    # tags = container.relations[:tags]
     # relation = users.combine_with(tasks.for_users.combine_with(tags.for_tasks))
 
     # TODO: figure out a way to assert correct number of issued queries
