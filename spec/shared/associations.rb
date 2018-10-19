@@ -6,7 +6,7 @@ RSpec.shared_context 'associations' do
 
   let(:conf) do
     ROM::Configuration.new(
-      default: [:ldap, server, ldap_options],
+      default: [:ldap, server],
       other:   [:memory, 'memory://test'],
     )
   end
@@ -14,16 +14,14 @@ RSpec.shared_context 'associations' do
   before do
     class Predators < ROM::Relation[:ldap]
       schema('(species=*)', as: :predators, infer: true) do
-        attribute 'entryDN',
-          Types::String.meta(primary_key: true, foreign_key: true, relation: :countries),
-          read: ROM::LDAP::Types::Single::String
+        attribute 'entryDN', Types::String.meta(foreign_key: true, relation: :countries)
 
-        associations do
-          has_many :prey
-          belongs_to :country
-        end
+        # associations do
+        #   has_many :prey
+        #   belongs_to :country
+        # end
       end
-
+      base 'ou=animals,dc=example,dc=com'
       auto_map false
 
       def by_name(name)
@@ -33,28 +31,32 @@ RSpec.shared_context 'associations' do
 
 
     class Prey < ROM::Relation[:ldap]
-      # schema do
       schema('(species=*)', as: :prey, infer: true) do
-        attribute 'entryDN',
-          Types::String.meta(primary_key: true, foreign_key: true, relation: :countries),
-          read: ROM::LDAP::Types::Single::String
+        attribute 'entryDN', Types::String.meta(foreign_key: true, relation: :countries)
 
         associations do
-          belongs_to :country
+          # belongs_to :market_data, foreign_key: :symbol, view: :capitalization, override: true
+          belongs_to :country, foreign_key: :dn, override: true
           # has_one :country
           has_many :predators
         end
       end
+
+      # relation.base.to_a # narrows base from one defined in cofig to one defined on relation class.
+      base 'ou=animals,dc=example,dc=com'
       # FIXME: works once then filter becomes empty string
       # dataset { present(:species) }
       auto_map false
 
       def for_predators(predators)
-        where(cn: predators.map { |tuple| tuple[:cn] })
+        # where(cn: predators.map { |tuple| tuple[:cn] })
+        where(dn: predators.map(&:dn))
       end
 
       def with_country
-        combine(:country)
+        # combine(:country)
+        combine(countries)
+        # combine_with(countries)
       end
     end
 
@@ -66,9 +68,16 @@ RSpec.shared_context 'associations' do
         attribute :name, Types::String #.meta(primary_key: true)
 
         associations do
-          has_many :predators, foreign_key: :dn
+          has_many :predators, combine_key: :dn
+          # has_many :predators, foreign_key: :dn
           has_many :prey, foreign_key: :dn
         end
+      end
+
+      # tuples might have string keys - always have dn method
+      def with_wildlife(animals)
+        # restrict(dn: animals.map { |u| u[:dn] })
+        restrict(dn: animals.map(&:dn))
       end
     end
 

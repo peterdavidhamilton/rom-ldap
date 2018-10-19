@@ -60,6 +60,5 @@ RSpec.configure do |config|
   Dir[root.join('shared/*.rb')].each(&method(:require))
 
   config.include(Helpers, helpers: true)
-  # config.include ENVHelper
 end
 

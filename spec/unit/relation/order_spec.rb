@@ -1,3 +1,4 @@
+# FIXME: this test snject is ambiguous ( >, <, >=, <=, etc)
 # Order DSL methods for numeric values ordered by size.
 #
 # [
@@ -10,11 +11,25 @@
 RSpec.describe ROM::LDAP::Relation do
 
   let(:formatter) { downcase_proc }
+
+  before do
+    conf.relation(:foo) do
+      schema('(&(objectClass=person)(gidNumber=1))', infer: true) do
+        attribute :uid, ROM::LDAP::Types::Strings,
+          read: ROM::LDAP::Types::String
+
+        attribute :uidnumber, ROM::LDAP::Types::Integers,
+          read: ROM::LDAP::Types::Integer
+      end
+    end
+  end
+
   include_context 'factories'
+
   let(:user_names) { %w[huey dewey louie donald] }
 
   describe '#gte uidnumber >= 5' do
-    let(:relation) { relations[:people].gte(uidnumber: 5) }
+    let(:relation) { relations[:foo].gte(uidnumber: 5) }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -47,7 +62,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'result' do
-      results = relation.with(auto_struct: false).select(:uid, :uidnumber).to_a
+      results = relation.select(:uid, :uidnumber).to_a
       expect(results).to eql(
         [
           { uid: 'donald', uidnumber: 16 },
@@ -59,7 +74,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#gt uidnumber > 9' do
-    let(:relation) { relations[:people].gt(uidnumber: 9) }
+    let(:relation) { relations[:foo].gt(uidnumber: 9) }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -107,7 +122,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#lte uidnumber <= 9' do
-    let(:relation) { relations[:people].lte(uidnumber: 9) }
+    let(:relation) { relations[:foo].lte(uidnumber: 9) }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -154,7 +169,7 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe '#lt uidnumber < 4' do
-    let(:relation) { relations[:people].lt(uidnumber: 4) }
+    let(:relation) { relations[:foo].lt(uidnumber: 4) }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')

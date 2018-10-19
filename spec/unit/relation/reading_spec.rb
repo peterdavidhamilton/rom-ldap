@@ -7,7 +7,8 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'raise errors if unsuitable method names' do
       expect { customers.with(auto_struct: true).to_a }.to raise_error(
-        NameError, "invalid attribute name `apple-imhandle'"
+        # NameError, "invalid attribute name `apple-imhandle'"
+        SyntaxError, /unexpected '-'/
       )
     end
 

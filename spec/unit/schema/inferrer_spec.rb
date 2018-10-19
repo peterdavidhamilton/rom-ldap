@@ -40,8 +40,8 @@ RSpec.describe ROM::LDAP::Schema::Inferrer do
     end
 
     it 'has inferred attribute types' do
-      primitives = schema.values.map(&:type).map(&:primitive).uniq
-      expect(primitives).to eql([String, Time, Array, Integer])
+      primitives = schema.values.map { |v| v.type.primitive.name }.uniq
+      expect(primitives).to eql(%w[String Time Array Integer])
     end
   end
 end
