@@ -2,18 +2,18 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Exporting
-
         # Serialize the selected dataset attributes in a formatted string.
         # Calls the method on the Directory::Entry or array of Entries.
         #
         # @example
         #   #=> relation.export(:to_format)
         #
-        # @return [String] i.e. YAML, JSON, LDIF
+        # @return [String] i.e. YAML, JSON, LDIF, BINARY
         #
         # @api public
         def export(format)
           raise 'The dataset is no longer a Dataset class' unless dataset.is_a?(Dataset)
+
           dataset.export(format: format, keys: schema.to_h.keys)
         end
 
@@ -53,18 +53,17 @@ module ROM
           export(:to_yaml)
         end
 
-        # Export the relation as MessagePack
+        # Export the relation as MessagePack Binary
         #
         # @return [String]
         #
         # @example
-        #   relation.to_yaml
+        #   relation.to_msgpack
         #
         # @api public
         def to_msgpack
           export(:to_msgpack)
         end
-
       end
     end
   end

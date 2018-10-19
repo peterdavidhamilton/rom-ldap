@@ -25,20 +25,7 @@ module ROM
       def aliased(name)
         super.meta(name: meta.fetch(:name, name))
       end
-      alias_method :as, :aliased
-
-
-      # Return a new attribute in its canonical form
-      #
-      # @api public
-      def canonical
-        if aliased?
-          meta(alias: nil)
-        else
-          self
-        end
-      end
-
+      alias as aliased
 
       # Return a new attribute marked as joined
       #
@@ -166,11 +153,12 @@ module ROM
       # @api public
       def qualified(table_alias = nil)
         return self if qualified? && table_alias.nil?
-        type = meta(qualified: table_alias || true)
+
+        meta(qualified: table_alias || true)
       end
 
-
-      # TODO:
+      # TODO: Copy design of SQL methods i.e. users.where { id.is(1) }
+      #
       # Return a boolean expression with an equality operator
       #
       # @example
@@ -184,9 +172,6 @@ module ROM
       # def is(other)
       #   self =~ other
       # end
-
-
-      private
 
       memoize :joined, :canonical, :to_s
     end

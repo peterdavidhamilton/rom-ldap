@@ -38,8 +38,7 @@ module ROM
         def parse_expression(ast)
           op, attr, val = ast
           operator  = id_operator(op)
-          # value     = id_value(val)
-          value = Functions[:identify_value].call(val)
+          value     = Functions[:identify_value].call(val)
           attribute = id_attribute(attr)
 
           wrap(attribute, operator, value)

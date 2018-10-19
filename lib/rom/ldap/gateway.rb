@@ -116,10 +116,10 @@ module ROM
       # @api public
       def connection
         if connected?
-          @conn
+          @connection
         else
-          @conn = Connection.new(
-            server:           options.fetch(:uri, '127.0.0.1:389'),
+          @connection = Connection.new(
+            servers:          options.fetch(:servers, %w[127.0.0.1:389]),
             connect_timeout:  options[:timeout],
             read_timeout:     options[:timeout],
             write_timeout:    options[:timeout],
@@ -130,9 +130,9 @@ module ROM
             # proxy_server: ?,
           )
 
-          @conn.use_logger(@logger)
+          @connection.use_logger(@logger)
           bind! unless options[:username].nil?
-          @conn
+          @connection
         end
       end
 
@@ -142,7 +142,7 @@ module ROM
       #
       # @api public
       def directory
-        @dir ||= Directory.new(connection, dir_opts).load_rootdse!
+        @directory ||= Directory.new(connection, dir_opts).load_rootdse!
       end
 
       private
@@ -155,7 +155,7 @@ module ROM
       end
 
       def connected?
-        !@conn.nil? && @conn.alive?
+        !@connection.nil? && @connection.alive?
       end
 
       def bind!

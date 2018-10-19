@@ -1,18 +1,16 @@
-# bundle config local.ldap-ber ~/Code/ldap-ber
 source 'https://rubygems.org'
 
 gemspec
 
 gem 'rom-core', github: 'rom-rb/rom', branch: 'master'
-gem 'ldap-ber', git: 'bb:ldap-ber', branch: 'develop'
+gem 'ldap-ber', git: 'ssh://git@bitbucket.org/mrpeterpeter/ldap-ber', branch: 'develop'
 
 group :test do
   gem 'codeclimate-test-reporter', require: false
-  gem 'msgpack'
-  gem 'pry', platforms: %i[jruby rbx]
+  gem 'msgpack', '~> 1.2.4'
   gem 'pry-byebug', platforms: :mri
-  gem 'rom-factory', '~> 0.5.0', require: false
-  gem 'rspec'
-  gem 'rubocop'
+  gem 'rom-factory', '~> 0.5', require: false
+  gem 'rspec', '~> 3.8'
+  gem 'rubocop', '~> 0.58'
   gem 'simplecov', require: false
 end

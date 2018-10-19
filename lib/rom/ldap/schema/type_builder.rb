@@ -118,10 +118,10 @@ module ROM
           case matcher
           when *STRING_MATCHERS  then 'String'
           when *BOOLEAN_MATCHERS then 'Bool'
-          when *INTEGER_MATCHERS then 'Int'
+          when *INTEGER_MATCHERS then 'Integer'
           when *TIME_MATCHERS    then 'Time'
           else
-            'String'
+            'Array'
           end
         end
       end

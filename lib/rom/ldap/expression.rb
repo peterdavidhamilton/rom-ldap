@@ -12,10 +12,9 @@ module ROM
       param :left
       param :right, optional: true
 
-
       def to_raw_rfc2254
         case op
-        when :con_not then        "!(#{left}=#{right})"
+        when :con_not then "!(#{left}=#{right})"
         when :op_eql, :op_bineq then "#{left}=#{right}"
         when :op_ext  then        "#{left}:=#{right}"
         when :op_prx  then        "#{left}~=#{right}"
@@ -81,8 +80,6 @@ module ROM
         end
       end
 
-
-
       #
       # Constructors
       #
@@ -103,7 +100,6 @@ module ROM
       def constructor(sym, other = nil)
         self.class.new(sym, self, other)
       end
-
     end
   end
 end

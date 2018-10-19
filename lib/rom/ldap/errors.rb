@@ -19,12 +19,9 @@ module ROM
       Net::TCPClient::ReadTimeout       => ConnectionError
     }.freeze
 
-
     ERRORS = {
       missing_or_invalid: [ResponseMissingOrInvalidError, 'response missing or invalid'],
-      no_bind_result:     [NoBindResultError, 'no bind result'],
+      no_bind_result:     [NoBindResultError, 'no bind result']
     }.freeze
-
-
   end
 end

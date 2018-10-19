@@ -47,6 +47,7 @@ module ROM
       # @api private
       def ldap_read(syntax = ::BER::ASN_SYNTAX)
         return unless ber_object = socket.read_ber(syntax)
+
         # return unless ber_object = socket_read(syntax, nil, read_timeout)
         # return unless ber_object = read(syntax)
         PDU.new(ber_object)
@@ -68,6 +69,7 @@ module ROM
 
         while pdu = ldap_read
           return pdu if pdu.message_id == message_id
+
           message_queue[pdu.message_id].push pdu
           next
         end

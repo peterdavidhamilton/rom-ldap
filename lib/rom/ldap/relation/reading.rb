@@ -2,7 +2,6 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
-
         # Specify an alternative search base for the dataset or resets it.
         #
         # @example
@@ -111,7 +110,6 @@ module ROM
         def all?(&block)
           dataset.__send__(__method__, &block)
         end
-
 
         # Find tuple by primary_key - required by commands
         #
@@ -230,50 +228,48 @@ module ROM
         def select(*args, &block)
           schema.project(*args, &block).(new(dataset.select(*args)))
         end
-        alias_method :project, :select
-        alias_method :pluck, :select
+        alias project select
+        alias pluck select
 
-
-                      # Restrict a relation to match criteria
-                      #
-                      # @overload where(conditions)
-                      #   Restrict a relation using a hash with conditions
-                      #
-                      #   @example
-                      #     users.where(name: 'Jane', age: 30)
-                      #
-                      #   @param [Hash] conditions A hash with conditions
-                      #
-                      # @overload where(conditions, &block)
-                      #   Restrict a relation using a hash with conditions and restriction DSL
-                      #
-                      #   @example
-                      #     users.where(name: 'Jane') { age > 18 }
-                      #
-                      #   @param [Hash] conditions A hash with conditions
-                      #
-                      # @overload where(&block)
-                      #   Restrict a relation using restriction DSL
-                      #
-                      #   @example
-                      #     users.where { age > 18 }
-                      #     users.where { (id < 10) | (id > 20) }
-                      #
-                      # @return [Relation]
-                      #
-                      # @api public
-                      # def where(*args, &block)
-                      #    if block
-                      #      where(*args).where(schema.canonical.restriction(&block))
-                      #    elsif args.size == 1 && args[0].is_a?(Hash)
-                      #      new(dataset.where(coerce_conditions(args[0])))
-                      #    elsif !args.empty?
-                      #      new(dataset.where(*args))
-                      #    else
-                      #      self
-                      #    end
-                      #  end
-
+        # Restrict a relation to match criteria
+        #
+        # @overload where(conditions)
+        #   Restrict a relation using a hash with conditions
+        #
+        #   @example
+        #     users.where(name: 'Jane', age: 30)
+        #
+        #   @param [Hash] conditions A hash with conditions
+        #
+        # @overload where(conditions, &block)
+        #   Restrict a relation using a hash with conditions and restriction DSL
+        #
+        #   @example
+        #     users.where(name: 'Jane') { age > 18 }
+        #
+        #   @param [Hash] conditions A hash with conditions
+        #
+        # @overload where(&block)
+        #   Restrict a relation using restriction DSL
+        #
+        #   @example
+        #     users.where { age > 18 }
+        #     users.where { (id < 10) | (id > 20) }
+        #
+        # @return [Relation]
+        #
+        # @api public
+        # def where(*args, &block)
+        #    if block
+        #      where(*args).where(schema.canonical.restriction(&block))
+        #    elsif args.size == 1 && args[0].is_a?(Hash)
+        #      new(dataset.where(coerce_conditions(args[0])))
+        #    elsif !args.empty?
+        #      new(dataset.where(*args))
+        #    else
+        #      self
+        #    end
+        #  end
 
         # Filters entities by pattern against canonical hash.
         #
@@ -311,7 +307,6 @@ module ROM
         def qualified
           schema.qualified.call(self)
         end
-
 
         # Map tuples from the relation
         #

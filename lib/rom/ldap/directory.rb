@@ -8,6 +8,7 @@ require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/sub_schema'
 require 'rom/ldap/directory/capabilities'
 require 'rom/ldap/directory/operations'
+require 'rom/ldap/directory/password'
 
 module ROM
   module LDAP
@@ -39,7 +40,6 @@ module ROM
       # PDU object
       attr_reader :result
 
-
       # @return [String]
       #
       # @api public
@@ -50,7 +50,6 @@ module ROM
       # binding.pry
       # require 'dry/monitor/notifications'
       # notifications = Dry::Monitor::Notifications.new(:directory)
-
 
       # @return [Array<String>]
       #

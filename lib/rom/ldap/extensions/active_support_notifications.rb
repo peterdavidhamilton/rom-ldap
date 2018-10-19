@@ -4,8 +4,6 @@ module ROM
   module LDAP
     module ActiveSupportInstrumentation
       def call(filter)
-        binding.pry
-
         ActiveSupport::Notifications.instrument(
           'ldap.rom',
           ldap: 'foobar',

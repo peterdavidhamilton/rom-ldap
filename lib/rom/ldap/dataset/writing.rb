@@ -2,7 +2,6 @@ module ROM
   module LDAP
     class Dataset
       module Writing
-
         # Interface to Directory#add
         #
         # @param tuple [Hash]
@@ -33,7 +32,6 @@ module ROM
         def delete
           map { |e| directory.delete(e.dn) }
         end
-
       end
     end
   end
