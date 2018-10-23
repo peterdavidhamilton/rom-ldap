@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+ruby '>= 2.3.0'
+
+gem 'awesome_print'
+gem 'pry-byebug', platforms: :mri
+gem 'rom-changeset'
+gem 'rom-core', git: 'ssh://git@github.com/rom-rb/rom', branch: 'master'
+gem 'rom-ldap', path: '../..'
+gem 'rom-repository'

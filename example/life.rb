@@ -12,15 +12,8 @@
 cwd = File.expand_path(File.join(File.dirname(__FILE__), 'lib'))
 $LOAD_PATH.unshift(cwd)
 
-# debugging
-require 'pry-byebug'    # 'binding.pry'
-require 'awesome_print' # 'ap'
-
-# dependencies
-require 'rom-ldap'
-require 'rom-repository'
-require 'rom-changeset'
-require 'rom/transformer'
+require 'bundler'
+Bundler.require
 
 
 #
@@ -170,6 +163,8 @@ end
 #
 # Mapper
 # =============================================================================
+require 'rom/transformer'
+
 class TransformAnimal < ROM::Transformer
   relation    :animals
   register_as :classification

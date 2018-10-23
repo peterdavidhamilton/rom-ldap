@@ -18,10 +18,7 @@ RSpec.shared_context 'relations' do
 
     conf.relation(:people) do
       schema('(&(objectClass=person)(gidNumber=1))') do
-        # 'string' values
-        attribute :mail,          ROM::LDAP::Types::String,
-          read: ROM::LDAP::Types::String
-        # ['array'] values
+        attribute :mail,          ROM::LDAP::Types::String
         attribute :uid,           ROM::LDAP::Types::String
         attribute :uidnumber,     ROM::LDAP::Types::Integer.meta(primary_key: true)
         attribute :gidnumber,     ROM::LDAP::Types::Integer

@@ -1,13 +1,6 @@
-#
-# $ bundle exec ruby ./ruby-ldap.rb
-#
+require 'bundler'
 
-require 'bundler/setup'
-require 'pry'
-require 'logger'
-require 'benchmark/ips'
-require 'rom-ldap'
-require 'net-ldap'
+Bundler.require
 
 logger = Logger.new(IO::NULL)
 
@@ -54,12 +47,12 @@ conf.relation(:explicit) do
 end
 
 container = ROM.container(conf)
-@infer    = container.relations[:infer]
-@explicit = container.relations[:explicit]
+infer    = container.relations[:infer]
+explicit = container.relations[:explicit]
 
 
 # NET-LDAP -------------------------------------
-@net_ldap = Net::LDAP.new(
+net_ldap = Net::LDAP.new(
   host: host, port: port, base: base,
   auth: { method: :simple, username: admin, password: password }
 )
@@ -69,15 +62,15 @@ Benchmark.ips do |bm|
   bm.config(time: 5, warmup: 0.5, iterations: 2)
 
   bm.report('net-ldap') do
-    @net_ldap.search(filter: filter, base: base, attributes: %w[* +]).to_a
+    net_ldap.search(filter: filter, base: base, attributes: %w[* +]).to_a
   end
 
   bm.report('rom-ldap inferred schema hash') do
-    @infer.to_a
+    infer.to_a
   end
 
   bm.report('rom-ldap explicit schema struct') do
-    @explicit.to_a
+    explicit.to_a
   end
 
   bm.compare!

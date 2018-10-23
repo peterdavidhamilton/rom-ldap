@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# increase file limit
+ulimit -n 1024
+
+# prepare specs
+bundle install
+
+# prepare examples
+cd example
+bundle install
+
+# prepare benchmarks
+cd ../benchmark
+bundle install
