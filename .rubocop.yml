@@ -7,14 +7,13 @@ AllCops:
     - lib/**/*
     - rakelib/*
   Exclude:
+    - '**/.DS_Store' # Lint/Syntax: Invalid byte sequence in utf-8.
     - doc/**/*
     - examples/**/*
     - log/*
-    - spec/**/*.rb
-    - spec/**/*.gemspec
+    - spec/**/*
     - vendor/**/*
-    - vendor/**/*
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.3
 
 Style/LambdaCall:
   Enabled: false

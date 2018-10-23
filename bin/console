@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+require 'bundler/setup'
+
+require 'rom/ldap'
+ROM::LDAP.load_extensions :compatible_entry_attributes
+
+conf = ROM::Configuration.new(:ldap, servers: %w'127.0.0.1:10389')
+
+conf.relation(:foo) { schema('(objectClass=*)', as: :foo, infer: true) }
+
+container = ROM.container(conf)
+
+foo = container.relations[:foo]
+
+require 'pry'
+Pry.start
+

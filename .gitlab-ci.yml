@@ -1,13 +1,13 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/ruby/tags/
-image: "ruby:2.4"
+image: "ruby:2.3"
 
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
 services:
-  - mysql:latest
+  # - mysql:latest
   - redis:latest
   - postgres:latest
 
@@ -37,13 +37,13 @@ rspec:
   script:
   - rspec spec
 
-rails:
-  variables:
-    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
-  script:
-  - rails db:migrate
-  - rails db:seed
-  - rails test
+# rails:
+#   variables:
+#     DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
+#   script:
+#   - rails db:migrate
+#   - rails db:seed
+#   - rails test
 
 # This deploy job uses a simple deploy flow to Heroku, other providers, e.g. AWS Elastic Beanstalk
 # are supported too: https://github.com/travis-ci/dpl

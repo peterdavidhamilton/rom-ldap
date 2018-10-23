@@ -1,23 +1,28 @@
-require 'psych'
-
+require 'yaml'
+#
 # @example
-#   brake ldif[schema]
-#   brake ldif[apple]
-#   brake ldif[setup]
+#   bundle exec rake ldif[foo]
+#
 desc 'Populate directory tree'
-task :ldif, [:file] do |t, args|
-  ldapmodify(file: args[:file])
-end
+task :ldif, [:file] do |t, file:|
 
-def ldapmodify(path: './spec/support', file:)
-  host     = config.fetch(:host, '127.0.0.1')
-  port     = config.fetch(:port, 10389)
-  admin    = config.fetch(:admin, 'uid=admin,ou=system')
-  password = config.fetch(:password, 'secret')
+  if file.nil?
+    abort("`$ rake ldif[schema]` to load './spec/support/schema.ldif'")
+  end
 
-  system "ldapmodify -h #{host} -p #{port} -D #{admin} -w #{password} -a -c -f #{path}/#{file}.ldif"
-end
+  config    = YAML.load_file(ROOT.join('spec/support/config.yml'))
+  ldif_path = ROOT.join('spec/support')
+  host      = config.fetch(:host, '127.0.0.1')
+  port      = config.fetch(:port, 10389)
+  admin     = config.fetch(:admin, 'uid=admin,ou=system')
+  password  = config.fetch(:password, 'secret')
 
-def config
-  @config ||= Psych.load_file('./spec/support/config.yml')
+  system("ldapmodify \
+            -h #{host} \
+            -p #{port} \
+            -D #{admin} \
+            -w #{password} \
+            -a -c \
+            -f #{ldif_path}/#{file}.ldif")
+
 end

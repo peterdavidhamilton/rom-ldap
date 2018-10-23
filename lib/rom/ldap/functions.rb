@@ -155,10 +155,8 @@ module ROM
           time       = (Integer(time) / ten_k) - since_1601
 
           ::Time.at(time)
-        rescue ArgumentError
-          ::Time.parse(time).utc
-        rescue ArgumentError
-          nil
+      rescue ArgumentError
+        ::Time.parse(time).utc
         end
       end
 

@@ -112,6 +112,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it 'result' do
+      binding.pry
       expect(relation.one.mail).to eql('bob@example.com')
     end
   end
