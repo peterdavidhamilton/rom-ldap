@@ -5,13 +5,18 @@ module ROM
         # Specify an alternative search base for the dataset or resets it.
         #
         # @example
-        #   relation.base("cn=department,ou=users,dc=org")
+        #   relation.with_base("cn=department,ou=users,dc=org")
         #
-        # @return [Relation]
+        # @return [Relation] Defaults to class attribute
         #
         # @api public
-        def base(alt_base = self.class.base)
+        def with_base(alt_base = self.class.base || current_base)
           new(dataset.with(base: alt_base))
+        end
+
+        # @return [String] current base
+        def current_base
+          dataset.opts[:base]
         end
 
         # Change the search base to the whole directory tree.
@@ -23,7 +28,7 @@ module ROM
         #
         # @api public
         def whole_tree
-          base(EMPTY_STRING)
+          with_base(EMPTY_STRING)
         end
 
         # Compliments #root method with an alternative search base
@@ -181,7 +186,8 @@ module ROM
         end
 
         # Limits the dataset to a number of tuples
-        #   FIXME: prevents option to export as dataset is now an array
+        #
+        # @todo prevents option to export as dataset is now an array
         #
         # @example
         #   relation.limit(6)
@@ -228,8 +234,23 @@ module ROM
         def select(*args, &block)
           schema.project(*args, &block).(new(dataset.select(*args)))
         end
-        alias project select
-        alias pluck select
+
+        alias_method :project, :select
+        alias_method :pluck, :select
+
+        # Lists a single attribute from each tuple sorted
+        #
+        # @example
+        #   relation.by_sn('Hamilton').list(:given_name)
+        #
+        # @return [Array]
+        #
+        # @api public
+        def list(field)
+          select(field).to_a.flat_map(&field).sort
+        end
+
+
 
         # Restrict a relation to match criteria
         #

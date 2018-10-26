@@ -1,0 +1,8 @@
+#
+# Change the config for `$ rake ldif[file]`
+# $LDAP* environment variables override this file.
+#
+URI  ldap://127.0.0.1:10389
+BASE dc=example,dc=com
+BINDDN uid=admin,ou=system
+VERSION 3

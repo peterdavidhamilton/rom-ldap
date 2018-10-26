@@ -196,6 +196,8 @@ module ROM
 
     MATCHED_VALUES_CONTROL     = '1.2.826.0.1.3344810.2.3'.freeze
 
+    # http://ldapwiki.com/wiki/LDAP%20Extensions%20and%20Controls%20Listing
+
     #
     # Active Directory
     #

@@ -39,12 +39,12 @@ module ROM
 
         private
 
-        # TODO: extract plain authentication
+        # @todo extract plain authentication
         def cleartext
           # noop
         end
 
-        # TODO: encrypted authentication
+        # @todo encrypted authentication
         def encrypted
           # noop
         end

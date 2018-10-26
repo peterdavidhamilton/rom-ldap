@@ -1,11 +1,12 @@
 RSpec.describe ROM::LDAP::Schema::Inferrer do
 
-  describe 'interprets directory.attribute_types in to ruby classes' do
-    let(:formatter) { method_name_proc }
+  let(:formatter) { method_name_proc }
 
-    include_context 'relations'
+  include_context 'relations'
 
-    subject(:schema) { accounts.schema.to_h }
+  subject(:schema) { accounts.schema.to_h }
+
+  describe 'interprets directory.attribute_types into ruby classes' do
 
     it "has loaded the directory's schema" do
       expect(accounts.dataset.directory.attribute_types).to_not be_empty

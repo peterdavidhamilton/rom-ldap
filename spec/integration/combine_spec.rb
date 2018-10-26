@@ -20,11 +20,11 @@ RSpec.describe 'Combine relations' do
 
   it 'combine' do
 
-    relations[:countries].to_a
-    # [{:name=>"India", :dn=>"cn=Pangolin,ou=animals,dc=example,dc=com"}]
-
-    countries.with_wildlife(predators.base).to_a
-    prey.base.join(:countries).to_a
+#     relations[:countries].to_a
+#     # [{:name=>"India", :dn=>"cn=Pangolin,ou=animals,dc=example,dc=com"}]
+# binding.pry
+#     countries.with_wildlife(predators.base).to_a
+#     prey.base.join(:countries).to_a
 
     # countries.with_wildlife([{dn: 'cn=Pangolin,ou=animals,dc=example,dc=com' }])
     # tags = container.relations[:tags]

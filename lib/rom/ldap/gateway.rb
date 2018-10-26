@@ -3,6 +3,7 @@ require 'rom/gateway'
 require 'rom/ldap/directory'
 require 'rom/ldap/dataset'
 
+# @note Refinements add Hash#slice when <2.5
 using ::Compatibility
 
 module ROM
@@ -22,38 +23,34 @@ module ROM
       attr_reader :dir_opts
 
       # @!attribute [r] options
-      #   @return [Hash] Options passed to directory
+      #   @return [Hash] Options passed to gateway
       attr_reader :options
 
       # Initialize an LDAP gateway
       #
       # Gateways are typically initialized via ROM::Configuration object
       #
-      # @overload initialize(params)
-      #   Connects to a directory via params hash
+      # @overload initialize(options)
+      #   Connects to a directory via options
       #
       #   @example
       #     ROM.container(:ldap, {})
       #
-      #   @param [Hash]
-      #
-      # @overload initialize(params, options)
-      #   Connects to a database via params and options
-      #
       #   @example
       #     ROM.container(:ldap, options)
       #
-      #   @option options :uri [String] Server URI '127.0.0.1:10389'
+      #   @option options :servers [Array<String>] Defaults to ['127.0.0.1:389']
       #
-      #   @option options :timeout [Integer] Directory timeout in seconds
+      #   @option options :timeout [Integer] Connection timeout in seconds.
       #
-      #   @option options :base [String] Directory timeout in seconds
+      #   @option options :base [String] Connection timeout in seconds.
       #
-      #   @option options :max_results [Integer] Directory result limit
+      #   @option options :max_results [Integer] Directory result limit.
+      #
+      #   @option options :logger [Object] Defaults to silenced Logger.
       #
       # @return [LDAP::Gateway]
       #
-      # @api public
       def initialize(options = EMPTY_HASH)
         @options  = options
         @dir_opts = options.slice(:base, :timeout, :max_results, :logger)
@@ -69,33 +66,37 @@ module ROM
       # @return [Array<Directory::Entry>]
       #
       # @api public
+      #
       def [](filter)
         directory.attributes(filter) || EMPTY_ARRAY
       end
 
-      # Directory attributes identifiers and descriptions
+      # Directory attributes identifiers and descriptions.
       #
       # @return [Array<String>]
       #
       # @api public
+      #
       def attribute_types
         directory.attribute_types
       end
 
-      # Return dataset with the given name
+      # An enumerable object for chainable queries.
       #
-      # @param filter [String] a filtered dataset
+      # @param filter [String] an ldap compatible filter string
       #
-      # @return [Dataset]
+      # @return [Dataset] dataset with the given filter
       #
       # @api public
+      #
       def dataset(filter)
-        Dataset.new(directory: directory, filter: filter, base: options.fetch(:base, 'dc=example,dc=com'))
+        Dataset.new(directory: directory, filter: filter, base: options[:base])
       end
 
       # @param logger [Logger]
       #
       # @api public
+      #
       def use_logger(logger)
         @logger = logger
       end
@@ -105,6 +106,7 @@ module ROM
       # @return [Symbol]
       #
       # @api public
+      #
       def directory_type
         directory.type
       end
@@ -114,50 +116,87 @@ module ROM
       # @return [Connection]
       #
       # @api public
+      #
       def connection
         if connected?
           @connection
         else
-          @connection = Connection.new(
-            servers:          options.fetch(:servers, %w[127.0.0.1:389]),
-            connect_timeout:  options[:timeout],
-            read_timeout:     options[:timeout],
-            write_timeout:    options[:timeout],
-            close_on_error:   false,
-            # connect_retry_count: 1.day.to_i
-            # connect_retry_interval: 10.0,
-            # on_connect: proc {},
-            # proxy_server: ?,
-          )
-
+          @connection = connect!
           @connection.use_logger(@logger)
           bind! unless options[:username].nil?
           @connection
         end
       end
 
-      # Wrapper for Connection and Logger.
+
+      #
+      # @return [Array<String>] Collection of LDAP servers.
+      #
+      # @api public
+      #
+      def servers
+        options.fetch(:servers, %w'127.0.0.1:389')
+      end
+
+      # The Directory class receives the Connection and is passed to Dataset.
       #
       # @return [Directory] ldap server object
       #
       # @api public
+      #
       def directory
         @directory ||= Directory.new(connection, dir_opts).load_rootdse!
       end
 
       private
 
-      # Disconnect from the server
+      # Initialise a new connection.
       #
-      # @api public
-      def disconnect
-        connection.close
+      # @return [Connection] Subclass of Net::TCPClient
+      #
+      # @api private
+      #
+      def connect!
+        Connection.new(
+          servers:          servers,
+          connect_timeout:  options[:timeout],
+          read_timeout:     options[:timeout],
+          write_timeout:    options[:timeout],
+          close_on_error:   false,
+          # connect_retry_count: 1.day.to_i
+          # connect_retry_interval: 10.0,
+          # on_connect: proc {},
+          # proxy_server: ?,
+        )
+      rescue *ERROR_MAP.keys => e
+        raise ERROR_MAP.fetch(e.class, Error), "Connection failed: #{servers.join(',')}"
       end
 
+      # Disconnect from the server.
+      #
+      # @return [?]
+      #
+      # @api private
+      #
+      def disconnect
+        connection.close
+        # @conn = nil
+        # @dir = nil
+      end
+
+
+      # Check if connection instance exists and is connected.
+      #
+      # @return [Boolean]
+      #
+      # @api private
+      #
       def connected?
         !@connection.nil? && @connection.alive?
       end
 
+
+      # @api private
       def bind!
         connection.bind(options.slice(:username, :password))
       end

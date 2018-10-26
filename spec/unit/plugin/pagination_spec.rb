@@ -1,10 +1,12 @@
 RSpec.describe 'Plugin / Pagination' do
 
   let(:formatter) { nil }
+  let(:base) { 'ou=users,dc=example,dc=com' }
   include_context 'relations'
 
   describe '#page' do
-    it 'allow to call with stringify number' do
+    it 'permits stringified integers' do
+      binding.pry
       expect(accounts.page('1').count).to eql(4)
     end
 
@@ -14,13 +16,15 @@ RSpec.describe 'Plugin / Pagination' do
   end
 
   describe '#per_page' do
-    it 'allow to call with stringify number' do
+    it 'permits stringified integers' do
       expect {
         container.relations[:accounts].per_page('5')
       }.to_not raise_error
+
+      expect(container.relations[:accounts].per_page('5')).to eql(5)
     end
 
-    it 'returns paginated relation with provided limit' do
+    it 'limits the collection returned' do
       accounts = container.relations[:accounts].page(2).per_page(3)
 
       expect(accounts.dataset.opts[:offset]).to eql(3)
@@ -50,7 +54,7 @@ RSpec.describe 'Plugin / Pagination' do
   end
 
   describe '#pager' do
-    it 'returns a pager with pagination meta-info' do
+    it 'contains pagination meta-info' do
       accounts = container.relations[:accounts].page(1)
 
       expect(accounts.dataset.opts[:offset]).to eql(0)

@@ -123,7 +123,7 @@ module ROM
           result.success? ? entry : false
         end
 
-        # TODO: Transactions WIP
+        # @todo Transactions WIP
         #
         # directory.transaction(opts) { yield(self) }
         def transaction(_opts)

@@ -157,7 +157,7 @@ module ROM
         meta(qualified: table_alias || true)
       end
 
-      # TODO: Copy design of SQL methods i.e. users.where { id.is(1) }
+      # @todo Copy design of SQL methods i.e. users.where { id.is(1) }
       #
       # Return a boolean expression with an equality operator
       #

@@ -47,14 +47,14 @@ RSpec.configure do |config|
   #   FileUtils.mkdir_p(tmp_test_dir)
   # end
 
-  config.before do
-    module Test
-    end
-  end
+  # config.before do
+  #   module Test
+  #   end
+  # end
 
-  config.after do
-    Object.send(:remove_const, :Test)
-  end
+  # config.after do
+  #   Object.send(:remove_const, :Test)
+  # end
 
   Dir[root.join('support/*.rb')].each(&method(:require))
   Dir[root.join('shared/*.rb')].each(&method(:require))

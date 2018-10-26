@@ -21,8 +21,10 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
 
     let(:relation) { relations.foo }
 
+    # @todo inferred types are wrong?
     it 'returns a single tuple identified by the pk' do
       expect(relation.fetch('uid=test1,ou=users,dc=example,dc=com')['uidNumber']).to eql(1)
+      # expect(relation.fetch('uid=test1,ou=users,dc=example,dc=com')['createTimestamp'].class).to eql(Time)
     end
 
     it 'raises when tuple was not found' do
