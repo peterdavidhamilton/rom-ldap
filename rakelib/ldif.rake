@@ -1,28 +1,28 @@
 require 'yaml'
+require 'pry'
+#
+# Leverage LDAP environment variables using ./ldaprc
+#
+# `$ echo -n secret > ./ldappw`
 #
 # @example
-#   bundle exec rake ldif[foo]
+#   $ rake ldif            # => ./example/ldif/animals.ldif
+#   $ rake ldif[file]      # => ./example/ldif/file.ldif
+#   $ rake ldif[file,path] # => ./path/file.ldif
 #
 desc 'Populate directory tree'
-task :ldif, [:file] do |t, file:|
+task :ldif, [:file, :path] do |_t, args|
 
-  if file.nil?
-    abort("`$ rake ldif[schema]` to load './spec/support/schema.ldif'")
-  end
+  # ARGV.each do |argv|
+  #   if argv =~ /(.+)\=(.+)/
+  #     config[Regexp.last_match(1).delete('-').to_sym] = Regexp.last_match(2)
+  #   end
+  # end
 
-  config    = YAML.load_file(ROOT.join('spec/support/config.yml'))
-  ldif_path = ROOT.join('spec/support')
-  host      = config.fetch(:host, '127.0.0.1')
-  port      = config.fetch(:port, 10389)
-  admin     = config.fetch(:admin, 'uid=admin,ou=system')
-  password  = config.fetch(:password, 'secret')
+  args.with_defaults(file: 'animals', path: 'example/ldif')
+  path = ROOT.join(args[:path])
+  ldif = "#{path}/#{args[:file]}.ldif"
 
-  system("ldapmodify \
-            -h #{host} \
-            -p #{port} \
-            -D #{admin} \
-            -w #{password} \
-            -a -c \
-            -f #{ldif_path}/#{file}.ldif")
-
+  # simple authenticated continuous add operation
+  system("ldapmodify -x -y ldappw -a -c -f #{ldif}")
 end

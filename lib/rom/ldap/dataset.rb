@@ -38,22 +38,23 @@ module ROM
 
       option :base,
         reader:   :private,
-        type:     Dry::Types['strict.string']
+        type:     Dry::Types['strict.string'],
+        default:  -> { EMPTY_STRING }
 
       option :criteria,
         reader:   :private,
         type:     Dry::Types['strict.array'],
-        default:  -> { [] }
+        default:  -> { EMPTY_ARRAY }
 
       option :offset,
         reader:   :private,
         optional: true,
-        type:     Dry::Types['strict.int']
+        type:     Dry::Types['strict.integer']
 
       option :limit,
         reader:   :private,
         optional: true,
-        type:     Dry::Types['strict.int']
+        type:     Dry::Types['strict.integer']
 
       option :entries,
         reader:   false,
@@ -64,12 +65,20 @@ module ROM
       include Reading
       include Writing
 
-      # Used by Relation to forward methods to dataset
+      # Collection of Dataset::QueryDSL module methods.
+      #   Used by Relation to forward methods to Dataset.
+      #
+      # @return [Array<Symbol>]
+      #
+      # @example
+      #   # => %i{where has lt begins excudes present}
       #
       def self.dsl
         QueryDSL.public_instance_methods(false)
       end
 
+      # Initialise a new class overriding options.
+      #
       # @return [ROM::LDAP::Dataset]
       #
       # @param overrides [Hash] Alternative options
@@ -96,7 +105,7 @@ module ROM
         with(entries: map { |e| e.select(*args) })
       end
 
-      #
+      # @todo Descibe this method
       #
       # @return [Array<Directory::Entry>]
       #

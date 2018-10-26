@@ -24,12 +24,13 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.add_runtime_dependency 'dry-core', '~> 0.4'
-  spec.add_runtime_dependency 'dry-types', '>= 0.12'
-  spec.add_runtime_dependency 'dry-struct', '~> 0.5'
-  spec.add_runtime_dependency 'rom-core', '>= 4.2'
   spec.add_runtime_dependency 'dry-monitor', '~> 0.1'
-  spec.add_runtime_dependency 'net_tcp_client', '~> 2.0'
+  spec.add_runtime_dependency 'dry-struct', '~> 0.5'
+  spec.add_runtime_dependency 'dry-types', '~> 0.12'
   spec.add_runtime_dependency 'ldap-ber', '~> 0.0.2'
+  spec.add_runtime_dependency 'net_tcp_client', '~> 2.0'
+  spec.add_runtime_dependency 'rom-core', '>= 4.2'
+  # spec.add_runtime_dependency 'transproc', '~> 1.0'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'pry'

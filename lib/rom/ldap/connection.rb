@@ -31,7 +31,7 @@ module ROM
         ::BER.reverse_lookup(:response, symbol)
       end
 
-      # TODO: NetTCP timeout in here
+      # @todo NetTCP timeout in here
       # socket_read(length, buffer, timeout)
 
 
@@ -41,7 +41,7 @@ module ROM
       def socket_write(*)
         super
       rescue *ERROR_MAP.keys => e
-        raise ERROR_MAP.fetch(e.class, Error), e
+        raise ERROR_MAP.fetch(e.class, Error), e.message
       end
 
       # @api private
@@ -105,7 +105,7 @@ module ROM
         logger.debug("#{result.class} #{result.message}") if result&.message
         logger.warn("#{result.class} #{result.info}") if result&.failure?
 
-        valid ? result : raise(*ERRORS.fetch(error))
+        valid ? result : raise(*ERRORS.fetch(error), error.message)
       end
     end
   end

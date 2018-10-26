@@ -52,7 +52,11 @@ module ROM
         fn.call(tuple)
       end
 
-      # @param sym [Symbol,String]
+      # Map from
+      #
+      # @todo Finish documentation
+      #
+      # @param val [Symbol,String]
       #
       # @example
       #   id_value(true) => 'TRUE'
@@ -147,7 +151,7 @@ module ROM
         t(:map_array, t(:to_boolean)).call(tuples)
       end
 
-      # TODO: split and use map_array
+      # @todo Split and use map_array
       def self.to_time(tuples)
         tuples.map do |time|
           ten_k      = 10_000_000
@@ -160,6 +164,11 @@ module ROM
         end
       end
 
+      # Convert string to snake case.
+      #
+      # @param value [String]
+      # @return [String]
+      #
       def self.to_underscore(value)
         Inflector.underscore(value.delete('= '))
       end

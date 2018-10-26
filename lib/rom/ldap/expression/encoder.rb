@@ -120,6 +120,10 @@ module ROM
           when :con_and
             ary = [left.coalesce(:con_and), right.coalesce(:con_and)].flatten
             ary.map(&:to_ber).to_ber_contextspecific(0)
+            # [
+            #   left.coalesce(:con_and),
+            #   right.coalesce(:con_and)
+            # ].flat_map(&:to_ber).to_ber_contextspecific(0)
 
           when :con_or
             ary = [left.coalesce(:con_or), right.coalesce(:con_or)].flatten

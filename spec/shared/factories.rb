@@ -1,5 +1,4 @@
 require 'rom-factory'
-require 'rom/ldap/directory/password'
 
 Faker::Config.random = Random.new(42)
 Faker::Config.locale = :en
@@ -14,6 +13,22 @@ RSpec.shared_context 'factories' do
   let(:user_names) { [Faker::Internet.unique.user_name] }
 
   before do
+
+# Patch autostruct error in specs only
+class << factories
+  def [](*)
+    super
+    rescue Dry::Struct::Error
+  end
+end
+
+    factories.define(:animals) do |f|
+      f.dn 'uid=foo,ou=animals,dc=example,dc=com'
+      f.cn 'foo'
+      f.species 'beast'
+      f.objectclass   %w[inetOrgPerson extensibleObject apple-user]
+    end
+
     factories.define(:person, relation: :people) do |f|
       f.uid           'foo'
       f.gidnumber     1

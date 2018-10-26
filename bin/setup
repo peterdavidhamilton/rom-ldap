@@ -15,3 +15,9 @@ bundle install
 # prepare benchmarks
 cd ../benchmark
 bundle install
+
+
+
+# LDIF file merge
+"include: file:///path/to/rom-ldap/examples/ldif/schema.ldif"
+

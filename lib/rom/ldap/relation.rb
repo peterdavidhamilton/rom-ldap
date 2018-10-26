@@ -43,7 +43,25 @@ module ROM
       defines :users
 
       branches EMPTY_HASH
+
+      # A convenience method for schema definition
+      #
+      # @example
+      #     conf.relation(:accounts) do
+      #       schema(groups, infer: true)
+      #     end
+      #
+      # @return [String] Common ldap filter string for groups
       groups   '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
+
+      # A convenience method for schema definition
+      #
+      # @example
+      #     conf.relation(:accounts) do
+      #       schema(users, infer: true)
+      #     end
+      #
+      # @return [String] Common ldap filter string for people
       users    '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
 
       schema_class      LDAP::Schema

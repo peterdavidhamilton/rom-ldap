@@ -62,24 +62,26 @@ module ROM
         [vendor_name, vendor_version]
       end
 
-      # If fail_on_error => true, this reopens the connection
+      # If fail_on_error => true, this should reopen the connection.
       #
+      # @return [?]
+      # @todo Document return value.
       # @api public
       def reconnect
         connection.connect
       end
 
       # Cache built attributes array as class variable.
-      # Allows specs to trigger rebuilding by deleting and allows functions access.
+      #   Allows specs to trigger rebuilding by deleting and allows functions access.
       #
       # @api public
       class << self
         attr_accessor :attributes
       end
 
-      # Parsed array of all directory attributes.
+      # Builds list of attributes and writes to class variable.
       #
-      # @return [Array<Hash>]
+      # @return [Array<Hash>] Parsed array of all directory attributes.
       #
       # @example
       #   [{

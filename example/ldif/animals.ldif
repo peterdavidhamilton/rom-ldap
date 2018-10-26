@@ -355,6 +355,21 @@ objectClass: top
 populationCount: 0
 extinct: TRUE
 
+dn: cn=Turtle Frog,ou=animals,dc=example,dc=com
+cn: Turtle Frog
+species: Myobatrachus gouldii
+genus: Myobatrachus
+family: Myobatrachidae
+order: Anura
+objectClass: Amphibia
+objectClass: extensibleObject
+objectClass: top
+populationCount: 0
+extinct: False
+labeledURI: https://en.wikipedia.org/wiki/Myobatrachus_gouldii
+
+
+
 #########################################################
 #
 # Animal Groups

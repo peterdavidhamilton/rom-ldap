@@ -3,9 +3,14 @@ RSpec.shared_context 'relations' do
   include_context 'directory'
 
   before do
-    # use_formatter(formatter)
     # ROM::LDAP.load_extensions :compatible_entry_attributes
     ROM::LDAP::Directory::Entry.use_formatter(formatter)
+
+    # used by factories[:animals] and not for reading
+    conf.relation(:animals) do
+      schema('(species=*)', infer: true)
+    end
+
 
     conf.relation(:accounts) do
       schema('(&(objectClass=person)(uid=*))', as: :accounts, infer: true) do
@@ -16,6 +21,7 @@ RSpec.shared_context 'relations' do
       auto_struct false
     end
 
+    # Not inferred so everything is an array
     conf.relation(:people) do
       schema('(&(objectClass=person)(gidNumber=1))') do
         attribute :mail,          ROM::LDAP::Types::String
@@ -34,6 +40,10 @@ RSpec.shared_context 'relations' do
       auto_struct true
     end
 
+    # NAME    : customers
+    # METHODS : by_cn, by_uid, by_uidnumber, by_givenname
+    # COERCED : true
+    # ENTITY  : false
     conf.relation(:group9998) do
       schema('(&(objectClass=person)(gidNumber=9998))', as: :customers, infer: true) do
         attribute :cn,        ROM::LDAP::Types::String.meta(index: true)

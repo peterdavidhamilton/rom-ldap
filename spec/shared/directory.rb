@@ -1,11 +1,13 @@
 RSpec.shared_context 'directory' do
 
+  let(:base) do
+    'dc=example,dc=com'
+  end
+
   let(:server) do
     {
-      username: nil,
-      password: nil,
       servers:  ['127.0.0.1:10389'],
-      base:     'ou=users,dc=example,dc=com',
+      base:     base,
       logger:   Logger.new(File.open('./log/test.log', 'a'))
     }
   end

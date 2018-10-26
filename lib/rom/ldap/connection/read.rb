@@ -145,7 +145,7 @@ module ROM
 
         private
 
-        # FIXME: Sort controls sill relevant?
+        # @todo Sort controls sill relevant?
         #
         # @example
         #   just a string

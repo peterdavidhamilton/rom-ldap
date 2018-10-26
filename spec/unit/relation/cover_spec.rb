@@ -1,3 +1,13 @@
+
+# https://relishapp.com/rspec/rspec-core/v/2-11/docs/example-groups/shared-examples
+# RSpec.describe Set do
+#   it_behaves_like "a collection object" do
+#     let(:collection) { Set.new }
+#   end
+# end
+
+
+
 # Range DSL methods for numeric values between or beyond two bounds.
 #
 # [
@@ -22,6 +32,10 @@ RSpec.describe ROM::LDAP::Relation do
 
     it 'chained criteria' do
       expect(relation.query_ast).to eql(
+
+        # [:con_and,[[:con_and,[[:op_eql,'objectClass','person'],[:op_eql,'gidNumber','1']]],[:con_and,[[:op_gte,:uidnumber,3],[:op_lte,:uidnumber,9]]]]]
+
+
         [
           :con_and,
           [

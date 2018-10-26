@@ -53,8 +53,9 @@ module ROM
           @canonical.fetch(rename(key), alt)
         end
 
-        # FIXME: This is destructive and breaks if select is called twice
         # Prune unwanted keys from internal hashes. (update source then canonical)
+        #
+        # @todo This is destructive and breaks if select is called twice
         #
         # @param keys [Array <Symbol>] Entry attributes to keep
         #
@@ -65,7 +66,7 @@ module ROM
           source_keys = keys.map { |k| translation_map[k] }
           @source    = @source.slice(*source_keys).freeze
           @canonical = @canonical.slice(*keys).freeze
-          self
+          itself
         end
 
         def first(key)
