@@ -13,23 +13,24 @@ module ROM
         #   relation.where(uid: 'leanda', sn: 'hamilton')
         #
         # @api public
-        def equals(args)
+        def equal(args)
           chain(*array_dsl(args))
         end
-        alias where equals
+        alias where equal
 
-        # Inequality filter aliased as '?'. Inverse of 'equals'.
+        # Antonym of 'equal'
         #
         # @example
-        #   relation.unequals(uid: 'pete')
-        #   relation.unequals(uid: %w[pete leanda])
+        #   relation.unequal(uid: 'pete')
+        #   relation.unequal(uid: %w[pete leanda])
         #
         # @api public
-        def unequals(args)
+        def unequal(args)
           chain(:con_not, array_dsl(args))
         end
+        alias where_not unequal
 
-        # Presence filter aliased as 'has', 'exists'.
+        # Presence filter aliased as 'has'.
         #
         # @example
         #   relation.present(:uid)
@@ -40,7 +41,6 @@ module ROM
           chain(:op_eql, attribute, :wildcard)
         end
         alias has present
-        alias exists present
 
         # Absence filter aliased as 'hasnt'. Inverse of 'present'.
         #
@@ -118,6 +118,7 @@ module ROM
 
         private
 
+        # Each where becomes and or
         # Handle potential arrays of arguments with a join.
         #
         # @param args [Array]
@@ -134,7 +135,7 @@ module ROM
             values = Array(right).map { |v| [:op_eql, left, escape(v)] }
             join_dsl(:con_or, values)
           end
-          join_dsl(:con_and, expressions)
+          join_dsl(:con_or, expressions)
         end
 
         # Apply Union (|) or Intersection (&) if two or more.
