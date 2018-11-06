@@ -16,8 +16,6 @@ module ROM
           message_id  = next_msgid
 
           ber_attrs = attrs.each_with_object([]) do |(k, v), attributes|
-            # NOTE: In Ruby 2.5+ this works
-            # ber_values = Array(v).map(&:to_ber).to_ber_set
             ber_values = Array(v).map { |v| v.to_ber }.to_ber_set
             attributes << [k.to_s.to_ber, ber_values].to_ber_sequence
           end
