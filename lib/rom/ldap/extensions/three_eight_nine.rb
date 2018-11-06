@@ -3,5 +3,7 @@ module ROM
     # RedHat 389
     module ThreeEightNine
     end
+
+    Directory.send(:include, ThreeEightNine)
   end
 end

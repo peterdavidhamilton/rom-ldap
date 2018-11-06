@@ -18,7 +18,8 @@ module ROM
         "ROM[#{directory.type}]"
       end
     end
+
+    Dataset.send(:prepend, ActiveSupportInstrumentation)
   end
 end
 
-ROM::LDAP::Dataset.send(:prepend, ROM::LDAP::ActiveSupportInstrumentation)
