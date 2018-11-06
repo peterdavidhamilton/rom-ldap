@@ -12,15 +12,18 @@ module ROM
       import Transproc::ArrayTransformations
       import Transproc::HashTransformations
 
+      # import :to_string, from: Transproc::Coercions, as: :stringify
+
       extend Exporters
 
       # Build tuple from arguments.
-      # Translates keys into original schema names and stringify values.
+      #   Translates keys into original schema names and stringify values.
       #
       # @param tuple [Hash] input arguments for directory #add and #modify
       #
       # @return [Hash]
-      #   NB: Directory#add will receive a hash with key :dn
+      #
+      # @note Directory#add will receive a hash with key :dn
       #
       # @example
       #
@@ -48,8 +51,16 @@ module ROM
       def self.tuplify(tuple, matrix)
         fn = t(:rename_keys, matrix) >>
              t(:map_values, t(:identify_value)) >>
-             t(:map_values, t(:stringify))
+             t(:map_values, t(:stringify)) >>
+             t(:prune)
+
         fn.call(tuple)
+      end
+
+      # remove keys with blank values
+      #
+      def self.prune(tuple)
+        tuple.reject { |k,v| v.nil? || v.empty? }
       end
 
       # Map from
@@ -92,7 +103,7 @@ module ROM
       end
 
       def self.to_hexidecimal(value)
-        value.each_byte.map { |b| b.to_s(16) }.join.force_encoding(Encoding::UTF_8)
+        value.each_byte.map { |b| b.to_s(16) }.join #.force_encoding(Encoding::UTF_8)
       end
 
       def self.to_hex(values)
@@ -132,41 +143,46 @@ module ROM
         ::Base64.strict_encode64(value).prepend("data:#{mime};base64,")
       end
 
-      def self.to_int(tuples)
+      # @note
+      #   Transproc::Coercions::TRUE_VALUES is missing 'TRUE'
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      def self.to_boolean(value)
+        Dry::Types['params.bool'][value]
+      end
+
+      def self.to_time(value)
+        time = (Integer(value) / TEN_MILLION) - SINCE_1601
+        ::Time.at(time)
+      rescue ArgumentError
+        ::Time.parse(value).utc
+      end
+
+
+      def self.map_to_integers(tuples)
         t(:map_array, t(:to_integer)).call(tuples)
       end
 
-      def self.to_sym(tuples)
+      def self.map_to_symbols(tuples)
         t(:map_array, t(:to_symbol)).call(tuples)
       end
 
-      # NB: Transproc::Coercions::TRUE_VALUES is missing 'TRUE'
-      # Overwrite #to_boolean for LDAP context.
+      # @return [Array<TrueClass, FalseClass>]
       #
-      def self.to_boolean(tuple)
-        Dry::Types['form.bool'][tuple]
+      def self.map_to_booleans(values)
+        t(:map_array, t(:to_boolean)).call(values)
       end
 
-      def self.to_bool(tuples)
-        t(:map_array, t(:to_boolean)).call(tuples)
+      def self.map_to_times(values)
+        t(:map_array, t(:to_time)).call(values)
       end
 
-      # @todo Split and use map_array
-      def self.to_time(tuples)
-        tuples.map do |time|
-          ten_k      = 10_000_000
-          since_1601 = 11_644_473_600
-          time       = (Integer(time) / ten_k) - since_1601
-
-          ::Time.at(time)
-      rescue ArgumentError
-        ::Time.parse(time).utc
-        end
-      end
 
       # Convert string to snake case.
       #
       # @param value [String]
+      #
       # @return [String]
       #
       def self.to_underscore(value)
@@ -181,47 +197,54 @@ module ROM
         fn.call(value)
       end
 
-      # 'filter' to 'query'
+      # Convert a filter to a query.
+      #
+      # @example
+      #     to_ast('(objectClass=*)') # => ['objectClass', :op_eq, :wildcard]
       #
       # @see QueryExporter
       #
-      # @param input [String]
+      # @param input [String] ldap filter string
       #
-      # @return [Array]
+      # @return [Array] query sytax tree
       #
       # @api public
       def self.to_ast(input)
         query.call(input)
       end
 
-      # 'query' to 'filter'
+      # Convert a query to a filter.
+      #
+      # @example
+      #     to_ast(['objectClass', :op_eq, :wildcard]) # => '(objectClass=*)'
       #
       # @see FilterExporter
       #
-      # @param input [Array]
+      # @param input [Array] query sytax tree
       #
-      # @return [String]
+      # @return [String] ldap filter string
       #
       # @api public
       def self.to_ldap(input)
         filter.call(input)
       end
 
-      # 'query' or 'filter' to 'expression'
+      # Convert a query or filter to an expression.
       #
-      # @see ExpressionExporter
+      # @see Directory#query
       #
-      # @param input [Array, String]
+      # @raise [FilterError] if output can not be expressed
+      #
+      # @param input [Array, String] query sytax tree or ldap filter string
       #
       # @return [Expression]
       #
       # @api public
       def self.to_exp(input)
-        if input.is_a?(String)
-          expression.call(input)
-        else
-          expression[to_ldap(input)]
-        end
+        filter = input.is_a?(String) ? input : to_ldap(input)
+        exp    = expression[filter]
+        raise FilterError, "'#{input}' is not an LDAP filter" if exp.nil?
+        exp
       end
     end
   end
