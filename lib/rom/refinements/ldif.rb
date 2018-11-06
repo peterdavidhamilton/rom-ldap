@@ -56,8 +56,6 @@ module LDIF
 
   refine ::Array do
     def to_ldif
-      # NOTE: In Ruby 2.5+ this works
-      # map(&:to_ldif).join
       map { |v| v.to_ldif }.join
     end
   end
