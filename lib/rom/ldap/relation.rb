@@ -39,30 +39,8 @@ module ROM
       #
       defines :base
       defines :branches
-      defines :groups
-      defines :users
 
       branches EMPTY_HASH
-
-      # A convenience method for schema definition
-      #
-      # @example
-      #     conf.relation(:accounts) do
-      #       schema(groups, infer: true)
-      #     end
-      #
-      # @return [String] Common ldap filter string for groups
-      groups   '(|(objectClass=group)(objectClass=groupOfNames))'.freeze
-
-      # A convenience method for schema definition
-      #
-      # @example
-      #     conf.relation(:accounts) do
-      #       schema(users, infer: true)
-      #     end
-      #
-      # @return [String] Common ldap filter string for people
-      users    '(|(objectClass=inetOrgPerson)(objectClass=user))'.freeze
 
       schema_class      LDAP::Schema
       schema_attr_class LDAP::Attribute
@@ -89,6 +67,15 @@ module ROM
       # @api public
       def transaction(opts = EMPTY_HASH, &block)
         Transaction.new(dataset.directory).run(opts, &block)
+      end
+
+      # Expose the search base currently in use.
+      #
+      # @return [String] current base
+      #
+      # @api public
+      def base
+        dataset.opts[:base]
       end
 
       # Current dataset in LDAP filter format.
@@ -134,9 +121,9 @@ module ROM
         with(schema: schema.project(*names.flatten))
       end
 
-      # def exclude(*names)
-      #   with(schema: schema.exclude(*names.flatten))
-      # end
+      def exclude(*names)
+        with(schema: schema.exclude(*names.flatten))
+      end
 
       # def rename(mapping)
       #   with(schema: schema.rename(mapping))
