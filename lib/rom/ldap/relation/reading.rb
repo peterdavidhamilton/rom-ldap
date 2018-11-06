@@ -2,7 +2,8 @@ module ROM
   module LDAP
     class Relation < ROM::Relation
       module Reading
-        # Specify an alternative search base for the dataset or resets it.
+
+        # Specify an alternative search base.
         #
         # @example
         #   relation.with_base("cn=department,ou=users,dc=org")
@@ -10,16 +11,11 @@ module ROM
         # @return [Relation] Defaults to class attribute
         #
         # @api public
-        def with_base(alt_base = self.class.base || current_base)
+        def with_base(alt_base = self.class.base)
           new(dataset.with(base: alt_base))
         end
 
-        # @return [String] current base
-        def current_base
-          dataset.opts[:base]
-        end
-
-        # Change the search base to the whole directory tree.
+        # Change the search base to search the whole directory tree.
         #
         # @example
         #   relation.whole_tree
@@ -31,19 +27,18 @@ module ROM
           with_base(EMPTY_STRING)
         end
 
-        # Compliments #root method with an alternative search base
-        # selected from a class level hash.
+        # An alternative search base selected from a class level hash.
         #
         # @param key [Symbol]
         #
         # @example
-        #   Relation.branches { custom: 'branch_filter' }
+        #   Relation.branches { custom: '(attribute=value)' }
         #
         #   relation.branch(:custom)
         #
         # @api public
         def branch(key)
-          base(self.class.branches[key])
+          with_base(self.class.branches[key])
         end
 
         # Standard directory query. Supersede criteria with the given filter string.
@@ -54,7 +49,7 @@ module ROM
         #
         # @api public
         def search(filter)
-          new(dataset.with(filter: filter))
+          new(dataset.with(base: self.class.base, filter: filter))
         end
 
         # Returns True if the filtered entity can bind.
@@ -171,18 +166,28 @@ module ROM
           dataset.reverse_each.first
         end
 
-        # Orders the dataset by a given attribute
+        # TODO: server-side sorting https://tools.ietf.org/html/rfc2891
+        #
+        # Orders the dataset by a given attribute using the coerced value.
+        #   Numeric attributes should appear in increasing order.
         #
         # @param attribute [Symbol]
         #
         # @example
-        #   relation.order(:given_name)
+        #   relation.order(:uid_number) => 101, 202, 303
         #
         # @return [Relation]
         #
         # @api public
         def order(attribute)
-          new(dataset.sort_by { |e| e[attribute] })
+          # if dataset.directory.sortable?
+          #   binding.pry
+          #   new(dataset)
+          # else
+            new(dataset.sort_by { |tuple| output_schema[tuple][attribute] })
+          # end
+
+          # new(dataset.with(entries: dataset.sort_by { |tuple| output_schema[tuple][attribute] })
         end
 
         # Limits the dataset to a number of tuples
@@ -223,31 +228,21 @@ module ROM
           new(dataset.reverse_each)
         end
 
-        # Selects on certain attributes from tuples
-        #
-        # @example
-        #   relation.where(sn: 'smith').select(:dn, :sn, :uid)
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def select(*args, &block)
-          schema.project(*args, &block).(new(dataset.select(*args)))
-        end
-
-        alias_method :project, :select
-        alias_method :pluck, :select
 
         # Lists a single attribute from each tuple sorted
         #
         # @example
         #   relation.by_sn('Hamilton').list(:given_name)
         #
-        # @return [Array]
+        # @return [Array<Mixed>]
         #
         # @api public
         def list(field)
-          select(field).to_a.flat_map(&field).sort
+          if auto_struct?
+            project(field).to_a.flat_map(&field).sort
+          else
+            project(field).to_a.map { |t| t[field] }.sort
+          end
         end
 
 
