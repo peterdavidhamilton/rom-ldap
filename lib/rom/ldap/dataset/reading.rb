@@ -1,12 +1,19 @@
+begin
+  require 'yaml'
+  require 'json'
+  require 'msgpack'
+rescue LoadError
+end
+
 using ::LDIF
 
 module ROM
   module LDAP
     class Dataset
       module Reading
-        # NB: Not the same as Relation#fetch!!
-        #
         # Find by Distinguished Name(s)
+        #
+        # @note This is not the same as Relation#fetch.
         #
         # @param dns [String, Array<String>]
         #
@@ -28,9 +35,14 @@ module ROM
           directory.bind_as(filter: query_ast, password: password)
         end
 
-        # Handle different string output formats i.e. LDIF, JSON, YAML
+        # Handle different string output formats i.e. LDIF, JSON, YAML, MessagePack
         #
-        # @return [String]
+        # @example export(format: :to_yaml, keys: [:dn, :cn])
+        #
+        # @option :format [String] method to call
+        # @option :keys [Array] schema keys to select
+        #
+        # @return [String] formatted output
         #
         # @api
         def export(format:, keys:)
