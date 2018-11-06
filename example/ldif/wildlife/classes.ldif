@@ -1,0 +1,82 @@
+#########################################################
+#
+# Object Classes
+# 1.3.6.1.4.1.18055.0.4.1.3.1000-4
+# amphibia, reptilia, aves, mammalia, chondrichthyes
+#
+#########################################################
+
+# Amphibia - amphibians - 1000
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1000, ou=objectClasses, cn=wildlife, ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Amphibians
+m-may: cn
+m-may: populationCount
+m-may: extinct
+m-must: species
+m-supobjectclass: top
+m-name: amphibia
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1000
+m-typeobjectclass: STRUCTURAL
+
+# Reptilia - reptiles - 1001
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1001, ou=objectClasses, cn=wildlife, ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Reptiles
+m-may: cn
+m-may: populationCount
+m-may: extinct
+m-must: species
+m-supobjectclass: top
+m-name: reptilia
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1001
+m-typeobjectclass: STRUCTURAL
+
+# Aves - birds - 1002
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1002, ou=objectClasses, cn=wildlife, ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Birds
+m-may: cn
+m-may: populationCount
+m-may: extinct
+m-must: species
+m-supobjectclass: top
+m-name: aves
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1002
+m-typeobjectclass: STRUCTURAL
+
+# Mammalia - mammals - 1003
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1003, ou=objectClasses, cn=wildlife, ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Mammals
+m-may: cn
+m-may: populationCount
+m-may: extinct
+m-must: species
+m-supobjectclass: top
+m-name: mammalia
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1003
+m-typeobjectclass: STRUCTURAL
+
+# Chondrichthyes - boney fish - 1004
+dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1004, ou=objectClasses, cn=wildlife, ou=schema
+objectClass: metaObjectClass
+objectClass: metaTop
+objectClass: top
+m-description: Cartilaginous fishes
+m-may: cn
+m-may: populationCount
+m-may: extinct
+m-must: species
+m-supobjectclass: top
+m-name: chondrichthyes
+m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1004
+m-typeobjectclass: STRUCTURAL

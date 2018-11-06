@@ -1,3 +1,5 @@
+version: 1
+
 dn: uid=tremblay_sasha,ou=users,dc=example,dc=com
 cn: Dr. Sasha Tremblay
 givenname: Sasha

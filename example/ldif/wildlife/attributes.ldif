@@ -1,20 +1,3 @@
-version: 1
-
-dn: cn=wildlife, ou=schema
-objectclass: metaSchema
-objectclass: top
-cn: wildlife
-
-dn: ou=attributeTypes, cn=wildlife, ou=schema
-objectclass: organizationalUnit
-objectclass: top
-ou: attributeTypes
-
-dn: ou=objectClasses, cn=wildlife, ou=schema
-objectclass: organizationalUnit
-objectclass: top
-ou: objectClasses
-
 #########################################################
 #
 # Attribute Types
@@ -89,11 +72,11 @@ m-singleValue: TRUE
 m-description: Has the animal died out
 m-equality: booleanMatch
 m-name: extinct
-m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.7
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1005
 
-# extinct 1006
+# endangered 1006
 dn: m-oid=1.3.6.1.4.1.18055.0.4.1.2.1006, ou=attributeTypes, cn=wildlife, ou=schema
 objectClass: metaAttributeType
 objectClass: metaTop
@@ -103,7 +86,7 @@ m-singleValue: TRUE
 m-description: The conservation status of the animal
 m-equality: booleanMatch
 m-name: endangered
-m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
+m-syntax: 1.3.6.1.4.1.1466.115.121.1.7
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1006
 
@@ -134,87 +117,3 @@ m-name: study
 m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
 m-usage: USER_APPLICATIONS
 m-oid: 1.3.6.1.4.1.18055.0.4.1.2.1011
-
-
-#########################################################
-#
-# Object Classes
-# 1.3.6.1.4.1.18055.0.4.1.3.1000-4
-# amphibia, reptilia, aves, mammalia, chondrichthyes
-#
-#########################################################
-
-# Amphibia - amphibians - 1000
-dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1000, ou=objectClasses, cn=wildlife, ou=schema
-objectClass: metaObjectClass
-objectClass: metaTop
-objectClass: top
-m-description: Amphibians
-m-may: cn
-m-may: populationCount
-m-may: extinct
-m-must: species
-m-supobjectclass: top
-m-name: amphibia
-m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1000
-m-typeobjectclass: STRUCTURAL
-
-# Reptilia - reptiles - 1001
-dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1001, ou=objectClasses, cn=wildlife, ou=schema
-objectClass: metaObjectClass
-objectClass: metaTop
-objectClass: top
-m-description: Reptiles
-m-may: cn
-m-may: populationCount
-m-may: extinct
-m-must: species
-m-supobjectclass: top
-m-name: reptilia
-m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1001
-m-typeobjectclass: STRUCTURAL
-
-# Aves - birds - 1002
-dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1002, ou=objectClasses, cn=wildlife, ou=schema
-objectClass: metaObjectClass
-objectClass: metaTop
-objectClass: top
-m-description: Birds
-m-may: cn
-m-may: populationCount
-m-may: extinct
-m-must: species
-m-supobjectclass: top
-m-name: aves
-m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1002
-m-typeobjectclass: STRUCTURAL
-
-# Mammalia - mammals - 1003
-dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1003, ou=objectClasses, cn=wildlife, ou=schema
-objectClass: metaObjectClass
-objectClass: metaTop
-objectClass: top
-m-description: Mammals
-m-may: cn
-m-may: populationCount
-m-may: extinct
-m-must: species
-m-supobjectclass: top
-m-name: mammalia
-m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1003
-m-typeobjectclass: STRUCTURAL
-
-# Chondrichthyes - boney fish - 1004
-dn: m-oid=1.3.6.1.4.1.18055.0.4.1.3.1004, ou=objectClasses, cn=wildlife, ou=schema
-objectClass: metaObjectClass
-objectClass: metaTop
-objectClass: top
-m-description: Cartilaginous fishes
-m-may: cn
-m-may: populationCount
-m-may: extinct
-m-must: species
-m-supobjectclass: top
-m-name: chondrichthyes
-m-oid: 1.3.6.1.4.1.18055.0.4.1.3.1004
-m-typeobjectclass: STRUCTURAL
