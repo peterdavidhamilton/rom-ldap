@@ -15,8 +15,10 @@ module ROM
         # @return [Array]
         #
         # @api public
-        def call(string)
-          @scanner = StringScanner.new(string.to_str)
+        def call(filter)
+          return nil unless filter.is_a?(String)
+
+          @scanner = StringScanner.new(filter.to_s)
           parse
         end
 

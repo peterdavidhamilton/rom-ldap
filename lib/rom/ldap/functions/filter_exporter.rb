@@ -17,7 +17,9 @@ module ROM
         #
         # @api public
         def call(ast)
-          case ast.to_ary.size
+          return nil unless ast.is_a?(Array)
+
+          case ast.to_a.size
           when 2 then parse(ast)
           when 3 then parse_expression(ast)
           end
