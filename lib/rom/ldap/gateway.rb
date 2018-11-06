@@ -145,7 +145,7 @@ module ROM
       # @api public
       #
       def directory
-        @directory ||= Directory.new(connection, dir_opts).load_rootdse!
+        @directory ||= Directory.new(connection, dir_opts)
       end
 
       private

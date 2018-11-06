@@ -1,11 +1,11 @@
 require 'rom/initializer'
 require 'dry/core/class_attributes'
-require 'rom/support/memoizable'
-require 'timeout'
+
+# wip
+require 'dry/monitor/notifications'
 
 require 'rom/ldap/functions'
 require 'rom/ldap/directory/root'
-require 'rom/ldap/directory/sub_schema'
 require 'rom/ldap/directory/capabilities'
 require 'rom/ldap/directory/operations'
 require 'rom/ldap/directory/password'
@@ -16,17 +16,17 @@ module ROM
       extend Initializer
       extend Dry::Core::ClassAttributes
 
-      defines :ldap_version
-      defines :default_base
-      defines :default_filter
+      # notifications = Dry::Monitor::Notifications.new(:directory)
 
-      ldap_version   3
+      # @see options[:base]
+      defines :default_base
       default_base   EMPTY_BASE
+
+      # @see operations module directory#query
+      defines :default_filter
       default_filter '(objectClass=*)'.freeze
 
-      include Memoizable
       include Root
-      include SubSchema
       include Operations
       include Capabilities
 
@@ -34,8 +34,20 @@ module ROM
 
       option :base,        default: -> { self.class.default_base }
       option :timeout,     default: -> { 30 }
-      option :max_results, default: -> { 1_000_000 }
+      option :max_results, default: -> { TEN_MILLION }
       option :logger,      default: -> { ::Logger.new(IO::NULL) }
+
+      # @see Gateway#directory
+      #
+      # @require rom/ldap/extensions/{vendor}
+      #
+      # @return [ROM::LDAP::Directory]
+      #
+      def initialize(*)
+        super
+
+        LDAP.load_extensions(type) if LDAP.available_extension?(type)
+      end
 
       # PDU object
       attr_reader :result
@@ -47,20 +59,7 @@ module ROM
         "#<#{self.class} servers=#{connection.servers} base='#{base}' ldap_versions=#{supported_versions} vendor='#{vendor_name}' release='#{vendor_version}' />"
       end
 
-      # binding.pry
-      # require 'dry/monitor/notifications'
-      # notifications = Dry::Monitor::Notifications.new(:directory)
 
-      # @return [Array<String>]
-      #
-      # @example
-      #   [ 'Apple', '510.30' ]
-      #   [ 'Apache Software Foundation', '2.0.0-M24' ]
-      #
-      # @api public
-      def vendor
-        [vendor_name, vendor_version]
-      end
 
       # If fail_on_error => true, this should reopen the connection.
       #
@@ -153,7 +152,6 @@ module ROM
         end
       end
 
-      memoize :root, :sub_schema
     end
   end
 end
