@@ -28,7 +28,8 @@ module ROM
         @odd_or_even = !odd_or_even
       end
     end
+
+    RailsLogSubscriber.attach_to(:rom)
   end
 end
 
-ROM::LDAP::RailsLogSubscriber.attach_to(:rom)

@@ -3,5 +3,7 @@ module ROM
     # Apple Open Directory
     module OpenDirectory
     end
+
+    Directory.include OpenDirectory
   end
 end

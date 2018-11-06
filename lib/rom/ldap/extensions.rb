@@ -20,6 +20,11 @@ module ROM
     # Vendors
     #=======================================
 
+    register_extension(:open_ldap) do
+      require 'rom/ldap/extensions/open_ldap'
+    end
+
+
     register_extension(:active_directory) do
       require 'rom/ldap/extensions/active_directory'
     end

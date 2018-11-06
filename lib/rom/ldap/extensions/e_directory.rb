@@ -3,5 +3,7 @@ module ROM
     # Novell eDirectory
     module EDirectory
     end
+
+    Directory.include EDirectory
   end
 end
