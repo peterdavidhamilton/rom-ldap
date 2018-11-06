@@ -53,6 +53,10 @@ module ROM
               equals('anr' => value)
             end
 
+      # All DC's and their versions
+      # '(&(&(&(&(samAccountType=805306369)(primaryGroupId=516))(objectCategory=computer)(operatingSystem=*))))'
+
+
 
             #
             # Accounts
@@ -95,6 +99,9 @@ module ROM
               ad_accounts_all.present(:mailnickname)
             end
 
+            # FIXME: the attribute names should be original format?
+            # see for example ad_accounts_all
+            #
             def ad_accounts_with_fax
               ad_accounts_all.equals(proxyaddresses: 'FAX:*')
             end
