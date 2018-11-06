@@ -78,7 +78,9 @@ module ROM
                 [
                   PAGED_RESULTS.to_ber,
                   false.to_ber,
-                  rfc2696_cookie.map(&:to_ber).to_ber_sequence.to_s.to_ber
+                  # NOTE: In Ruby 2.5+ this works
+                  # rfc2696_cookie.map(&:to_ber)
+                  rfc2696_cookie.map { |x| x.to_ber }.to_ber_sequence.to_s.to_ber
                 ].to_ber_sequence
             end
 
