@@ -89,7 +89,7 @@ module ROM
           attributes.detect { |a| a[:name] == attribute_name } || EMPTY_HASH
         end
 
-        # Map attribute to Type using known OID or by inferring from the matchers.
+        # Map attribute to Type using known syntax or by inferring from the matchers.
         #
         # @param attribute [Hash]
         #
@@ -97,15 +97,23 @@ module ROM
         #
         # @api private
         def map_type(attribute)
-          by_oid(attribute[:oid]) || by_matcher(attribute[:matcher])
+          by_syntax(attribute[:oid]) || by_matcher(attribute[:matcher])
         end
 
-        # @param oid [String]
+        # @param oid [String] '1.3.6.1.4.1.1466.115.121.1.15'
+        #
+        # @example
+        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.7')  => Bool
+        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.15') => String
+        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.24') => Time
+        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.27') => Integer
+        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.28') => Binary (JPEG)
+        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.40') => Octet
         #
         # @return [String]
         #
         # @api private
-        def by_oid(oid)
+        def by_syntax(oid)
           ::BER.lookup(:oid, oid)
         end
 
@@ -116,9 +124,13 @@ module ROM
         # @api private
         def by_matcher(matcher)
           case matcher
+          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
           when *STRING_MATCHERS  then 'String'
+          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.7
           when *BOOLEAN_MATCHERS then 'Bool'
+          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.27
           when *INTEGER_MATCHERS then 'Integer'
+          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.24
           when *TIME_MATCHERS    then 'Time'
           else
             'Array'
