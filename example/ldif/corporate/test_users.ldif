@@ -1,55 +1,5 @@
-# $ convert -size 1x1 xc:white pixel.jpg
 version: 1
 
-#
-# Partition
-#
-dn: dc=example,dc=com
-dc: example
-objectClass: top
-objectClass: domain
-
-#
-# Top Levels
-#
-dn: ou=users,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: users
-
-dn: ou=groups,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: groups
-
-#
-# Groups
-#
-dn: cn=empty,ou=groups,dc=example,dc=com
-cn: Empty Group
-objectClass: top
-objectClass: posixGroup
-gidNumber: 9997
-
-# 10 'test' customers below are members
-dn: cn=customers,ou=groups,dc=example,dc=com
-cn: Test Customers
-objectClass: top
-objectClass: posixGroup
-gidNumber: 9998
-
-# static group available for generated users
-dn: cn=staff,ou=groups,dc=example,dc=com
-cn: Factory Staff
-objectClass: top
-objectClass: posixGroup
-gidNumber: 9999
-
-
-
-#
-# Admin
-#
 dn: uid=root,ou=users,dc=example,dc=com
 cn: Directory Administrator
 givenName: Directory
@@ -63,6 +13,7 @@ sn: Administrator
 uid: root
 userPassword:: e1NIQX1XNnBoNU1tNVB6OEdnaVVMYlBnekczN21qOWc9
 uidNumber: 0
+gidNumber: 0
 # preferredLanguage: en
 # jpegPhoto:< file:///Users/pdh/Code/rom-ldap/spec/support/pixel.jpg
 # audio:< file:///Users/pdh/Code/rom-ldap/spec/support/beep.wav
@@ -75,10 +26,6 @@ uidNumber: 0
 # labeledURI: http://example.com
 
 
-
-#
-# Customers
-#
 dn: uid=test1,ou=users,dc=example,dc=com
 cn: test1
 givenName: test1

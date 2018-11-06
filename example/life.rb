@@ -31,10 +31,18 @@ end
 # Configuration
 # =============================================================================
 opts = {
-  username: 'uid=admin,ou=system',
-  password: 'secret',
-  servers:  %w[127.0.0.1:10389], # defaults to ['127.0.0.1:389']
-  base:     'dc=example,dc=com', # defaults to ''
+  # OPEN LDAP
+  username: 'cn=admin,dc=example,dc=org',
+  password: 'admin',
+  servers:  ["#{`docker-machine ip`.strip}:3897"],
+  base:     'dc=example,dc=org',
+
+  # APACHE
+  # username: 'uid=admin,ou=system',
+  # password: 'secret',
+  # servers:  %w[127.0.0.1:10389], # defaults to ['127.0.0.1:389']
+  # base:     'dc=example,dc=com', # defaults to ''
+
   timeout:  10,                  # defaults to 30
   logger:   Logger.new(STDOUT)   # defaults to null
 }
@@ -156,7 +164,7 @@ end
 # =============================================================================
 class NewAnimal < ROM::Changeset::Create[:animals]
   map do |tuple|
-    tuple.merge(dn: "cn=#{tuple[:cn]},ou=animals,dc=example,dc=com")
+    tuple.merge(dn: "cn=#{tuple[:cn]},ou=animals,dc=example,dc=org")
   end
 end
 
@@ -224,8 +232,8 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   base    'dc=example,dc=com'.freeze
-  branches animals: 'ou=animals,dc=example,dc=com',
-           extinct: 'ou=extinct,ou=animals,dc=example,dc=com'
+  branches animals: 'ou=animals,dc=example,dc=org',
+           extinct: 'ou=extinct,ou=animals,dc=example,dc=org'
   use :pagination
   per_page 4
   use :auto_restrictions
@@ -260,14 +268,14 @@ configuration.relation(:animals, adapter: :ldap) do
   #
   # relation with only one tuple
   def mankind
-    by_pk('cn=human,ou=animals,dc=example,dc=com')
+    by_pk('cn=human,ou=animals,dc=example,dc=org')
   end
 
   #
   # return the single tuple from the dataset using it's primary key
   #
   def lion
-    fetch('cn=lion,ou=animals,dc=example,dc=com')
+    fetch('cn=lion,ou=animals,dc=example,dc=org')
   end
 
   #
@@ -436,8 +444,8 @@ animals.matches(cn: 'man').to_a
 animals.where(extinct: true).to_a
 
 # return specific entries
-animals.by_pk('cn=Lion,ou=animals,dc=example,dc=com')
-animals.fetch('cn=Lion,ou=animals,dc=example,dc=com')
+animals.by_pk('cn=Lion,ou=animals,dc=example,dc=org')
+animals.fetch('cn=Lion,ou=animals,dc=example,dc=org')
 
 # pagination and mapping over a key
 animals.map(:description).to_a

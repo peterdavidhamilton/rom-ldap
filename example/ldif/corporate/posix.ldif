@@ -1,20 +1,5 @@
 version: 1
 
-dn: cn=rom, ou=schema
-objectclass: metaSchema
-objectclass: top
-cn: rom
-
-dn: ou=attributeTypes, cn=rom, ou=schema
-objectclass: organizationalUnit
-objectclass: top
-ou: attributeTypes
-
-dn: ou=objectClasses, cn=rom, ou=schema
-objectclass: organizationalUnit
-objectclass: top
-ou: objectClasses
-
 #########################################################
 # SCHEMA for
 # attributeTypes: uidNumber, gidNumber, memberUid

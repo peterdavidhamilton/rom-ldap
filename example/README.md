@@ -4,11 +4,11 @@ A demonstration of rom-ldap using biological classification and taxonomic hierar
 
 - `$ cd rom-ldap/examples`
 - `$ bundle package --all`
-- `$ bundle exec rake ldif[../../examples/ldif/schema]`
-- `$ bundle exec rake ldif[../../examples/ldif/animals]`
+- `$ bundle exec rake ldif[corporate/domain]`
+- `$ bundle exec rake ldif[wildlife/animals]`
 - `$ bundle exec ruby ./life.rb`
 
-
+`$ convert -size 1x1 xc:white pixel.jpg`
 
 Suggested additions to the example animals:
 

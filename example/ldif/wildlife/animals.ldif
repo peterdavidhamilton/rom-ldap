@@ -2,27 +2,6 @@ version: 1
 
 #########################################################
 #
-# Organisational Units
-#
-#########################################################
-
-dn: ou=animals,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: animals
-
-dn: ou=extinct,ou=animals,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: extinct
-
-# dn: ou=groups,dc=example,dc=com
-# objectClass: top
-# objectClass: organizationalUnit
-# ou: groups
-
-#########################################################
-#
 # Animals
 #
 #########################################################
@@ -43,7 +22,7 @@ endangered: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Human
 study: anthropology
 # audio:< file://~/Template.plist
-audio:< file://./recordings/human.wav
+# audio:< file://./recordings/human.wav
 
 dn: cn=Red Fox,ou=animals,dc=example,dc=com
 cn: Red Fox
@@ -367,32 +346,4 @@ objectClass: top
 populationCount: 0
 extinct: False
 labeledURI: https://en.wikipedia.org/wiki/Myobatrachus_gouldii
-
-
-
-#########################################################
-#
-# Animal Groups
-#
-#########################################################
-
-dn: cn=wild,ou=groups,dc=example,dc=com
-cn: Wild Animals
-objectClass: groupOfNames
-member: cn=Red Fox,ou=animals,dc=example,dc=com
-member: cn=American Robin,ou=animals,dc=example,dc=com
-member: cn=Sun Bear,ou=animals,dc=example,dc=com
-member: cn=Zebra,ou=animals,dc=example,dc=com
-member: cn=Poison dart Frog,ou=animals,dc=example,dc=com
-member: cn=James's flamingo,ou=animals,dc=example,dc=com
-member: cn=Orangutan,ou=animals,dc=example,dc=com
-member: cn=Platypus,ou=animals,dc=example,dc=com
-
-
-dn: cn=domestic,ou=groups,dc=example,dc=com
-cn: Domesticated Animals
-objectClass: groupOfNames
-member: cn=Spur-thighed Tortoise,ou=animals,dc=example,dc=com
-member: cn=Cat,ou=animals,dc=example,dc=com
-member: cn=Dog,ou=animals,dc=example,dc=com
 

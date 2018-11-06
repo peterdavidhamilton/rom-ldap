@@ -1,0 +1,16 @@
+version: 1
+
+dn: cn=wildlife, ou=schema
+objectclass: metaSchema
+objectclass: top
+cn: wildlife
+
+dn: ou=attributeTypes, cn=wildlife, ou=schema
+objectclass: organizationalUnit
+objectclass: top
+ou: attributeTypes
+
+dn: ou=objectClasses, cn=wildlife, ou=schema
+objectclass: organizationalUnit
+objectclass: top
+ou: objectClasses
