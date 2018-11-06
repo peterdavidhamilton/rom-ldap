@@ -41,7 +41,7 @@ module ROM
       def socket_write(*)
         super
       rescue *ERROR_MAP.keys => e
-        raise ERROR_MAP.fetch(e.class, Error), e.message
+        raise ERROR_MAP.fetch(e.class, Error), e
       end
 
       # @api private
@@ -92,6 +92,8 @@ module ROM
         @msgid += 1
       end
 
+      # Log response from server
+      #
       # @option :result   [PDU]
       # @option :response [Symbol] key for expected response integer
       # @option :error    [Symbol] key for appropriate exception
@@ -102,10 +104,10 @@ module ROM
       def validate_pdu(result:, response:, error: :missing_or_invalid)
         valid = result&.app_tag == pdu_lookup(response)
 
-        logger.debug("#{result.class} #{result.message}") if result&.message
-        logger.warn("#{result.class} #{result.info}") if result&.failure?
+        logger.debug(result.message) if result&.message
+        logger.warn(result.info) if result&.failure?
 
-        valid ? result : raise(*ERRORS.fetch(error), error.message)
+        valid ? result : raise(*ERRORS.fetch(error))
       end
     end
   end
