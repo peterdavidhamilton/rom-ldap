@@ -162,14 +162,11 @@ module ROM
           connect_timeout:  options[:timeout],
           read_timeout:     options[:timeout],
           write_timeout:    options[:timeout],
-          close_on_error:   false,
-          # connect_retry_count: 1.day.to_i
-          # connect_retry_interval: 10.0,
-          # on_connect: proc {},
-          # proxy_server: ?,
+          close_on_error:   false
         )
       rescue *ERROR_MAP.keys => e
-        raise ERROR_MAP.fetch(e.class, Error), "Connection failed: #{servers.join(',')}"
+        raise ERROR_MAP.fetch(e.class, Error),
+          "Connection failed: #{servers.join(',')}"
       end
 
       # Disconnect from the server.
