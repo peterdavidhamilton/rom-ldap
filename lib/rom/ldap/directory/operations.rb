@@ -1,13 +1,37 @@
+require 'timeout'
+
 module ROM
   module LDAP
     class Directory
       module Operations
+
+        # Use connection to communicate with server.
+        #
+        # @param options [Hash]
+        #
+        # @return [Array<Entry>]
+        #
+        # @api public
+        def query(filter: self.class.default_filter, **options)
+          expr = Functions[:to_exp][filter]
+          set  = []
+
+          @result = connection.search(base: base, expression: expr, **options) do |entity|
+            set << entity
+            yield entity if block_given?
+          end
+
+          set.sort_by(&:dn)
+        end
+
+
         # Find an entry by distinguished name.
         #
         # @param dn [String]
         #
         # @return [Entry]
         #
+        # @api public
         def by_dn(dn)
           query(base: dn, max_results: 1)
         end
@@ -81,10 +105,16 @@ module ROM
         #
         # @api public
         def add(tuple)
-          args = payload(tuple)
-          raise(OperationError, 'distinguished name is required') unless (dn = args.delete(:dn))
+          args = prepare_payload(tuple)
+          dn   = args.delete(:dn)
 
-          logger.debug("#{self.class} adding '#{dn}'")
+          raise(OperationError, 'distinguished name is required') unless dn
+
+    # args values need to be wrapped in arrays
+    # when doing relation.update_by_cn('foo', sn: 'bar')
+    # args[:sn]
+
+          logger.debug("#{self.class}##{__callee__} '#{dn}'")
 
           result = connection.add(dn: dn, attrs: args)
           result.success? ? by_dn(dn).first : false
@@ -98,10 +128,10 @@ module ROM
         #
         # @api public
         def modify(dn, tuple) # third param :replace
-          args = payload(tuple)
+          args = prepare_payload(tuple)
           ops  = args.map { |attribute, value| [:replace, attribute, value] }
 
-          logger.debug("#{self.class} modifying '#{dn}'")
+          logger.debug("#{self.class}##{__callee__} '#{dn}'")
 
           result = connection.modify(dn: dn, ops: ops)
           result.success? ? by_dn(dn).first : false
@@ -117,57 +147,43 @@ module ROM
           entry = by_dn(dn).first
           raise(OperationError, 'distinguished name not found') unless entry
 
-          logger.debug("#{self.class} deleting '#{dn}'")
+          logger.debug("#{self.class}##{__callee__} '#{dn}'")
 
           result = connection.delete(dn: dn)
           result.success? ? entry : false
         end
 
+        # directory.transaction(opts) { yield(self) }
+        #
         # @todo Transactions WIP
         #
-        # directory.transaction(opts) { yield(self) }
+        # @api public
         def transaction(_opts)
           yield()
         end
 
-        private
-
-        # Use connection to communicate with server.
-        #
-        # @param options [Hash]
-        #
-        # @return [Array<Entry>]
-        #
-        # @api private
-        def query(options)
-          set    = []
-          filter = options.delete(:filter) || self.class.default_filter
-          expr   = Functions[:to_exp][filter]
-
-          @result = connection.search(base: base, expression: expr, **options) do |entity|
-            set << entity
-            yield entity if block_given?
-          end
-
-          set.sort_by(&:dn)
-        end
 
         # Is the server capable of paging and has a user defined limit not been set.
         #
+        # @api public
         def unlimited?
           pageable? && max_results.nil?
         end
 
+        private
+
         # Tuplify operation input, using a translation hash to rename keys.
         #
-        # @param tuple [Hash]
+        # @note Used by #add and #modify
+        #
+        # @param args [Hash]
         #
         # @api private
-        def payload(tuple)
-          attributes  = attribute_types.select { |a| tuple.key?(a[:name]) }
+        def prepare_payload(args)
+          attributes  = attribute_types.select { |a| args.key?(a[:name]) }
           transmatrix = attributes.map { |a| a.values_at(:name, :original) }.to_h
 
-          Functions[:tuplify].call(tuple.dup, transmatrix)
+          Functions[:tuplify].call(args, transmatrix)
         end
       end
     end

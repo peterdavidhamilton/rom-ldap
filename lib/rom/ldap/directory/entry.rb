@@ -45,10 +45,12 @@ module ROM
           @canonical  = build(original: false)
         end
 
+        # @api public
         def [](key)
           @canonical[rename(key)]
         end
 
+        # @api public
         def fetch(key, alt = EMPTY_ARRAY)
           @canonical.fetch(rename(key), alt)
         end
@@ -95,6 +97,7 @@ module ROM
         #
         # @example entry.each(:object_class) { |e| puts e }
         #
+        # @api public
         def each(key = nil, &block)
           key ? fetch(key).each(&block) : @canonical.each(&block)
         end
@@ -106,25 +109,30 @@ module ROM
         #
         # @example entry.map(:object_class, &:to_sym)
         #
+        # @api public
         def map(key = nil, &block)
           key ? fetch(key).map(&block) : @canonical.map(&block)
         end
 
+        # @api public
         def to_h
           @canonical
         end
         alias to_hash to_h
 
+        # @api public
         def to_a
           @canonical.to_a
         end
         alias to_ary to_a
 
+        # @api public
         def to_str
           @canonical.inspect
         end
         alias inspect to_str
 
+        # @api public
         def to_s
           source.to_ldif
         end

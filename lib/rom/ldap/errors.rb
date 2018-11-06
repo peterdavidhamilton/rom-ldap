@@ -2,15 +2,16 @@ require 'rom/ldap/error'
 
 module ROM
   module LDAP
-    #                                                        # USAGE
-    ConfigError                   = Class.new(StandardError) # WIP
-    ConnectionError               = Class.new(StandardError) # mapped below
-    FilterError                   = Class.new(StandardError) # filter builder
-    NoBindResultError             = Class.new(StandardError) # authenticate operation
-    OperationError                = Class.new(StandardError) # directory
-    ResponseMissingError          = Class.new(StandardError) # update operation
-    ResponseMissingOrInvalidError = Class.new(StandardError) # all operations
-    ResponseTypeInvalidError      = Class.new(StandardError) # search operation
+    #
+    ConfigError                   = Class.new(StandardError)
+    ConnectionError               = Class.new(StandardError)
+    FilterError                   = Class.new(StandardError)
+    NoBindResultError             = Class.new(StandardError)
+    OperationError                = Class.new(StandardError)
+    PasswordError                 = Class.new(StandardError)
+    ResponseMissingError          = Class.new(StandardError)
+    ResponseMissingOrInvalidError = Class.new(StandardError)
+    ResponseTypeInvalidError      = Class.new(StandardError)
 
     ERROR_MAP = {
       Errno::ECONNREFUSED               => ConnectionError,

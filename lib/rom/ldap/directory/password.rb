@@ -10,12 +10,14 @@ module ROM
       #
       class Password
         def self.generate(type, password, salt = secure_salt )
+          raise PasswordError, "No password supplied" if password.nil?
+
           case type
           when :md5  then encode(type, md5(password))
           when :sha  then encode(type, sha(password))
           when :ssha then encode(type, ssha(password, salt))
           else
-            raise Error, "Unsupported encryption type (#{type})"
+            raise PasswordError, "Unsupported encryption type (#{type})"
           end
         end
 

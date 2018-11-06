@@ -1,4 +1,3 @@
-require 'psych'
 require 'dry/core/constants'
 
 module ROM
@@ -9,6 +8,11 @@ module ROM
     OP_ATTRS   = '+'.freeze
     NEW_LINE   = "\n".freeze
     EMPTY_BASE = EMPTY_STRING
+
+    TEN_MILLION = 10_000_000.freeze
+
+    SINCE_1601  = 11_644_473_600.freeze
+
 
     # Including :create_timestamp, :modify_timestamp, :entry_uuid
     ALL_ATTRIBUTES = [WILDCARD, OP_ATTRS].freeze
@@ -161,6 +165,7 @@ module ROM
       lastusn
       namingContexts
       netscapemdsuffix
+      objectClass
       operatingSystemVersion
       rootDomainNamingContext
       subschemaSubentry
