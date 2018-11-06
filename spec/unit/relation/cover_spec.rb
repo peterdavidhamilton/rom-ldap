@@ -1,26 +1,9 @@
-
-# https://relishapp.com/rspec/rspec-core/v/2-11/docs/example-groups/shared-examples
-# RSpec.describe Set do
-#   it_behaves_like "a collection object" do
-#     let(:collection) { Set.new }
-#   end
-# end
-
-
-
-# Range DSL methods for numeric values between or beyond two bounds.
-#
-# [
-#   { uid: 'bungle',   uidnumber: 9   },
-#   { uid: 'geoffrey', uidnumber: 16  },
-#   { uid: 'george',   uidnumber: 4   },
-#   { uid: 'zippy',    uidnumber: 1   }
-# ]
-#
 RSpec.describe ROM::LDAP::Relation do
 
-  let(:formatter) { downcase_proc }
-  include_context 'factories'
+  let(:formatter) { downcase_formatter }
+
+  include_context 'factory'
+
   let(:user_names) { %w[zippy george bungle geoffrey] }
 
   describe '#within uidnumber 3..9' do

@@ -6,7 +6,7 @@ RSpec.shared_context 'associations' do
 
   let(:conf) do
     ROM::Configuration.new(
-      default: [:ldap, server],
+      default: [:ldap, gateway_opts],
       other:   [:memory, 'memory://test'],
     )
   end

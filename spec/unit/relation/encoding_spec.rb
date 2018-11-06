@@ -1,12 +1,11 @@
-RSpec.describe ROM::LDAP::Relation, helpers: true do
+RSpec.describe ROM::LDAP::Relation do
 
-  let(:formatter) { method_name_proc }
-  include_context 'relations'
+  include_context 'people'
 
   describe '#where using non-utf8 encoded string' do
+
     before do
-      accounts.insert(
-        dn: 'cn=Bruce Lee,ou=users,dc=example,dc=com',
+      factories[:person,
         uid: '李振藩',
         cn: 'Bruce Lee',
         given_name: 'Bruce',
@@ -15,18 +14,13 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
         sn: 'Lee',
         mail: 'dragon@example.com',
         object_class: %w[inetOrgPerson extensibleObject]
-      )
+      ]
     end
 
-    after do
-      relations[:accounts].by_pk('cn=Bruce Lee,ou=users,dc=example,dc=com').delete
-      reset_attributes!
-    end
-
-    let(:relation) { relations[:accounts].where(uid: '李振藩') }
+    let(:relation) { people.where(uid: '李振藩'.encode!('eucJP')) }
 
     it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(uid=*))')
+      expect(relation.source_filter).to eql('(objectClass=person)')
     end
 
     it 'chained criteria' do
@@ -35,13 +29,7 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
           :con_and,
           [
             # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'uid', :wildcard]
-              ]
-            ],
+            [:op_eql, 'objectClass', 'person'],
             # criteria
             [:op_eql, :uid, '李振藩']
           ]
@@ -50,11 +38,11 @@ RSpec.describe ROM::LDAP::Relation, helpers: true do
     end
 
     it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(uid=*))(uid=李振藩))')
+      expect(relation.ldap_string).to eql('(&(objectClass=person)(uid=李振藩))')
     end
 
     it 'result' do
-      expect(relation.one[:uid]).to eql('李振藩')
+      expect(relation.one[:uid]).to eql(['李振藩'])
     end
   end
 end

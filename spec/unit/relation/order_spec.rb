@@ -1,76 +1,16 @@
-# FIXME: this test snject is ambiguous ( >, <, >=, <=, etc)
-# Order DSL methods for numeric values ordered by size.
-#
-# [
-#   { uid: 'dewey',   uidnumber: 4  },
-#   { uid: 'donald',  uidnumber: 16 },
-#   { uid: 'huey',    uidnumber: 1  },
-#   { uid: 'louie',   uidnumber: 9  }
-# ]
-#
-RSpec.describe ROM::LDAP::Relation do
+RSpec.describe ROM::LDAP::Relation, 'order' do
 
-  let(:formatter) { downcase_proc }
+  include_context 'animals'
 
   before do
-    conf.relation(:foo) do
-      schema('(&(objectClass=person)(gidNumber=1))', infer: true) do
-        attribute :uid, ROM::LDAP::Types::Strings,
-          read: ROM::LDAP::Types::String
-
-        attribute :uidnumber, ROM::LDAP::Types::Integers,
-          read: ROM::LDAP::Types::Integer
-      end
-    end
+    factories[:animal, :rare_bird, population_count: 50]
+    factories[:animal, :rare_bird, population_count: 100]
+    factories[:animal, :amphibian, population_count: 300]
+    factories[:animal, :reptile, population_count: 1_000]
+    factories[:animal, :mammal, population_count: 2_000]
   end
 
-  include_context 'factories'
 
-  let(:user_names) { %w[huey dewey louie donald] }
-
-  describe '#gte uidnumber >= 5' do
-    let(:relation) { relations[:foo].gte(uidnumber: 5) }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [:op_gte, :uidnumber, 5]
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(uidNumber>=5))'
-      )
-    end
-
-    it 'result' do
-      results = relation.select(:uid, :uidnumber).to_a
-      expect(results).to eql(
-        [
-          { uid: 'donald', uidnumber: 16 },
-          { uid: 'louie', uidnumber: 9 }
-        ]
-      )
-    end
-  end
 
 
   describe '#gt uidnumber > 9' do

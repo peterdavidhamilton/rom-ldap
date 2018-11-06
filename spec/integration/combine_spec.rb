@@ -6,8 +6,7 @@ RSpec.describe 'Combine relations' do
     # https://en.wikipedia.org/wiki/Indian_pangolin
     directory.add(
       dn: 'cn=Pangolin,ou=animals,dc=example,dc=com',
-      # NB: extra common names only
-      cn: %w[Indian\ Pangolin Thick-tailed\ Pangolin Scaly\ Anteater],
+      cn: ['Indian Pangolin', 'Thick-tailed Pangolin', 'Scaly Anteater'],
       species: 'Manis crassicaudata',
       objectclass: %w[extensibleObject mammalia]
     )

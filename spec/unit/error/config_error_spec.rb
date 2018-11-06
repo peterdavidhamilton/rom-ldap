@@ -1,19 +1,17 @@
 RSpec.describe ROM::LDAP::ConfigError do
 
-  # describe 'invalid search size' do
-  #   let(:params) do
-  #     {
-  #       server: '127.0.0.1:10389',
-  #       base:   'ou=users,dc=example,dc=com',
-  #       size:   -10
-  #     }
-  #   end
+  describe 'invalid search size' do
 
-  #   it 'invalid search-size' do
-  #     skip 'WIP'
-  #     err = -> { container.relations }.must_raise ROM::LDAP::ConfigError
-  #     err.message.must_match /invalid search-size/i
-  #   end
-  # end
+    let(:gateway_opts) do
+      gateway_opts.merge(size: -10)
+    end
+
+    include_context 'directory'
+
+    xit 'invalid search-size' do
+      expect { container.relations }.
+        to raise_error(ROM::LDAP::ConfigError, 'size must be a positive integer')
+    end
+  end
 
 end

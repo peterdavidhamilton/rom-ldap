@@ -1,7 +1,9 @@
-RSpec.describe ROM::LDAP::Relation do
+RSpec.describe ROM::LDAP::Relation, 'equality queries' do
 
-  let(:formatter) { downcase_proc }
-  include_context 'factories'
+  let(:formatter) { downcase_formatter }
+
+  include_context 'factory'
+
   let(:user_names) { %w[barry billy bobby sally] }
 
   describe '#equals with single value' do

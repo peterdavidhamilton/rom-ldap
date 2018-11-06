@@ -1,83 +1,10 @@
 RSpec.describe ROM::LDAP::Relation do
 
-  let(:formatter) { downcase_proc }
-  include_context 'factories'
+  let(:formatter) { downcase_formatter }
+
+  include_context 'factory'
+
   let(:user_names) { %w[rita sue bob] }
-
-  describe '#present' do
-    let(:relation) { relations[:people].present('uidNumber') }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [:op_eql, 'uidNumber', :wildcard]
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(uidNumber=*))')
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(3)
-    end
-  end
-
-  describe '#missing' do
-    let(:relation) { relations[:people].missing(:mail) }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [
-              :con_not,
-              [:op_eql, :mail, :wildcard]
-            ]
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(!(mail=*)))')
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(0)
-    end
-  end
 
 
   describe '#begins' do

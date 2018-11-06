@@ -2,8 +2,11 @@ RSpec.describe ROM::LDAP::Relation do
 
   describe 'uncoerced attributes' do
 
-    let(:formatter) { nil }
-    include_context 'relations'
+    # let(:formatter) { nil }
+
+    # include_context 'directory'
+
+    # include_context 'relations'
 
     it 'raise errors if unsuitable method names' do
       expect { customers.with(auto_struct: true).to_a }.to raise_error(
@@ -45,9 +48,9 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe 'snake-case coerced attributes' do
-    include_context 'relations'
+    # include_context 'relations'
 
-    let(:formatter) { method_name_proc }
+    # let(:formatter) { method_formatter }
 
     # it 'make suitable method names' do
     #   expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
@@ -66,9 +69,9 @@ RSpec.describe ROM::LDAP::Relation do
 
 
   describe 'flat coerced attributes' do
-    include_context 'relations'
+    # include_context 'relations'
 
-    let(:formatter) { downcase_proc }
+    # let(:formatter) { downcase_formatter }
 
     # it 'make suitable method names' do
     #   expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)

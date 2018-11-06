@@ -1,82 +1,100 @@
-RSpec.describe 'Plugin / Pagination' do
+RSpec.describe ROM::LDAP::Relation do
 
-  let(:formatter) { nil }
-  let(:base) { 'ou=users,dc=example,dc=com' }
-  include_context 'relations'
-
-  describe '#page' do
-    it 'permits stringified integers' do
-      binding.pry
-      expect(accounts.page('1').count).to eql(4)
-    end
-
-    it 'preserves existing modifiers' do
-      expect(accounts.where(uid: 'root').page(1).count).to eql(1)
+  before do
+    conf.relation(:birds) do
+      schema('(species=*)', infer: true)
+      use :pagination
+      per_page 13
     end
   end
 
-  describe '#per_page' do
-    it 'permits stringified integers' do
-      expect {
-        container.relations[:accounts].per_page('5')
-      }.to_not raise_error
+  include_context 'animals'
 
-      expect(container.relations[:accounts].per_page('5')).to eql(5)
+  describe 'Pagination plugin' do
+
+    subject(:birds) { relations.birds }
+
+    before do
+      factories[:animal, :bird, cn: 'Robin']
+
+      49.times { factories[:animal, :bird] }
     end
 
-    it 'limits the collection returned' do
-      accounts = container.relations[:accounts].page(2).per_page(3)
-
-      expect(accounts.dataset.opts[:offset]).to eql(3)
-      expect(accounts.dataset.opts[:limit]).to eql(3)
-
-      expect(accounts.pager.current_page).to eql(2)
-      expect(accounts.pager.total).to eql(11)
-      expect(accounts.pager.total_pages).to eql(4)
-
-      expect(accounts.pager.next_page).to eql(3)
-      expect(accounts.pager.prev_page).to eql(1)
-
-      expect(accounts.pager.limit_value).to eql(3)
-    end
-  end
-
-  describe '#total_pages' do
-    it 'returns a single page when elements are a perfect fit' do
-      accounts = container.relations[:accounts].page(1).per_page(3)
-      expect(accounts.pager.total_pages).to eql(4)
+    after do
+      birds.delete
     end
 
-    it 'returns the exact number of pages to accommodate all elements' do
-      accounts = container.relations[:accounts].page(1).per_page(20)
-      expect(accounts.pager.total_pages).to eql(1)
+    it 'with 50 in the collection' do
+      expect(birds.count).to eql(50)
     end
-  end
 
-  describe '#pager' do
-    it 'contains pagination meta-info' do
-      accounts = container.relations[:accounts].page(1)
 
-      expect(accounts.dataset.opts[:offset]).to eql(0)
-      expect(accounts.dataset.opts[:limit]).to eql(4)
 
-      expect(accounts.pager.total).to eql(11)
-      expect(accounts.pager.total_pages).to eql(3)
+    describe '#page' do
+      it 'permits stringified integers' do
+        expect(birds.page('1').count).to eql(13)
+      end
 
-      expect(accounts.pager.current_page).to eql(1)
-      expect(accounts.pager.next_page).to eql(2)
-      expect(accounts.pager.prev_page).to be_nil
+      it 'preserves existing modifiers' do
+        expect(birds.where(cn: 'Robin').page(1).count).to eql(1)
+      end
+    end
 
-      accounts = container.relations[:accounts].page(2)
 
-      expect(accounts.pager.current_page).to eql(2)
-      expect(accounts.pager.next_page).to eql(3)
-      expect(accounts.pager.prev_page).to eql(1)
 
-      accounts = container.relations[:accounts].page(3)
+    describe '#per_page' do
+      it 'permits stringified integers' do
+        expect { birds.per_page('5') }.to_not raise_error
+      end
 
-      expect(accounts.pager.next_page).to be_nil
-      expect(accounts.pager.prev_page).to eql(2)
+      it 'limits the collection returned' do
+        expect(birds.page(2).per_page(3).dataset.opts[:offset]).to eql(3)
+        expect(birds.page(2).per_page(3).dataset.opts[:limit]).to eql(3)
+
+        expect(birds.page(2).per_page(3).pager.limit_value).to eql(3)
+
+        expect(birds.page(2).per_page(3).pager.current_page).to eql(2)
+        expect(birds.page(1).per_page(10).pager.total).to eql(50)
+        expect(birds.page(1).per_page(5).pager.total_pages).to eql(10)
+
+        expect(birds.page(5).per_page(7).pager.next_page).to eql(6)
+        expect(birds.page(5).per_page(7).pager.prev_page).to eql(4)
+      end
+    end
+
+
+
+    describe '#total_pages' do
+      it 'returns a single page when elements are a perfect fit' do
+        expect(birds.page(1).per_page(3).pager.total_pages).to eql(17)
+      end
+
+      it 'returns the exact number of pages to accommodate all elements' do
+        expect(birds.page(1).per_page(20).pager.total_pages).to eql(3)
+      end
+    end
+
+
+
+    describe '#pager' do
+      it 'contains pagination meta-info' do
+        expect(birds.page(1).dataset.opts[:offset]).to eql(0)
+        expect(birds.page(1).dataset.opts[:limit]).to eql(13)
+
+        expect(birds.page(1).pager.total).to eql(50)
+        expect(birds.page(1).pager.total_pages).to eql(4)
+
+        expect(birds.page(1).pager.current_page).to eql(1)
+        expect(birds.page(1).pager.next_page).to eql(2)
+        expect(birds.page(1).pager.prev_page).to be_nil
+
+        expect(birds.page(2).pager.current_page).to eql(2)
+        expect(birds.page(2).pager.next_page).to eql(3)
+        expect(birds.page(2).pager.prev_page).to eql(1)
+
+        expect(birds.page(4).pager.next_page).to be_nil
+        expect(birds.page(4).pager.prev_page).to eql(3)
+      end
     end
   end
 end

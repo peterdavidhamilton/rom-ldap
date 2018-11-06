@@ -1,8 +1,8 @@
 RSpec.describe 'Commands / Delete' do
 
-  let(:formatter) { method_name_proc }
+  # let(:formatter) { method_formatter }
 
-  include_context 'relations'
+  # include_context 'relations'
 
   before do
     # conf.relation(:accounts) do

@@ -1,19 +1,25 @@
 RSpec.shared_context 'directory' do
 
   let(:base) do
-    'dc=example,dc=com'
+    'ou=specs,dc=example,dc=com'
   end
 
-  let(:server) do
+  let(:servers) do
+    # %w'127.0.0.1:389'
+    [ "#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}" ]
+  end
+
+  let(:gateway_opts) do
     {
-      servers:  ['127.0.0.1:10389'],
-      base:     base,
-      logger:   Logger.new(File.open('./log/test.log', 'a'))
+      servers: servers,
+      base: base,
+      # timeout: 0,
+      logger: Logger.new(File.open('./log/test.log', 'a'))
     }
   end
 
   let(:conf) do
-    ROM::Configuration.new(:ldap, server)
+    ROM::Configuration.new(:ldap, gateway_opts)
   end
 
   let(:container) do
@@ -40,15 +46,19 @@ RSpec.shared_context 'directory' do
   # Example functions to format attributes.
   #
 
-  let(:reverse_proc) do
+  let(:reverse_formatter) do
     ->(key) { key.to_s.downcase.tr('-= ', '').reverse.to_sym }
   end
 
-  let(:downcase_proc) do
+  let(:downcase_formatter) do
     ->(key) { key.to_s.downcase.tr('-= ', '').to_sym }
   end
 
-  let(:method_name_proc) do
+  # @note Creates attribute names that can act as methods
+  #
+  # @see
+  #
+  let(:method_formatter) do
     ->(key) { ROM::LDAP::Functions.to_method_name(key) }
   end
 
