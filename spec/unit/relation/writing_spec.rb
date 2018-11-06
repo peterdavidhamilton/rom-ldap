@@ -2,8 +2,9 @@ RSpec.describe ROM::LDAP::Relation do
 
   describe '#insert downcase' do
 
-    let(:formatter) { downcase_proc }
-    include_context 'relations'
+    # let(:formatter) { downcase_formatter }
+
+    # include_context 'relations'
 
     before { accounts.where(uid: 'batman').delete }
     after  { accounts.where(uid: 'batman').delete }
@@ -56,8 +57,8 @@ RSpec.describe ROM::LDAP::Relation do
 
   describe '#insert snake_case' do
 
-    let(:formatter) { method_name_proc }
-    include_context 'relations'
+    # let(:formatter) { method_formatter }
+    # include_context 'relations'
 
     before { accounts.where(uid: 'batman').delete }
     after  { accounts.where(uid: 'batman').delete }

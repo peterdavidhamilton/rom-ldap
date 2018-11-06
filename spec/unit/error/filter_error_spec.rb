@@ -2,15 +2,26 @@ RSpec.describe ROM::LDAP::FilterError do
 
   include_context 'directory'
 
-  describe 'FilterError' do
+  context 'valid filter' do
     before do
-      conf.relation(:missing) { schema('invalid', infer: true) }
+      conf.relation(:foo) { schema('(dn=*)', infer: true) }
     end
 
-    # it 'invalid filter syntax' do
-    #   err = -> { relations.missing }.must_raise ROM::LDAP::FilterError
-    #   err.message.must_match /invalid filter syntax/i
-    # end
+    it 'raises no error' do
+      expect { container.relations }.not_to raise_error
+    end
+  end
+
+
+  context 'invalid filter' do
+    before do
+      conf.relation(:foo) { schema('invalid', infer: true) }
+    end
+
+    it 'raises filter error' do
+      expect { container.relations }.
+        to raise_error(ROM::LDAP::FilterError, "'invalid' is not an LDAP filter")
+    end
   end
 
 end

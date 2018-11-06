@@ -1,57 +1,43 @@
-#
-# Use new wildlife data
-#
-RSpec.describe ROM::LDAP::Schema::TypeBuilder, helpers: true do
+RSpec.describe ROM::LDAP::Schema::TypeBuilder do
 
-  let(:formatter) { nil }
+  include_context 'dragons'
 
-  include_context 'directory'
+  describe 'coerces auto_struct attributes' do
 
-  before do
-    use_formatter(formatter)
+    subject(:struct) { dragons.to_a.last }
 
-    conf.relation(:wildlife) do
-      schema('(species=*)', infer: true)
-      base 'ou=animals,dc=example,dc=com'
-    end
-  end
-
-  after(:each) do
-    reset_attributes!
-  end
-
-  let(:relation) { relations.wildlife }
-  let(:schema)   { relation.schema.to_h }
-
-  # zebra
-  subject(:account) { relation.to_a.last }
-
-  describe 'coerces' do
-    it 'integer values' do
-      expect(account.fetch('populationCount')).to eql(0)
+    it 'to String' do
+      expect(struct.fetch(:species)).to be_a(String)
     end
 
-    it 'time values' do
-      expect(account.fetch('createTimestamp').class).to eql(Time)
+    it 'to Integer' do
+      expect(struct.fetch(:population_count)).to be_a(Integer)
     end
 
-    it 'boolean values' do
-      expect(account.fetch('extinct')).to eql(false)
+    it 'to Time' do
+      expect(struct.fetch(:create_timestamp)).to be_a(Time)
+    end
+
+    it 'to TrueClass or FalseClass' do
+      expect(struct.fetch(:extinct)).to be_a(TrueClass)
+      expect(struct.fetch(:endangered)).to be_a(FalseClass)
     end
   end
 
 
   describe 'builds LDAP schema into metadata' do
 
-    let(:description) do
-      schema.values.map { |v| [v.name, v.type.meta[:description]] }.to_h
+    let(:descriptions) do
+      dragons.schema.to_h.values.map { |v|
+        [v.name, v.type.meta[:description]]
+      }.sort.to_h
     end
 
     it 'including the description for attributes' do
-      expect(description.fetch('dn')).to eql(nil)
-      expect(description.fetch('cn')).to eql("RFC2256: common name(s) for which the entity is known by")
-      expect(description.fetch('entryUUID')).to eql("UUID of the entry")
-      expect(description.fetch('species')).to eql("The scientific name of the animal")
+      expect(descriptions.fetch(:dn)).to eql(nil)
+      expect(descriptions.fetch(:cn)).to eql("RFC2256: common name(s) for which the entity is known by")
+      expect(descriptions.fetch(:entry_uuid)).to eql("UUID of the entry")
+      expect(descriptions.fetch(:species)).to eql("The scientific name of the animal")
     end
   end
 end

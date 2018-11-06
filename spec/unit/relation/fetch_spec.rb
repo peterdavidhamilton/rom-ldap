@@ -1,77 +1,75 @@
-RSpec.describe ROM::LDAP::Relation, helpers: true do
+RSpec.describe ROM::LDAP::Relation, '#fetch' do
 
-  let(:formatter) { nil }
-  include_context 'directory'
+  context 'with default primary_key' do
 
-  after(:each) do
-    reset_attributes!
-  end
+    include_context 'people'
 
-  #
-  # Default Primary Key = DN
-  #
-  describe '#fetch default primary_key' do
     before do
-      use_formatter(formatter)
-
-      conf.relation(:foo) do
-        schema(users, infer: true)
-      end
+      factories[:person, cn: 'Megatron', uid_number: 1]
+      factories[:person, cn: 'Optimus', uid_number: 2]
     end
 
-    let(:relation) { relations.foo }
+    # after do
+    #   people.where(cn: 'Megatron').delete
+    #   people.where(cn: 'Optimus').delete
+    # end
 
-    # @todo inferred types are wrong?
-    it 'returns a single tuple identified by the pk' do
-      expect(relation.fetch('uid=test1,ou=users,dc=example,dc=com')['uidNumber']).to eql(1)
-      # expect(relation.fetch('uid=test1,ou=users,dc=example,dc=com')['createTimestamp'].class).to eql(Time)
+    it 'returns a single tuple' do
+      expect(people.fetch('cn=Megatron,ou=specs,dc=example,dc=com')[:uid_number]).to eql(1)
+      expect(people.fetch('cn=Optimus,ou=specs,dc=example,dc=com')[:create_timestamp].class).to eql(Time)
     end
 
     it 'raises when tuple was not found' do
       expect {
-        relation.fetch('uid=unknown,ou=users,dc=example,dc=com')
+        people.fetch('uid=unknown,ou=spec,dc=example,dc=com')
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation does not contain any tuples')
     end
 
-    it 'raises when more tuples were returned' do
+    it 'raises when more tuples are found' do
       expect {
-        relation.fetch([
-          'uid=test1,ou=users,dc=example,dc=com',
-          'uid=test2,ou=users,dc=example,dc=com'
+        people.fetch([
+          'cn=Megatron,ou=specs,dc=example,dc=com',
+          'cn=Optimus,ou=specs,dc=example,dc=com'
         ])
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation consists of more than one tuple')
     end
   end
 
-  #
-  # Custom Primary Key = uidNumber
-  #
-  describe '#fetch custom primary_key' do
-    before do
-      use_formatter(formatter)
 
+  context 'with custom primary_key' do
+    before do
       conf.relation(:foo) do
-        schema(users, infer: true) do
+        schema('(objectClass=inetOrgPerson)', infer: true) do
           attribute 'uidNumber', ROM::LDAP::Types::Integer.meta(primary_key: true)
         end
       end
     end
 
-    let(:relation) { relations.foo }
+    include_context 'people'
 
-    it 'returns a single tuple identified by the pk' do
-      expect(relation.fetch(1)['uidNumber']).to eql(1)
+    before do
+      factories[:person, cn: 'Megatron', uid_number: 1]
+      factories[:person, cn: 'Optimus', uid_number: 2]
+    end
+
+    # after do
+    #   people.where(cn: 'Megatron').delete
+    #   people.where(cn: 'Optimus').delete
+    # end
+
+    it 'returns a single tuple' do
+      expect(relations.foo.fetch(1)[:uid_number]).to eql(1)
     end
 
     it 'raises when tuple was not found' do
       expect {
-        relation.fetch(5_315_412)
+        relations.foo.fetch(5_315_412)
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation does not contain any tuples')
     end
 
-    it 'raises when more tuples were returned' do
+    it 'raises when more tuples are found' do
       expect {
-        relation.fetch([1, 2])
+        relations.foo.fetch([1, 2])
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation consists of more than one tuple')
     end
   end

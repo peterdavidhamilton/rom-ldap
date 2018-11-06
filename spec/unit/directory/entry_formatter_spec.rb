@@ -1,154 +1,148 @@
-#
-# Entry.use_formatter(proc) defines the proc that
-# will rename an entity's attributes name
-#
-RSpec.describe ROM::LDAP::Directory::Entry do
-  describe 'Entry.formatter' do
+RSpec.describe ROM::LDAP::Directory::Entry, '#rename' do
 
-    subject(:entity) { ROM::LDAP::Directory::Entry }
+  include_context 'directory'
 
-    describe 'when nil' do
-      let(:formatter) { nil }
-      include_context 'relations'
+  before do
+    directory.add(
+      dn: 'ou=specs,dc=example,dc=com',
+      ou: 'specs',
+      objectClass: %w'organizationalUnit top'
+    )
 
-      it 'Entry.rename works' do
-        expect(entity.rename('=HELLO World')).to eql('=HELLO World')
-      end
+    directory.add(
+      dn: 'cn=foo,ou=specs,dc=example,dc=com',
+      cn: 'foo',
+      sn: 'bar',
+      objectClass: %w'inetOrgPerson'
+    )
+  end
 
-      it 'uses the actual attribute name like "gidNumber" or "apple-imhandle"' do
-        keys = %w[
-          apple-imhandle
-          cn
-          createTimestamp
-          creatorsName
-          dn
-          entryCSN
-          entryDN
-          entryParentId
-          entryUUID
-          gidNumber
-          givenName
-          mail
-          nbChildren
-          nbSubordinates
-          objectClass
-          pwdHistory
-          sn
-          subschemaSubentry
-          uid
-          uidNumber
-          userPassword
-        ]
-        expect(accounts.schema.to_h.keys).to include(*keys)
-      end
+  after do
+    directory.delete('cn=foo,ou=specs,dc=example,dc=com')
+    directory.delete('ou=specs,dc=example,dc=com')
+  end
+
+  subject(:entry) { ROM::LDAP::Directory::Entry }
+
+  let(:attributes) { relations.people.schema.to_h.keys }
+
+
+  context 'when formatter is nil' do
+
+    before do
+      entry.use_formatter(nil)
+      conf.relation(:people) { schema('(objectClass=person)', infer: true) }
     end
 
-    describe 'when mimicking Net::LDAP' do
-      let(:formatter) { downcase_proc }
-      include_context 'relations'
+    it 'has no effect, leaving attribute name unaltered' do
 
-      it 'Entry.rename works' do
-        expect(entity.rename('=HELLO World')).to eql(:helloworld)
-      end
+      expect(entry.rename('=HELLO World')).to eql('=HELLO World')
 
-      it 'produces lowercase symbol attribute names like :gidnumber' do
-        keys = %i[
-          appleimhandle
-          cn
-          createtimestamp
-          creatorsname
-          dn
-          entrycsn
-          entrydn
-          entryparentid
-          entryuuid
-          gidnumber
-          givenname
-          mail
-          nbchildren
-          nbsubordinates
-          objectclass
-          pwdhistory
-          sn
-          subschemasubentry
-          uid
-          uidnumber
-          userpassword
-        ]
-        expect(accounts.schema.to_h.keys).to include(*keys)
-      end
-    end
-
-    describe 'when using the default rom-ldap formatter' do
-      let(:formatter) { method_name_proc }
-      include_context 'relations'
-
-      it 'Entry.rename works' do
-        expect(entity.rename('=HELLO World')).to eql(:hello_world)
-      end
-
-      it 'produces snake_case symbol attribute names like :gid_number' do
-           keys = %i[
-            apple_imhandle
-            cn
-            create_timestamp
-            creators_name
-            dn
-            entry_csn
-            entry_dn
-            entry_parent_id
-            entry_uuid
-            gid_number
-            given_name
-            mail
-            nb_children
-            nb_subordinates
-            object_class
-            pwd_history
-            sn
-            subschema_subentry
-            uid
-            uid_number
-            user_password
-          ]
-        expect(accounts.schema.to_h.keys).to include(*keys)
-      end
-    end
-
-    describe 'when using a "reverse formatter"' do
-      let(:formatter) { reverse_proc }
-      include_context 'relations'
-
-      it 'Entry.rename works' do
-        expect(entity.rename('=HELLO World')).to eql(:dlrowolleh)
-      end
-
-      it 'produces names like :rebmundig' do
-        keys = %i[
-            ditnerapyrtne
-            diu
-            diuuyrtne
-            drowssapresu
-            eldnahmielppa
-            emannevig
-            emansrotaerc
-            liam
-            nc
-            nd
-            ndyrtne
-            nerdlihcbn
-            ns
-            nscyrtne
-            pmatsemitetaerc
-            rebmundig
-            rebmundiu
-            setanidrobusbn
-            ssalctcejbo
-            yrotsihdwp
-            yrtnebusamehcsbus
-          ]
-        expect(accounts.schema.to_h.keys).to include(*keys)
-      end
+      expect(attributes).to include(*%w[
+                                        cn
+                                        createTimestamp
+                                        creatorsName
+                                        dn
+                                        entryCSN
+                                        entryDN
+                                        entryParentId
+                                        entryUUID
+                                        nbChildren
+                                        nbSubordinates
+                                        objectClass
+                                        sn
+                                        subschemaSubentry
+                                      ])
     end
   end
+
+
+
+  context 'when formatter emulates Net::LDAP' do
+
+    before do
+      entry.use_formatter(downcase_formatter)
+      conf.relation(:people) { schema('(objectClass=person)', infer: true) }
+    end
+
+    it 'creates lowercase symbols' do
+      expect(entry.rename('=HELLO World')).to eql(:helloworld)
+
+      expect(attributes).to include(*%i[
+                                      cn
+                                      createtimestamp
+                                      creatorsname
+                                      dn
+                                      entrycsn
+                                      entrydn
+                                      entryparentid
+                                      entryuuid
+                                      nbchildren
+                                      nbsubordinates
+                                      objectclass
+                                      sn
+                                      subschemasubentry
+                                    ])
+    end
+  end
+
+
+
+  context 'when using the default ROM-LDAP formatter' do
+
+    before do
+      entry.use_formatter(method_formatter)
+      conf.relation(:people) { schema('(objectClass=person)', infer: true) }
+    end
+
+    it 'creates attribute names compatible with Ruby methods' do
+      expect(entry.rename('=HELLO World')).to eql(:hello_world)
+
+      expect(attributes).to include(*%i[
+                                      cn
+                                      create_timestamp
+                                      creators_name
+                                      dn
+                                      entry_csn
+                                      entry_dn
+                                      entry_parent_id
+                                      entry_uuid
+                                      nb_children
+                                      nb_subordinates
+                                      object_class
+                                      sn
+                                      subschema_subentry
+                                    ])
+    end
+  end
+
+
+  context 'when using a custom formatter' do
+
+    before do
+      entry.use_formatter(reverse_formatter)
+      conf.relation(:people) { schema('(objectClass=person)', infer: true) }
+    end
+
+    it 'calls the formatter proc' do
+      expect(entry.rename('=HELLO World')).to eql(:dlrowolleh)
+
+      expect(attributes).to include(*%i[
+                                      ditnerapyrtne
+                                      diuuyrtne
+                                      emansrotaerc
+                                      nc
+                                      nd
+                                      ndyrtne
+                                      nerdlihcbn
+                                      ns
+                                      nscyrtne
+                                      pmatsemitetaerc
+                                      setanidrobusbn
+                                      ssalctcejbo
+                                      yrtnebusamehcsbus
+                                    ])
+    end
+  end
+
 end

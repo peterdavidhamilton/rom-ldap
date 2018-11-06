@@ -1,31 +1,34 @@
-require 'msgpack'
+RSpec.describe ROM::LDAP::Relation, 'exporting' do
 
-RSpec.describe ROM::LDAP::Relation do
+  include_context 'people'
 
-  describe 'exports single tuple to different formats' do
-
-    let(:formatter) { method_name_proc }
-    include_context 'relations'
-
-    # Attributes are in the order selected (alphabetical)
-    #
-    let(:relation) do
-      attributes = %i[cn dn gid_number given_name mail object_class sn uid uid_number user_password]
-      accounts.where(uid: 'test1').select(*attributes)
+  before do
+    %w[Peter Leanda].each.with_index(123) do |gn, i|
+      factories[:person, given_name: gn, uid_number: i, sn: 'Hamilton']
     end
+  end
+
+  # after do
+  #   people.where(sn: 'Hamilton').delete
+  # end
+
+  # Attributes are in the order selected (alphabetical)
+  #
+  let(:attrs) do
+    %i[cn dn given_name object_class sn uid_number]
+  end
+
+  context 'a single tuple' do
+    let(:relation) { people.where(given_name: 'leanda').project(*attrs) }
 
     it '#to_msgpack' do
       export = {
-        "cn"            => ["test1"],
-        "dn"            => ["uid=test1,ou=users,dc=example,dc=com"],
-        "gidNumber"     => ["9998"],
-        "givenName"     => ["test1"],
-        "mail"          => ["test1@example.com"],
-        "objectClass"   => ["top", "inetOrgPerson", "person", "organizationalPerson", "extensibleObject"],
-        "sn"            => ["test1"],
-        "uid"           => ["test1"],
-        "uidNumber"     => ["1"],
-        "userPassword"  => ["{SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw="]
+        "cn"          => ["Leanda Hamilton"],
+        "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],
+        "givenName"   => ["Leanda"],
+        "objectClass" => ["apple-user", "organizationalPerson", "person", "extensibleObject", "inetOrgPerson", "top"],
+        "sn"          => ["Hamilton"],
+        "uidNumber"   => ["124"]
       }
 
       expect(MessagePack.unpack(relation.to_msgpack)).to eql(export)
@@ -33,20 +36,17 @@ RSpec.describe ROM::LDAP::Relation do
 
     it '#to_ldif' do
       export = <<~LDIF
-      cn: test1
-      dn: uid=test1,ou=users,dc=example,dc=com
-      gidNumber: 9998
-      givenName: test1
-      mail: test1@example.com
-      objectClass: top
-      objectClass: inetOrgPerson
-      objectClass: person
+      cn: Leanda Hamilton
+      dn: cn=Leanda Hamilton,ou=specs,dc=example,dc=com
+      givenName: Leanda
+      objectClass: apple-user
       objectClass: organizationalPerson
+      objectClass: person
       objectClass: extensibleObject
-      sn: test1
-      uid: test1
-      uidNumber: 1
-      userPassword: {SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw=
+      objectClass: inetOrgPerson
+      objectClass: top
+      sn: Hamilton
+      uidNumber: 124
 
       LDIF
 
@@ -54,45 +54,7 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it '#to_json' do
-      export = <<~JSON
-        {
-          "cn": [
-              "test1"
-          ],
-          "dn": [
-              "uid=test1,ou=users,dc=example,dc=com"
-          ],
-          "gidNumber": [
-              "9998"
-          ],
-          "givenName": [
-              "test1"
-          ],
-          "mail": [
-              "test1@example.com"
-          ],
-          "objectClass": [
-              "top",
-              "inetOrgPerson",
-              "person",
-              "organizationalPerson",
-              "extensibleObject"
-          ],
-          "sn": [
-              "test1"
-          ],
-          "uid": [
-              "test1"
-          ],
-          "uidNumber": [
-              "1"
-          ],
-          "userPassword": [
-              "{SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw="
-          ]
-        }
-      JSON
-      .delete(" \n")
+      export = '{"cn":["Leanda Hamilton"],"dn":["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],"givenName":["Leanda"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["124"]}'
 
       expect(relation.to_json).to eql(export)
     end
@@ -101,29 +63,22 @@ RSpec.describe ROM::LDAP::Relation do
       export = <<~YAML
       ---
       cn:
-      - test1
+      - Leanda Hamilton
       dn:
-      - uid=test1,ou=users,dc=example,dc=com
-      gidNumber:
-      - '9998'
+      - cn=Leanda Hamilton,ou=specs,dc=example,dc=com
       givenName:
-      - test1
-      mail:
-      - test1@example.com
+      - Leanda
       objectClass:
-      - top
-      - inetOrgPerson
-      - person
+      - apple-user
       - organizationalPerson
+      - person
       - extensibleObject
+      - inetOrgPerson
+      - top
       sn:
-      - test1
-      uid:
-      - test1
+      - Hamilton
       uidNumber:
-      - '1'
-      userPassword:
-      - "{SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw="
+      - '124'
       YAML
 
       expect(relation.to_yaml).to eql(export)
@@ -134,42 +89,27 @@ RSpec.describe ROM::LDAP::Relation do
 
 
 
-  describe 'exports multiple tuples to different formats' do
+  context 'multiple tuples' do
 
-    let(:formatter) { method_name_proc }
-    include_context 'relations'
-
-    let(:relation) do
-      accounts.where(uid: ['test1','test2']).pluck(
-        :dn, :mail, :given_name, :sn, :cn, :object_class,
-        :gid_number, :uid_number, :user_password, :uid)
-    end
+    let(:relation) { people.where(sn: 'Hamilton').project(*attrs) }
 
     it '#to_msgpack' do
       export = [
         {
-          "dn"            => ["uid=test1,ou=users,dc=example,dc=com"],
-          "mail"          => ["test1@example.com"],
-          "givenName"     => ["test1"],
-          "sn"            => ["test1"],
-          "cn"            => ["test1"],
-          "objectClass"   => ["top", "inetOrgPerson", "person", "organizationalPerson", "extensibleObject"],
-          "gidNumber"     => ["9998"],
-          "uidNumber"     => ["1"],
-          "userPassword"  => ["{SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw="],
-          "uid"           => ["test1"]
+          "cn"          => ["Leanda Hamilton"],
+          "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],
+          "givenName"   => ["Leanda"],
+          "objectClass" => ["apple-user", "organizationalPerson", "person", "extensibleObject", "inetOrgPerson", "top"],
+          "sn"          => ["Hamilton"],
+          "uidNumber"   => ["124"]
         },
         {
-          "dn"            => ["uid=test2,ou=users,dc=example,dc=com"],
-          "mail"          => ["test2@example.com"],
-          "givenName"     => ["test2"],
-          "sn"            => ["test2"],
-          "cn"            => ["test2"],
-          "objectClass"   => ["top", "inetOrgPerson", "person", "organizationalPerson", "extensibleObject"],
-          "gidNumber"     => ["9998"],
-          "uidNumber"     => ["2"],
-          "userPassword"  => ["{SHA}EJ9LPFDXsN9ynSmbxvjp75Bmlx8="],
-          "uid"           => ["test2"]
+          "cn"          => ["Peter Hamilton"],
+          "dn"          => ["cn=Peter Hamilton,ou=specs,dc=example,dc=com"],
+          "givenName"   => ["Peter"],
+          "objectClass" => ["apple-user", "organizationalPerson", "person", "extensibleObject", "inetOrgPerson", "top"],
+          "sn"          => ["Hamilton"],
+          "uidNumber"   => ["123"]
         }
       ]
 
@@ -178,35 +118,29 @@ RSpec.describe ROM::LDAP::Relation do
 
     it '#to_ldif' do
       export = <<~LDIF
-      dn: uid=test1,ou=users,dc=example,dc=com
-      mail: test1@example.com
-      givenName: test1
-      sn: test1
-      cn: test1
-      objectClass: top
-      objectClass: inetOrgPerson
-      objectClass: person
+      cn: Leanda Hamilton
+      dn: cn=Leanda Hamilton,ou=specs,dc=example,dc=com
+      givenName: Leanda
+      objectClass: apple-user
       objectClass: organizationalPerson
+      objectClass: person
       objectClass: extensibleObject
-      gidNumber: 9998
-      uidNumber: 1
-      userPassword: {SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw=
-      uid: test1
+      objectClass: inetOrgPerson
+      objectClass: top
+      sn: Hamilton
+      uidNumber: 124
 
-      dn: uid=test2,ou=users,dc=example,dc=com
-      mail: test2@example.com
-      givenName: test2
-      sn: test2
-      cn: test2
-      objectClass: top
-      objectClass: inetOrgPerson
-      objectClass: person
+      cn: Peter Hamilton
+      dn: cn=Peter Hamilton,ou=specs,dc=example,dc=com
+      givenName: Peter
+      objectClass: apple-user
       objectClass: organizationalPerson
+      objectClass: person
       objectClass: extensibleObject
-      gidNumber: 9998
-      uidNumber: 2
-      userPassword: {SHA}EJ9LPFDXsN9ynSmbxvjp75Bmlx8=
-      uid: test2
+      objectClass: inetOrgPerson
+      objectClass: top
+      sn: Hamilton
+      uidNumber: 123
 
       LDIF
 
@@ -214,61 +148,48 @@ RSpec.describe ROM::LDAP::Relation do
     end
 
     it '#to_json' do
-      export = '[{"dn":["uid=test1,ou=users,dc=example,dc=com"],"mail":["test1@example.com"],"givenName":["test1"],"sn":["test1"],"cn":["test1"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"gidNumber":["9998"],"uidNumber":["1"],"userPassword":["{SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw="],"uid":["test1"]},{"dn":["uid=test2,ou=users,dc=example,dc=com"],"mail":["test2@example.com"],"givenName":["test2"],"sn":["test2"],"cn":["test2"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"gidNumber":["9998"],"uidNumber":["2"],"userPassword":["{SHA}EJ9LPFDXsN9ynSmbxvjp75Bmlx8="],"uid":["test2"]}]'
+      export = '[{"cn":["Leanda Hamilton"],"dn":["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],"givenName":["Leanda"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["124"]},{"cn":["Peter Hamilton"],"dn":["cn=Peter Hamilton,ou=specs,dc=example,dc=com"],"givenName":["Peter"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["123"]}]'
+
       expect(relation.to_json).to eql(export)
     end
 
     it '#to_yaml' do
       export = <<~YAML
       ---
-      - dn:
-        - uid=test1,ou=users,dc=example,dc=com
-        mail:
-        - test1@example.com
+      - cn:
+        - Leanda Hamilton
+        dn:
+        - cn=Leanda Hamilton,ou=specs,dc=example,dc=com
         givenName:
-        - test1
-        sn:
-        - test1
-        cn:
-        - test1
+        - Leanda
         objectClass:
-        - top
-        - inetOrgPerson
-        - person
+        - apple-user
         - organizationalPerson
+        - person
         - extensibleObject
-        gidNumber:
-        - '9998'
+        - inetOrgPerson
+        - top
+        sn:
+        - Hamilton
         uidNumber:
-        - '1'
-        userPassword:
-        - "{SHA}tESsBmE/yNY3lb6a0L6vVQEZNqw="
-        uid:
-        - test1
-      - dn:
-        - uid=test2,ou=users,dc=example,dc=com
-        mail:
-        - test2@example.com
+        - '124'
+      - cn:
+        - Peter Hamilton
+        dn:
+        - cn=Peter Hamilton,ou=specs,dc=example,dc=com
         givenName:
-        - test2
-        sn:
-        - test2
-        cn:
-        - test2
+        - Peter
         objectClass:
-        - top
-        - inetOrgPerson
-        - person
+        - apple-user
         - organizationalPerson
+        - person
         - extensibleObject
-        gidNumber:
-        - '9998'
+        - inetOrgPerson
+        - top
+        sn:
+        - Hamilton
         uidNumber:
-        - '2'
-        userPassword:
-        - "{SHA}EJ9LPFDXsN9ynSmbxvjp75Bmlx8="
-        uid:
-        - test2
+        - '123'
       YAML
 
       expect(relation.to_yaml).to eql(export)

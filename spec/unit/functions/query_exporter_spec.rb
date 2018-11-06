@@ -1,4 +1,5 @@
 RSpec.describe ROM::LDAP::Functions::QueryExporter do
+
   subject(:exporter) { ROM::LDAP::Functions::QueryExporter.new }
 
   describe 'con_and' do
