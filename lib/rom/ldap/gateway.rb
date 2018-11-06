@@ -129,13 +129,14 @@ module ROM
       end
 
 
+      # Default to server defined by LDAP ENV variables
       #
       # @return [Array<String>] Collection of LDAP servers.
       #
       # @api public
       #
       def servers
-        options.fetch(:servers, %w'127.0.0.1:389')
+        options.fetch(:servers, ["#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}"])
       end
 
       # The Directory class receives the Connection and is passed to Dataset.
