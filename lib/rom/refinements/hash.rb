@@ -8,7 +8,7 @@
 #
 module Compatibility
   refine ::Hash do
-    unless RUBY_VERSION.to_f < 2.5
+    if RUBY_VERSION.to_f < 2.5
       def slice(*keys)
         hash = {}
         keys.each { |key| hash[key] = fetch(key) if key?(key) }
