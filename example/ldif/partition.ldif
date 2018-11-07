@@ -1,0 +1,10 @@
+# Base64 encoded partition
+#
+# $ openssl base64 -in partition.ldif -out partition.b64
+#
+# ZG46IGRjPXJvbSxkYz1sZGFwCmRjOiByb20tbGRhcApvYmplY3RDbGFzczogdG9wCm9iamVjdENsYXNzOiBkb21haW4=
+#
+dn: dc=rom,dc=ldap
+dc: rom-ldap
+objectClass: top
+objectClass: domain
