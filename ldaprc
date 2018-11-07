@@ -1,3 +1,4 @@
 VERSION 3
 BASE dc=rom,dc=ldap
+PORT 389
 BINDDN uid=admin,ou=system

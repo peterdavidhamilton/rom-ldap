@@ -4,13 +4,13 @@ RSpec.describe ROM::LDAP::Directory::Entry, '#rename' do
 
   before do
     directory.add(
-      dn: 'ou=specs,dc=example,dc=com',
+      dn: 'ou=specs,dc=rom,dc=ldap',
       ou: 'specs',
       objectClass: %w'organizationalUnit top'
     )
 
     directory.add(
-      dn: 'cn=foo,ou=specs,dc=example,dc=com',
+      dn: 'cn=foo,ou=specs,dc=rom,dc=ldap',
       cn: 'foo',
       sn: 'bar',
       objectClass: %w'inetOrgPerson'
@@ -18,8 +18,8 @@ RSpec.describe ROM::LDAP::Directory::Entry, '#rename' do
   end
 
   after do
-    directory.delete('cn=foo,ou=specs,dc=example,dc=com')
-    directory.delete('ou=specs,dc=example,dc=com')
+    directory.delete('cn=foo,ou=specs,dc=rom,dc=ldap')
+    directory.delete('ou=specs,dc=rom,dc=ldap')
   end
 
   subject(:entry) { ROM::LDAP::Directory::Entry }

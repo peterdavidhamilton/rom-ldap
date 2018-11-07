@@ -302,14 +302,14 @@ configuration.relation(:animals, adapter: :ldap) do
   end
 
   #
-  # Query DSL methods like: where, unequals, gte, present
+  # Query DSL methods like: where, unequal, gte, present
   #
   def mammals
     where(objectClass: 'mammalia')
   end
 
   def vegetarians
-    unequals(order: 'carnivora')
+    unequal(order: 'carnivora')
   end
 
   def population_above(num)
@@ -339,7 +339,7 @@ configuration.register_command(DeleteAnimal)
 configuration.register_mapper(TransformAnimal)
 
 # attribute name formatter - loaded before ROM.container
-ROM::LDAP.load_extensions :compatible_entry_attributes
+ROM::LDAP.load_extensions :compatibility
 
 container      = ROM.container(configuration)
 
@@ -437,7 +437,7 @@ animals.where(objectClass: 'mammalia').find(/Homo/).count
 # return a single struct
 animals.where(cn: 'human').one.species
 animals.matches(cn: 'hum').one
-animals.equals(cn: 'orangutan').one.cn
+animals.equal(cn: 'orangutan').one.cn
 
 animals.matches(cn: 'man').to_a
 

@@ -50,7 +50,7 @@ module ROM
             # Ambiguous Name Resolution (ANR)
             #
             def ambiguous(value)
-              equals('anr' => value)
+              equal('anr' => value)
             end
 
       # All DC's and their versions
@@ -63,36 +63,36 @@ module ROM
             #
 
             def ad_accounts_all
-              equals('sAMAccountType' => 805_306_368)
+              equal('sAMAccountType' => 805_306_368)
             end
 
             # AD_USER_DISABLED = Filter::Builder.ex("userAccountControl:1.2.840.113556.1.4.803", "2")
             def ad_accounts_disabled
-              ad_accounts_all.equals(UAC => ACCOUNT_DISABLED)
+              ad_accounts_all.equal(UAC => ACCOUNT_DISABLED)
             end
 
             def ad_accounts_enabled
-              ad_accounts_all.unequals(UAC => ACCOUNT_DISABLED)
+              ad_accounts_all.unequal(UAC => ACCOUNT_DISABLED)
             end
 
             def ad_accounts_insecure
-              ad_accounts_all.equals(UAC => PASSWORD_NOT_REQUIRED)
+              ad_accounts_all.equal(UAC => PASSWORD_NOT_REQUIRED)
             end
 
             def ad_accounts_expired_password
-              ad_accounts_all.equals(UAC => PASSWORD_EXPIRED)
+              ad_accounts_all.equal(UAC => PASSWORD_EXPIRED)
             end
 
             def ad_accounts_permanent_password
-              ad_accounts_all.equals(UAC => PASSWORD_DONT_EXPIRE)
+              ad_accounts_all.equal(UAC => PASSWORD_DONT_EXPIRE)
             end
 
             def ad_accounts_control(oid)
-              ad_accounts_all.equals(UAC => oid)
+              ad_accounts_all.equal(UAC => oid)
             end
 
             def ad_accounts_membership(groupdn)
-              ad_accounts_all.equals(MEMBER => groupdn)
+              ad_accounts_all.equal(MEMBER => groupdn)
             end
 
             def ad_accounts_with_email
@@ -103,11 +103,11 @@ module ROM
             # see for example ad_accounts_all
             #
             def ad_accounts_with_fax
-              ad_accounts_all.equals(proxyaddresses: 'FAX:*')
+              ad_accounts_all.equal(proxyaddresses: 'FAX:*')
             end
 
             def ad_accounts_hidden_email
-              unequals(objectclass: 'publicFolder').equals(msexchhidefromaddresslists: 'TRUE')
+              unequal(objectclass: 'publicFolder').equal(msexchhidefromaddresslists: 'TRUE')
             end
 
             #
@@ -115,44 +115,44 @@ module ROM
             #
 
             def ad_groups_security
-              equals(GROUP => GROUP_SECURITY_ENABLED)
-              # equals(grouptype: GROUP_SECURITY_ENABLED)
+              equal(GROUP => GROUP_SECURITY_ENABLED)
+              # equal(grouptype: GROUP_SECURITY_ENABLED)
             end
 
             def ad_groups_universal
-              equals(GROUP => GROUP_UNIVERSAL)
+              equal(GROUP => GROUP_UNIVERSAL)
             end
 
             def ad_groups_empty
-              equals(objectclass: 'group').missing(:member)
+              equal(objectclass: 'group').missing(:member)
             end
 
             def ad_catalog_global
-              equals(objectcategory: 'nTDSDSA', OPTS => SCRIPT)
+              equal(objectcategory: 'nTDSDSA', OPTS => SCRIPT)
             end
 
             def ad_computers
-              equals(objectcategory: 'computer')
+              equal(objectcategory: 'computer')
             end
 
             def ad_controllers
-              ad_computers.equals(UAC => SERVER_TRUST_ACCOUNT)
+              ad_computers.equal(UAC => SERVER_TRUST_ACCOUNT)
             end
 
             def ad_exchanges
-              equals(objectclass: 'msExchExchangeServer').unequals(objectclass: 'msExchExchangeServerPolicy')
+              equal(objectclass: 'msExchExchangeServer').unequal(objectclass: 'msExchExchangeServerPolicy')
             end
 
             def ad_contacts
-              equals(objectcategory: 'contact')
+              equal(objectcategory: 'contact')
             end
 
             def ad_unrenamable_object
-              equals(FLAG => 134_217_728)
+              equal(FLAG => 134_217_728)
             end
 
             def ad_undeletable_object
-              equals(FLAG => -GROUP_SECURITY_ENABLED)
+              equal(FLAG => -GROUP_SECURITY_ENABLED)
             end
           end
         end

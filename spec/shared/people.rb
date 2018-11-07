@@ -61,7 +61,7 @@ RSpec.shared_context 'people' do
       end
 
       f.dn do |cn|
-        "cn=#{cn},ou=specs,dc=example,dc=com"
+        "cn=#{cn},ou=specs,dc=rom,dc=ldap"
       end
 
       f.uid do |cn|

@@ -67,7 +67,7 @@ RSpec.describe ROM::LDAP::Functions::FilterExporter do
       expect(ast).to eql('(cn~=Peter Hamilton)')
     end
 
-    it 'equals' do
+    it 'equal' do
       ast = exporter.call([:op_eql, 'mail', '*@peterdavidhamilton.com'])
       expect(ast).to eql('(mail=*@peterdavidhamilton.com)')
     end

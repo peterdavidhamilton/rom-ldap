@@ -21,7 +21,7 @@ RSpec.shared_context 'associations' do
         #   belongs_to :country
         # end
       end
-      base 'ou=animals,dc=example,dc=com'
+      base 'ou=animals,dc=rom,dc=ldap'
       auto_map false
 
       def by_name(name)
@@ -43,7 +43,7 @@ RSpec.shared_context 'associations' do
       end
 
       # relation.base.to_a # narrows base from one defined in cofig to one defined on relation class.
-      base 'ou=animals,dc=example,dc=com'
+      base 'ou=animals,dc=rom,dc=ldap'
       # FIXME: works once then filter becomes empty string
       # dataset { present(:species) }
       auto_map false

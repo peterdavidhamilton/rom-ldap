@@ -129,14 +129,17 @@ module ROM
       end
 
 
-      # Default to server defined by LDAP ENV variables
+      # Default LDAPHOST:LDAPPORT or localhost:389
       #
       # @return [Array<String>] Collection of LDAP servers.
       #
       # @api public
       #
       def servers
-        options.fetch(:servers, ["#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}"])
+        # options.fetch(:servers,
+        #   ["#{ENV.fetch('LDAPHOST', 'localhost')}:#{ENV.fetch('LDAPPORT', 389)}"]
+        # )
+        options[:servers]
       end
 
       # The Directory class receives the Connection and is passed to Dataset.
@@ -160,6 +163,7 @@ module ROM
       def connect!
         Connection.new(
           servers:          servers,
+          server:           "#{ENV.fetch('LDAPHOST', 'localhost')}:#{ENV.fetch('LDAPPORT', 389)}",
           connect_timeout:  options[:timeout],
           read_timeout:     options[:timeout],
           write_timeout:    options[:timeout],

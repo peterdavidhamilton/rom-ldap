@@ -1,26 +1,26 @@
 version: 1
 
-dn: ou=groups,dc=example,dc=com
+dn: ou=groups,dc=rom,dc=ldap
 objectClass: top
 objectClass: organizationalUnit
 ou: groups
 
-dn: cn=wild,ou=groups,dc=example,dc=com
+dn: cn=wild,ou=groups,dc=rom,dc=ldap
 cn: Wild Animals
 objectClass: groupOfNames
-member: cn=Red Fox,ou=animals,dc=example,dc=com
-member: cn=American Robin,ou=animals,dc=example,dc=com
-member: cn=Sun Bear,ou=animals,dc=example,dc=com
-member: cn=Zebra,ou=animals,dc=example,dc=com
-member: cn=Poison dart Frog,ou=animals,dc=example,dc=com
-member: cn=James's flamingo,ou=animals,dc=example,dc=com
-member: cn=Orangutan,ou=animals,dc=example,dc=com
-member: cn=Platypus,ou=animals,dc=example,dc=com
+member: cn=Red Fox,ou=animals,dc=rom,dc=ldap
+member: cn=American Robin,ou=animals,dc=rom,dc=ldap
+member: cn=Sun Bear,ou=animals,dc=rom,dc=ldap
+member: cn=Zebra,ou=animals,dc=rom,dc=ldap
+member: cn=Poison dart Frog,ou=animals,dc=rom,dc=ldap
+member: cn=James's flamingo,ou=animals,dc=rom,dc=ldap
+member: cn=Orangutan,ou=animals,dc=rom,dc=ldap
+member: cn=Platypus,ou=animals,dc=rom,dc=ldap
 
-dn: cn=domestic,ou=groups,dc=example,dc=com
+dn: cn=domestic,ou=groups,dc=rom,dc=ldap
 cn: Domesticated Animals
 objectClass: groupOfNames
-member: cn=Spur-thighed Tortoise,ou=animals,dc=example,dc=com
-member: cn=Cat,ou=animals,dc=example,dc=com
-member: cn=Dog,ou=animals,dc=example,dc=com
+member: cn=Spur-thighed Tortoise,ou=animals,dc=rom,dc=ldap
+member: cn=Cat,ou=animals,dc=rom,dc=ldap
+member: cn=Dog,ou=animals,dc=rom,dc=ldap
 

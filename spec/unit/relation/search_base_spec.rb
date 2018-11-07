@@ -12,8 +12,8 @@ RSpec.describe ROM::LDAP::Relation, 'search base' do
   before do
     conf.relation(:foo) do
       schema('(objectClass=*)', infer: true)
-      base 'ou=department,dc=example,dc=com'
-      branches finance: 'ou=finance,dc=example,dc=com'
+      base 'ou=department,dc=rom,dc=ldap'
+      branches finance: 'ou=finance,dc=rom,dc=ldap'
     end
   end
 
@@ -29,10 +29,10 @@ RSpec.describe ROM::LDAP::Relation, 'search base' do
   end
 
   it '#with_base changes to a given search base or class base' do
-    expect(relation.class.base).to eql('ou=department,dc=example,dc=com')
-    expect(relation.with_base.base).to eql('ou=department,dc=example,dc=com')
+    expect(relation.class.base).to eql('ou=department,dc=rom,dc=ldap')
+    expect(relation.with_base.base).to eql('ou=department,dc=rom,dc=ldap')
 
-    expect(relation.with_base('ou=marketing,dc=example,dc=com').base).to eql('ou=marketing,dc=example,dc=com')
+    expect(relation.with_base('ou=marketing,dc=rom,dc=ldap').base).to eql('ou=marketing,dc=rom,dc=ldap')
   end
 
   it '#whole_tree widens search base to the whole directory' do
@@ -40,7 +40,7 @@ RSpec.describe ROM::LDAP::Relation, 'search base' do
   end
 
   it '#branch changes to a named search base branch' do
-    expect(relation.branch(:finance).base).to eql('ou=finance,dc=example,dc=com')
+    expect(relation.branch(:finance).base).to eql('ou=finance,dc=rom,dc=ldap')
   end
 
 

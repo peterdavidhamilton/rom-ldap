@@ -24,7 +24,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     it '#to_msgpack' do
       export = {
         "cn"          => ["Leanda Hamilton"],
-        "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],
+        "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],
         "givenName"   => ["Leanda"],
         "objectClass" => ["apple-user", "organizationalPerson", "person", "extensibleObject", "inetOrgPerson", "top"],
         "sn"          => ["Hamilton"],
@@ -37,7 +37,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     it '#to_ldif' do
       export = <<~LDIF
       cn: Leanda Hamilton
-      dn: cn=Leanda Hamilton,ou=specs,dc=example,dc=com
+      dn: cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
       givenName: Leanda
       objectClass: apple-user
       objectClass: organizationalPerson
@@ -54,7 +54,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     end
 
     it '#to_json' do
-      export = '{"cn":["Leanda Hamilton"],"dn":["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],"givenName":["Leanda"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["124"]}'
+      export = '{"cn":["Leanda Hamilton"],"dn":["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],"givenName":["Leanda"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["124"]}'
 
       expect(relation.to_json).to eql(export)
     end
@@ -65,7 +65,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       cn:
       - Leanda Hamilton
       dn:
-      - cn=Leanda Hamilton,ou=specs,dc=example,dc=com
+      - cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
       givenName:
       - Leanda
       objectClass:
@@ -97,7 +97,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       export = [
         {
           "cn"          => ["Leanda Hamilton"],
-          "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],
+          "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],
           "givenName"   => ["Leanda"],
           "objectClass" => ["apple-user", "organizationalPerson", "person", "extensibleObject", "inetOrgPerson", "top"],
           "sn"          => ["Hamilton"],
@@ -105,7 +105,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
         },
         {
           "cn"          => ["Peter Hamilton"],
-          "dn"          => ["cn=Peter Hamilton,ou=specs,dc=example,dc=com"],
+          "dn"          => ["cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap"],
           "givenName"   => ["Peter"],
           "objectClass" => ["apple-user", "organizationalPerson", "person", "extensibleObject", "inetOrgPerson", "top"],
           "sn"          => ["Hamilton"],
@@ -119,7 +119,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     it '#to_ldif' do
       export = <<~LDIF
       cn: Leanda Hamilton
-      dn: cn=Leanda Hamilton,ou=specs,dc=example,dc=com
+      dn: cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
       givenName: Leanda
       objectClass: apple-user
       objectClass: organizationalPerson
@@ -131,7 +131,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       uidNumber: 124
 
       cn: Peter Hamilton
-      dn: cn=Peter Hamilton,ou=specs,dc=example,dc=com
+      dn: cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap
       givenName: Peter
       objectClass: apple-user
       objectClass: organizationalPerson
@@ -148,7 +148,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     end
 
     it '#to_json' do
-      export = '[{"cn":["Leanda Hamilton"],"dn":["cn=Leanda Hamilton,ou=specs,dc=example,dc=com"],"givenName":["Leanda"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["124"]},{"cn":["Peter Hamilton"],"dn":["cn=Peter Hamilton,ou=specs,dc=example,dc=com"],"givenName":["Peter"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["123"]}]'
+      export = '[{"cn":["Leanda Hamilton"],"dn":["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],"givenName":["Leanda"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["124"]},{"cn":["Peter Hamilton"],"dn":["cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap"],"givenName":["Peter"],"objectClass":["apple-user","organizationalPerson","person","extensibleObject","inetOrgPerson","top"],"sn":["Hamilton"],"uidNumber":["123"]}]'
 
       expect(relation.to_json).to eql(export)
     end
@@ -159,7 +159,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       - cn:
         - Leanda Hamilton
         dn:
-        - cn=Leanda Hamilton,ou=specs,dc=example,dc=com
+        - cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
         givenName:
         - Leanda
         objectClass:
@@ -176,7 +176,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       - cn:
         - Peter Hamilton
         dn:
-        - cn=Peter Hamilton,ou=specs,dc=example,dc=com
+        - cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap
         givenName:
         - Peter
         objectClass:

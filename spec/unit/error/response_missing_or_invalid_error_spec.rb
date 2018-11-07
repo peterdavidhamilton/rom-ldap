@@ -2,7 +2,7 @@ RSpec.describe ROM::LDAP::ResponseMissingOrInvalidError do
 
 # server said nothing or that your request was invalid
 
-# factories[:animals, dn: 'cn=spider,ou=animals,dc=example,dc=com']
+# factories[:animals, dn: 'cn=spider,ou=animals,dc=rom,dc=ldap']
 
 
   # include_context 'animals'

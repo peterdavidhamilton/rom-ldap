@@ -6,8 +6,8 @@ RSpec.describe ROM::LDAP::Relation, 'equality queries' do
 
   let(:user_names) { %w[barry billy bobby sally] }
 
-  describe '#equals with single value' do
-    let(:relation) { relations[:people].equals(uid: 'billy') }
+  describe '#equal with single value' do
+    let(:relation) { relations[:people].equal(uid: 'billy') }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -42,8 +42,8 @@ RSpec.describe ROM::LDAP::Relation, 'equality queries' do
     end
   end
 
- describe '#equals with multiple attributes' do
-    let(:relation) { relations[:people].equals(uid: 'billy', mail: 'billy@example.com') }
+ describe '#equal with multiple attributes' do
+    let(:relation) { relations[:people].equal(uid: 'billy', mail: 'billy@example.com') }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -132,8 +132,8 @@ RSpec.describe ROM::LDAP::Relation, 'equality queries' do
 
 
 
-  describe '#unequals with single value' do
-    let(:relation) { relations[:people].unequals(uid: 'sally') }
+  describe '#unequal with single value' do
+    let(:relation) { relations[:people].unequal(uid: 'sally') }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
@@ -175,8 +175,8 @@ RSpec.describe ROM::LDAP::Relation, 'equality queries' do
 
 
 
-  describe '#unequals with multiple values' do
-    let(:relation) { relations[:people].unequals(uid: %w[billy sally]) }
+  describe '#unequal with multiple values' do
+    let(:relation) { relations[:people].unequal(uid: %w[billy sally]) }
 
     it 'source filter' do
       expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')

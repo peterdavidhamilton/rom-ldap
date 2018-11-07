@@ -15,7 +15,7 @@ RSpec.shared_context 'factory' do
     ROM::LDAP.load_extensions :compatibility
 
     directory.add(
-      dn: 'ou=specs,dc=example,dc=com',
+      dn: 'ou=specs,dc=rom,dc=ldap',
       ou: 'specs',
       object_class: %w'organizationalUnit top'
     )
@@ -23,7 +23,7 @@ RSpec.shared_context 'factory' do
 
 
   after do
-    directory.delete('ou=specs,dc=example,dc=com')
+    directory.delete('ou=specs,dc=rom,dc=ldap')
   end
 
 end
