@@ -4,8 +4,8 @@ module ROM
   module LDAP
     extend Dry::Core::Extensions
 
-    register_extension(:compatible_entry_attributes) do
-      require 'rom/ldap/extensions/compatible_entry_attributes'
+    register_extension(:compatibility) do
+      require 'rom/ldap/extensions/compatibility'
     end
 
     register_extension(:active_support_notifications) do
