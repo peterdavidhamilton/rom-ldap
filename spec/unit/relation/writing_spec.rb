@@ -17,7 +17,7 @@ RSpec.describe ROM::LDAP::Relation do
     it '#insert returns false on failure' do
       expect(
         accounts.insert(
-          dn: 'uid=batman,ou=users,dc=example,dc=com',
+          dn: 'uid=batman,ou=users,dc=rom,dc=ldap',
           cn: 'The Dark Knight',
           uid: 'batman',
           sn: 'Wayne',
@@ -35,7 +35,7 @@ RSpec.describe ROM::LDAP::Relation do
     it '#insert -> #update -> #delete' do
       expect(
         accounts.insert(
-          dn: 'uid=batman,ou=users,dc=example,dc=com',
+          dn: 'uid=batman,ou=users,dc=rom,dc=ldap',
           cn: 'The Dark Knight',
           uid: 'batman',
           sn: 'Wayne',
@@ -77,7 +77,7 @@ RSpec.describe ROM::LDAP::Relation do
     it '#insert -> #update -> #delete' do
       expect(
         accounts.insert(
-          dn: 'uid=batman,ou=users,dc=example,dc=com',
+          dn: 'uid=batman,ou=users,dc=rom,dc=ldap',
           cn: 'The Dark Knight',
           uid: 'batman',
           sn: 'Wayne',

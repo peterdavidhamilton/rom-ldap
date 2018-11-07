@@ -1,16 +1,16 @@
 version: 1
 
-dn: dc=example,dc=com
+dn: dc=rom,dc=ldap
 dc: example
 objectClass: top
 objectClass: domain
 
-dn: ou=animals,dc=example,dc=com
+dn: ou=animals,dc=rom,dc=ldap
 objectClass: top
 objectClass: organizationalUnit
 ou: animals
 
-dn: ou=extinct,ou=animals,dc=example,dc=com
+dn: ou=extinct,ou=animals,dc=rom,dc=ldap
 objectClass: top
 objectClass: organizationalUnit
 ou: extinct

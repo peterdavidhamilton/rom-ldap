@@ -49,7 +49,7 @@ RSpec.shared_context 'animals' do
 
       f.dn do |cn|
         common_name = cn.is_a?(Array) ? cn.first : cn
-        "cn=#{common_name},ou=specs,dc=example,dc=com"
+        "cn=#{common_name},ou=specs,dc=rom,dc=ldap"
       end
 
       f.object_class do

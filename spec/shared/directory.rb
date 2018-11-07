@@ -1,11 +1,10 @@
 RSpec.shared_context 'directory' do
 
   let(:base) do
-    'ou=specs,dc=example,dc=com'
+    'ou=specs,dc=rom,dc=ldap'
   end
 
   let(:servers) do
-    # %w'127.0.0.1:389'
     [ "#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}" ]
   end
 

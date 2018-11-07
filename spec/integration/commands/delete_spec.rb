@@ -19,7 +19,7 @@ RSpec.describe 'Commands / Delete' do
     end
 
     accounts.insert(
-      dn: 'uid=black_panther,ou=users,dc=example,dc=com',
+      dn: 'uid=black_panther,ou=users,dc=rom,dc=ldap',
       cn: 'King of Wakanda',
       uid: 'black_panther',
       givenname: "T'Challa",

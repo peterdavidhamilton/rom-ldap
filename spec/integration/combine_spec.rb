@@ -5,7 +5,7 @@ RSpec.describe 'Combine relations' do
   before do
     # https://en.wikipedia.org/wiki/Indian_pangolin
     directory.add(
-      dn: 'cn=Pangolin,ou=animals,dc=example,dc=com',
+      dn: 'cn=Pangolin,ou=animals,dc=rom,dc=ldap',
       cn: ['Indian Pangolin', 'Thick-tailed Pangolin', 'Scaly Anteater'],
       species: 'Manis crassicaudata',
       objectclass: %w[extensibleObject mammalia]
@@ -13,19 +13,19 @@ RSpec.describe 'Combine relations' do
 
     countries << {
       name: 'India',
-      dn: 'cn=Pangolin,ou=animals,dc=example,dc=com',
+      dn: 'cn=Pangolin,ou=animals,dc=rom,dc=ldap',
     }
   end
 
   it 'combine' do
 
 #     relations[:countries].to_a
-#     # [{:name=>"India", :dn=>"cn=Pangolin,ou=animals,dc=example,dc=com"}]
+#     # [{:name=>"India", :dn=>"cn=Pangolin,ou=animals,dc=rom,dc=ldap"}]
 # binding.pry
 #     countries.with_wildlife(predators.base).to_a
 #     prey.base.join(:countries).to_a
 
-    # countries.with_wildlife([{dn: 'cn=Pangolin,ou=animals,dc=example,dc=com' }])
+    # countries.with_wildlife([{dn: 'cn=Pangolin,ou=animals,dc=rom,dc=ldap' }])
     # tags = container.relations[:tags]
     # relation = users.combine_with(tasks.for_users.combine_with(tags.for_tasks))
 

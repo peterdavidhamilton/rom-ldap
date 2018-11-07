@@ -15,21 +15,21 @@ RSpec.describe ROM::LDAP::Relation, '#fetch' do
     # end
 
     it 'returns a single tuple' do
-      expect(people.fetch('cn=Megatron,ou=specs,dc=example,dc=com')[:uid_number]).to eql(1)
-      expect(people.fetch('cn=Optimus,ou=specs,dc=example,dc=com')[:create_timestamp].class).to eql(Time)
+      expect(people.fetch('cn=Megatron,ou=specs,dc=rom,dc=ldap')[:uid_number]).to eql(1)
+      expect(people.fetch('cn=Optimus,ou=specs,dc=rom,dc=ldap')[:create_timestamp].class).to eql(Time)
     end
 
     it 'raises when tuple was not found' do
       expect {
-        people.fetch('uid=unknown,ou=spec,dc=example,dc=com')
+        people.fetch('uid=unknown,ou=spec,dc=rom,dc=ldap')
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation does not contain any tuples')
     end
 
     it 'raises when more tuples are found' do
       expect {
         people.fetch([
-          'cn=Megatron,ou=specs,dc=example,dc=com',
-          'cn=Optimus,ou=specs,dc=example,dc=com'
+          'cn=Megatron,ou=specs,dc=rom,dc=ldap',
+          'cn=Optimus,ou=specs,dc=rom,dc=ldap'
         ])
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation consists of more than one tuple')
     end
