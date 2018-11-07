@@ -393,7 +393,7 @@ objectClass: ads-base
 objectclass: ads-partition
 objectclass: ads-jdbmPartition
 ads-partitionSuffix: dc=rom,dc=ldap
-ads-contextentry:: ZG46IGRjPW9wZW5taWNyb3Njb3B5LGRjPW9yZw0KZGM6IG9wZW5taWNyb3Njb3B5DQpvYmplY3RjbGFzczogZG9tYWluDQpvYmplY3RjbGFzczogdG9w
+ads-contextentry:: ZG46IGRjPXJvbSxkYz1sZGFwCmRjOiByb20tbGRhcApvYmplY3RDbGFzczogdG9wCm9iamVjdENsYXNzOiBkb21haW4=
 ads-jdbmpartitionoptimizerenabled: TRUE
 ads-partitioncachesize: 100
 ads-partitionsynconwrite: TRUE
