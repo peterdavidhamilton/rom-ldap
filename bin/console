@@ -1,17 +1,36 @@
 #!/usr/bin/env ruby
+#
+#
+#
 require 'bundler/setup'
 
 require 'rom/ldap'
-ROM::LDAP.load_extensions :compatible_entry_attributes
+ROM::LDAP.load_extensions :compatibility
 
-conf = ROM::Configuration.new(:ldap, servers: %w'127.0.0.1:10389')
+module Sandbox
+  module_function
 
-conf.relation(:foo) { schema('(objectClass=*)', as: :foo, infer: true) }
+  def conf
+    ROM::Configuration.new(:ldap) do |conf|
+      conf.relation(:all) do
+        schema('(objectClass=*)', infer: true)
+      end
+    end
+  end
 
-container = ROM.container(conf)
+  def container
+    ROM.container(conf)
+  end
 
-foo = container.relations[:foo]
+  def sandbox
+    container.relations[:all]
+  end
+end
+
+include Sandbox
 
 require 'pry'
 Pry.start
 
+# List every distinguished name
+# sandbox.map(:dn).to_a

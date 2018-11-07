@@ -12,7 +12,7 @@ RSpec.shared_context 'factory' do
     # @note
     #   Select LDAP attribute formatter before defining relations.
     #
-    ROM::LDAP.load_extensions :compatible_entry_attributes
+    ROM::LDAP.load_extensions :compatibility
 
     directory.add(
       dn: 'ou=specs,dc=example,dc=com',
