@@ -11,6 +11,27 @@ module ROM
   module LDAP
     class Dataset
       module Reading
+
+        # @see Connection::Read#encode_sort_controls
+        #
+        # Alphabetical increasing
+        # Numerical increasing
+        # FALSE to TRUE
+        #
+        # @param attribute [String,Symbol]
+        #
+        def order_by(attribute)
+          with(sort_attr: [original_name(attribute)])
+        end
+
+        # @param attr [String, Symbol]
+        # @return [String] server-side version of attribute
+        # @note passed as 'sort' value to directory#search
+        #
+        def original_name(attr)
+          directory.attribute_types.find { |a| a[:name].eql?(attr) }[:original]
+        end
+
         # Find by Distinguished Name(s)
         #
         # @note This is not the same as Relation#fetch.
@@ -54,7 +75,8 @@ module ROM
           end
         end
 
-        # Unrestricted count of every entry under the base with base entry deducted.
+        # Unrestricted count of every entry under the search base
+        #   with the domain entry discounted.
         #
         # @return [Integer]
         #

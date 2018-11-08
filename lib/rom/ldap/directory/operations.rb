@@ -21,7 +21,7 @@ module ROM
             yield entity if block_given?
           end
 
-          set.sort_by(&:dn)
+          set
         end
 
 
@@ -45,13 +45,15 @@ module ROM
         # @return [Array<Directory::Entry>]
         #
         # @api public
-        def search(ast, base: nil)
+        def search(ast, base: nil, **options)
           Timeout.timeout(timeout) do
             query(filter:      ast,
                   base:        base,
                   max_results: max_results,
                   deref:       DEREF_ALWAYS,
-                  unlimited:   unlimited?)
+                  unlimited:   unlimited?,
+                  **options
+                  )
           end
         rescue Timeout::Error # => e
         end
@@ -105,7 +107,7 @@ module ROM
         #
         # @api public
         def add(tuple)
-          args = prepare_payload(tuple)
+          args = tuplify(tuple)
           dn   = args.delete(:dn)
 
           raise(OperationError, 'distinguished name is required') unless dn
@@ -128,8 +130,7 @@ module ROM
         #
         # @api public
         def modify(dn, tuple) # third param :replace
-          args = prepare_payload(tuple)
-          ops  = args.map { |attribute, value| [:replace, attribute, value] }
+          ops = tuplify(tuple).map { |attr, val| [:replace, attr, val] }
 
           logger.debug("#{self.class}##{__callee__} '#{dn}'")
 
@@ -172,18 +173,22 @@ module ROM
 
         private
 
-        # Tuplify operation input, using a translation hash to rename keys.
+        # Rename the formatted keys of the incoming tuple to their original
+        #   server-side format.
         #
-        # @note Used by #add and #modify
+        # @note Used by Directory#add and Directory#modify
         #
-        # @param args [Hash]
+        # @param tuple [Hash]
+        #
+        # @example
+        #   # => tuplify(population_count: 0) => { 'populationCount' => 0 }
         #
         # @api private
-        def prepare_payload(args)
-          attributes  = attribute_types.select { |a| args.key?(a[:name]) }
-          transmatrix = attributes.map { |a| a.values_at(:name, :original) }.to_h
+        def tuplify(tuple)
+          attrs   = attribute_types.select { |a| tuple.key?(a[:name]) }
+          key_map = attrs.map { |a| a.values_at(:name, :original) }.to_h
 
-          Functions[:tuplify].call(args, transmatrix)
+          Functions[:tuplify].call(tuple, key_map)
         end
       end
     end

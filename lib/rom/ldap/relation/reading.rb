@@ -123,6 +123,7 @@ module ROM
         def by_pk(pk)
           if primary_key == :dn
             new(dataset.fetch(pk))
+            # with_base(pk)
           else
             where(primary_key => pk)
           end
@@ -166,28 +167,28 @@ module ROM
           dataset.reverse_each.first
         end
 
-        # TODO: server-side sorting https://tools.ietf.org/html/rfc2891
-        #
         # Orders the dataset by a given attribute using the coerced value.
         #   Numeric attributes should appear in increasing order.
         #
         # @param attribute [Symbol]
         #
         # @example
-        #   relation.order(:uid_number) => 101, 202, 303
+        #   relation.order(:uid_number).to_a =>
+        #     [
+        #       {uid_number: 101},
+        #       {uid_number: 202},
+        #       {uid_number: 303}
+        #     ]
         #
         # @return [Relation]
         #
         # @api public
         def order(attribute)
           # if dataset.directory.sortable?
-          #   binding.pry
-          #   new(dataset)
+            new(dataset.order_by(attribute))
           # else
-            new(dataset.sort_by { |tuple| output_schema[tuple][attribute] })
+          #   new(dataset.sort_by { |tuple| output_schema[tuple][attribute] })
           # end
-
-          # new(dataset.with(entries: dataset.sort_by { |tuple| output_schema[tuple][attribute] })
         end
 
         # Limits the dataset to a number of tuples

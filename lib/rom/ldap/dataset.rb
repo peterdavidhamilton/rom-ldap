@@ -56,6 +56,11 @@ module ROM
         optional: true,
         type:     Dry::Types['strict.integer']
 
+      option :sort_attr,
+        reader:   :private,
+        optional: true,
+        type:     Dry::Types['strict.array']
+
       option :entries,
         reader:   false,
         optional: true,
@@ -98,6 +103,8 @@ module ROM
           .freeze
       end
 
+      # FIXME: selected attributes in query
+      #
       # @return [Dataset]
       #
       # @api public
@@ -122,7 +129,8 @@ module ROM
 
       def map(key = nil, &block)
         if key
-          each.map { |e| e.select(key) }.map(&block)
+          # each.map { |e| e.select(key) }.map(&block)
+          each.map { |e| e[key] }.map(&block)
         else
           each.map(&block)
         end
@@ -188,7 +196,7 @@ module ROM
       #
       # @api private
       def entries
-        results = options[:entries] || directory.search(query_ast, base: base)
+        results = options[:entries] || directory.search(query_ast, base: base, sort: sort_attr)
         options[:criteria] = []
         options[:entries]  = nil
         results
