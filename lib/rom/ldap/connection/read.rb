@@ -41,7 +41,7 @@ module ROM
           attributes: ALL_ATTRIBUTES,
           attributes_only: false,
           return_referrals: false,
-          sort: false, # %w[dn]
+          sort: false,
           unlimited: true
         )
 
@@ -145,8 +145,7 @@ module ROM
 
         private
 
-        # @todo Sort controls sill relevant?
-        #
+
         # @example
         #   just a string
         #     => ['cn']
@@ -157,7 +156,7 @@ module ROM
         #   multiple strings or arrays
         #     => ['givenname', 'sn']
         #
-        # @param definitions [Boolean, Array]
+        # @param definitions [Boolean, Array<Mixed>]
         #
         # @api private
         def encode_sort_controls(definitions)

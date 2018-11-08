@@ -12,8 +12,8 @@ module ROM
 
         # @api private
         def call(schema, gateway)
-          dataset      = schema.name.dataset
-          columns      = dataset_attributes(gateway, dataset)
+          dataset = schema.name.dataset
+          columns = dataset_attributes(gateway, dataset)
 
           inferred = columns.map do |name|
             type = type_builder.call(name, schema.name)
@@ -32,8 +32,11 @@ module ROM
 
         private
 
-        # Canonical attribute names used within dataset. Array contents are effect
-        # by the formatting proc.
+        # Canonical attribute names used within dataset.
+        #   Array contents are effect by the formatting proc.
+        #
+        # @param dataset [String] LDAP filter string / dataset name
+        # @param gateway [ROM::LDAP::Gateway]
         #
         # @return [Array<Symbol, String>]
         #
