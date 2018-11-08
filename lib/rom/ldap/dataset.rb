@@ -147,7 +147,15 @@ module ROM
 
       private
 
-      # Update the criteria
+      # Update the criteria.
+      #   If criteria already exist join with AND.
+      #
+      # @example
+      #   chain(:op_eql, :uid,  "*foo*")
+      #
+      # @param exprs [Mixed] AST built by QueryDSL
+      #
+      # @return [Dataset]
       #
       # @api private
       def chain(*exprs)
