@@ -107,27 +107,44 @@ module ROM
           chain(:con_not, match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
 
+        # @param args [Range]
+        #
+        # @api public
         def within(args)
           chain(:con_and, cover_dsl(args))
         end
         alias between within
 
+        # @param args [Range]
+        #
+        # @api public
         def outside(args)
           chain(:con_not, [:con_and, cover_dsl(args)])
         end
 
         private
 
-        # Each where becomes and or
-        # Handle potential arrays of arguments with a join.
+        # Handle multiple criteria with an OR join.
+        #   @see #chain for AND join.
         #
-        # @param args [Array]
+        # @param args [Hash]
         #
-        # @return [Array]
+        # @return [Array] AST
         #
         # @example
-        #   array_dsl({sn: 'hamilton', gn: %w[leanda peter]})
-        #     # =>
+        #   array_dsl(sn: 'hamilton', gn: %w[leanda peter])
+        #   =>
+        #       [ :con_or,
+        #         [
+        #           [ :op_eql, :sn, "hamilton" ],
+        #           [ :con_or,
+        #             [
+        #               [ :op_eql, :gn, "leanda" ],
+        #               [ :op_eql, :gn, "peter" ]
+        #             ]
+        #           ]
+        #         ]
+        #       ]
         #
         # @api private
         def array_dsl(args)
@@ -170,7 +187,7 @@ module ROM
 
         # Process values >= 1
         #
-        # @param args [Array]
+        # @param args [Range,Array]
         #
         # @return [Array]
         #
