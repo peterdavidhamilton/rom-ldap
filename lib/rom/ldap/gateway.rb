@@ -68,7 +68,7 @@ module ROM
       # @api public
       #
       def [](filter)
-        directory.attributes(filter) || EMPTY_ARRAY
+        directory.attributes(filter)
       end
 
       # Directory attributes identifiers and descriptions.
@@ -136,10 +136,9 @@ module ROM
       # @api public
       #
       def servers
-        # options.fetch(:servers,
-        #   ["#{ENV.fetch('LDAPHOST', 'localhost')}:#{ENV.fetch('LDAPPORT', 389)}"]
-        # )
-        options[:servers]
+        options.fetch(:servers,
+          ["#{ENV.fetch('LDAPHOST', 'localhost')}:#{ENV.fetch('LDAPPORT', 389)}"]
+        )
       end
 
       # The Directory class receives the Connection and is passed to Dataset.
@@ -163,7 +162,6 @@ module ROM
       def connect!
         Connection.new(
           servers:          servers,
-          server:           "#{ENV.fetch('LDAPHOST', 'localhost')}:#{ENV.fetch('LDAPPORT', 389)}",
           connect_timeout:  options[:timeout],
           read_timeout:     options[:timeout],
           write_timeout:    options[:timeout],
