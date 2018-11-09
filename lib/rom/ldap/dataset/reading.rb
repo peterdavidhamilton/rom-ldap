@@ -25,11 +25,16 @@ module ROM
         end
 
         # @param attr [String, Symbol]
+        #
         # @return [String] server-side version of attribute
-        # @note passed as 'sort' value to directory#search
+        #
+        # @raise [ArgumentError]
+        #
+        # @note passed as keyword 'sort' to directory#search
         #
         def original_name(attr)
-          directory.attribute_types.find { |a| a[:name].eql?(attr) }[:original]
+          field = directory.attribute_types.find { |a| a[:name].eql?(attr) }
+          field ? field[:original] : raise(ArgumentError, "#{attr} is not a known attribute")
         end
 
         # Find by Distinguished Name(s)

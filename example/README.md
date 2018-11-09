@@ -8,6 +8,8 @@ A demonstration of rom-ldap using biological classification and taxonomic hierar
 - `$ bundle exec rake ldif[wildlife/animals]`
 - `$ bundle exec ruby ./life.rb`
 
+`docker run --name rom-ldap -d -p 389:10389 -e APACHEDS_INSTANCE=rom-ldap -v $(pwd)/example/ldif/config.ldif:/bootstrap/conf/config.ldif:ro openmicroscopy/apacheds`
+
 `$ convert -size 1x1 xc:white pixel.jpg`
 
 Suggested additions to the example animals:

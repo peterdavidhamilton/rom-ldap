@@ -6,6 +6,7 @@ RSpec.shared_context 'animals' do
 
     directory.add(
       dn: "cn=foo,#{base}",
+      discovery_date: '20070508200557Z',
       cn: 'foo',
       endangered: false,
       extinct: false,
@@ -92,12 +93,11 @@ RSpec.shared_context 'animals' do
         f.extinct true
       end
 
-
-      # f.endangered { fake(:boolean) }
-      # f.extinct { fake(:boolean) }
-
-
       f.description 'description'
+
+      f.discovery_date do
+        fake(:date, :birthday, rand).to_time.utc.strftime("%Y%m%d%H%M%SZ")
+      end
 
       # strings
       f.species do |genus|
