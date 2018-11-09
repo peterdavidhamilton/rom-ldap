@@ -24,7 +24,8 @@ module ROM
       Bools     = Array.constructor(Functions[:map_to_booleans])
 
       # Special LDAP Read Types --------
-      Address   = Constructor(String, ->(v) { v.map { |a| a.split('$').map(&:strip) }.first })
+      Address   = Constructor(String, ->(v) { v.split('$').map(&:strip) })
+      # Addresses = Constructor(Array, ->(v) { v.map { |a| a.split('$').map(&:strip) }.first })
     end
   end
 end

@@ -1,26 +1,72 @@
 RSpec.describe ROM::LDAP::Types do
 
-  # describe 'ROM::LDAP::Types::Input' do
-  #   it 'coerces input to strings' do
-  #     klass = ROM::LDAP::Types::Input
+  describe 'Address' do
+    subject(:type) { ROM::LDAP::Types::Address }
 
-  #     klass[nil].must_equal     ''
-  #     klass['hello'].must_equal 'hello'
-  #     klass[Object].must_equal  'Object'
-  #     klass[:symbol].must_equal 'symbol'
-  #   end
-  # end
+    it 'foo' do
+      expect(type['street$town$region$country']).to eq(%w[street town region country])
+    end
 
-  # describe 'ROM::LDAP::Types::Entry' do
-  #   it 'coerces input to array of strings' do
-  #     klass  = ROM::LDAP::Types::Entry
-  #     input  = [nil, 'string', :symbol, Object]
-  #     output = klass[input]
+    xit 'ignores other values' do
+      expect(type[nil]).to be_nil
+      expect(type['string']).to eql('string')
+      expect(type[Object]).to eql(Object)
+      expect(type[:symbol]).to eql(:symbol)
+      expect(type[123]).to eql(123)
+    end
+  end
 
-  #     output.must_be_instance_of Array
-  #     output.must_equal ['', 'string', 'symbol', 'Object']
-  #   end
-  # end
+  describe 'Time' do
+    subject(:type) { ROM::LDAP::Types::Time }
+
+    it 'ignores nil values' do
+      expect(type[nil]).to be_nil
+    end
+
+    # oid:1.3.6.1.4.1.1466.115.121.1.24
+    it 'coerces GeneralizedTime' do
+      expect(type['20181109175836.147Z'].to_s).to eq('2018-11-09 17:58:36 UTC')
+      expect(type['20020514230000Z'].to_s).to eq('2002-05-14 23:00:00 UTC')
+    end
+
+    it 'coerces Active Directory timestamps' do
+      expect(type['131862601330000000'].to_s).to eq('2018-11-09 18:02:13 +0000')
+      expect(type[0].to_s).to eql('1601-01-01 01:00:00 +0100')
+    end
+
+    it 'raises errors with invalid values' do
+      expect { type['string'] }.to raise_error(ArgumentError, 'no time information in "string"')
+      expect { type[Object] }.to raise_error(TypeError, "can't convert Class into Integer")
+      expect { type[:symbol] }.to raise_error(TypeError, "can't convert Symbol into Integer")
+    end
+  end
+
+
+  describe 'Bool' do
+    subject(:type) { ROM::LDAP::Types::Bool }
+
+    it 'coerces true values' do
+      expect(type['t']).to be(true)
+      expect(type['TRUE']).to be(true)
+      expect(type['y']).to be(true)
+      expect(type['yes']).to be(true)
+    end
+
+    it 'coerces false values' do
+      expect(type['f']).to be(false)
+      expect(type['FALSE']).to be(false)
+      expect(type['n']).to be(false)
+      expect(type['no']).to be(false)
+    end
+
+    it 'ignores other values' do
+      expect(type[nil]).to be_nil
+      expect(type['string']).to eql('string')
+      expect(type[Object]).to eql(Object)
+      expect(type[:symbol]).to eql(:symbol)
+      expect(type[123]).to eql(123)
+    end
+  end
 
   # describe 'ROM::LDAP::Types::Jpeg' do
   #   it 'coerces binary data to base64 encoding' do
