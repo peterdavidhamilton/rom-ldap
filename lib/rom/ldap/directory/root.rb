@@ -40,6 +40,8 @@ module ROM
           end
         end
 
+        # Check if vendor identifies as ActiveDirectory
+        #
         # @return [Boolean]
         #
         # @api public
@@ -47,11 +49,13 @@ module ROM
           !!root['forestFunctionality']
         end
 
+        # Check if vendor identifies as OpenLDAP
+        #
         # @return [Boolean]
         #
         # @api public
         def od?
-          root['objectClass'].include?('OpenLDAProotDSE')
+          root['objectClass']&.include?('OpenLDAProotDSE')
         end
 
 

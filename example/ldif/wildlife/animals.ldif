@@ -333,6 +333,7 @@ objectClass: extensibleObject
 objectClass: top
 populationCount: 0
 extinct: TRUE
+discoveryDate: 15980101000000Z
 
 dn: cn=Turtle Frog,ou=animals,dc=rom,dc=ldap
 cn: Turtle Frog
