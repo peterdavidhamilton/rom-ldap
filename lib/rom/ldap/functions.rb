@@ -152,9 +152,24 @@ module ROM
         Dry::Types['params.bool'][value]
       end
 
+      # The 18-digit Active Directory timestamps,
+      # also named 'Windows NT time format','Win32 FILETIME or SYSTEMTIME' or NTFS file time.
+      #
+      # These are used in Microsoft Active Directory for
+      # pwdLastSet, accountExpires, LastLogon, LastLogonTimestamp and LastPwdSet.
+      #
+      # The timestamp is the number of 100-nanoseconds intervals (1 nanosecond = one billionth of a second)
+      # since Jan 1, 1601 UTC.
+      #
+      # Milliseconds are discarded (last 7 digits of the LDAP timestamp)
+      #
+      # @see ROM::LDAP::Types::Time
+      #
+      # @param value [String] time or integer
+      #
       def self.to_time(value)
-        time = (Integer(value) / TEN_MILLION) - SINCE_1601
-        ::Time.at(time)
+        unix_epoch_time = (Integer(value) / TEN_MILLION) - SINCE_1601
+        ::Time.at(unix_epoch_time)
       rescue ArgumentError
         ::Time.parse(value).utc
       end
