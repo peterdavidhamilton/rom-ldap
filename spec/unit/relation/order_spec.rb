@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation, 'order' do
 
+  before { skip('awaiting redesign') }
+
   include_context 'animals'
 
   before do

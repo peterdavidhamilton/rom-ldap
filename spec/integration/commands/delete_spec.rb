@@ -1,5 +1,7 @@
 RSpec.describe 'Commands / Delete' do
 
+  before { skip('awaiting redesign') }
+
   # let(:formatter) { method_formatter }
 
   # include_context 'relations'

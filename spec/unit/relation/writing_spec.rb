@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation do
 
+  before { skip('awaiting redesign') }
+
   describe '#insert downcase' do
 
     # let(:formatter) { downcase_formatter }
