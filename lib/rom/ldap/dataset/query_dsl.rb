@@ -103,6 +103,8 @@ module ROM
         end
         alias matches contains
 
+        # negate #contains
+        #
         def excludes(args)
           chain(:con_not, match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
@@ -115,12 +117,34 @@ module ROM
         end
         alias between within
 
+        # negate #outside
+        #
         # @param args [Range]
         #
         # @api public
         def outside(args)
           chain(:con_not, [:con_and, cover_dsl(args)])
         end
+
+
+
+
+                    def binary_equal(args)
+                      chain(:op_bineq, *args.to_a[0])
+                    end
+
+                    def approx(args)
+                      chain(:op_prx, *args.to_a[0])
+                    end
+
+                    def bitwise(args)
+                      chain(:op_ext, *args.to_a[0])
+                    end
+
+
+
+
+
 
         private
 
@@ -155,11 +179,9 @@ module ROM
           join_dsl(:con_or, expressions)
         end
 
-        # Apply Union (|) or Intersection (&) if two or more.
-        # Use :con_or for multiple values of an attribute.
-        # Used :con_and for multiple attributes.
+        # Wrap criteria with a join operator.
         #
-        # @param operator [Symbol] :con_or
+        # @param operator [Symbol] :con_or, :con_and
         #
         # @param ary [Array] [[op, left, right],[op, left, right]]
         #
@@ -168,24 +190,28 @@ module ROM
           ary.size >= 2 ? [operator, ary] : ary.first
         end
 
-        # Process values >= 1
+        # Wrap criteria value with extra characters, used for wildcard
         #
         # @param args [Array]
         #
-        # @options :left [String] prepended to value - used for wildcard
+        # @options :left [String] prepended to value.
         #
-        # @options :right [String] appended to value - used for wildcard
+        # @options :right [String] appended to value.
         #
         # @return [Array]
+        #
+        # @example
+        #   match_dsl(bar: 'foo', left: '*', right: '*')
+        #       => [:op_eql, :bar, '*foo*']
         #
         # @api private
         def match_dsl(args, left: EMPTY_STRING, right: EMPTY_STRING)
           attribute, value = args.to_a[0]
-          value = left + escape(value) + right
+          value = left.to_s + escape(value) + right.to_s
           [:op_eql, attribute, value]
         end
 
-        # Process values >= 1
+        #
         #
         # @param args [Range,Array]
         #
@@ -202,7 +228,10 @@ module ROM
           [lower, upper]
         end
 
-        # Escape "(, ), \, *, null" characters
+        # If any of the following special characters must appear in the
+        # search filter as literals, they must be escsped.
+        #
+        # "(", ")", "\", ,"/" "*", "null"
         #
         # @api private
         def escape(value)
