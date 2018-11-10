@@ -114,7 +114,7 @@ module ROM
         #
         # @api private
         def by_syntax(oid)
-          ::BER.lookup(:oid, oid)
+          ::BER.lookup(:types, oid)
         end
 
         # @param matcher [String]
