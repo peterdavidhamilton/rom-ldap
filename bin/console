@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 #
+# `$ LDAPHOST=x.x.x.x LDAPPORT=389 bundle exec ./bin/console`
+#
+# List every distinguished name
+#   # => ldap.map(:dn).to_a
 #
 #
 require 'bundler/setup'
@@ -22,7 +26,7 @@ module Sandbox
     ROM.container(conf)
   end
 
-  def sandbox
+  def ldap
     container.relations[:all]
   end
 end
@@ -31,6 +35,3 @@ include Sandbox
 
 require 'pry'
 Pry.start
-
-# List every distinguished name
-# sandbox.map(:dn).to_a
