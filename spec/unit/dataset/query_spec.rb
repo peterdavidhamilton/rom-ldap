@@ -1,3 +1,19 @@
+# con_and:  '&'      # AND
+# con_or:   '|'      # OR
+# con_not:  '!'      # NOT
+# op_prx:   '~='     # Approximately equal to
+# op_ext:   ':='     # Bitwise comparison of numeric values
+# op_gte:   '>='     # Lexicographically greater than or equal to
+# op_lte:   '<='     # Lexicographically less than or equal to
+# op_eql:   '='      # Equal to
+# op_bineq: '='      #   uses #to_ber_bin on value
+
+# In addition to the operators above,
+# LDAP defines two matching rule object identifiers (OIDs) that can be used to
+# perform bitwise comparisons of numeric values.
+# Matching rules have the following syntax.
+
+
 RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
 
   include_context 'animals'
@@ -106,5 +122,52 @@ RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
         [:con_not, [:con_and, [[:op_gte, :bar, 1], [:op_lte, :bar, 999]]]]
       )
     end
+  end
+
+
+
+  describe 'FOO!' do
+
+    it 'op_bineq' do
+      binding.pry
+      expect(dataset.binary_equal(bar: 'foo').opts[:criteria]).to eql(
+        [:op_bineq, :bar, 'foo']
+      )
+    end
+
+    it 'op_ext' do
+      expect(dataset.bitwise(bar: 'foo').opts[:criteria]).to eql([:op_ext, :bar, 'foo'])
+    end
+
+    it 'op_prx' do
+      expect(dataset.approx(bar: 'foo').opts[:criteria]).to eql([:op_prx, :bar, 'foo'])
+    end
+  end
+
+
+
+  describe 'chained criteria' do
+
+    it '2 methods' do
+      expect(dataset.where(bar: %w'foo baz').above(quux: 100).opts[:criteria]).to eql(
+        [
+          :con_and,
+          [
+            [
+              :con_or,
+              [
+                [:op_eql, :bar, 'foo'],
+                [:op_eql, :bar, 'baz']
+              ]
+            ],
+            [
+              :con_not,
+              [:op_lte, :quux, 100]
+            ]
+          ]
+        ]
+      )
+    end
+
   end
 end
