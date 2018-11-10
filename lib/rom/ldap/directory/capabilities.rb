@@ -1,13 +1,25 @@
 module ROM
   module LDAP
     class Directory
+      #
+      # Convenience predicates
+      #
       module Capabilities
 
+        def capabilities
+          supported_controls.map { |oid| ::BER.lookup(:controls, oid) }.sort
+        end
+
+        # Is the server able to order the entries.
+        #
         # @return [Boolean]
         #
         # @api public
         def sortable?
-          supported_controls.include?(SORT_RESPONSE)
+          # supported_controls.include?(SORT_RESPONSE)
+          capabilities.include?(:sort_response)
+          # or
+          # ::BER.reverse_lookup(:controls, :sort_response)
         end
 
         # @return [Boolean]
