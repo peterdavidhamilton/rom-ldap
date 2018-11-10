@@ -1,3 +1,9 @@
+# Fail fast if directory will be unreachable.
+#
+abort('Please set LDAP env variables') unless
+  !ENV['LDAPHOST'].empty? &&
+  !ENV['LDAPPORT'].empty?
+
 require 'bundler/setup'
 
 begin
