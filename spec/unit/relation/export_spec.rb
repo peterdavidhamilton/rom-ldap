@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation, 'exporting' do
 
+  before { skip('awaiting redesign') }
+
   include_context 'people'
 
   before do

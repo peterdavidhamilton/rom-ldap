@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation do
 
+  before { skip('awaiting redesign') }
+
   let(:formatter) { downcase_formatter }
 
   include_context 'factory'

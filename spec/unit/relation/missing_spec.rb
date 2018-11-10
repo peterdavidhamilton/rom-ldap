@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation, '#missing' do
 
+  before { skip('awaiting redesign') }
+
   let(:formatter) { downcase_formatter }
 
   let(:user_names) { %w[rita sue bob] }

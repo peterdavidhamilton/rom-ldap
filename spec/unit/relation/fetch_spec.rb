@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation, '#fetch' do
 
+  before { skip('awaiting redesign') }
+
   context 'with default primary_key' do
 
     include_context 'people'

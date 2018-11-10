@@ -25,7 +25,7 @@ RSpec.describe ROM::LDAP::Relation, 'special operators' do
   # Search for homophones
   #
   it 'is approx' do
-    binding.pry
+    # binding.pry
     expect(animals.with_base('ou=animals,dc=rom,dc=ldap').approx(cn: 'cam').to_a).to eql([])
   end
 

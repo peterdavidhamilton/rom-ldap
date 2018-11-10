@@ -5,15 +5,14 @@ RSpec.shared_context 'directory' do
   end
 
   let(:servers) do
-    [ "#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}" ]
+    ["#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}"]
   end
 
   let(:gateway_opts) do
     {
       servers: servers,
-      base: base,
-      # timeout: 0,
-      logger: Logger.new(File.open('./log/test.log', 'a'))
+      base:    base,
+      logger:  Logger.new(File.open('./log/test.log', 'a'))
     }
   end
 

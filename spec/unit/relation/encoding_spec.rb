@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation do
 
+  before { skip('awaiting redesign') }
+
   include_context 'people'
 
   describe '#where using non-utf8 encoded string' do

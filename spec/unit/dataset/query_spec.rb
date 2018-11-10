@@ -129,7 +129,6 @@ RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
   describe 'FOO!' do
 
     it 'op_bineq' do
-      binding.pry
       expect(dataset.binary_equal(bar: 'foo').opts[:criteria]).to eql(
         [:op_bineq, :bar, 'foo']
       )

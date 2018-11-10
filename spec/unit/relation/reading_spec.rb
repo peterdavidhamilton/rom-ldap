@@ -1,5 +1,7 @@
 RSpec.describe ROM::LDAP::Relation do
 
+  before { skip('awaiting redesign') }
+
   describe 'uncoerced attributes' do
 
     # let(:formatter) { nil }
