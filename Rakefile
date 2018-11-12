@@ -1,6 +1,3 @@
-require 'pathname'
-ROOT = Pathname(__FILE__).dirname
-
 if ENV['DEBUG']
   begin
     require 'pry-byebug'
@@ -9,5 +6,7 @@ if ENV['DEBUG']
 end
 
 require 'bundler/gem_tasks'
+
+load 'rom/ldap/tasks/ldap.rake'
 
 task default: [:spec]
