@@ -19,11 +19,6 @@ TMP_PATH  = root.join('../tmp')
 require 'dry/core/deprecations'
 Dry::Core::Deprecations.set_logger!(root.join('../log/deprecations.log'))
 
-require 'faker'
-Faker::Config.random = Random.new(42)
-Faker::Config.locale = :en
-
-
 RSpec.configure do |config|
   config.disable_monkey_patching!
 
