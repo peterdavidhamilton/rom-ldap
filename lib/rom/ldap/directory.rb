@@ -135,6 +135,24 @@ module ROM
             [Regexp.last_match(1), Regexp.last_match(2)]
           end
 
+    # Attribute Type Description Format - RFC4512
+    #
+    # https://docs.oracle.com/cd/E19476-01/821-0509/attribute-type-description-format.html
+    #
+    # oid:     type[/^\(\s*([\d\.]*)/, 1],
+    # rfc4512: type
+    # https://ping.force.com/Support/PingIdentityArticle?id=kA340000000PMwQCAW
+    #
+    #
+    # X-ALLOWED-VALUE — Provides an explicit set of values that are the only values that will be allowed for the associated attribute.
+    # X-VALUE-REGEX — Provides one or more regular expressions that describe acceptable values for the associated attribute. Values will only be allowed if they match at least one of the regular expressions.
+    # X-MIN-VALUE-LENGTH — Specifies the minimum number of characters that values of the associated attribute are permitted to have.
+    # X-MAX-VALUE-LENGTH — Specifies the maximum number of characters that values of the associated attribute are permitted to have.
+    # X-MIN-INT-VALUE — Specifies the minimum integer value that may be assigned to the associated attribute.
+    # X-MAX-INT-VALUE — Specifies the maximum integer value that may be assigned to the associated attribute.
+    # X-MIN-VALUE-COUNT — Specifies the minimum number of values that the attribute is allowed to have in any entry.
+    # X-MAX-VALUE-COUNT — Specifies the maximum number of values that the attribute is allowed to have in any entry.
+
         Array(attribute_names).map do |name|
           {
             name:        Entry.rename(name), # canonical
