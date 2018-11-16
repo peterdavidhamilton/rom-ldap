@@ -3,7 +3,6 @@ RSpec.shared_context 'animals' do
   include_context 'factory'
 
   before do
-
     directory.add(
       dn: "cn=foo,#{base}",
       discovery_date: '20070508200557Z',
@@ -28,8 +27,27 @@ RSpec.shared_context 'animals' do
 
 
 
-    # all attributes no need to patch factory
-    # only use with the method_name formatter
+    # ApacheDS Operational Attributes
+    #
+    # @see http://directory.apache.org/apacheds/advanced-ug/8-operational-attributes.html
+    #
+    # subschema_subentry  'cn=schema'
+    #
+    # create_timestamp    '20180301171714.514Z'
+    # creators_name       '0.9.2342.19200300.100.1.1=admin,2.5.4.11=system'
+    #
+    # modify_timestamp    '20180301171714.514Z'
+    # modifiers_name      '0.9.2342.19200300.100.1.1=admin,2.5.4.11=system'
+    #
+    # entry_csn           '20180827070345.021000Z#000000#001#000000'
+    # entry_dn            'uid=root,ou=users,dc=example,dc=com'
+    # entry_parent_id     '4c3c6602-849d-4554-8969-0f5d3901f597'
+    # entry_uuid          '7791d3ce-eeb2-4eb2-9da1-ba8f9ab2e8c2'
+    #
+    # nb_subordinates     '0'
+    # nb_children         '0'
+    #
+    # pwd_history         'binary data'
     #
     factories.define(:animal) do |f|
 
