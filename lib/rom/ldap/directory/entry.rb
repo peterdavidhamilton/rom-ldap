@@ -1,169 +1,127 @@
-require 'dry/equalizer'
 require 'dry/core/cache'
+require 'dry/equalizer'
+require 'rom/initializer'
+require 'rom/support/memoizable'
 require 'rom/ldap/functions'
 
-using ::Compatibility
-using ::LDIF
 
 module ROM
   module LDAP
     class Directory
+      # A Hash-like object wrapping the DN and attributes returned by the server.
+      #   Contains the canonical attributes hash and a formatted version.
       #
-      # Initialised by PDU#parse_search_return
+      # Exposes methods #fetch, #first, #each_value and #include?.
+      # All other method calls are forwarded to the formatted tuple.
       #
+      # @see Directory#query
+      #
+      # @api public
       class Entry
-        module ClassMethods
-          attr_reader :formatter
 
-          def rename(key)
-            formatter ? formatter[key] : key
-          end
+        # Ensure entry attributes are always sorted alphabetically.
+        #
+        SORT_PROC = ->(attrs) { attrs.sort_by(&:first).freeze }.freeze
 
-          # @see 'rom/ldap/extensions/compatibility'
-          #
-          # @example
-          #   ROM::LDAP.load_extensions :compatibility
-          #
-          def use_formatter(function)
-            @formatter = function
-          end
-        end
-
+        extend Initializer
         extend Dry::Core::Cache
-        extend ClassMethods
 
-        include Dry::Equalizer(:to_h, :to_a, :to_str)
+        include Dry::Equalizer(:dn, :attributes, :canonical, :formatted)
+        include Memoizable
 
-        attr_reader :dn
-        attr_reader :source
-        attr_reader :attributes
-
-        def initialize(dn, attributes = EMPTY_ARRAY)
-          @dn         = dn.to_s
-          @attributes = attributes.push(['dn', [dn]])
-          @source     = build
-          @canonical  = build(original: false)
-        end
-
-        # @api public
-        def [](key)
-          @canonical[rename(key)]
-        end
-
-        # @api public
-        def fetch(key, alt = EMPTY_ARRAY)
-          @canonical.fetch(rename(key), alt)
-        end
-
-        # Prune unwanted keys from internal hashes. (update source then canonical)
+        # @see Dataset::Persistence
         #
-        # @todo This is destructive and breaks if select is called twice
+        # Accessed when iterating over dataset during #modify and #delete
         #
-        # @param keys [Array <Symbol>] Entry attributes to keep
+        param :dn, proc(&:to_s)
+
         #
-        # @return [Entry]
+        #
+        param :attributes, SORT_PROC, type: Types::Strict::Hash, reader: :private
+
+
+        # Retrieve values for a given attribute.
+        #
+        # @see Directory::Root
+        #
+        # @return [Array<String>]
+        #
+        # @param key [String, Symbol]
         #
         # @api public
-        def select(*keys)
-          source_keys = keys.map { |k| translation_map[k] }
-          @source    = @source.slice(*source_keys).freeze
-          @canonical = @canonical.slice(*keys).freeze
-          itself
+        def fetch(key)
+          formatted.fetch(rename(key), canonical[key])
         end
+        alias [] fetch
 
+        # Find the first (only) value for an attribute.
+        #
+        # @see Directory::Root
+        #
+        # @param [Symbol, String] key Attribute name.
+        #
+        # @return [String]
+        #
+        # @api public
         def first(key)
           fetch(key)&.first
         end
 
-        def last(key)
-          fetch(key)&.last
-        end
-
-        def keys
-          source.keys
-        end
-
-        def attribute_names
-          @canonical.keys
-        end
-
-        def translation_map
-          attribute_names.zip(keys).to_h
-        end
-
-        # Iterate over canonical attributes, or the values for a give attribute.
+        # Iterate over the values of a given attribute.
         #
         # @param key [Symbol] canonical attribute name
         #
-        # @example entry.each(:object_class) { |e| puts e }
+        # @example
+        #
+        #   entry.each_value(:object_class, &:to_sym)
+        #   entry.each_value(:object_class) { |o| o.to_sym }
         #
         # @api public
-        def each(key = nil, &block)
-          key ? fetch(key).each(&block) : @canonical.each(&block)
+        def each_value(key, &block)
+          fetch(key).map(&block)
         end
-        alias each_attribute each
 
-        # Iterate over canonical attributes, or the values for a give attribute.
+
+        # Mostly used by the test suite.
         #
-        # @param key [Symbol] canonical attribute name
+        # @example
         #
-        # @example entry.map(:object_class, &:to_sym)
+        #   expect(relation.first).to include(attr: %w[val1 val2])
+        #
+        # @param tuple [Hash] keys and array of values
+        #
+        # @return [TrueClass]
         #
         # @api public
-        def map(key = nil, &block)
-          key ? fetch(key).map(&block) : @canonical.map(&block)
+        def include?(tuple)
+          tuple.flat_map { |attr,vals| vals.map { |v| fetch(attr).include?(v) } }.all?
+          rescue NoMethodError
+          false
         end
 
-        # @api public
-        def to_h
-          @canonical
-        end
-        alias to_hash to_h
 
-        # @api public
-        def to_a
-          @canonical.to_a
-        end
-        alias to_ary to_a
-
-        # @api public
-        def to_str
-          @canonical.inspect
-        end
-        alias inspect to_str
-
-        # @api public
-        def to_s
-          source.to_ldif
+        # Defer to enumerable hash methods before entry values.
+        #
+        #
+        def method_missing(meth, *args, &block)
+          formatted.send(meth, *args, &block) if formatted.respond_to?(meth)
         end
 
-        def hash
-          source.hash
+        # @return [String]
+        #
+        def inspect
+          %(#<#{self.class} #{dn} />).freeze
         end
 
-        def method_missing(method, *args, &block)
-          value = self[method]
-          return value unless value.nil?
-          return @canonical.public_send(method, *args, &block) if @canonical.respond_to?(method)
-
-          super
-        end
 
         private
 
-        # Merge dn with attributes as arrays of strings.
+        # @param meth [Symbol]
         #
-        # @return [Hash]
+        # @return [TrueClass, FalseClass]
         #
-        # @api private
-        def build(original: true)
-          attributes.each_with_object({}) do |(attr, vals), h|
-            h[original ? attr.to_s : rename(attr)] = vals.map(&:to_s)
-          end
-        end
-
-        def respond_to_missing?(name, _include_private = false)
-          !!self[name]
+        def respond_to_missing?(meth, include_private = false)
+          formatted.respond_to?(meth) || super
         end
 
         # Cache renamed key to improve performance two fold in benchmarks.
@@ -172,8 +130,57 @@ module ROM
         #
         # @api private
         def rename(key)
-          fetch_or_store(key, self.class.formatter) { self.class.rename(key) }
+          fetch_or_store(key) { LDAP.formatter[key] }
         end
+
+        # Convert keys of the canonical tuple using the chosen formatting proc.
+        #
+        def formatted
+          Functions[:map_keys, LDAP.formatter][canonical]
+        end
+
+        # DN combined with attributes array
+        #
+        # @return [Array]
+        #
+        # @api private
+        def with_dn
+          attributes.dup.unshift(['dn', dn])
+        end
+
+        # Create canonical tuple
+        #
+        # @example
+        #
+        #   # => { 'dn' => [''], 'objectClass' => ['', ''] }
+        #
+        # @return [Hash] canonical camelCase keys ordered alphabetically
+        #
+        # Dataset#export
+        #
+        def canonical
+          stringify_keys[stringify_values[with_dn]]
+        end
+
+        # Covert hash keys to strings.
+        #
+        # @return [Proc]
+        #
+        # @api private
+        def stringify_keys
+          Functions[:map_keys, Functions[:to_string]]
+        end
+
+        # Convert hash whose values are arrays of strings.
+        #
+        # @return [Proc]
+        #
+        # @api private
+        def stringify_values
+          Functions[:map_values, Functions[:map_array, Functions[:to_string]]]
+        end
+
+        memoize :canonical, :formatted
       end
     end
   end
