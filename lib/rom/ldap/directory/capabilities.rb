@@ -6,8 +6,15 @@ module ROM
       #
       module Capabilities
 
+        # Named capabilities
+        #
+        # @see rom/ldap/constants.rb
+        #
+        # @return [Array<Symbol>]
+        #
+        # @api public
         def capabilities
-          supported_controls.map { |oid| ::BER.lookup(:controls, oid) }.sort
+          @capabilities ||= CONTROLS.invert.values_at(*supported_controls).freeze
         end
 
         # Is the server able to order the entries.
@@ -16,47 +23,44 @@ module ROM
         #
         # @api public
         def sortable?
-          # supported_controls.include?(SORT_RESPONSE)
           capabilities.include?(:sort_response)
-          # or
-          # ::BER.reverse_lookup(:controls, :sort_response)
         end
 
         # @return [Boolean]
         #
         # @api public
         def pageable?
-          supported_controls.include?(PAGED_RESULTS)
+          capabilities.include?(:paged_results)
         end
 
         # @return [Boolean]
         #
         # @api public
         def chainable?
-          supported_controls.include?(MATCHING_RULE_IN_CHAIN)
+          capabilities.include?(:matching_rule_in_chain)
         end
 
         # @return [Boolean]
         #
         # @api public
         def pruneable?
-          supported_controls.include?(DELETE_TREE)
+          capabilities.include?(:delete_tree)
         end
 
         # @return [Boolean]
         #
         # @api public
         def bitwise?
-          supported_controls.include?(MATCHING_RULE_BIT_AND) &&
-            supported_controls.include?(MATCHING_RULE_BIT_OR)
+          capabilities.include?(:matching_rule_bit_and) &&
+            capabilities.include?(:matching_rule_bit_or)
         end
 
         # @return [Boolean]
         #
         # @api public
         def i18n?
-          supported_controls.include?(LANGUAGE_TAG_OPTIONS) &&
-            supported_controls.include?(LANGUAGE_RANGE_OPTIONS)
+          capabilities.include?(:language_tag_options) &&
+            capabilities.include?(:language_range_options)
         end
       end
     end
