@@ -2,6 +2,8 @@
 
 ### Added
 
+- Docker setup [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/7b08f6f69b9fa39a9700b45b72d91fe094a3442b)
+- `CHANGELOG.md` [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/0731b6a467fd97a4769f9bc481a2975f0638b1b9)
 - New `ROM::LDAP::Relation` methods #to_dsml and #to_msgpack [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/cc9d250584ba8cf3e875f7aa0f3754f676fdf2db)
 - Introduce `ROM::LDAP::RestrictionDSL` from rom-sql
 [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/f0ddfe6a062fd63c1d6ab305d2cc97c50abf170d)
