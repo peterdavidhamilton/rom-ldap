@@ -1,21 +1,14 @@
+require 'yaml'
+require 'json'
+require 'rom/ldap/ldif'
+
 module ROM
   module LDAP
     class Relation < ROM::Relation
+      # LDIF, JSON, YAML and if loading extensions MsgPack and DSML.
+      #
       module Exporting
-        # Serialize the selected dataset attributes in a formatted string.
-        # Calls the method on the Directory::Entry or array of Entries.
-        #
-        # @example
-        #   #=> relation.export(:to_format)
-        #
-        # @return [String] i.e. YAML, JSON, LDIF, BINARY
-        #
-        # @api public
-        def export(format)
-          raise 'The dataset is no longer a Dataset class' unless dataset.is_a?(Dataset)
-
-          dataset.export(format: format, keys: schema.to_h.keys)
-        end
+        using LDIF
 
         # Export the relation as LDIF
         #
@@ -26,7 +19,7 @@ module ROM
         #
         # @api public
         def to_ldif
-          export(:to_ldif)
+          export.to_ldif
         end
 
         # Export the relation as JSON
@@ -38,7 +31,7 @@ module ROM
         #
         # @api public
         def to_json
-          export(:to_json)
+          export.to_json
         end
 
         # Export the relation as YAML
@@ -50,20 +43,24 @@ module ROM
         #
         # @api public
         def to_yaml
-          export(:to_yaml)
+          export.to_yaml
         end
 
-        # Export the relation as MessagePack Binary
+
+        private
+
+        # Serialize the selected dataset attributes in a formatted string.
         #
-        # @return [String]
+        # @example  i.e. YAML, JSON, LDIF, BINARY
+        #   #=> relation.export.to_format
         #
-        # @example
-        #   relation.to_msgpack
+        # @return [Hash, Array<Hash>]
         #
         # @api public
-        def to_msgpack
-          export(:to_msgpack)
+        def export
+          dataset.respond_to?(:export) ? dataset.export : dataset
         end
+
       end
     end
   end
