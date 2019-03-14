@@ -1,0 +1,5 @@
+dn: dc=rom,dc=ldap
+objectClass: dcObject
+objectClass: organization
+description: ROM-LDAP 389 Directory Server
+o: ROM-LDAP

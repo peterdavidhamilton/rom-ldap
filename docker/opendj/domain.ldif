@@ -1,0 +1,5 @@
+dn: dc=rom,dc=ldap
+objectClass: top
+objectClass: domain
+description: ROM-LDAP OpenDJ Server
+o: ROM-LDAP
