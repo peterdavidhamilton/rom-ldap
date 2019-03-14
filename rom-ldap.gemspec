@@ -13,7 +13,6 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'http://rom-rb.org'
   spec.license     = 'MIT'
 
-  # use "yard" to  ld full HTML docs.
   spec.metadata['yard.run'] = 'yri'
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -26,14 +25,13 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'dry-core', '~> 0.4'
   spec.add_runtime_dependency 'dry-monitor', '~> 0.1'
   spec.add_runtime_dependency 'dry-struct', '~> 0.5'
-  spec.add_runtime_dependency 'dry-types', '~> 0.12'
+  spec.add_runtime_dependency 'dry-types', '> 0.13.0'
   spec.add_runtime_dependency 'ldap-ber', '~> 0.0.2'
-  spec.add_runtime_dependency 'net_tcp_client', '~> 2.0'
-  spec.add_runtime_dependency 'rom-core', '>= 4.2'
-  # spec.add_runtime_dependency 'transproc', '~> 1.0'
+  # spec.add_runtime_dependency 'net_tcp_client', '~> 2.0'
+  spec.add_runtime_dependency 'rom-core', '~> 4.2'
+  spec.add_runtime_dependency 'transproc', '~> 1.0'
 
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'pry-byebug'
   spec.add_development_dependency 'rake', '> 12.0'
-  spec.add_development_dependency 'rspec', '~> 3.5'
+  spec.add_development_dependency 'rspec', '~> 3.8'
 end

@@ -1,239 +1,114 @@
 require 'ostruct'
-require 'rom/ldap/directory/entry'
 require 'dry/core/class_attributes'
+require 'rom/initializer'
 
 module ROM
   module LDAP
+    # @see PDU
+    #
+    SUCCESS_CODES = %i[
+      success
+      time_limit_exceeded
+      size_limit_exceeded
+      compare_true
+      compare_false
+      referral
+      sasl_bind_in_progress
+    ].freeze
+
+
     # LDAP Message Protocol Data Unit (PDU)
     #
     class PDU
-      extend Dry::Core::ClassAttributes
+      extend Initializer
 
-      # Wrapper class around search results
-      # @see #parse_search_return
+      param :message_id, proc(&:to_i),
+        reader: true,
+        type: Types::Strict::Integer
+
+      # @!attribute [r] tag
+      #   @return [Array]
+      param :tag,
+        reader: :private,
+        type: Types::Strict::Array
+
+      param :ctrls,
+        reader: :private,
+        type: Types::Strict::Array,
+        default: -> { EMPTY_ARRAY }
+
+      # @return [Integer]
       #
-      defines :result_object
-
-      result_object Directory::Entry
-
-      Error = Class.new(RuntimeError)
-
-      SUCCESS_CODES = %i[
-        success
-        time_limit_exceeded
-        size_limit_exceeded
-        compare_true
-        compare_false
-        referral
-        sasl_bind_in_progress
-      ].freeze
-
-      LIMIT_CODES = %i[
-        time_limit_exceeded
-        size_limit_exceeded
-      ].freeze
-
-      # @param ber_object [Array<Array>]
-      #
-      def initialize(ber_object)
-        begin
-          message, tag, ctrls = ber_object
-
-          @message_id = message.to_i
-          @app_tag    = tag.ber_identifier & 0x1f
-          @controls   = ctrls || []
-          @res        = {}
-        rescue StandardError => e
-          raise Error, "#{self.class}: #{e.message}"
-        end
-
-        parse_tag(pdu_type, tag)
-        parse_controls(ctrls) if ctrls
+      def app_tag
+        tag.ber_identifier & 0x1f
       end
 
-      attr_reader :message_id
-      attr_reader :message
-      attr_reader :info
-      attr_reader :app_tag
-      attr_reader :controls
-      attr_reader :bind_parameters
-      attr_reader :extended_response
-      attr_reader :search_entry
-      attr_reader :search_parameters
-      attr_reader :search_referrals
-
-      alias msg_id          message_id
-      alias result_controls controls
-      alias ldap_controls   controls
-
-      def inspect
-        <<~PDU
-          #<#{self.class}
-          type="#{pdu_type}"
-          result_code=#{result_code}
-          message="#{message}"
-          info="#{info}"
-          success?=#{success?}
-          referral?=#{referral?}
-          failure?=#{failure?}
-          error_message="#{error_message}"
-          matched_dn="#{matched_dn}"
-          bind_as="#{bind_parameters}"
-          >
-        PDU
-      end
-
-      alias to_s inspect
-
-      # @return [Hash]
+      # @return [Integer]
       #
-      # @api public
-      def result
-        @res
+      def result_code
+        tag[0]
       end
 
-      # Grep for error message
+      #
       #
       # @return [String]
       #
-      # @api public
-      def error_message
-        @res.fetch(:error, EMPTY_STRING)[/comment: (.*), data/, 1]
-      end
-
-      def result_code
-        @res.fetch(:code, nil)
-      end
-
       def matched_dn
-        @res.fetch(:dn, nil)
-      end
-
-      def result_server_sasl_creds
-        @res.fetch(:server_sasl_credentials)
-      end
-
-      def referral?
-        result_code == 10
-      end
-
-      def success?
-        SUCCESS_CODES.include?(@sym)
-      end
-
-      def failure?
-        !success?
-      end
-
-      private
-
-      def parse_tag(pdu_type, tag)
-        case pdu_type
-        # Authenticaton
-        when :bind_request            then parse_bind_request(tag)
-        when :bind_result             then parse_bind_response(tag)
-        when :unbind_request          then parse_unbind_request(tag)
-        # Searching
-        when :search_request          then parse_ldap_search_request(tag)
-        when :search_result_referral  then parse_search_referral(tag)
-        when :search_returned_data    then parse_search_return(tag)
-        # Operation Results
-        when :search_result           then parse_ldap_result(tag)
-        when :add_response            then parse_ldap_result(tag)
-        when :delete_response         then parse_ldap_result(tag)
-        when :modify_response         then parse_ldap_result(tag)
-        when :modify_rdn_response     then parse_ldap_result(tag)
-        # Extended
-        when :extended_response       then parse_extended_response(tag)
-        end
-      end
-
-      def check_sequence_size(sequence, size)
-        raise Error, "Invalid LDAP result length. #{sequence}" unless sequence.length >= size
-      end
-
-      def parse_sequence(sequence)
-        @res[:code], @res[:dn], @res[:error] = sequence
-      end
-
-      # Splat the BER result
-      #
-      # @api private
-      def decode_result
-        @sym, @message, @info, @flag = BER.lookup(:result, result_code)
-      end
-
-      def pdu_type
-        BER.lookup(:response, @app_tag) || raise(Error, "Unknown pdu_type: #{@app_tag}")
+        tag[1]
       end
 
       # @example
-      #   sequence =>
-      #       [
-      #         'uid=test1,ou=users,dc=example,dc=com',
-      #         [
-      #           [ 'mail',         [] ],
-      #           [ 'givenName',    [] ],
-      #           [ 'sn',           [] ],
-      #           [ 'cn',           [] ],
-      #           [ 'objectClass',  [] ],
-      #           [ 'gidNumber',    [] ],
-      #           [ 'uidNumber',    [] ],
-      #           [ 'userPassword', [] ],
-      #           [ 'uid',          [] ]
-      #         ]
-      #       ]
+      #   "Matchingrule is required for sorting by the attribute cn"
       #
-      # @param sequence [Array]
+      # @return [String]
       #
-      def parse_search_return(sequence)
-        check_sequence_size(sequence, 2)
-        parse_sequence(sequence)
-        decode_result
-        @search_entry = self.class.result_object.new(*sequence)
+      def advice
+        tag[2]
       end
 
-      def parse_ldap_result(sequence)
-        check_sequence_size(sequence, 3)
-        parse_sequence(sequence)
-        decode_result
-        parse_search_referral(sequence[3]) if referral?
+
+      def search_referrals
+        return unless search_referral?
+        tag[3] || EMPTY_ARRAY
       end
 
-      def parse_extended_response(sequence)
-        check_sequence_size(sequence, 3)
-        parse_sequence(sequence)
-        decode_result
-        @extended_response = sequence[3]
+
+      def result_server_sasl_creds
+        return unless bind_result? && gteq4?
+        tag[3]
       end
 
-      def parse_bind_response(sequence)
-        check_sequence_size(sequence, 3)
-        parse_ldap_result(sequence)
-        @res[:server_sasl_credentials] = sequence[3] if sequence.length >= 4
-        result
+
+
+      # @return [Array] => [version, username, password]
+      #
+      #
+      def bind_result
+        return unless bind_result?
+        raise ResponseTypeInvalidError, 'Invalid bind_result' unless gteq_3?
+        tag
       end
 
-      def parse_search_referral(uris)
-        @search_referrals = uris
+
+      #
+      # @return [OpenStruct] => :version, :name, :authentication
+      #
+      def bind_parameters
+        return unless bind_request?
+binding.pry
+        s = ::OpenStruct.new
+        s.version, s.name, s.authentication = tag
+        s
       end
 
-      def parse_controls(sequence)
-        @controls = sequence.map do |control|
-          o             = ::OpenStruct.new
-          o.oid         = control[0]
-          o.criticality = control[1]
-          o.value       = control[2]
 
-          if o.criticality&.is_a?(String)
-            o.value       = o.criticality
-            o.criticality = false
-          end
-          o
-        end
-      end
 
-      def parse_ldap_search_request(sequence)
+      #
+      # @return [OpenStruct,Nil] => :version, :name, :authentication
+      #
+      def search_parameters
+        return unless search_request?
+binding.pry
         s = ::OpenStruct.new
         s.base_object,
         s.scope,
@@ -242,19 +117,185 @@ module ROM
         s.time_limit,
         s.types_only,
         s.filter,
-        s.attributes = sequence
-        @search_parameters = s
+        s.attributes = tag
+        s
       end
 
-      def parse_bind_request(sequence)
-        s = ::OpenStruct.new
-        s.version, s.name, s.authentication = sequence
-        @bind_parameters = s
+      # Message
+      #
+      # @example => "No attribute with the name false exists in the server's schema"
+      #
+      # @return [String,Nil]
+      #
+      def extended_response
+        raise ResponseTypeInvalidError, "Invalid extended_response" unless gteq_3?
+        tag[3] if extended_response?
       end
 
-      def parse_unbind_request(_sequence)
-        nil
+      # ["dn", [ entry... ]]
+      #
+      # @return [Array,Nil]
+      #
+      def search_entry
+        raise ResponseTypeInvalidError, "Invalid search_entry" unless gteq_2?
+        tag if search_result?
       end
+
+
+
+      # RFC-2251, an LDAP 'control' is a sequence of tuples, each consisting of
+      # - an OID
+      # - a boolean criticality flag defaulting FALSE
+      # - and an optional Octet String
+      #
+      # If only two fields are given, the second one may be either criticality or data, since criticality has a default value.
+      # RFC-2696 is a good example.
+      #
+      # @see Connection::Read#search
+      #
+      # @return [Array<OpenStruct>] => :oid, :criticality, :value
+      #
+      def result_controls
+        ctrls.map do |control|
+          oid, level, value = control
+          value, level = level, false if level&.is_a?(String)
+          ::OpenStruct.new(oid: oid, criticality: level, value: value)
+        end
+      end
+
+
+      # logging =======================  #
+
+
+      # First item from responses.yaml
+      #
+      # @return [String]
+      #
+      def message
+        detailed_response[0]
+      end
+
+      # Grep for error message
+      #
+      # @return [String, FalseClass]
+      #
+      def error_message
+        tag[3][/comment: (.*), data/, 1] if tag[3]
+      end
+
+      # @return [String]
+      #
+      def info
+        detailed_response[1]
+      end
+
+      # @return [String]
+      #
+      def flag
+        detailed_response[2]
+      end
+
+
+      # predicates =======================  #
+
+      # @return [TrueClass, FalseClass]
+      #
+      def add_response?
+        pdu_type == :add_response
+      end
+
+      # @see https://tools.ietf.org/html/rfc4511#section-4.2.1
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      def bind_request?
+        pdu_type == :bind_request
+      end
+
+      # @see https://tools.ietf.org/html/rfc4511#section-4.2.2
+      #
+      # A successful operation is indicated by a BindResponse with a resultCode set to success.
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      def bind_result?
+        pdu_type.eql?(:bind_result)
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def search_request?
+        pdu_type.eql?(:search_request)
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def search_result?
+        pdu_type.eql?(:search_returned_data)
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def search_referral?
+        pdu_type == :search_result_referral
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def extended_response?
+        pdu_type == :extended_response
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def success?
+        SUCCESS_CODES.include?(result_code_symbol)
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def failure?
+        !success?
+      end
+
+
+      # conversion =======================  #
+
+      # @return [Symbol]
+      #
+      def pdu_type
+        # BER.lookup(:response, app_tag) || raise(ResponseTypeInvalidError, "Unknown pdu_type: #{app_tag}")
+        BER.fetch(:response, app_tag) || raise(ResponseTypeInvalidError, "Unknown pdu_type: #{app_tag}")
+      end
+
+      # @return [Symbol]
+      #
+      def result_code_symbol
+        # BER.lookup(:result, result_code)
+        BER.fetch(:result, result_code)
+      end
+
+
+      private
+
+      def detailed_response
+        RESPONSES[result_code_symbol]
+      end
+
+
+
+      # @return [TrueClass, FalseClass]
+      #
+      def gteq_2?
+        tag.length >= 2
+      end
+
+      # @return [TrueClass, FalseClass]
+      #
+      def gteq_3?
+        tag.length >= 3
+      end
+
     end
   end
 end
