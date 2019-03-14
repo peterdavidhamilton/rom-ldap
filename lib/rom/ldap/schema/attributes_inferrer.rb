@@ -32,8 +32,10 @@ module ROM
 
         private
 
-        # Canonical attribute names used within dataset.
-        #   Array contents are effect by the formatting proc.
+
+        # All possible formatted Entry attribute names.
+        #
+        # @see Directory#query_attributes
         #
         # @param dataset [String] LDAP filter string / dataset name
         # @param gateway [ROM::LDAP::Gateway]
@@ -44,7 +46,7 @@ module ROM
         #
         # @api private
         def dataset_attributes(gateway, dataset)
-          gateway[dataset].flat_map(&:attribute_names).uniq.sort
+          gateway[dataset].flat_map(&:keys).uniq.sort
         end
       end
     end
