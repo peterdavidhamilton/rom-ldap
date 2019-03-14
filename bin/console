@@ -1,37 +1,58 @@
 #!/usr/bin/env ruby
-#
-# `$ LDAPHOST=x.x.x.x LDAPPORT=389 bundle exec ./bin/console`
-#
-# List every distinguished name
-#   # => ldap.map(:dn).to_a
-#
-#
+
 require 'bundler/setup'
 
-require 'rom/ldap'
-ROM::LDAP.load_extensions :compatibility
-
-module Sandbox
-  module_function
-
-  def conf
-    ROM::Configuration.new(:ldap) do |conf|
-      conf.relation(:all) do
-        schema('(objectClass=*)', infer: true)
-      end
-    end
-  end
-
-  def container
-    ROM.container(conf)
-  end
-
-  def ldap
-    container.relations[:all]
-  end
-end
-
-include Sandbox
+Bundler.setup
 
 require 'pry'
-Pry.start
+require 'pry-byebug'
+
+require 'rom-ldap'
+require 'rom-repository'
+require 'rom-changeset'
+
+config = ROM::Configuration.new(:ldap,
+  'ldap://127.0.0.1:10389/dc=rom,dc=ldap',
+  # 'ldap://192.168.99.102:4389/dc=rom,dc=ldap',
+  extensions: %i[
+    compatibility
+    dsml_export
+    msgpack_export
+  ]
+)
+
+
+require 'dry/monitor/notifications'
+
+notifications = Dry::Monitor::Notifications.new(:console)
+
+config.plugin :ldap, relations: :instrumentation do |plugin_config|
+  plugin_config.notifications = notifications
+end
+
+
+require_relative './ldap_logger'
+
+Dry::Monitor::LDAP::Logger.new(Logger.new($stdout)).subscribe(notifications)
+
+
+config.relation(:all) do
+  schema('(objectClass=*)', infer: true) do
+    use :timestamps,
+      attributes: %i(create_timestamp modify_timestamp),
+      type: ROM::LDAP::Types::Time
+  end
+
+  branches animals: 'ou=animals,dc=rom,dc=ldap',
+           users:   'ou=users,dc=rom,dc=ldap'
+end
+
+rom = ROM.container(config)
+
+repo = Class.new(ROM::Repository[:all]) {
+  commands :create, update: :by_pk, delete: :by_pk
+}.new(rom)
+
+ldap = rom.relations[:all]
+
+Pry.start(self)
