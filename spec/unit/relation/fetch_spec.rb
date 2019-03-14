@@ -1,7 +1,5 @@
 RSpec.describe ROM::LDAP::Relation, '#fetch' do
 
-  before { skip('awaiting redesign') }
-
   context 'with default primary_key' do
 
     include_context 'people'
@@ -11,14 +9,8 @@ RSpec.describe ROM::LDAP::Relation, '#fetch' do
       factories[:person, cn: 'Optimus', uid_number: 2]
     end
 
-    # after do
-    #   people.where(cn: 'Megatron').delete
-    #   people.where(cn: 'Optimus').delete
-    # end
-
     it 'returns a single tuple' do
       expect(people.fetch('cn=Megatron,ou=specs,dc=rom,dc=ldap')[:uid_number]).to eql(1)
-      expect(people.fetch('cn=Optimus,ou=specs,dc=rom,dc=ldap')[:create_timestamp].class).to eql(Time)
     end
 
     it 'raises when tuple was not found' do
@@ -29,10 +21,10 @@ RSpec.describe ROM::LDAP::Relation, '#fetch' do
 
     it 'raises when more tuples are found' do
       expect {
-        people.fetch([
+        people.fetch(
           'cn=Megatron,ou=specs,dc=rom,dc=ldap',
           'cn=Optimus,ou=specs,dc=rom,dc=ldap'
-        ])
+        )
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation consists of more than one tuple')
     end
   end
@@ -41,8 +33,10 @@ RSpec.describe ROM::LDAP::Relation, '#fetch' do
   context 'with custom primary_key' do
     before do
       conf.relation(:foo) do
-        schema('(objectClass=inetOrgPerson)', infer: true) do
-          attribute 'uidNumber', ROM::LDAP::Types::Integer.meta(primary_key: true)
+        schema('(objectClass=inetOrgPerson)') do
+          attribute :uid_number,
+            ROM::LDAP::Types::Integer.meta(primary_key: true),
+            read: ROM::LDAP::Types::Integer
         end
       end
     end
@@ -54,24 +48,21 @@ RSpec.describe ROM::LDAP::Relation, '#fetch' do
       factories[:person, cn: 'Optimus', uid_number: 2]
     end
 
-    # after do
-    #   people.where(cn: 'Megatron').delete
-    #   people.where(cn: 'Optimus').delete
-    # end
+    let(:relation) { relations[:foo] }
 
     it 'returns a single tuple' do
-      expect(relations.foo.fetch(1)[:uid_number]).to eql(1)
+      expect(relation.fetch(1)[:uid_number]).to eql(1)
     end
 
     it 'raises when tuple was not found' do
       expect {
-        relations.foo.fetch(5_315_412)
+        relation.fetch(5_315_412)
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation does not contain any tuples')
     end
 
     it 'raises when more tuples are found' do
       expect {
-        relations.foo.fetch([1, 2])
+        relation.fetch(1, 2)
       }.to raise_error(ROM::TupleCountMismatchError, 'The relation consists of more than one tuple')
     end
   end

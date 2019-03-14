@@ -4,20 +4,24 @@ RSpec.shared_context 'people' do
 
   before do
 
+    # TODO: check for essential custom non-standard attribute
+
+
+    # Requires 'apple' and 'posix' schemas to be loaded into LDAP.
+    #
     directory.add(
-      dn: "cn=foo,#{base}",
-      cn: 'foo',
+      dn: "cn=person,#{base}",
+      cn: 'person',
       given_name: 'given_name',
       sn: 'sn',
       uid: 'uid',
-      gid_number: 1,
-      uid_number: 1,
-      apple_imhandle: 'apple_imhandle',
       mail: 'mail',
       user_password: 'user_password',
+      gid_number: 1,                      # not apacheds standard attribute
+      uid_number: 1,                      # not apacheds standard attribute
+      apple_imhandle: 'apple_imhandle',   # not apacheds standard attribute
       object_class: %w[extensibleObject person]
     )
-
 
     conf.relation(:people) do
       schema('(objectClass=person)', infer: true)
@@ -26,19 +30,7 @@ RSpec.shared_context 'people' do
 
     factories.define(:person, relation: :people) do |f|
 
-      f.create_timestamp ''
-      f.creators_name ''
-      f.entry_csn ''
-      f.entry_dn ''
-      f.entry_parent_id ''
-      f.entry_uuid ''
-      f.nb_children ''
-      f.nb_subordinates ''
-      f.subschema_subentry ''
-
-      f.pwd_history ''
-
-      f.object_class %w[inetOrgPerson extensibleObject apple-user]
+      f.object_class %w[inetOrgPerson extensibleObject]
 
       f.uid_number do
         fake(:number)
@@ -86,7 +78,7 @@ RSpec.shared_context 'people' do
 
     end
 
-    directory.delete("cn=foo,#{base}")
+    directory.delete("cn=person,#{base}")
   end
 
 

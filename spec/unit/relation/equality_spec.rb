@@ -1,226 +1,66 @@
-RSpec.describe ROM::LDAP::Relation, 'equality queries' do
+RSpec.describe ROM::LDAP::Relation, 'equality' do
 
-  before { skip('awaiting redesign') }
+  include_context 'animals'
 
-  let(:formatter) { downcase_formatter }
+  before do
+    factories[:animal, :rare_bird, population_count: 50]
+    factories[:animal, :rare_bird, population_count: 100]
+    factories[:animal, :amphibian, population_count: 300]
+    factories[:animal, :reptile, population_count: 1_000]
+    factories[:animal, :mammal, population_count: 2_000]
+  end
 
-  include_context 'factory'
+  let(:results) do
+    animals
+      .public_send(method, population_count: value)
+      .project(:population_count)
+      .order(:population_count)
+      .to_a
+      .map { |e| e[:population_count] }
+  end
 
-  let(:user_names) { %w[barry billy bobby sally] }
 
-  describe '#equal with single value' do
-    let(:relation) { relations[:people].equal(uid: 'billy') }
+  describe '#equal' do
 
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
+    let(:method) { :equal }
+    let(:value) { 50 }
 
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [:op_eql, :uid, 'billy']
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(uid=billy))')
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(1)
+    it 'is equal to' do
+      expect(results).to eql([50])
     end
   end
 
- describe '#equal with multiple attributes' do
-    let(:relation) { relations[:people].equal(uid: 'billy', mail: 'billy@example.com') }
 
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
+  describe '#unequal' do
 
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [
-              :con_and,
-              [
-                [:op_eql, :uid, 'billy'],
-                [:op_eql, :mail, 'billy@example.com']
-              ]
-            ]
-          ]
-        ]
-      )
-    end
+    let(:method) { :unequal }
+    let(:value) { 50 }
 
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(&(uid=billy)(mail=billy@example.com)))'
-      )
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(1)
+    it 'is not equal to' do
+      expect(results).to eql([100, 300, 1_000, 2_000])
     end
   end
 
-  describe '#where (alias) with multiple values' do
-    let(:relation) { relations[:people].where(uid: %w[billy sally]) }
 
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
+  describe '#gte' do
 
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [
-              :con_or,
-              [
-                [:op_eql, :uid, 'billy'],
-                [:op_eql, :uid, 'sally']
-              ]
-            ]
-          ]
-        ]
-      )
-    end
+    let(:method) { :gte }
+    let(:value) { 300 }
 
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(|(uid=billy)(uid=sally)))'
-      )
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(2)
+    it 'is greater than or equal to' do
+      expect(results).to eql([300, 1_000, 2_000])
     end
   end
 
 
 
-  describe '#unequal with single value' do
-    let(:relation) { relations[:people].unequal(uid: 'sally') }
+  describe '#lte' do
 
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
+    let(:method) { :lte }
+    let(:value) { 300 }
 
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [
-              :con_not,
-              [:op_eql, :uid, 'sally']
-            ]
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(!(uid=sally)))'
-      )
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(3)
-    end
-  end
-
-
-
-  describe '#unequal with multiple values' do
-    let(:relation) { relations[:people].unequal(uid: %w[billy sally]) }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [
-              :con_not,
-              [
-                :con_or,
-                [
-                  [:op_eql, :uid, 'billy'],
-                  [:op_eql, :uid, 'sally']
-                ]
-              ]
-            ]
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql(
-        '(&(&(objectClass=person)(gidNumber=1))(!(|(uid=billy)(uid=sally))))'
-      )
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(2)
+    it 'is less than or equal to' do
+      expect(results).to eql([50, 100, 300])
     end
   end
 

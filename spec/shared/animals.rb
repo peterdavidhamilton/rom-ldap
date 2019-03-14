@@ -3,28 +3,31 @@ RSpec.shared_context 'animals' do
   include_context 'factory'
 
   before do
+
+    # Seed directory with data to be inferred by the relation.
+    #
     directory.add(
-      dn: "cn=foo,#{base}",
-      discovery_date: '20070508200557Z',
-      cn: 'foo',
+      dn: "cn=animal,#{base}",
+      cn: 'animal',
       endangered: false,
+      discovery_date: '20070508200557Z',
+      labeled_uri: 'labeled_uri',
       extinct: false,
       population_count: 0,
       description: 'description',
       family: 'family',
       genus: 'genus',
-      labeled_uri: 'labeled_uri',
       order: 'order',
       species: 'species',
       study: 'study',
       object_class: %w[extensibleObject mammalia]
     )
 
-
+    # Define a relation whose schema is dependent upon the entry return.
+    #
     conf.relation(:animals) do
       schema('(species=*)', infer: true)
     end
-
 
 
     # ApacheDS Operational Attributes
@@ -50,16 +53,6 @@ RSpec.shared_context 'animals' do
     # pwd_history         'binary data'
     #
     factories.define(:animal) do |f|
-
-      f.create_timestamp ''
-      f.creators_name ''
-      f.entry_csn ''
-      f.entry_dn ''
-      f.entry_parent_id ''
-      f.entry_uuid ''
-      f.nb_children ''
-      f.nb_subordinates ''
-      f.subschema_subentry ''
 
       # animal
       f.cn do
@@ -132,7 +125,9 @@ RSpec.shared_context 'animals' do
       end
     end
 
-    directory.delete("cn=foo,#{base}")
+    # Purge temporary seed data.
+    #
+    directory.delete("cn=animal,#{base}")
   end
 
   let(:animals) { relations[:animals] }
