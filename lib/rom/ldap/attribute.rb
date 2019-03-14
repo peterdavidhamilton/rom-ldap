@@ -1,5 +1,6 @@
 require 'dry/core/cache'
 require 'rom/attribute'
+require 'rom/ldap/attribute_dsl'
 
 module ROM
   module LDAP
@@ -9,9 +10,39 @@ module ROM
     class Attribute < ROM::Attribute
       extend Dry::Core::Cache
 
+      include AttributeDSL
+
       # @api private
       def self.[](*args)
         fetch_or_store(args) { new(*args) }
+      end
+
+      # Attribute definition identifies this is not a directory internal attribute
+      # and values can be altered.
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      # @api public
+      def editable?
+        meta[:editable].eql?(true)
+      end
+
+      # Attribute definition identifies this attribute can not have multiple values.
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      # @api public
+      def single?
+        meta[:single].equal?(true)
+      end
+
+      # OID permits multiple values?
+      #
+      # @return [TrueClass, FalseClass]
+      #
+      # @api public
+      def multiple?
+        meta[:single].equal?(false)
       end
 
       # Return a new attribute with an alias
@@ -47,7 +78,7 @@ module ROM
       #   schema[:id, :tasks].joined?
       #   # => true
       #
-      # @return [Boolean]
+      # @return [TrueClass, FalseClass]
       #
       # @api public
       def joined?
@@ -62,7 +93,7 @@ module ROM
       #   id.qualified?
       #   # => true
       #
-      # @return [Boolean]
+      # @return [TrueClass, FalseClass]
       #
       # @api public
       def qualified?
@@ -78,41 +109,54 @@ module ROM
         meta(foreign_key: true)
       end
 
-      # LDAP Attribute Object Identifier
+      # Attribute Numeric Object Identifier
       #
-      # @return [BER::BerIdentifiedString]
+      # @return [String]
       #
       # @api public
       def oid
         meta[:oid]
       end
 
-      # OID expects multiple values?
+      # Raw LDAP Attribute Definition.
       #
-      # @return [Boolean]
+      # @return [String]
       #
       # @api public
-      def multiple?
-        meta[:multiple]
+      def to_definition
+        meta[:definition]
+      end
+
+
+      # Attribute's syntax Numeric Object Identifier
+      #
+      # @return [String]
+      #
+      # @api public
+      def syntax
+        meta[:syntax]
       end
 
       # OID description
       #
-      # @return [BER::BerIdentifiedString]
+      # @return [String]
       #
       # @api public
       def description
         meta[:description]
       end
 
-      # The attribute name as it appears in the server's schema.
+      # Convert to string for ldap query using original name
+      # The canonical attribute name defined in RFC4512.
       #
       # @return [String]
       #
       # @api public
-      def original_name
-        meta[:original]
+      def to_s
+        meta[:canonical]
       end
+      alias original_name to_s
+
 
       # @api public
       def indexed?
@@ -126,16 +170,9 @@ module ROM
         meta(index: true)
       end
 
-      # Convert to string for ldap query using original name
-      #
-      # @return [String]
-      #
-      # @api public
-      def to_s
-        original_name || Directory.attributes.detect { |a| a[:name] == name }[:original]
-      end
-
       # Return a new attribute in its canonical form
+      #
+      # @return [LDAP::Attribute]
       #
       # @api public
       def canonical
@@ -146,6 +183,8 @@ module ROM
         end
       end
 
+      # @todo Relevance to LDAP environment?
+      #
       # @see Schema#qualified
       #
       # @return [LDAP::Attribute]
@@ -156,22 +195,6 @@ module ROM
 
         meta(qualified: table_alias || true)
       end
-
-      # @todo Copy design of SQL methods i.e. users.where { id.is(1) }
-      #
-      # Return a boolean expression with an equality operator
-      #
-      # @example
-      #   users.where { id.is(1) }
-      #
-      #   users.where(users[:id].is(1))
-      #
-      # @param [Object] other Any SQL-compatible object type
-      #
-      # @api public
-      # def is(other)
-      #   self =~ other
-      # end
 
       memoize :joined, :canonical, :to_s
     end

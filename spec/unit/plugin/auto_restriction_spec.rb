@@ -3,8 +3,6 @@ RSpec.describe ROM::LDAP::Relation, 'Plugin::AutoRestrictions' do
   include_context 'directory'
 
   before do
-    ROM::LDAP::Directory::Entry.use_formatter(nil)
-
     conf.relation(:foo) do
       schema('(objectClass=inetOrgPerson)') do
         attribute :cn,        ROM::LDAP::Types::String.meta(index: true)
@@ -30,9 +28,9 @@ RSpec.describe ROM::LDAP::Relation, 'Plugin::AutoRestrictions' do
   end
 
   it 'uses (attr=val) criteria' do
-    expect(relation.by_cn('test3').ldap_string).to match(/(cn=test3)/)
-    expect(relation.by_uid('test2').ldap_string).to match(/(uid=test2)/)
-    expect(relation.by_givenName('test4').ldap_string).to match(/(givenName=test4)/)
-    expect(relation.by_uidNumber(1).ldap_string).to match(/(uidNumber=1)/)
+    expect(relation.by_cn('test3').to_filter).to match(/(cn=test3)/)
+    expect(relation.by_uid('test2').to_filter).to match(/(uid=test2)/)
+    expect(relation.by_givenName('test4').to_filter).to match(/(givenName=test4)/)
+    expect(relation.by_uidNumber(1).to_filter).to match(/(uidNumber=1)/)
   end
 end

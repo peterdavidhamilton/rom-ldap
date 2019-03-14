@@ -1,9 +1,5 @@
-require 'ber'
 require 'rom/ldap/types'
 require 'rom/initializer'
-
-# Hash#slice
-using ::Compatibility
 
 module ROM
   module LDAP
@@ -60,24 +56,21 @@ module ROM
         #
         # @api public
         def call(attribute_name, schema)
-          attribute = attribute_by_name(attribute_name)
+          attribute = find_attribute(attribute_name)
           primitive = map_type(attribute)
-          multiple  = !attribute[:single] && primitive != 'Array'
           ruby_type = Types.const_get(primitive)
-          read_type = multiple ? Types.const_get(Inflector.pluralize(primitive)) : ruby_type
+          read_type = !attribute[:single] ? Types.const_get(Inflector.pluralize(primitive)) : ruby_type
 
           ruby_type.meta(
-            name:     attribute_name,
+            **attribute,
             source:   schema,
-            multiple: multiple,
-            read:     read_type,
-            **attribute.slice(:description, :original, :matcher, :oid)
+            name:     attribute_name,
+            read:     read_type.meta(oid: attribute[:oid]),
           )
         end
 
         private
 
-        # OPTIMIZE: also used in Attribute
         # Attribute whose formatted name matches the attribute name.
         #
         # @param name [Symbol, String]
@@ -85,36 +78,32 @@ module ROM
         # @return [Hash]
         #
         # @api private
-        def attribute_by_name(attribute_name)
-          attributes.detect { |a| a[:name] == attribute_name } || EMPTY_HASH
+        def find_attribute(name)
+          attributes.find { |a| a[:name].eql?(name) } || EMPTY_HASH
         end
 
         # Map attribute to Type using known syntax or by inferring from the matchers.
         #
-        # @param attribute [Hash]
+        # @option :syntax  [String] attribute syntax
+        # @option :matcher [String] attribute matcher
         #
         # @return [String]
         #
         # @api private
-        def map_type(attribute)
-          by_syntax(attribute[:oid]) || by_matcher(attribute[:matcher])
+        def map_type(syntax: nil, matcher: nil, **)
+          by_syntax(syntax) or by_matcher(matcher)
         end
 
-        # @param oid [String] '1.3.6.1.4.1.1466.115.121.1.15'
+        # @param oid [String] LDAP Object Identifier
         #
         # @example
-        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.7')  => Bool
-        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.15') => String
         #   by_syntax('1.3.6.1.4.1.1466.115.121.1.24') => Time
-        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.27') => Integer
-        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.28') => Binary (JPEG)
-        #   by_syntax('1.3.6.1.4.1.1466.115.121.1.40') => Octet
         #
         # @return [String]
         #
         # @api private
         def by_syntax(oid)
-          ::BER.lookup(:types, oid)
+          OID_TYPE_MAP[oid]
         end
 
         # @param matcher [String]
@@ -124,16 +113,12 @@ module ROM
         # @api private
         def by_matcher(matcher)
           case matcher
-          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.15
           when *STRING_MATCHERS  then 'String'
-          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.7
           when *BOOLEAN_MATCHERS then 'Bool'
-          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.27
           when *INTEGER_MATCHERS then 'Integer'
-          # m-syntax: 1.3.6.1.4.1.1466.115.121.1.24
           when *TIME_MATCHERS    then 'Time'
           else
-            'Array'
+            'String'
           end
         end
       end

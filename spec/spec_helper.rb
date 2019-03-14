@@ -1,10 +1,11 @@
-# Fail fast if directory will be unreachable.
-#
-abort('Please set LDAP env variables') unless
-  !ENV['LDAPHOST'].empty? &&
-  !ENV['LDAPPORT'].empty?
-
 require 'bundler/setup'
+
+require 'simplecov'
+
+SimpleCov.start do
+  add_filter '/spec/'
+  add_filter '/vendor/'
+end
 
 begin
   require 'pry-byebug'
@@ -22,6 +23,7 @@ require 'pathname'
 SPEC_ROOT = root = Pathname(__FILE__).dirname
 TMP_PATH  = root.join('../tmp')
 
+
 require 'dry/core/deprecations'
 Dry::Core::Deprecations.set_logger!(root.join('../log/deprecations.log'))
 
@@ -31,4 +33,3 @@ RSpec.configure do |config|
   Dir[root.join('support/*.rb')].each(&method(:require))
   Dir[root.join('shared/*.rb')].each(&method(:require))
 end
-

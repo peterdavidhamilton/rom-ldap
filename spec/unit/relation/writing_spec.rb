@@ -1,101 +1,106 @@
 RSpec.describe ROM::LDAP::Relation do
 
-  before { skip('awaiting redesign') }
+  include_context 'people'
 
-  describe '#insert downcase' do
-
-    # let(:formatter) { downcase_formatter }
-
-    # include_context 'relations'
-
-    before { accounts.where(uid: 'batman').delete }
-    after  { accounts.where(uid: 'batman').delete }
-
-    it '#update and #delete return an empty array for an empty dataset' do
-      expect(accounts.where(uid: 'foo').update(mail: 'foo@bar')).to eql([])
-      expect(accounts.where(uid: 'bar').delete).to eql([])
-    end
-
-    it '#insert returns false on failure' do
-      expect(
-        accounts.insert(
-          dn: 'uid=batman,ou=users,dc=rom,dc=ldap',
-          cn: 'The Dark Knight',
-          uid: 'batman',
-          sn: 'Wayne',
-          objectclass: %w[top]
+  describe '#insert' do
+    context 'when unsuccessful' do
+      it 'raises error if missing dn' do
+        expect { people.insert(cn: 'The Dark Knight') }.to raise_error(
+          ROM::LDAP::OperationError, 'distinguished name is required'
         )
-      ).to eql(false)
+      end
     end
 
-    it '#insert raises error if missing dn' do
-      expect { accounts.insert(cn: 'The Dark Knight') }.to raise_error(
-        ROM::LDAP::OperationError, 'distinguished name is required'
-      )
-    end
 
-    it '#insert -> #update -> #delete' do
-      expect(
-        accounts.insert(
-          dn: 'uid=batman,ou=users,dc=rom,dc=ldap',
-          cn: 'The Dark Knight',
-          uid: 'batman',
-          sn: 'Wayne',
-          uidnumber: 1003,
-          gidnumber: 1050,
-          appleimhandle: 'bruce-wayne',
-          objectclass: %w[extensibleobject inetorgperson apple-user]
-        )
-      ).to be_kind_of(ROM::LDAP::Directory::Entry)
+    context 'when successful' do
+      it 'returns Entry object' do
+        expect(
+          people.insert(
+            dn: 'uid=batman,ou=specs,dc=rom,dc=ldap',
+            cn: 'The Dark Knight',
+            uid: 'batman',
+            given_name: 'Bruce',
+            sn: 'Wayne',
+            apple_imhandle: 'bruce-wayne',
+            object_class: %w[extensibleobject inetorgperson]
+          )
+        ).to be_kind_of(ROM::LDAP::Directory::Entry)
 
-      expect(accounts.where(uid: 'batman').one[:cn]).to eql(['The Dark Knight'])
-      expect(accounts.where(uid: 'batman').one[:appleimhandle]).to eql(['bruce-wayne'])
-      # expect(accounts.where(uid: 'batman').update(missing: 'Hulk')).to eql([false])
-      # expect(accounts.where(uid: 'batman').update(sn: 'Stark').first.sn).to eql(['Stark'])
-      # expect(accounts.where(uid: 'batman').delete).to eql([true])
-      # expect(accounts.where(uid: 'batman').one).to be_nil
+        expect(people.where(uid: 'batman').one[:cn]).to eql(['The Dark Knight'])
+        expect(people.where(uid: 'batman').one[:apple_imhandle]).to eql(['bruce-wayne'])
+      end
     end
   end
 
-  describe '#insert snake_case' do
 
-    # let(:formatter) { method_formatter }
-    # include_context 'relations'
-
-    before { accounts.where(uid: 'batman').delete }
-    after  { accounts.where(uid: 'batman').delete }
-
-    it '#update and #delete return an empty array for an empty dataset' do
-      expect(accounts.where(uid: 'foo').update(mail: 'foo@bar')).to eql([])
-      expect(accounts.where(uid: 'bar').delete).to eql([])
+  describe '#update' do
+    before do
+      factories[:person, uid: 'hawkeye']
     end
 
-    it '#insert raises error if missing dn' do
-      expect { accounts.insert(cn: 'The Dark Knight') }.to raise_error(
-        ROM::LDAP::OperationError, 'distinguished name is required'
-      )
+    context 'when unsuccessful' do
+      it 'return an empty array for an empty dataset' do
+        expect(people.where(uid: 'foo').update(mail: 'foo@bar')).to eql([])
+      end
+
+      it 'return an array of booleans' do
+        expect(people.where(uid: 'hawkeye').update(missing: 'Hulk')).to eql([false])
+      end
     end
 
-    it '#insert -> #update -> #delete' do
-      expect(
-        accounts.insert(
-          dn: 'uid=batman,ou=users,dc=rom,dc=ldap',
-          cn: 'The Dark Knight',
-          uid: 'batman',
-          sn: 'Wayne',
-          uid_number: 1003,
-          gid_number: 1050,
-          apple_imhandle: 'bruce-wayne',
-          object_class: %w[extensibleobject inetorgperson apple-user]
-        )
-      ).to be_kind_of(ROM::LDAP::Directory::Entry)
 
-      expect(accounts.where(uid: 'batman').one[:cn]).to eql(['The Dark Knight'])
-      expect(accounts.where(uid: 'batman').one[:apple_imhandle]).to eql(['bruce-wayne'])
-      # expect(accounts.where(uid: 'batman').update(missing: 'Hulk')).to eql([false])
-      # expect(accounts.where(uid: 'batman').update(sn: 'Stark').first.sn).to eql(['Stark'])
-      # expect(accounts.where(uid: 'batman').delete).to eql([true])
-      # expect(accounts.where(uid: 'batman').one).to be_nil
+
+    context 'when successful' do
+
+      let(:new_dn) { 'cn=Francis Barton,dc=rom,dc=ldap' }
+
+      after do
+        directory.delete(new_dn)
+      end
+
+      it 'return the updated entry' do
+        expect(people.where(uid: 'hawkeye').update(sn: 'Barton').first).to include(sn: ['Barton'])
+      end
+
+      it 'replaces multiple attributes' do
+        expect(people.where(uid: 'hawkeye').update(given_name: %w'Hawkeye Goliath Clint', sn: 'Barton').first).to include('givenName' => %w'Hawkeye Goliath Clint', sn: ['Barton'])
+      end
+
+      it 'additional name' do
+        expect(people.where(uid: 'hawkeye').update(cn: 'Hawkeye').first).to include(cn: ['Hawkeye'])
+      end
+
+      it 'rename and move' do
+        expect(people.where(uid: 'hawkeye').update(dn: new_dn, cn: 'Hawkeye').first[:cn]).to eql(['Francis Barton', 'Hawkeye'])
+      end
+
     end
   end
+
+
+  describe '#delete' do
+    before do
+      factories[:person, uid: 'batman']
+    end
+
+    context 'when successful' do
+      it 'return the deleted entry' do
+        expect(people.where(uid: 'batman').delete.first).to be_kind_of(ROM::LDAP::Directory::Entry)
+        expect(people.where(uid: 'batman').one).to be_nil
+      end
+
+      it 'return an array of deleted tuples' do
+        expect(people.where(uid: 'batman').delete.first).to include(uid: ['batman'])
+        # expect(people.where(uid: 'batman').delete.first[:uid]).to eql(['batman'])
+        expect(people.where(uid: 'batman').one).to be_nil
+      end
+    end
+
+    context 'when unsuccessful' do
+      it 'return an empty array for an empty dataset' do
+        expect(people.where(uid: 'bar').delete).to eql([])
+      end
+    end
+  end
+
 end

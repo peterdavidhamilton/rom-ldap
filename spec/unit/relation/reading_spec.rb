@@ -1,111 +1,90 @@
-RSpec.describe ROM::LDAP::Relation do
+RSpec.describe ROM::LDAP::Relation, 'reading' do
 
-  before { skip('awaiting redesign') }
+  include_context 'people'
 
-  describe 'uncoerced attributes' do
-
-    # let(:formatter) { nil }
-
-    # include_context 'directory'
-
-    # include_context 'relations'
-
-    it 'raise errors if unsuitable method names' do
-      expect { customers.with(auto_struct: true).to_a }.to raise_error(
-        # NameError, "invalid attribute name `apple-imhandle'"
-        SyntaxError, /unexpected '-'/
-      )
-    end
-
-    it 'default order by dn' do
-      names = customers.to_a.collect { |t| t['givenName'] }
-      expect(names).to eql(
-        [
-          ['test1'], ['test10'], ['test2'], ['test3'], ['test4'],
-          ['test5'], ['test6'], ['test7'], ['test8'], ['test9']
-        ]
-      )
-    end
-
-    it '#reverse' do
-      names = customers.reverse.to_a.collect { |t| t['givenName'] }
-      expect(names).to eql(
-        [
-          ['test9'], ['test8'], ['test7'], ['test6'], ['test5'],
-          ['test4'], ['test3'], ['test2'], ['test10'], ['test1']
-        ]
-      )
-    end
-
-    it '#random' do
-      names = customers.random.to_a.collect { |t| t['givenName'] }
-      expect(names).not_to eql(
-        [
-          ['test1'], ['test10'], ['test2'], ['test3'], ['test4'],
-          ['test5'], ['test6'], ['test7'], ['test8'], ['test9']
-        ]
-      )
+  before do
+    10.times.map { 'user' }.each.with_index(1) do |gn, i|
+      factories[:person, uid: "#{gn}#{i}"]
     end
   end
 
+  subject(:relation) { people.with(auto_struct: true).order(:uid) }
 
-  describe 'snake-case coerced attributes' do
-    # include_context 'relations'
 
-    # let(:formatter) { method_formatter }
-
-    # it 'make suitable method names' do
-    #   expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
-    # end
-
-    it '#limit' do
-      names = customers.limit(2).to_a.collect { |t| t[:given_name] }
-      expect(names).to eql(
-        [
-          ['test1'],
-          ['test10']
-        ]
-      )
-    end
+  it '#search' do
+    expect(relation.search('(uid=user7)').first[:uid]).to eql(['user7'])
   end
 
 
-  describe 'flat coerced attributes' do
-    # include_context 'relations'
-
-    # let(:formatter) { downcase_formatter }
-
-    # it 'make suitable method names' do
-    #   expect { customers.with(auto_struct: true).to_a }.to_not raise_error(NameError)
-    # end
-
-    it '#first' do
-      expect(customers.first[:givenname]).to eql(['test1'])
-    end
-
-    it '#last' do
-      expect(customers.last[:givenname]).to eql(['test9'])
-    end
-
-    it '#select' do
-      result = accounts.where(uid: 'test2').select(:appleimhandle).to_a
-      expect(result).to eql([{ appleimhandle: ['@test2'] }])
-
-      result = accounts.where(uid: 'test2').select(:appleimhandle).one
-      expect(result).to have_key(:appleimhandle)
-      expect(result).to_not have_key(:uid)
-    end
-
-    it '#unique?' do
-      expect(accounts.where(uid: 'test3').unique?).to eql(true)
-    end
-
-    it '#any?' do
-      expect(accounts.any?).to eql(true)
-    end
-
-    it '#count' do
-      expect(accounts.count).to eql(11)
-    end
+  it '#reverse' do
+    expect(relation.reverse.to_a.map(&:uid)).to eql(
+      [
+        ['user9'], ['user8'], ['user7'], ['user6'], ['user5'],
+        ['user4'], ['user3'], ['user2'], ['user10'], ['user1']
+      ]
+    )
   end
+
+
+  it '#unfiltered' do
+    expect(relation.where(uid: 'user10').count).to eql(1)
+    expect(relation.where(uid: 'user10').unfiltered.count).to eql(10)
+  end
+
+
+  it '#random' do
+    expect(relation.random.to_a.map(&:uid)).not_to eql(
+      [
+        ['user1'], ['user10'], ['user2'], ['user3'], ['user4'],
+        ['user5'], ['user6'], ['user7'], ['user8'], ['user9']
+      ]
+    )
+  end
+
+
+  it '#limit' do
+    expect(relation.limit(3).to_a.map(&:uid)).to eql(
+      [ ['user1'], ['user10'], ['user2']]
+    )
+  end
+
+  it '#first' do
+    expect(relation.first[:uid]).to eql(['user1'])
+  end
+
+  it '#last' do
+    expect(relation.last[:uid]).to eql(['user9'])
+  end
+
+  it '#map' do
+    expect(relation.map(:uid)).to be_a(Enumerator)
+
+    expect(relation.limit(4).map(:uid).to_a).to eql(
+      [['user1'], ['user10'], ['user2'], ['user3'] ]
+    )
+  end
+
+  it '#unique?' do
+    expect(relation.where(uid: 'user3').unique?).to eql(true)
+    expect(relation.where(uid: 'user3').one?).to eql(true)
+    expect(relation.where(uid: 'user3').distinct?).to eql(true)
+  end
+
+  it '#any?' do
+    expect(relation.any? { |a| a[:uid] == %w'user1' }).to eql(true)
+    expect(relation.exist? { |a| a[:uid] == ['foo'] }).to eql(false)
+  end
+
+  it '#none?' do
+    expect(relation.none? { |a| a[:uid] == ['foo'] }).to eql(true)
+  end
+
+  it '#all?' do
+    expect(relation.all? { |a| !a[:uid].nil? }).to eql(true)
+  end
+
+  it '#count' do
+    expect(relation.count).to eql(10)
+  end
+
 end

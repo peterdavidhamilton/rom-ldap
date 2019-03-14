@@ -1,12 +1,11 @@
 require 'rom/ldap/types'
 require 'rom/ldap/schema'
-require 'rom/ldap/wrap'
 require 'rom/ldap/dataset'
 require 'rom/ldap/attribute'
-require 'rom/ldap/transaction' # WIP
 require 'rom/ldap/relation/reading'
 require 'rom/ldap/relation/writing'
 require 'rom/ldap/relation/exporting'
+require 'rom/ldap/transaction'
 
 module ROM
   module LDAP
@@ -20,23 +19,19 @@ module ROM
 
       extend Notifications::Listener
 
+      # Set dataset search base value to be the default or class specific.
       subscribe('configuration.relations.schema.set', adapter: :ldap) do |event|
-        # schema   = event[:schema]
         relation = event[:relation]
-
-        relation.dataset do
-          # puts to_ldif
-          self # <ROM::LDAP::Dataset filter='(gidnumber=1050)'>
-        end
+        relation.dataset { with(base: relation.base || directory.base) }
       end
 
-      subscribe('configuration.relations.dataset.allocated', adapter: :ldap) do |event|
-        event[:dataset].opts[:ldap_string]
+      # @api private
+      def initialize(dataset, schema:, **)
+        dataset = dataset.with(attrs: schema.map(&:name)) if dataset.is_a?(Dataset)
+        super
       end
 
-      #
-      # LDAP specific class attributes.
-      #
+
       defines :base
       defines :branches
 
@@ -46,28 +41,24 @@ module ROM
       schema_attr_class LDAP::Attribute
       schema_inferrer   LDAP::Schema::Inferrer.new.freeze
       schema_dsl        LDAP::Schema::DSL
-      wrap_class        LDAP::Wrap
 
       forward(*Dataset.dsl)
 
+      # Fallsback to :entry_dn operational value.
+      #
+      # @return [Symbol]
+      #
+      # @api public
       def primary_key
         attribute = schema.find(&:primary_key?)
 
         if attribute
           attribute.alias || attribute.name
         else
-          :dn
+          :entry_dn
         end
       end
 
-      # @yield [t] Transaction
-      #
-      # @return [Mixed]
-      #
-      # @api public
-      def transaction(opts = EMPTY_HASH, &block)
-        Transaction.new(dataset.directory).run(opts, &block)
-      end
 
       # Expose the search base currently in use.
       #
@@ -83,25 +74,7 @@ module ROM
       # @return [String]
       #
       # @api public
-      def ldap_string
-        dataset.opts[:ldap_string]
-      end
-
-      # Current dataset in abstract query format.
-      #
-      # @return [String]
-      #
-      # @api public
-      def query_ast
-        dataset.opts[:query_ast]
-      end
-
-      # Original dataset in LDAP filter format.
-      #
-      # @return [String]
-      #
-      # @api public
-      def source_filter
+      def to_filter
         dataset.opts[:filter]
       end
 
@@ -117,25 +90,29 @@ module ROM
         associations[name].call
       end
 
+      # @return [Relation]
+      #
+      # @api public
       def project(*names)
-        with(schema: schema.project(*names.flatten))
+        with(schema: schema.project(*names))
       end
 
+      # @return [Relation]
+      #
+      # @api public
       def exclude(*names)
-        with(schema: schema.exclude(*names.flatten))
+        with(schema: schema.exclude(*names))
       end
 
-      # def rename(mapping)
-      #   with(schema: schema.rename(mapping))
-      # end
+      # @yield [t] Transaction
+      #
+      # @return [Mixed]
+      #
+      # @api public
+      def transaction(opts = EMPTY_HASH, &block)
+        Transaction.new(dataset.directory).run(opts, &block)
+      end
 
-      # def prefix(prefix)
-      #   with(schema: schema.prefix(prefix))
-      # end
-
-      # def wrap(prefix = dataset.name)
-      #   with(schema: schema.wrap(prefix))
-      # end
     end
   end
 end

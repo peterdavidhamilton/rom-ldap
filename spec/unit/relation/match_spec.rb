@@ -1,162 +1,30 @@
-RSpec.describe ROM::LDAP::Relation do
+RSpec.describe ROM::LDAP::Relation, 'matching' do
 
-  before { skip('awaiting redesign') }
+  include_context 'people'
 
-  let(:formatter) { downcase_formatter }
-
-  include_context 'factory'
-
-  let(:user_names) { %w[rita sue bob] }
-
-
-  describe '#begins' do
-    let(:relation) { relations[:people].begins(uid: 'b') }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [:op_eql, :uid, 'b*']
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(uid=b*))')
-    end
-
-    it 'result' do
-      expect(relation.one.mail).to eql('bob@example.com')
+  before do
+    %w[rita sue bob].each do |gn|
+      factories[:person, uid: gn, mail: "#{gn}@example.com"]
     end
   end
 
+  subject(:relation) { people.with(auto_struct: true) }
 
-  describe '#ends' do
-    let(:relation) { relations[:people].ends(uid: 'a') }
 
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [:op_eql, :uid, '*a']
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(uid=*a))')
-    end
-
-    it 'result' do
-      expect(relation.one.mail).to eql('rita@example.com')
-    end
+  it '#begins' do
+    expect(relation.begins(uid: 'b').one.mail).to eql(%w'bob@example.com')
   end
 
-
-  describe '#contains' do
-    let(:relation) { relations[:people].contains(uid: 'o') }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [:op_eql, :uid, '*o*']
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(uid=*o*))')
-    end
-
-    it 'result' do
-      expect(relation.one.mail).to eql('bob@example.com')
-    end
+  it '#ends' do
+    expect(relation.ends(uid: 'a').one.mail).to eql(%w'rita@example.com')
   end
 
+  it '#contains' do
+    expect(relation.contains(uid: 'o').one.mail).to eql(%w'bob@example.com')
+  end
 
-  describe '#excludes' do
-    let(:relation) { relations[:people].excludes(uid: 'i') }
-
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [
-              :con_and,
-              [
-                [:op_eql, 'objectClass', 'person'],
-                [:op_eql, 'gidNumber', '1']
-              ]
-            ],
-            # criteria
-            [
-              :con_not,
-              [:op_eql, :uid, '*i*']
-            ]
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(!(uid=*i*)))')
-    end
-
-    it 'result count' do
-      expect(relation.count).to eql(2)
-    end
+  it '#excludes' do
+    expect(relation.excludes(uid: 'i').count).to eql(2)
   end
 
 end

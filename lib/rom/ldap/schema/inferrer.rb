@@ -27,9 +27,10 @@ module ROM
         # @api private
         def call(schema, gateway)
           inferred = super
+
           { **inferred }
-        rescue *ERROR_MAP.keys => e
-          raise ERROR_MAP.fetch(e.class, Error), e
+        rescue *CONNECTION_FAILURES => e
+          raise ConnectionError, e
         ensure
           FALLBACK_SCHEMA
         end

@@ -12,6 +12,8 @@ RSpec.describe ROM::LDAP::Relation do
 
   describe 'Pagination plugin' do
 
+    # subject(:birds) { relations.book_of_birds }
+
     subject(:birds) { relations.birds }
 
     before do
@@ -20,9 +22,6 @@ RSpec.describe ROM::LDAP::Relation do
       49.times { factories[:animal, :bird] }
     end
 
-    after do
-      birds.delete
-    end
 
     it 'with 50 in the collection' do
       expect(birds.count).to eql(50)

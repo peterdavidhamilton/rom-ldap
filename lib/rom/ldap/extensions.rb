@@ -8,41 +8,58 @@ module ROM
       require 'rom/ldap/extensions/compatibility'
     end
 
+    #=======================================
+    # Exporters
+    #=======================================
+
+    register_extension(:dsml_export) do
+      require 'rom/ldap/extensions/exporters/dsml'
+    end
+
+    register_extension(:msgpack_export) do
+      require 'rom/ldap/extensions/exporters/msgpack'
+    end
+
+    #=======================================
+    # Autoloaded for Rails
+    #=======================================
+
     register_extension(:active_support_notifications) do
-      require 'rom/sql/extensions/active_support_notifications'
+      require 'rom/ldap/extensions/active_support_notifications'
     end
 
     register_extension(:rails_log_subscriber) do
-      require 'rom/sql/extensions/rails_log_subscriber'
+      require 'rom/ldap/extensions/rails_log_subscriber'
     end
 
     #=======================================
-    # Vendors
+    # Autoloaded by vendor
+    #
+    # Extendeds directory only ATM
     #=======================================
 
     register_extension(:open_ldap) do
-      require 'rom/ldap/extensions/open_ldap'
+      require 'rom/ldap/extensions/vendors/open_ldap'
     end
 
-
     register_extension(:active_directory) do
-      require 'rom/ldap/extensions/active_directory'
+      require 'rom/ldap/extensions/vendors/active_directory'
     end
 
     register_extension(:open_directory) do
-      require 'rom/ldap/extensions/open_directory'
+      require 'rom/ldap/extensions/vendors/open_directory'
     end
 
     register_extension(:e_directory) do
-      require 'rom/ldap/extensions/e_directory'
+      require 'rom/ldap/extensions/vendors/e_directory'
     end
 
     register_extension(:apache_ds) do
-      require 'rom/ldap/extensions/apache_ds'
+      require 'rom/ldap/extensions/vendors/apache_ds'
     end
 
     register_extension(:three_eight_nine) do
-      require 'rom/ldap/extensions/three_eight_nine'
+      require 'rom/ldap/extensions/vendors/three_eight_nine'
     end
   end
 end

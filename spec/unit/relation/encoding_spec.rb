@@ -1,10 +1,8 @@
-RSpec.describe ROM::LDAP::Relation do
-
-  before { skip('awaiting redesign') }
+RSpec.describe ROM::LDAP::Relation, 'encoding' do
 
   include_context 'people'
 
-  describe '#where using non-utf8 encoded string' do
+  describe 'using non-utf8 values' do
 
     before do
       factories[:person,
@@ -21,29 +19,7 @@ RSpec.describe ROM::LDAP::Relation do
 
     let(:relation) { people.where(uid: '李振藩'.encode!('eucJP')) }
 
-    it 'source filter' do
-      expect(relation.source_filter).to eql('(objectClass=person)')
-    end
-
-    it 'chained criteria' do
-      expect(relation.query_ast).to eql(
-        [
-          :con_and,
-          [
-            # original
-            [:op_eql, 'objectClass', 'person'],
-            # criteria
-            [:op_eql, :uid, '李振藩']
-          ]
-        ]
-      )
-    end
-
-    it 'combined filter' do
-      expect(relation.ldap_string).to eql('(&(objectClass=person)(uid=李振藩))')
-    end
-
-    it 'result' do
+    it 'returns utf8 values' do
       expect(relation.one[:uid]).to eql(['李振藩'])
     end
   end

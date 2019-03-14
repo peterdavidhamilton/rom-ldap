@@ -1,10 +1,24 @@
 require 'rom/schema'
 require 'rom/ldap/schema/dsl'
+require 'rom/ldap/restriction_dsl'
 require 'rom/ldap/schema/inferrer'
 
 module ROM
   module LDAP
     class Schema < ROM::Schema
+
+      # Open restriction DSL for defining query conditions using schema attributes
+      #
+      # @see Relation#where
+      #
+      # @return [Mixed] Result of the block call
+      #
+      # @api public
+      def restriction(&block)
+        RestrictionDSL.new(self).call(&block)
+      end
+
+
       # Create a new relation based on the schema definition
       #
       # @param relation [Relation] The source relation

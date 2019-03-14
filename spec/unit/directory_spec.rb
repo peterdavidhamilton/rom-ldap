@@ -27,8 +27,8 @@ RSpec.describe ROM::LDAP::Directory do
   end
 
   it '#capabilities translates oids' do
-    expect(directory.capabilities).to eql(%i[
-      cascade_control
+    expect(directory.capabilities.sort).to eql(%i[
+      cascade
       directory_sync
       entry_change_notification
       manage_dsa_it
@@ -42,10 +42,10 @@ RSpec.describe ROM::LDAP::Directory do
       sort_request
       sort_response
       subentries
-      sync_done_control
+      sync_done
       sync_info_message
-      sync_request_control
-      sync_state_control
+      sync_request
+      sync_state
       virtual_list_view_request
       virtual_list_view_response
     ])
@@ -58,7 +58,8 @@ RSpec.describe ROM::LDAP::Directory do
         '1.3.6.1.4.1.1466.20037',
         '1.3.6.1.4.1.18060.0.1.3',
         '1.3.6.1.4.1.18060.0.1.5',
-        '1.3.6.1.4.1.4203.1.11.1'
+        '1.3.6.1.4.1.4203.1.11.1',
+        '1.3.6.1.4.1.4203.1.11.3' # is in local apacheds but not in docker apacheds
       ])
   end
 
@@ -88,7 +89,7 @@ RSpec.describe ROM::LDAP::Directory do
       ])
   end
 
-  it '#sortable?' do
+  it '#sortable? to be true' do
     expect(directory.sortable?).to be(true)
   end
 
@@ -104,37 +105,38 @@ RSpec.describe ROM::LDAP::Directory do
   end
 
 
+  describe '#key_map' do
+    context 'when using the default formatter' do
+      before do
+        ROM::LDAP.use_formatter(nil)
+      end
 
+      after do
+        ROM::LDAP.use_formatter(method_formatter)
+      end
 
-
-
-
-
-
-  describe '#query' do
-    it 'can search schema entries' do
-      expect(directory.query(filter: '(m-name=discoveryDate)', base: 'cn=wildlife,ou=schema').first['m-oid']).to eql(%w[1.3.6.1.4.1.18055.0.4.1.2.1008])
+      it do
+        # expect(directory.key_map).to include('c-o' => 'c-o')
+        # expect(directory.key_map).to include('c-PostalCode' => 'c-PostalCode')
+        expect(directory.key_map).to include('dSAQuality' => 'dSAQuality')
+        expect(directory.key_map).to include('homeTelephoneNumber' => 'homeTelephoneNumber')
+        expect(directory.key_map).to include('mXRecord' => 'mXRecord')
+        expect(directory.key_map).to include('textEncodedORAddress' => 'textEncodedORAddress')
+        expect(directory.key_map).to include('x500UniqueIdentifier' => 'x500UniqueIdentifier')
+      end
     end
 
-    it 'returns the whole tree to a max of 1000' do
-      expect(directory.query(filter: '(objectClass=*)', base: '').count).to eql(1000)
+    context 'when using the compatibility formatter' do
+      it do
+        # expect(directory.key_map).to include(c_o: 'c-o')
+        # expect(directory.key_map).to include(c_postal_code: 'c-PostalCode')
+        expect(directory.key_map).to include(d_sa_quality: 'dSAQuality')
+        expect(directory.key_map).to include(home_telephone_number: 'homeTelephoneNumber')
+        expect(directory.key_map).to include(m_x_record: 'mXRecord')
+        expect(directory.key_map).to include(text_encoded_or_address: 'textEncodedORAddress')
+        expect(directory.key_map).to include(x500_unique_identifier: 'x500UniqueIdentifier')
+      end
     end
-  end
-
-
-  it '#modify can update an attribute schema' do
-    directory.modify('m-oid=1.3.6.1.4.1.18055.0.4.1.2.1012,ou=attributeTypes,cn=wildlife,ou=schema', m_syntax: '1.3.6.1.4.1.1466.115.121.1.24')
-  end
-
-
-  it '#add persists and deletes valid entries' do
-    expect(directory.add(dn: 'cn=foobar,dc=rom,dc=ldap', cn: 'foobar', sn: 'foo', objectClass: 'person')).to be_a(ROM::LDAP::Directory::Entry)
-    expect(directory.delete('cn=foobar,dc=rom,dc=ldap')).to be_a(ROM::LDAP::Directory::Entry)
-    expect(directory.by_dn('cn=foobar,dc=rom,dc=ldap')).to be_empty
-  end
-
-  it '#add doesnt persist invalid entries' do
-    expect(directory.add(dn: 'cn=foobar,ou=specs,dc=rom,dc=ldap', cn: 'foobar', objectClass: 'person')).to eql(false)
   end
 
 end
