@@ -1,7 +1,7 @@
 module ROM
   module LDAP
     class Dataset
-      module Writing
+      module Persistence
         # Interface to Directory#add
         #
         # @param tuple [Hash]
@@ -25,6 +25,8 @@ module ROM
         end
 
         # Interface to Directory#delete
+        #
+        # @see Directory::Operations#delete
         #
         # @return [Array<Directory::Entry, Boolean>]
         #

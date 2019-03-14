@@ -1,85 +1,76 @@
 require 'rom/initializer'
 require 'rom/ldap/functions'
-require 'rom/ldap/dataset/reading'
-require 'rom/ldap/dataset/writing'
-require 'rom/ldap/dataset/query_dsl'
 
-# Hash#except
-using ::Compatibility
+require 'rom/ldap/dataset/conversion'
+require 'rom/ldap/dataset/persistence'
+require 'rom/ldap/dataset/dsl'
 
 module ROM
   module LDAP
-    #
-    # @option :directory [Directory] Directory object
-    #
-    # @option :filter [String] Relation name.
-    #   @example => "(&(objectClass=person)(uidNumber=*))"
-    #
-    # @option :limit [Integer] Pagination page(1).
-    #
-    # @option :offset [Integer] Pagination per_page(20).
-    #
-    # @option :base [String] Default search base defined in ROM.configuration.
-    #
-    # @option :criteria [Array] Initial query criteria AST.
-    #
-    # @option :entries [Array] Tuples returned from directory.
     #
     # @api private
     class Dataset
       extend Initializer
       include Enumerable
 
+      #
+      #
+      # @!attribute [r] directory
+      #   @return [Directory]
       option :directory
 
-      option :filter,
-        reader:   false,
-        type:     Dry::Types['string']
+      # Defined in relation schema.
+      #
+      # @!attribute [r] name
+      #   @return [String] Valid LDAP filter filter string.
+      option :name, type: Types::Filter, reader: :private
 
-      option :base,
-        reader:   :private,
-        type:     Dry::Types['strict.string'],
-        default:  -> { EMPTY_STRING }
+      #
+      # @!attribute [r] criteria
+      #   @return [Array] Query AST
+      option :criteria, type: Types::Strict::Array, reader: :private, default: -> { EMPTY_ARRAY }
 
-      option :criteria,
-        reader:   :private,
-        type:     Dry::Types['strict.array'],
-        default:  -> { EMPTY_ARRAY }
 
-      option :offset,
-        reader:   :private,
-        optional: true,
-        type:     Dry::Types['strict.integer']
+      option :direction, type: Types::Direction, reader: :private, default: -> { :asc }
 
-      option :limit,
-        reader:   :private,
-        optional: true,
-        type:     Dry::Types['strict.integer']
+      # Valid Distinguished Name. A relation class value or the gateway default.
+      #
+      # @!attribute [r] base
+      #   @return [String] Set when initializing a relation
+      option :base, type: Types::DN, reader: :private, optional: true
 
-      option :sort_attr,
-        reader:   :private,
-        optional: true,
-        type:     Dry::Types['strict.array']
+      # @option :offset [Integer] Pagination per_page(20).
+      #
+      option :offset, type: Types::Strict::Integer, reader: :private, optional: true
 
-      option :entries,
-        reader:   false,
-        optional: true,
-        type:     Dry::Types['strict.array']
+      # @option :limit [Integer] Pagination page(1).
+      #
+      option :limit, type: Types::Strict::Integer, reader: :private, optional: true
 
-      include QueryDSL
-      include Reading
-      include Writing
+      option :rand, type: Types::Strict::Bool, reader: :private, default: -> { false }
 
-      # Collection of Dataset::QueryDSL module methods.
+      # Attributes to return. Needs to be set to the projected schema.
+      #
+      option :attrs, type: Types::Strict::Array, reader: :private, optional: true
+
+      # @option :sort_attrs [String,Symbol] Attribute name(s) to sort by.
+      #
+      option :sort_attrs, type: Types::Strict::Array, reader: :private, optional: true
+
+      include DSL
+      include Persistence
+      include Conversion
+
+      # Collection of Dataset::DSL module methods.
       #   Used by Relation to forward methods to Dataset.
       #
       # @return [Array<Symbol>]
       #
       # @example
-      #   # => %i{where has lt begins excudes present}
+      #   # => %i{equal has lt begins excludes present}
       #
       def self.dsl
-        QueryDSL.public_instance_methods(false)
+        DSL.public_instance_methods(false)
       end
 
       # Initialise a new class overriding options.
@@ -97,118 +88,157 @@ module ROM
       #
       # @api public
       def opts
-        options
-          .except(:directory)
-          .merge(query_ast: query_ast, ldap_string: ldap_string)
-          .freeze
+        options.merge(ast: to_ast, filter: to_filter).freeze
       end
 
-      # FIXME: selected attributes in query
+      # Iterate over the entries return from the server.
       #
-      # @return [Dataset]
-      #
-      # @api public
-      def select(*args)
-        with(entries: map { |e| e.select(*args) })
-      end
-
-      # @todo Descibe this method
-      #
-      # @return [Array<Directory::Entry>]
+      # @return [Array <Directory::Entry>]
+      # @return [Enumerator <Directory::Entry>]
       #
       # @api public
       def each(*args, &block)
-        return entries.to_enum unless block_given?
+        results = paginated? ? entries[page_range] : entries
 
-        if paginated?
-          entries[page_range].each(*args, &block)
-        else
-          entries.each(*args, &block)
-        end
+        # if sort_attrs && !directory.sortable?
+        #   results = results.sort_by { |tuple| tuple[*sort_attrs] }
+        # end
+
+        results = results.sort_by { rand } if rand
+        results = results.reverse_each if reversed?
+
+        block_given? ? results.each(*args, &block) : results.to_enum
       end
 
-      def map(key = nil, &block)
-        if key
-          # each.map { |e| e.select(key) }.map(&block)
-          each.map { |e| e[key] }.map(&block)
-        else
-          each.map(&block)
-        end
+      # Iterate over each entry or one attribute of each entry.
+      #
+      # @return [Mixed]
+      #
+      # @api public
+      def map(attr = nil, &block)
+        each.map { |entry| attr ? entry[attr] : entry }.map(&block)
       end
 
-      # Inspect dataset revealing current filter and base.
+      # Inspect dataset revealing current ast and base.
       #
       # @return [String]
       #
       # @api public
       def inspect
-        %(#<#{self.class}: base="#{base}" #{query_ast}>)
+        %(#<#{self.class}: base="#{base}" #{to_ast} />)
+      end
+
+      # Wildcard search on multiple attributes.
+      #
+      # @return [Relation]
+      #
+      # @api public
+      def grep(attrs, value)
+        new_criteria = attrs.map do |attr|
+          match_dsl([[attr, value]], left: WILDCARD, right: WILDCARD)
+        end
+        join(new_criteria, :con_or)
+      end
+
+      # @see Relation#where
+      #
+      # Combine AST criteria - use AND by default
+      #
+      # @param new_criteria [Array]
+      # @param constructor  [Symbol]
+      #
+      # @return [Relation]
+      #
+      # @api public
+      def join(new_criteria, constructor = :con_and)
+        new_chain = join_dsl(constructor, new_criteria)
+
+        # check because RestrictionDSL sometimes offers empty criteria
+        if new_chain.empty?
+          self
+        else
+          chain(*new_chain)
+        end
+      end
+
+      # Validate the password against the filtered user.
+      #
+      # @param password [String]
+      #
+      # @return [Boolean]
+      #
+      # @api public
+      def bind(password)
+        directory.bind_as(filter: to_ast, password: password)
+      end
+
+      # Handle different string output formats
+      #   i.e. DSML, LDIF, JSON, YAML, MessagePack.
+      #
+      # @return [Hash, Array<Hash>]
+      #
+      def export
+        results = map(&:canonical)
+        results.one? ? results.first : results
+      end
+
+      # Unrestricted count of every entry under the search base
+      #   with the domain entry discounted.
+      #
+      # @return [Integer]
+      #
+      # @api public
+      def total
+        directory.base_total - 1
       end
 
       private
 
-      # Update the criteria.
-      #   If criteria already exist join with AND.
-      #
-      # @example
-      #   chain(:op_eql, :uid,  "*foo*")
-      #
-      # @param exprs [Mixed] AST built by QueryDSL
-      #
-      # @return [Dataset]
-      #
-      # @api private
-      def chain(*exprs)
-        if options[:criteria].empty?
-          with(criteria: exprs)
-        else
-          with(criteria: [:con_and, [options[:criteria], exprs]])
-        end
-      end
 
-      # Convert the full query to an LDAP filter string
+      # Communicate with LDAP servers.
+      #   @see Connection::SearchRequest for #query keywords defintion.
       #
-      # @return [String]
-      #
-      # @api private
-      def ldap_string
-        Functions[:to_ldap].(query_ast)
-      end
-
-      # Combine original relation dataset name (LDAP filter string)
-      #   with search criteria (AST).
-      #
-      # @return [String]
-      #
-      # @api private
-      def query_ast
-        if criteria.empty?
-          filter_ast
-        else
-          [:con_and, [filter_ast, criteria]]
-        end
-      end
-
-      # Convert the relation's source filter string to a query AST.
-      #
-      # @return [Array]
-      #
-      # @api private
-      def filter_ast
-        Functions[:to_ast].(options[:filter])
-      end
-
-      # Populate with a directory search or iterate over existing @entries.
-      #
-      # @return [Array<Hash>]
+      # @return [Array<Hash>] Populate with a directory search.
       #
       # @api private
       def entries
-        results = options[:entries] || directory.search(query_ast, base: base, sort: sort_attr)
+        results =
+          directory.query(
+            filter: to_ast,
+            base: base,
+            attributes: renamed_select,
+            sorted: renamed_sort,
+            max: limit,
+            reverse: reversed?
+          )
+
         options[:criteria] = []
-        options[:entries]  = nil
         results
       end
+
+      # @api private
+      def renamed_select
+        directory.canonical_attributes(attrs) if attrs
+      end
+
+      # @api private
+      def renamed_sort
+        directory.canonical_attributes(sort_attrs) if sort_attrs
+      end
+
+
+      # Convert formatted attribute names into canonical names.
+      #
+      # @param attrs [Array<String, Symbol>]
+      #
+      # @return [Array<String, Symbol>]
+      #
+      # @api public
+      # def map_attributes(attrs)
+      #   directory.canonical_attributes(attrs)
+      # end
+
+
 
       # @api private
       def page_range
@@ -218,6 +248,11 @@ module ROM
       # @api private
       def paginated?
         limit && offset
+      end
+
+      # @api private
+      def reversed?
+        direction.eql?(:desc)
       end
     end
   end

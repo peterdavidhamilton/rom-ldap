@@ -3,7 +3,7 @@ RSpec.describe ROM::LDAP::Dataset do
   include_context 'factory'
 
   before do
-    conf.relation(:foo) { schema('cn=*)') }
+    conf.relation(:foo) { schema('(cn=*)', infer: true) }
   end
 
   subject(:dataset) { relations.foo.dataset }
@@ -22,15 +22,17 @@ RSpec.describe ROM::LDAP::Dataset do
   end
 
   it 'reveals internal options' do
+    expect(dataset.opts).to have_key(:name)
     expect(dataset.opts).to have_key(:base)
     expect(dataset.opts).to have_key(:criteria)
-    expect(dataset.opts).to have_key(:entries)
     expect(dataset.opts).to have_key(:filter)
-    expect(dataset.opts).to have_key(:ldap_string)
+    expect(dataset.opts).to have_key(:ast)
     expect(dataset.opts).to have_key(:limit)
     expect(dataset.opts).to have_key(:offset)
-    expect(dataset.opts).to have_key(:query_ast)
-    expect(dataset.opts).to have_key(:sort_attr)
+    expect(dataset.opts).to have_key(:attrs)
+    expect(dataset.opts).to have_key(:sort_attrs)
+    expect(dataset.opts).to have_key(:directory)
   end
+
 
 end
