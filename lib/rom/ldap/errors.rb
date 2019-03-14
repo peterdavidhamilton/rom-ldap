@@ -5,24 +5,36 @@ module ROM
     #
     ConfigError                   = Class.new(StandardError)
     ConnectionError               = Class.new(StandardError)
-    FilterError                   = Class.new(StandardError)
-    NoBindResultError             = Class.new(StandardError)
+    BindError                     = Class.new(StandardError)
+    SecureBindError               = Class.new(StandardError)
     OperationError                = Class.new(StandardError)
     PasswordError                 = Class.new(StandardError)
+    UnknownAttributeError         = Class.new(StandardError)
+
     ResponseMissingError          = Class.new(StandardError)
     ResponseMissingOrInvalidError = Class.new(StandardError)
     ResponseTypeInvalidError      = Class.new(StandardError)
 
-    ERROR_MAP = {
-      Errno::ECONNREFUSED               => ConnectionError,
-      Net::TCPClient::ConnectionFailure => ConnectionError,
-      Net::TCPClient::ConnectionTimeout => ConnectionError,
-      Net::TCPClient::ReadTimeout       => ConnectionError
-    }.freeze
+    # @see ROM::LDAP::Gateway
+    #
+    # @see ROM::LDAP::Schema::Inferrer
+    #
+    CONNECTION_FAILURES = [
+      EOFError,
+      Errno::ECONNABORTED,
+      Errno::ECONNREFUSED,
+      Errno::ECONNRESET,
+      Errno::EHOSTUNREACH,
+      Errno::EIO,
+      Errno::ENETDOWN,
+      Errno::ENETRESET,
+      Errno::EPIPE,
+      Errno::ETIMEDOUT,
+      IOError,
+      # Net::TCPClient::ConnectionFailure,
+      # Net::TCPClient::ConnectionTimeout,
+      # Net::TCPClient::ReadTimeout
+    ]
 
-    ERRORS = {
-      missing_or_invalid: [ResponseMissingOrInvalidError, 'response missing or invalid'],
-      no_bind_result:     [NoBindResultError, 'no bind result']
-    }.freeze
   end
 end
