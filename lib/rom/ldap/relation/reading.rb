@@ -11,7 +11,7 @@ module ROM
         # @return [Relation] Defaults to class attribute
         #
         # @api public
-        def with_base(alt_base = self.class.base)
+        def with_base(alt_base)
           new(dataset.with(base: alt_base))
         end
 
@@ -41,15 +41,25 @@ module ROM
           with_base(self.class.branches[key])
         end
 
-        # Standard directory query. Supersede criteria with the given filter string.
-        #
-        # @param filter [String] Valid LDAP filter string
+
+        # Remove additional search criteria and return to initial filter.
         #
         # @return [Relation]
         #
         # @api public
-        def search(filter)
-          new(dataset.with(base: self.class.base, filter: filter))
+        def unfiltered
+          new(dataset.with(criteria: EMPTY_ARRAY))
+        end
+
+        # Replace the relation filter with a new query.
+        #
+        # @param new_filter [String] Valid LDAP filter string
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def search(new_filter)
+          new(dataset.with(name: new_filter))
         end
 
         # Returns True if the filtered entity can bind.
@@ -59,6 +69,45 @@ module ROM
         # @api public
         def authenticate(password)
           dataset.bind(password)
+        end
+
+        # Map tuples from the relation
+        #
+        # @example
+        #   users.map { |user| user[:id] }
+        #   # =>  [1, 2, 3]
+        #
+        #   users.map(:id).to_a
+        #   # =>  [1, 2, 3]
+        #
+        # @param key [Symbol] An optional name of the key for extracting values
+        #                     from tuples
+        #
+        # @return [Array<Array>]
+        #
+        # @api public
+        def map(key = nil, &block)
+          dataset.map(key, &block)
+        end
+
+        # Array of values for an :attribute from all tuples.
+        #
+        # @param field [Symbol] formatted or canonical attribute key
+        #
+        # @example
+        #   relation.by_sn('Hamilton').list(:given_name)
+        #
+        # @return [Array<Mixed>]
+        #
+        # @raise [ROM::Struct::MissingAttribute] If auto_struct? and field not present.
+        #
+        # @api public
+        def list(field)
+          if auto_struct?
+            to_a.flat_map(&field)
+          else
+            map(field).to_a.compact.flatten
+          end
         end
 
         # Count the number of entries selected from the paginated dataset.
@@ -111,36 +160,34 @@ module ROM
           dataset.__send__(__method__, &block)
         end
 
-        # Find tuple by primary_key - required by commands
+        # Find tuples by primary_key which defaults to :entry_dn
+        # Method is required by commands.
         #
-        # @param pk [Mixed] single values
+        # @param pks [Integer, String] single values
         #
         # @example
-        #   relation.by_pk(1001)
+        #   relation.by_pk(1001, 1002)
         #   relation.by_pk('uid=test1,ou=users,dc=example,dc=com')
         #
         # @return [Relation]
-        def by_pk(pk)
-          if primary_key == :dn
-            new(dataset.fetch(pk))
-            # with_base(pk)
-          else
-            where(primary_key => pk)
-          end
+        def by_pk(*pks)
+          where(primary_key => pks)
         end
 
         # Fetch a tuple identified by the pk
         #
+        # @param pk [String, Integer]
+        #
         # @example
-        #   users.fetch(1001) # => {:id => 1, name: "Jane"}
+        #   users.fetch(1001) # => {:id => 1, name: "Peter"}
         #
         # @return [Hash]
         #
         # @raise [ROM::TupleCountMismatchError] When 0 or more than 1 tuples were found
         #
         # @api public
-        def fetch(pk)
-          by_pk(pk).one!
+        def fetch(*pk)
+          by_pk(*pk).one!
         end
 
         # First tuple from the relation
@@ -167,8 +214,35 @@ module ROM
           dataset.reverse_each.first
         end
 
+        # Use server-side sorting if available.
+        #
         # Orders the dataset by a given attribute using the coerced value.
-        #   Numeric attributes should appear in increasing order.
+        #
+        # @see https://tools.ietf.org/html/rfc2891
+        #
+        # SortResult ::= SEQUENCE {
+        #     sortResult  ENUMERATED {
+        #        success                   (0), -- results are sorted
+        #        operationsError           (1), -- server internal failure
+        #        timeLimitExceeded         (3), -- timelimit reached before
+        #                                       -- sorting was completed
+        #        strongAuthRequired        (8), -- refused to return sorted
+        #                                       -- results via insecure
+        #                                       -- protocol
+        #        adminLimitExceeded       (11), -- too many matching entries
+        #                                       -- for the server to sort
+        #        noSuchAttribute          (16), -- unrecognized attribute
+        #                                       -- type in sort key
+        #        inappropriateMatching    (18), -- unrecognized or inappro-
+        #                                       -- priate matching rule in
+        #                                       -- sort key
+        #        insufficientAccessRights (50), -- refused to return sorted
+        #                                       -- results to this client
+        #        busy                     (51), -- too busy to process
+        #        unwillingToPerform       (53), -- unable to sort
+        #        other                    (80)
+        #        },
+        #     attributeType [0] AttributeType OPTIONAL }
         #
         # @param attribute [Symbol]
         #
@@ -183,41 +257,19 @@ module ROM
         # @return [Relation]
         #
         # @api public
-        def order(attribute)
+        def order(*attribute)
+          new(dataset.with(sort_attrs: attribute))
+
+          # Move this inside the Dataset so it is always a Dataset class never an Array
           # if dataset.directory.sortable?
-            new(dataset.order_by(attribute))
+          #   new(dataset.with(sort_attrs: dataset.map_attribute(attribute)))
           # else
-          #   new(dataset.sort_by { |tuple| output_schema[tuple][attribute] })
+          #   new(dataset.sort_by { |tuple| output_schema[tuple][attribute] || EMPTY_ARRAY })
           # end
         end
 
-        # Limits the dataset to a number of tuples
-        #
-        # @todo prevents option to export as dataset is now an array
-        #
-        # @example
-        #   relation.limit(6)
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def limit(number)
-          new(dataset.take(number))
-        end
-
-        # Shuffles the dataset
-        #
-        # @example
-        #   relation.random
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def random
-          new(dataset.sort_by { rand })
-        end
-
-        # Reverses the dataset
+        # Reverses the dataset.
+        # Use server-side sorting if available.
         #
         # @example
         #   relation.reverse
@@ -226,94 +278,91 @@ module ROM
         #
         # @api public
         def reverse
-          new(dataset.reverse_each)
+          new(dataset.with(direction: :desc))
         end
 
-
-        # Lists a single attribute from each tuple sorted
+        # Limits the dataset to a number of tuples
         #
         # @example
-        #   relation.by_sn('Hamilton').list(:given_name)
+        #   relation.limit(6)
         #
-        # @return [Array<Mixed>]
+        # @return [Relation]
         #
         # @api public
-        def list(field)
-          if auto_struct?
-            project(field).to_a.flat_map(&field).sort
+        def limit(number)
+          new(dataset.with(limit: number))
+        end
+
+        # Shuffles the dataset.
+        #
+        # @example
+        #   relation.random
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def random
+          # new(dataset.sort_by { rand })
+          new(dataset.with(rand: true))
+        end
+
+        # Searches attributes of the projected schema for a match.
+        #
+        # @param value [String]
+        #
+        # @return [Relation]
+        #
+        # @example
+        #   relation.find('eo')
+        #
+        # @api public
+        def find(value)
+          new(dataset.grep(schema.map(&:name).sort, value))
+        end
+
+        # A Hash argument is passed straight to Dataset#equal.
+        # Otherwise the RestrictionDSL builds abstract queries
+        #
+        # @param args [Array<Array, Hash>] AST queries or an attr/val hash.
+        #
+        #
+        # @example
+        #   users.where { id.is(1)  }
+        #   users.where { id == 1   }
+        #   users.where { id > 1    }
+        #   users.where { id.gte(1) }
+        #
+        #   users.where(users[:id].is(1))
+        #   users.where(users[:id].lt(1))
+        #
+        # @api public
+        def where(*args, &block)
+          if block
+            where(args).where(schema.restriction(&block))
+          elsif args.size == 1 && args[0].is_a?(Hash)
+            new(dataset.equal(args[0]))
+          elsif !args.empty?
+            new(dataset.join(args))
           else
-            project(field).to_a.map { |t| t[field] }.sort
+            self
           end
         end
 
 
-
-        # Restrict a relation to match criteria
+        # List values of the "member" attribute for a group.
         #
-        # @overload where(conditions)
-        #   Restrict a relation using a hash with conditions
+        # @param [String] dn Distinguished name.
         #
-        #   @example
-        #     users.where(name: 'Jane', age: 30)
-        #
-        #   @param [Hash] conditions A hash with conditions
-        #
-        # @overload where(conditions, &block)
-        #   Restrict a relation using a hash with conditions and restriction DSL
-        #
-        #   @example
-        #     users.where(name: 'Jane') { age > 18 }
-        #
-        #   @param [Hash] conditions A hash with conditions
-        #
-        # @overload where(&block)
-        #   Restrict a relation using restriction DSL
-        #
-        #   @example
-        #     users.where { age > 18 }
-        #     users.where { (id < 10) | (id > 20) }
-        #
-        # @return [Relation]
+        # @return [Array<String>]
         #
         # @api public
-        # def where(*args, &block)
-        #    if block
-        #      where(*args).where(schema.canonical.restriction(&block))
-        #    elsif args.size == 1 && args[0].is_a?(Hash)
-        #      new(dataset.where(coerce_conditions(args[0])))
-        #    elsif !args.empty?
-        #      new(dataset.where(*args))
-        #    else
-        #      self
-        #    end
-        #  end
-
-        # Filters entities by pattern against canonical hash.
-        #
-        # @see Directory::Entry.to_str
-        #
-        # @param pattern [Mixed]
-        #
-        # @return [Relation]
-        #
-        # @example
-        #   relation.find(/regexp/)
-        #   relation.find(23..67)
-        #
-        # @api public
-        def find(pattern)
-          new(dataset.grep(pattern))
+        def members_of_group(dn)
+          with(auto_struct: false).by_pk(dn).list(:member)
         end
 
-        # Filters entities by inverse of pattern
-        #
-        # @see #find
-        #
-        # @api public
-        def find_inverse(pattern)
-          new(dataset.grep_v(pattern))
-        end
 
+        # Requires attribute to respond to #qualified
+        #
         # Qualifies all columns in a relation
         #
         # This method is intended to be used internally within a relation object
@@ -325,49 +374,6 @@ module ROM
           schema.qualified.call(self)
         end
 
-        # Map tuples from the relation
-        #
-        # @example
-        #   users.map { |user| user[:id] }
-        #   # [1, 2, 3]
-        #
-        #   users.map(:id).to_a
-        #   # [1, 2, 3]
-        #
-        # @param key [Symbol] An optional name of the key for extracting values
-        #                     from tuples
-        #
-        # @api public
-        def map(key = nil, &block)
-          dataset.map(key, &block)
-        end
-
-        #
-        # Associations
-        #
-        #
-
-        # @example
-        #   join(:accounts, id: :uid_number)
-        #
-        def join(other, join_cond = EMPTY_HASH)
-          # binding.pry
-
-          if other.is_a?(Symbol) || other.is_a?(ROM::Relation::Name)
-            if join_cond.empty?
-              # ROM::LDAP::Associations::ManyToOne
-              associations[other].join(self)
-              # else
-              # new(dataset.__send__(type, other.to_sym, join_cond, opts, &block))
-            end
-          # elsif other.is_a?(Sequel::SQL::AliasedExpression)
-          #   new(dataset.__send__(type, other, join_cond, opts, &block))
-          # elsif other.respond_to?(:name) && other.name.is_a?(Relation::Name)
-          #   associations[other.name.key].join(type, self, other)
-          else
-            raise ArgumentError, "+other+ must be either a symbol or a relation, #{other.class} given"
-          end
-        end
       end
     end
   end
