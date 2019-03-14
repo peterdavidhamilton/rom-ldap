@@ -1,49 +1,18 @@
 RSpec.shared_context 'directory' do
 
-  let(:base) do
-    'ou=specs,dc=rom,dc=ldap'
-  end
-
-  let(:servers) do
-    ["#{ENV['LDAPHOST']}:#{ENV['LDAPPORT']}"]
-  end
-
-  let(:gateway_opts) do
-    {
-      servers: servers,
-      base:    base,
-      logger:  Logger.new(File.open('./log/test.log', 'a'))
-    }
-  end
-
-  let(:conf) do
-    ROM::Configuration.new(:ldap, gateway_opts)
-  end
-
-  let(:container) do
-    ROM.container(conf)
-  end
-
-  let(:connection) do
-    conf.gateways[:default].connection
-  end
-
-  let(:directory) do
-    conf.gateways[:default].directory
-  end
-
-  let(:relations) do
-    container.relations
-  end
-
-  let(:commands) do
-    container.commands
-  end
-
   #
   # Example functions to format attributes.
   #
+  # @note Creates attribute names that can act as methods
+  #
+  # @see ROM::LDAP.load_extensions(:compatibility)
+  #
+  let(:method_formatter) do
+    ROM::LDAP::Functions[:to_method_name]
+  end
 
+  # @note formatter_spec.rb checks for line numbers :57 and :61.
+  #
   let(:reverse_formatter) do
     ->(key) { key.to_s.downcase.tr('-= ', '').reverse.to_sym }
   end
@@ -52,12 +21,43 @@ RSpec.shared_context 'directory' do
     ->(key) { key.to_s.downcase.tr('-= ', '').to_sym }
   end
 
-  # @note Creates attribute names that can act as methods
+
+  # apacheds  'secret'
+  # others    'topsecret'
+  # apacheds  'uid=admin,ou=system'
+  # openldap  'cn=admin,dc=rom,dc=ldap'
+  # opendj    'cn=Directory Manager'
+  # 389       'cn=Directory Manager'
   #
-  # @see
-  #
-  let(:method_formatter) do
-    ->(key) { ROM::LDAP::Functions.to_method_name(key) }
+
+  let(:base) { 'ou=specs,dc=rom,dc=ldap' }
+
+  let(:uri) { "ldaps://127.0.0.1:10389/#{base}" }
+  # let(:uri) { "ldaps://192.168.99.102:1389/#{base}" } # apacheds 5 mins slower
+
+  let(:bind_dn) { 'uid=admin,ou=system' }
+
+  let(:bind_pw) { 'secret' }
+
+  let(:logger) { Logger.new(File.open('./log/test.log', 'a')) }
+
+  let(:gateway_opts) do
+    { username: bind_dn, password: bind_pw, logger: logger }
   end
 
+  let(:conf) { TestConfiguration.new(:ldap, uri, gateway_opts) }
+
+  let(:container) { ROM.container(conf) }
+
+  let(:directory) { conf.gateways[:default].directory }
+
+  let(:client) { directory.client }
+
+  let(:relations) { container.relations }
+
+  let(:commands) { container.commands }
+
+  before { ROM::LDAP.use_formatter(method_formatter) }
+
+  after { ROM::LDAP.use_formatter(nil) }
 end

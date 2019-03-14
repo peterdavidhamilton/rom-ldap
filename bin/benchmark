@@ -1,0 +1,153 @@
+#!/usr/bin/env ruby
+#
+#                 NET one:    11.0 i/s
+#      ROM [explicit] one:    6.5 i/s - 1.68x   (± 0.00) slower
+#      ROM [explicit] all:    5.3 i/s - 2.07x   (± 0.00) slower
+#   ROM [inferred] struct:    4.4 i/s - 2.48x   (± 0.00) slower
+#              NET struct:    4.3 i/s - 2.55x   (± 0.00) slower
+#                 NET all:    3.9 i/s - 2.83x   (± 0.00) slower
+#      ROM [inferred] one:    3.8 i/s - 2.89x   (± 0.00) slower
+#   ROM [explicit] struct:    3.4 i/s - 3.19x   (± 0.00) slower
+#      ROM [inferred] all:    1.5 i/s - 7.10x   (± 0.00) slower
+#    ROM [explicit] order:    1.4 i/s - 7.84x   (± 0.00) slower
+#    ROM [inferred] order:    0.7 i/s - 15.81x  (± 0.00) slower
+#
+#
+
+require 'bundler'
+
+Bundler.require :default, :development, :benchmark
+
+net_ldap = Net::LDAP.new(
+            host: '127.0.0.1',
+            port: '10389',
+            base: 'ou=users,dc=rom,dc=ldap',
+            auth: {
+              method: :simple,
+              username: 'uid=admin,ou=system',
+              password: 'secret'
+            }
+          )
+
+
+logger = Logger.new(File.open('./log/benchmark.log', 'a'))
+# logger = ::Logger.new(IO::NULL)
+
+filter = '(objectclass=*)'
+
+config = ROM::Configuration.new(:ldap,
+          'ldap://127.0.0.1:10389/ou=users,dc=rom,dc=ldap',
+          extensions: %i[compatibility],
+          username: 'uid=admin,ou=system',
+          password: 'secret',
+          logger: logger,
+          timeout: 10
+        )
+
+# Inferred => all attributes including operational
+#
+config.relation(:rom) do
+  schema(filter, infer: true)
+end
+
+
+# Explicit => schema only attributes
+#
+config.relation(:static) do
+  schema(filter) do
+    attribute :cn,      ROM::LDAP::Types::Strings
+    # attribute :study,   ROM::LDAP::Types::Symbol
+    # attribute :family,  ROM::LDAP::Types::String
+    # attribute :genus,   ROM::LDAP::Types::String
+    # attribute :order,   ROM::LDAP::Types::String
+    # attribute :species, ROM::LDAP::Types::String
+
+    use :timestamps, attributes: %i(create_timestamp), type: ROM::LDAP::Types::Time
+  end
+end
+
+
+rom = ROM.container(config)
+
+
+Benchmark.ips do |bm|
+
+  bm.config(time: 5, warmup: 0.5, iterations: 3)
+
+  #
+  # One Attribute
+  #
+  bm.report('NET one') do
+    net_ldap.search(attributes: %w[cn]).to_a
+  end
+
+  bm.report('ROM [explicit] one') do
+    rom.relations[:static].project(:cn).to_a
+  end
+
+  bm.report('ROM [inferred] one') do
+    rom.relations[:rom].project(:cn).to_a
+  end
+
+
+
+  #
+  # All Attributes
+  #
+  bm.report('NET all') do
+    net_ldap.search
+  end
+
+  bm.report('ROM [explicit] all') do
+    rom.relations[:static].to_a
+  end
+
+  bm.report('ROM [inferred] all') do
+    rom.relations[:rom].to_a
+  end
+
+
+
+  #
+  # Ordered Attributes
+  #
+  # bm.report('NET order') do
+  #   binding.pry
+  #   net_ldap.search(sort_controls: ['cn'])
+  #   # net_ldap.search
+  # end
+
+  bm.report('ROM [explicit] order') do
+    rom.relations[:static].order(:cn).to_a
+  end
+
+  bm.report('ROM [inferred] order') do
+    rom.relations[:rom].order(:cn).to_a
+  end
+
+
+
+
+  #
+  # Structs
+  #
+  bm.report('NET struct') do
+    net_ldap.search.map { |e| OpenStruct.new(e.instance_variable_get(:@myhash)) }
+  end
+
+  bm.report('ROM [explicit] struct') do
+    rom.relations[:static].with(auto_struct: true).has(:cn).to_a
+  end
+
+  bm.report('ROM [inferred] struct') do
+    rom.relations[:rom].with(auto_struct: true).has(:cn).project(:cn).to_a
+  end
+
+  bm.compare!
+end
+
+
+
+
+
+
