@@ -3,38 +3,27 @@ module ROM
     class Directory
       module Root
 
-        # Identifiy the vendor of the LDAP server.
+        # Identify the LDAP server vendor, type determines vendor extension to load.
         #
         # @see https://ldapwiki.com/wiki/Determine%20LDAP%20Server%20Vendor
         #
-        # @return [Symbol] 1 of 11
-        #
-        #     :active_directory
-        #     :apache_ds
-        #     :e_directory
-        #     :ibm
-        #     :netscape
-        #     :open_directory
-        #     :open_ldap
-        #     :oracle
-        #     :sun_microsystems
-        #     :three_eight_nine
-        #     :unknown
+        # @return [Symbol]
         #
         # @api public
         def type
           case root.first('vendorName')
-          when /389/      then :three_eight_nine
-          when /Apache/   then :apache_ds
-          when /Apple/    then :open_directory
-          when /IBM/      then :ibm
-          when /Netscape/ then :netscape
-          when /Novell/   then :e_directory
-          when /Oracle/   then :oracle
-          when /Sun/      then :sun_microsystems
+          when /389/        then :three_eight_nine
+          when /Apache/     then :apache_ds
+          when /Apple/      then :open_directory
+          when /ForgeRock/  then :open_dj
+          when /IBM/        then :ibm
+          when /Netscape/   then :netscape
+          when /Novell/     then :e_directory
+          when /Oracle/     then :open_ds
+          when /Sun/        then :sun_microsystems
           when nil
-            :active_directory if ad?
-            :open_ldap if od?
+            return :active_directory if ad?
+            return :open_ldap if od?
           else
             :unknown
           end
@@ -46,7 +35,7 @@ module ROM
         #
         # @api public
         def ad?
-          !!root['forestFunctionality']
+          !root['forestFunctionality'].nil?
         end
 
         # Check if vendor identifies as OpenLDAP
@@ -67,7 +56,7 @@ module ROM
         #
         # @api public
         def vendor
-          [vendor_name, vendor_version]
+          [vendor_name, vendor_version].freeze
         end
 
 
@@ -146,10 +135,19 @@ module ROM
         end
 
 
+        # @return [String]
+        #
+        # @api public
+        def contexts
+          root['namingContexts'].sort
+        end
+
         private
 
 
         # Representation of directory RootDSE
+        #
+        # @see https://ldapwiki.com/wiki/Retrieving%20RootDSE
         #
         # @return [Directory::Entry]
         #
@@ -158,9 +156,9 @@ module ROM
         # @api private
         def root
           @root ||= query(
-            base: EMPTY_BASE,
-            scope: SCOPE_BASE_OBJECT,
-            attributes: ROOT_DSE_ATTRS
+            base: EMPTY_STRING,
+            scope: SCOPE_BASE,
+            attributes: ALL_ATTRS
           ).first
         end
 
@@ -172,8 +170,8 @@ module ROM
         def sub_schema
           @sub_schema ||= query(
             base: sub_schema_entry,
-            scope: SCOPE_BASE_OBJECT,
             filter: '(objectClass=subschema)',
+            scope: SCOPE_BASE,
             attributes:  %w[objectClasses attributeTypes],
             max_results: 1
           ).first

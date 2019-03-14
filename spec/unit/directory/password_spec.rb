@@ -5,6 +5,18 @@ RSpec.describe ROM::LDAP::Directory::Password do
   let(:string) { 'i_am_secure' }
   let(:salt) { '46f32286494860eb762abaf3ad3643a0' }
 
+  it 'raises error for missing password' do
+    expect {
+      pwd.generate(:md5, nil)
+    }.to raise_error(ROM::LDAP::PasswordError, 'No password supplied')
+  end
+
+  it 'raises error for unknown encryption' do
+    expect {
+      pwd.generate(:unknown, string)
+    }.to raise_error(ROM::LDAP::PasswordError, /Unsupported/)
+  end
+
   describe 'MD5' do
     let(:md5) { "{MD5}gdsPd3Tx/ZO4ZPElskkn7Q==" }
 
