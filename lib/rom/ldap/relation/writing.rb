@@ -3,31 +3,29 @@ module ROM
     class Relation < ROM::Relation
       module Writing
         # @example
-        #   repo.insert(
-        #     dn: 'uid=batman,ou=users,dc=test',
+        #   relation.insert(
+        #     dn: 'uid=batman,ou=comic,dc=rom,dc=ldap',
         #     cn: 'The Dark Knight',
         #     uid: 'batman',
+        #     given_name: 'Bruce',
         #     sn: 'Wayne',
-        #     uid_number: 1003,
-        #     gid_number: 1050,
         #     apple_imhandle: 'bruce-wayne',
-        #     object_class: %w[extensibleObject inetOrgPerson apple-user]
+        #     object_class: %w[extensibleObject inetOrgPerson]
         #   )
         #     #=>
         #   {
-        #     dn: 'uid=batman,ou=users,dc=test',
+        #     dn: 'uid=batman,ou=comic,dc=rom,dc=ldap',
         #     cn: 'The Dark Knight',
         #     uid: 'batman',
+        #     given_name: 'Bruce',
         #     sn: 'Wayne',
-        #     uid_number: 1003,
-        #     gid_number: 1050,
         #     apple_imhandle: 'bruce-wayne',
-        #     object_class: %w[extensibleObject inetOrgPerson apple-user]
+        #     object_class: %w[top extensibleObject inetOrgPerson]
         #   }
         #
         # @param tuple [Hash]
         #
-        # @return [Array<Directory::Entry, Boolean>]
+        # @return [Array<Directory::Entry, FalseClass>]
         #
         # @api public
         def insert(tuple)
@@ -35,12 +33,12 @@ module ROM
         end
 
         # @example
-        #   repo.update(2000, mail: 'fear_the_bat@gotham.com')
+        #   relation.update(2000, mail: 'fear_the_bat@gotham.com')
         #   #=>  {}
         #
         # @param tuple [Hash]
         #
-        # @return [Array<Directory::Entry, Boolean>]
+        # @return [Array<Directory::Entry, FalseClass>]
         #
         # @api public
         def update(tuple)
@@ -48,9 +46,9 @@ module ROM
         end
 
         # @example
-        #   repo.delete(2000) #=> true
+        #   relation.delete('uid=batman,ou=users,dc=test') #=> { uid: 'batman'}
         #
-        # @return [Array<Boolean>]
+        # @return [Array<Directory::Entry, FalseClass>]
         #
         # @api public
         def delete

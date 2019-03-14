@@ -2,6 +2,8 @@ module ROM
   module Plugins
     module Relation
       module LDAP
+        # Microsoft Active Directory Namespace
+        #
         module ActiveDirectory
           # Microsoft Active Directory specific extension.
           #
@@ -40,11 +42,11 @@ module ROM
             USE_DES_KEY_ONLY               = 2_097_152
             WORKSTATION_TRUST_ACCOUNT      = 4096
 
-            FLAG   = "systemFlags:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
-            GROUP  = "groupType:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
-            MEMBER = "memberOf:#{ROM::LDAP::MATCHING_RULE_IN_CHAIN}:".freeze
-            OPTS   = "options:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
-            UAC    = "userAccountControl:#{ROM::LDAP::MATCHING_RULE_BIT_AND}:".freeze
+            FLAG   = "systemFlags:#{ROM::LDAP::CONTROLS[:matching_rule_bit_and]}:".freeze
+            GROUP  = "groupType:#{ROM::LDAP::CONTROLS[:matching_rule_bit_and]}:".freeze
+            MEMBER = "memberOf:#{ROM::LDAP::CONTROLS[:matching_rule_in_chain]}:".freeze
+            OPTS   = "options:#{ROM::LDAP::CONTROLS[:matching_rule_bit_and]}:".freeze
+            UAC    = "userAccountControl:#{ROM::LDAP::CONTROLS[:matching_rule_bit_and]}:".freeze
 
             #
             # Ambiguous Name Resolution (ANR)

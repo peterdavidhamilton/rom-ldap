@@ -4,7 +4,7 @@ module ROM
       class Update < ROM::Commands::Update
         adapter :ldap
 
-        # use :schema
+        use :schema
 
         after :finalize
 
@@ -14,13 +14,12 @@ module ROM
 
         private
 
-        # Update entries returned by directory
         #
-        # @param tuples [Array<Hash>]
+        # @param tuples [Array<Entry>]
         #
         # @api private
-        def finalize(tuples, *)
-          tuples.map { |t| relation.output_schema[t] }
+        def finalize(entries, *)
+          entries.map { |t| relation.output_schema[t] }
         end
 
         def update(*args)

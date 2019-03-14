@@ -4,21 +4,37 @@ module ROM
       class Create < ROM::Commands::Create
         adapter :ldap
 
-        # use :schema
+        use :schema
+
+        after :finalize
 
         # Pass tuple(s) to relation for insertion.
         #
         # @param tuples [Hash, Array<Hash>]
         #
+        # @return [Array<Entry>]
+        #
         # @api public
         def execute(tuples)
-          [tuples].flatten.each { |tuple| relation.insert(tuple) }
+          Array([tuples]).flatten(1).map do |tuple|
 
-          # Array([tuples]).flatten.map { |tuple|
-          #   attributes = input[tuple]
-          #   relation.insert(attributes.to_h)
-          #   attributes
-          # }.to_a
+            # filter through input schema
+            # attributes = input[tuple]
+
+            relation.insert(tuple)
+          end
+        end
+
+        private
+
+        # Output through relation output_schema
+        #
+        # @param entries [Array<Entry>]
+        #
+        # @api private
+        def finalize(entries, *)
+          # entries.map { |t| relation.output_schema[t] if t.is_a?(Hash) }
+          entries.map { |t| relation.output_schema[t] }
         end
       end
     end
