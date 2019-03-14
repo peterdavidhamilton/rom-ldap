@@ -1,0 +1,11 @@
+# Admin schema password
+dn: cn=admin,{{ LDAP_BASE_DN }}
+changetype: modify
+replace: userPassword
+userPassword: {{ LDAP_ADMIN_PASSWORD_ENCRYPTED }}
+
+
+dn: uid=admin,ou=system
+changetype: modify
+replace: userPassword
+userPassword: new-password

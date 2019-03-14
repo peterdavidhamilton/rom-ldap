@@ -1,0 +1,9 @@
+# openssl base64 -in domain.ldif -out apacheds.b64
+# ads-contextentry::
+#
+dn: dc=rom,dc=ldap
+dc: rom-ldap
+objectClass: top
+objectClass: domain
+description: ROM-LDAP ApacheDS
+o: ROM-LDAP

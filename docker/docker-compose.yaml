@@ -1,0 +1,139 @@
+#
+# OpenLDAP - cn=admin,cn=config       secret
+# ApacheDS - uid=admin,ou=system      secret
+# 389      - cn=Directory Manager     topsecret
+# OpenDJ   - cn=Directory Manager     secret
+#
+version: '3.3'
+services:
+
+  # # the gem
+  # #
+  # rom:
+  #   container_name: rom-ldap
+  #   build:
+  #     context: ..
+  #     dockerfile: ./rom-ldap/Dockerfile
+  #   environment:
+  #     RACK_ENV: test
+  #     LDAPHOST: rom-apacheds
+  #     LDAPPORT: '10389'
+  #     LDAPBASE: dc=rom,dc=ldap
+  #     LDAPBINDDN: uid=admin,ou=system
+  #     LDAPBINDPW: secret
+
+
+  # 1 ubuntu
+  # docker build -t apacheds .
+  # docker run -it -p 1389:10389 apacheds
+  # ou=schema
+  #
+  apache_ds:
+    container_name: rom-apacheds
+    build:
+      context: ./apacheds
+      labels:
+        vendor: Apache
+      args:
+        version: 2.0.0-M24
+        # version: 2.0.0.AM25
+        architecture: amd64
+    ports:
+      - 1389:10389
+      - 1636:10636
+    volumes:
+      - /var/lib/apacheds/log
+    hostname: rom.ldap
+    restart: on-failure
+    environment:
+      APACHEDS_INSTANCE: rom
+
+
+
+  # 2 debian
+  # docker build -t openldap .
+  # docker run -it -p 2389:389 -e LDAP_DOMAIN=rom.ldap -e LDAP_BASE_DN=dc=rom,dc=ldap openldap
+  #
+  open_ldap:
+    container_name: rom-openldap
+    build:
+      context: ./openldap
+      labels:
+        vendor: OpenLDAP
+    tty: true
+    stdin_open: true
+    volumes:
+      - /var/lib/ldap
+      - /etc/ldap/slapd.d
+    ports:
+      - 2389:389
+      - 2636:636
+    hostname: rom.ldap
+    restart: on-failure
+    environment:
+      # LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
+      LDAP_LOG_LEVEL: 0
+      LDAP_DOMAIN: rom.ldap
+      LDAP_BASE_DN: dc=rom,dc=ldap
+      LDAP_ADMIN_PASSWORD: topsecret
+
+
+
+  # 3 centos
+  # docker build -t 389 .
+  # docker run -it -p 3389:389 -e DIRSRV_FQDN=rom.ldap -e DIRSRV_SUFFIX=dc=rom,dc=ldap 389
+  # cn=schema
+  #
+  three_eight_nine:
+    container_name: rom-389
+    build:
+      context: ./389
+      labels:
+        vendor: '389'
+    ports:
+      - 3389:389
+      - 3636:636
+      # - 9830:9830
+    volumes:
+      - /etc/dirsrv
+      - /var/lib/dirsrv
+      - /var/log/dirsrv
+    hostname: rom.ldap
+    restart: on-failure
+    environment:
+      DIRSRV_ID: rom
+      LDAP_LOG_LEVEL: '0'
+      DIRSRV_FQDN: rom.ldap
+      DIRSRV_SUFFIX: dc=rom,dc=ldap
+      DIRSRV_ROOT_DN: cn=Directory Manager
+      DIRSRV_ROOT_DN_PASSWORD: topsecret
+      # DIRSRV_ADMIN_USERNAME: admin
+      # DIRSRV_ADMIN_PASSWORD: adminpassword
+
+
+
+
+  # 4 debian
+  # docker build -t opendj .
+  # docker run -it -p 4389:389 -e BASE_DN=dc=rom,dc=ldap opendj
+  #
+  open_dj:
+    container_name: rom-opendj
+    build:
+      context: ./opendj
+      args:
+        version: 4.3.1
+      labels:
+        vendor: OpenIdentity
+    ports:
+      - 4389:389
+      - 4636:636
+      # - 4444:4444
+    volumes:
+      - /opt/opendj
+    hostname: rom.ldap
+    restart: on-failure
+    environment:
+      BASE_DN: dc=rom,dc=ldap
+      ROOT_USER_DN: cn=Directory Manager
+      ROOT_PASSWORD: topsecret
