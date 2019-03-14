@@ -1,20 +1,4 @@
-# con_and:  '&'      # AND
-# con_or:   '|'      # OR
-# con_not:  '!'      # NOT
-# op_prx:   '~='     # Approximately equal to
-# op_ext:   ':='     # Bitwise comparison of numeric values
-# op_gte:   '>='     # Lexicographically greater than or equal to
-# op_lte:   '<='     # Lexicographically less than or equal to
-# op_eql:   '='      # Equal to
-# op_bineq: '='      #   uses #to_ber_bin on value
-
-# In addition to the operators above,
-# LDAP defines two matching rule object identifiers (OIDs) that can be used to
-# perform bitwise comparisons of numeric values.
-# Matching rules have the following syntax.
-
-
-RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
+RSpec.describe ROM::LDAP::Dataset::DSL do
 
   include_context 'animals'
 
@@ -25,16 +9,8 @@ RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
       expect(dataset.equal(bar: 'foo').opts[:criteria]).to eql([:op_eql, :bar, 'foo'])
     end
 
-    it '#where (equal)' do
-      expect(dataset.where(bar: 'foo').opts[:criteria]).to eql([:op_eql, :bar, 'foo'])
-    end
-
     it '#unequal' do
       expect(dataset.unequal(bar: 'foo').opts[:criteria]).to eql([:con_not, [:op_eql, :bar, 'foo']])
-    end
-
-    it '#where_not (unequal)' do
-      expect(dataset.where_not(bar: 'foo').opts[:criteria]).to eql([:con_not, [:op_eql, :bar, 'foo']])
     end
   end
 
@@ -126,11 +102,13 @@ RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
 
 
 
-  describe 'FOO!' do
+  describe 'Special queries' do
 
+    # OPTIMIZE: include check for binary input in DSL and change the operator internally
+    #
     it 'op_bineq' do
-      expect(dataset.binary_equal(bar: 'foo').opts[:criteria]).to eql(
-        [:op_bineq, :bar, 'foo']
+      expect(dataset.binary_equal(bar: 'binary_data').opts[:criteria]).to eql(
+        [:op_eq, :bar, 'binary_data']
       )
     end
 
@@ -144,11 +122,17 @@ RSpec.describe ROM::LDAP::Dataset, 'QueryDSL' do
   end
 
 
+  it '#inverse' do
+    expect(dataset.equal(bar: 'foo').inverse.opts[:criteria]).to eql([:con_not, [:op_eql, :bar, 'foo']])
+  end
+
+
+
 
   describe 'chained criteria' do
 
     it '2 methods' do
-      expect(dataset.where(bar: %w'foo baz').above(quux: 100).opts[:criteria]).to eql(
+      expect(dataset.equal(bar: %w'foo baz').above(quux: 100).opts[:criteria]).to eql(
         [
           :con_and,
           [

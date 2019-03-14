@@ -4,7 +4,17 @@ module ROM
       # AST Query Interface
       #
       # @api public
-      module QueryDSL
+      module DSL
+
+        # Invert the whole query
+        #
+        # @return [Dataset]
+        #
+        # @api public
+        def inverse
+          with(criteria: [:con_not, criteria])
+        end
+
         # Equality filter aliased as 'where'.
         #
         # @example
@@ -12,11 +22,12 @@ module ROM
         #   relation.where(uid: %w[pete leanda])
         #   relation.where(uid: 'leanda', sn: 'hamilton')
         #
+        # @return [Dataset]
+        #
         # @api public
         def equal(args)
           chain(*array_dsl(args))
         end
-        alias where equal
 
         # Antonym of 'equal'
         #
@@ -24,17 +35,20 @@ module ROM
         #   relation.unequal(uid: 'pete')
         #   relation.unequal(uid: %w[pete leanda])
         #
+        # @return [Dataset]
+        #
         # @api public
         def unequal(args)
           chain(:con_not, array_dsl(args))
         end
-        alias where_not unequal
 
         # Presence filter aliased as 'has'.
         #
         # @example
         #   relation.present(:uid)
         #   relation.has(:mail)
+        #
+        # @return [Dataset]
         #
         # @api public
         def present(attribute)
@@ -48,6 +62,8 @@ module ROM
         #   relation.missing(:uid)
         #   relation.hasnt(:mail)
         #
+        # @return [Dataset]
+        #
         # @api public
         def missing(attribute)
           chain(:con_not, [:op_eql, attribute, :wildcard])
@@ -55,6 +71,8 @@ module ROM
         alias hasnt missing
 
         # Greater than filter
+        #
+        # @return [Dataset]
         #
         # @api public
         def gt(args)
@@ -64,6 +82,8 @@ module ROM
 
         # Less than filter
         #
+        # @return [Dataset]
+        #
         # @api public
         def lt(args)
           chain(:con_not, [:op_gte, *args.to_a[0]])
@@ -72,12 +92,16 @@ module ROM
 
         # Greater than or equal filter
         #
+        # @return [Dataset]
+        #
         # @api public
         def gte(args)
           chain(:op_gte, *args.to_a[0])
         end
 
         # Less than or equal filter
+        #
+        # @return [Dataset]
         #
         # @api public
         def lte(args)
@@ -86,6 +110,8 @@ module ROM
 
         # Starts with filter
         #
+        # @return [Dataset]
+        #
         # @api public
         def begins(args)
           chain(*match_dsl(args, right: WILDCARD))
@@ -93,11 +119,16 @@ module ROM
 
         # Ends with filter
         #
+        # @return [Dataset]
+        #
         # @api public
         def ends(args)
           chain(*match_dsl(args, left: WILDCARD))
         end
 
+        # @return [Dataset]
+        #
+        # @api public
         def contains(args)
           chain(*match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
@@ -105,6 +136,9 @@ module ROM
 
         # negate #contains
         #
+        # @return [Dataset]
+        #
+        # @api public
         def excludes(args)
           chain(:con_not, match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
@@ -128,25 +162,50 @@ module ROM
 
 
 
+        # @return [Dataset]
+        #
+        # @api public
+        def binary_equal(args)
+          chain(:op_eq, *args.to_a[0])
+        end
 
-                    def binary_equal(args)
-                      chain(:op_bineq, *args.to_a[0])
-                    end
+        # @return [Dataset]
+        #
+        # @api public
+        def approx(args)
+          chain(:op_prx, *args.to_a[0])
+        end
 
-                    def approx(args)
-                      chain(:op_prx, *args.to_a[0])
-                    end
-
-                    def bitwise(args)
-                      chain(:op_ext, *args.to_a[0])
-                    end
-
-
-
+        # @return [Dataset]
+        #
+        # @api public
+        def bitwise(args)
+          chain(:op_ext, *args.to_a[0])
+        end
 
 
 
         private
+
+        # Update the criteria.
+        #   If criteria already exist join with AND.
+        #
+        # @example
+        #   chain(:op_eql, :uid,  "*foo*")
+        #
+        # @param exprs [Mixed] AST built by QueryDSL
+        #
+        # @return [Dataset]
+        #
+        # @api private
+        def chain(*exprs)
+          if criteria.empty?
+            with(criteria: exprs)
+          else
+            with(criteria: [:con_and, [criteria, exprs]])
+          end
+        end
+
 
         # Handle multiple criteria with an OR join.
         #   @see #chain for AND join.
@@ -177,6 +236,9 @@ module ROM
             join_dsl(:con_or, values)
           end
           join_dsl(:con_or, expressions)
+
+          # join_dsl(:con_or, [ match_dsl(args.map(&:to_a)) ])
+          # join_dsl(:con_or, args.map { |arg| match_dsl([arg]) })
         end
 
         # Wrap criteria with a join operator.
@@ -194,9 +256,8 @@ module ROM
         #
         # @param args [Array]
         #
-        # @options :left [String] prepended to value.
-        #
-        # @options :right [String] appended to value.
+        # @option :left  [String] Prepended to value.
+        # @option :right [String] Appended to value.
         #
         # @return [Array]
         #
@@ -206,10 +267,21 @@ module ROM
         #
         # @api private
         def match_dsl(args, left: EMPTY_STRING, right: EMPTY_STRING)
-          attribute, value = args.to_a[0]
-          value = left.to_s + escape(value) + right.to_s
-          [:op_eql, attribute, value]
+          expressions = args.map do |att, val|
+            values = Array(val).map { |v|
+                        value = left.to_s + escape(v) + right.to_s
+                        [:op_eql, att, value]
+                      }
+
+            join_dsl(:con_or, values)
+          end
+          join_dsl(:con_or, expressions)
+
+          # attribute, value = args.to_a[0]
+          # value = left.to_s + escape(value) + right.to_s
+          # [:op_eql, attribute, value]
         end
+
 
         #
         #
