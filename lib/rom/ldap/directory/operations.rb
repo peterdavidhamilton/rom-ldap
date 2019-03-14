@@ -1,157 +1,231 @@
-require 'timeout'
+require 'dry/core/cache'
 
 module ROM
   module LDAP
     class Directory
       module Operations
+        def self.included(klass)
+          klass.class_eval do
+            extend Dry::Core::Cache
+          end
+        end
 
         # Use connection to communicate with server.
+        # If :base is passed, it overwrites the default base keyword.
         #
-        # @param options [Hash]
+        # @option :filter [String, Array] AST or LDAP string.
+        #   Defaults to class attribute.
         #
-        # @return [Array<Entry>]
+        # @param options [Hash] @see Connection::SearchRequest
+        #
+        # @return [Array<Entry>] Formatted hash like objects.
         #
         # @api public
-        def query(filter: self.class.default_filter, **options)
-          expr = Functions[:to_exp][filter]
-          set  = []
+        #
+        def query(filter: DEFAULT_FILTER, **options)
+          set = []
+          counter = 0
 
-          @result = connection.search(base: base, expression: expr, **options) do |entity|
-            set << entity
-            yield entity if block_given?
+          params = {
+            base: base,
+            expression: to_expression(filter),
+            **options
+            # paged: pageable?
+
+            # return_refs: true
+            # https://tools.ietf.org/html/rfc4511#section-4.5.3
+          }
+
+          # pdu = client.search(params) do |search_referrals: |
+          # end
+
+          pdu = client.search(params) do |dn, attributes|
+            counter += 1
+            logger.debug("#{counter}: #{dn}") if ::ENV['DEBUG']
+
+            set << entity = Entry.new(dn, attributes)
+            yield(entity) if block_given?
           end
+
+          debug(pdu)
 
           set
         end
 
 
-        # Find an entry by distinguished name.
+        def debug(pdu)
+          return unless ::ENV['DEBUG']
+          logger.debug(pdu.advice) if pdu&.advice
+          logger.debug(pdu.message) if pdu&.message
+          logger.debug(pdu.info) if pdu&.failure?
+        end
+
+
+        # Return all attributes for a distinguished name.
         #
         # @param dn [String]
         #
-        # @return [Entry]
+        # @return [Array<Entry>]
         #
         # @api public
         def by_dn(dn)
-          query(base: dn, max_results: 1)
+          raise(OperationError, 'distinguished name is required') unless dn
+
+          query(base: dn, max: 1, attributes: ALL_ATTRS)
         end
 
-        # Query results as array of hashes ordered by Distinguished Name
         #
-        # @param ast [Array]
         #
-        # @option :base [String]
-        #
-        # @return [Array<Directory::Entry>]
-        #
-        # @api public
-        def search(ast, base: nil, **options)
-          Timeout.timeout(timeout) do
-            query(filter:      ast,
-                  base:        base,
-                  max_results: max_results,
-                  deref:       DEREF_ALWAYS,
-                  unlimited:   unlimited?,
-                  **options
-                  )
-          end
-        rescue Timeout::Error # => e
-        end
-
         # @option :filter [String]
-        #
         # @option :password [String]
         #
-        # @return [Boolean]
+        # @return [TrueClass, FalseClass]
         #
         # @api public
         def bind_as(filter:, password:)
-          if (entity = query(filter: filter, max_results: 1).first)
+          if (entity = query(filter: filter, max: 1).first)
             password = password.call if password.respond_to?(:call)
-            result   = connection.bind(username: entity.dn, password: password)
-            result.success?
+
+            pdu = client.bind(username: entity.dn, password: password)
+            pdu.success?
           else
             false
           end
         end
 
-        # Used by gateway[filter] to infer schema. Limited to 100.
+        # Used by gateway[filter] to infer schema at boot.
+        #   Limited to 1000 and cached.
         #
-        # @return [Array<Directory::Entry>]
+        # @param filter [String] dataset schema filter
+        #
+        # @return [Array<Entry>]
         #
         # @api public
-        def attributes(filter)
-          query(
-            filter: filter,
-            base: base,
-            max_results: 100,
-            attributes_only: true,
-            unlimited: false
-          )
+        def query_attributes(filter)
+          fetch_or_store(base, filter) do
+            query(
+              filter: filter,
+              base: base,
+              max: 1_000, # attribute sample size
+              attributes_only: true,
+              # paged: false
+            )
+          end
         end
 
-        # Count everything within the current base, inclusive of base entry.
+        # Count all entries under the search base, inclusive of base entry.
         #
         # @return [Integer]
         #
         # @api public
         def base_total
-          query(base: base, attributes: %i[cn]).count
+          query(base: base, attributes: %w'objectClass', attributes_only: true).count
         end
 
+        #
         # @param tuple [Hash] tuple using formatted attribute names.
         #
-        # @return [Entry, Boolean] created LDAP entry or false.
-        #
-        # @example - must include valid :dn
+        # @return [Entry, FalseClass] created LDAP entry or false.
         #
         # @api public
         def add(tuple)
-          args = tuplify(tuple)
-          dn   = args.delete(:dn)
-
+          attrs = canonicalise(tuple)
+          dn    = attrs.delete(:dn)
           raise(OperationError, 'distinguished name is required') unless dn
 
-    # args values need to be wrapped in arrays
-    # when doing relation.update_by_cn('foo', sn: 'bar')
-    # args[:sn]
+          log(__callee__, dn)
 
-          logger.debug("#{self.class}##{__callee__} '#{dn}'")
+          pdu = client.add(dn: dn, attrs: attrs)
 
-          result = connection.add(dn: dn, attrs: args)
-          result.success? ? by_dn(dn).first : false
+          pdu.success? ? find(dn) : pdu.success?
         end
+
+
+
 
         # @param dn [String] distinguished name.
         #
         # @param tuple [Hash] tuple using formatted attribute names.
         #
-        # @return [Entry, Boolean] updated LDAP entry or false.
+        # @return [Entry, FalseClass] updated LDAP entry or false.
         #
         # @api public
-        def modify(dn, tuple) # third param :replace
-          ops = tuplify(tuple).map { |attr, val| [:replace, attr, val] }
+        def modify(dn, tuple)
+          log(__callee__, dn)
 
-          logger.debug("#{self.class}##{__callee__} '#{dn}'")
+          attrs  = canonicalise(tuple)
+          new_dn = attrs.delete(:dn)
 
-          result = connection.modify(dn: dn, ops: ops)
-          result.success? ? by_dn(dn).first : false
+          rdn_attr, rdn_val = get_rdn(dn).split('=')
+
+          if new_dn
+            new_rdn = get_rdn(new_dn)
+            parent  = get_parent_dn(new_dn)
+
+            new_rdn_attr, new_rdn_val = new_rdn.split('=')
+
+            replace = rdn_attr.eql?(new_rdn_attr)
+
+            pdu = client.rename(dn: dn, rdn: new_rdn, replace: replace, superior: parent)
+
+            if pdu.success?
+              dn = new_dn
+              rdn_val = new_rdn_val
+            end
+          end
+
+
+          if attrs.keys.include?('userPassword')
+            new_pwd = attrs.delete('userPassword')
+            entry   = find(dn)
+            old_pwd = entry['userPassword']
+
+            pdu = client.password_modify(dn, old_pwd: old_pwd, new_pwd: new_pwd)
+          end
+
+
+          if !attrs.empty?
+            if attrs.keys.include?(rdn_attr) && !attrs.keys.include?(rdn_val)
+              attrs[rdn_attr] = Array(attrs[rdn_attr]).unshift(rdn_val)
+            end
+
+            pdu = client.update(dn: dn, ops: attrs.to_a)
+          end
+
+
+          pdu.success? ? find(dn) : pdu.success?
+        end
+
+
+
+
+        # Tuple(s) by dn
+        #
+        # @param dn [String] distinguished name
+        #
+        # @return [Array<Hash>,Hash]
+        #
+        # @raise [OperationError] distinguished name not found
+        #
+        def find(dn)
+          entry = by_dn(dn)
+          raise(OperationError, 'distinguished name not found') unless entry
+
+          entry.one? ? entry.first : entry
         end
 
         #
         # @param dn [String] distinguished name.
         #
-        # @return [Entry, Boolean] deleted LDAP entry or false.
+        # @return [Entry, FalseClass] deleted LDAP entry or false.
         #
         # @api public
         def delete(dn)
-          entry = by_dn(dn).first
-          raise(OperationError, 'distinguished name not found') unless entry
+          log(__callee__, dn)
+          entry = find(dn)
 
-          logger.debug("#{self.class}##{__callee__} '#{dn}'")
-
-          result = connection.delete(dn: dn)
-          result.success? ? entry : false
+          pdu = client.delete(dn: dn)
+          pdu.success? ? entry : pdu.success?
         end
 
         # directory.transaction(opts) { yield(self) }
@@ -164,14 +238,34 @@ module ROM
         end
 
 
-        # Is the server capable of paging and has a user defined limit not been set.
-        #
-        # @api public
-        def unlimited?
-          pageable? && max_results.nil?
-        end
+
 
         private
+
+
+
+       # first bit of dn
+        #
+        def get_rdn(dn)
+          dn.split(',')[0]
+        end
+
+
+
+        def get_parent_dn(dn)
+          dn.split(',')[1..-1].join(',')
+        end
+
+
+
+
+
+
+        # Log operation attempt
+        #
+        def log(method, dn)
+          logger.debug("#{self.class}##{method} '#{dn}'")
+        end
 
         # Rename the formatted keys of the incoming tuple to their original
         #   server-side format.
@@ -181,13 +275,10 @@ module ROM
         # @param tuple [Hash]
         #
         # @example
-        #   # => tuplify(population_count: 0) => { 'populationCount' => 0 }
+        #   # => canonicalise(population_count: 0) => { 'populationCount' => 0 }
         #
         # @api private
-        def tuplify(tuple)
-          attrs   = attribute_types.select { |a| tuple.key?(a[:name]) }
-          key_map = attrs.map { |a| a.values_at(:name, :original) }.to_h
-
+        def canonicalise(tuple)
           Functions[:tuplify].call(tuple, key_map)
         end
       end

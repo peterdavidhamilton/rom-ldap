@@ -6,46 +6,88 @@ require 'securerandom'
 module ROM
   module LDAP
     class Directory
-      # Encode passwords
+      # @abstract
+      #   Encode and validate passwords using md5, sha or ssha.
       #
       class Password
+
+        # Generate an ecrypted password.
+        #
+        # @example
+        #   Password.generate(:ssha, 'secret magic word')
+        #
+        # @param type     [Symbol] Encryption type. [:md5, :sha, :ssha].
+        # @param password [String] Plain text password to be encrypted.
+        #
+        # @return [String]
+        #
+        # @raise [PasswordError]
+        #
+        # @api public
         def self.generate(type, password, salt = secure_salt )
-          raise PasswordError, "No password supplied" if password.nil?
+          raise PasswordError, 'No password supplied' if password.nil?
 
           case type
-          when :md5  then encode(type, md5(password))
-          when :sha  then encode(type, sha(password))
-          when :ssha then encode(type, ssha(password, salt))
+          when :md5  then _encode(type, md5(password))
+          when :sha  then _encode(type, sha(password))
+          when :ssha then _encode(type, ssha(password, salt))
           else
             raise PasswordError, "Unsupported encryption type (#{type})"
           end
         end
 
+        # Validate plain password against encrypted SSHA password.
+        #
+        # @return [TrueClass, FalseClass]
+        #
+        # @api public
         def self.check_ssha(password, encrypted)
-          decoded = Base64.decode64(encrypted.gsub(/^{SSHA}/, ''))
+          decoded = Base64.decode64(encrypted.gsub(/^{SSHA}/, EMPTY_STRING))
           hash = decoded[0..20]
           salt = decoded[20..-1]
-          encode(:ssha, ssha(password, salt)) == encrypted
+          _encode(:ssha, ssha(password, salt)) == encrypted
         end
 
         private_class_method
 
-        def self.encode(type, encrypted)
+        # @return [String] Prepend type to encrypted string.
+        #
+        # @api private
+        def self._encode(type, encrypted)
           "{#{type.upcase}}" + Base64.encode64(encrypted).chomp!
         end
 
+        # Generate salt.
+        #
+        # @api private
         def self.secure_salt
           SecureRandom.random_bytes(16)
         end
 
+        # @param str [String]
+        #
+        # @return [String] MD5 digest.
+        #
+        # @api private
         def self.md5(str)
           Digest::MD5.digest(str)
         end
 
+        # @param str  [String]
+        # @param salt [String]
+        #
+        # @return [String] SHA1 digest with salt.
+        #
+        # @api private
         def self.ssha(str, salt)
           Digest::SHA1.digest(str + salt) + salt
         end
 
+        # @param str [String]
+        #
+        # @return [String] SHA1 digest without salt.
+        #
+        # @api private
         def self.sha(str)
           Digest::SHA1.digest(str)
         end
