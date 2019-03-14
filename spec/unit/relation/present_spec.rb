@@ -1,45 +1,15 @@
-RSpec.describe ROM::LDAP::Relation, '#present, #has, #exists' do
+RSpec.describe ROM::LDAP::Relation, 'present' do
 
-  before { skip('awaiting redesign') }
-
-  let(:formatter) { downcase_formatter }
-
-  include_context 'factory'
+  include_context 'people'
 
   let(:user_names) { %w[rita sue bob] }
 
-
-  let(:relation) { relations[:people].present('uidNumber') }
-
-  it 'source filter' do
-    expect(relation.source_filter).to eql('(&(objectClass=person)(gidNumber=1))')
+  before do
+    %w[zippy george bungle geoffrey].each.with_index(1) do |gn, i|
+      # factories[:person, given_name: gn, uid_number: i**2]
+    end
   end
 
-  it 'chained criteria' do
-    expect(relation.query_ast).to eql(
-      [
-        :con_and,
-        [
-          # original
-          [
-            :con_and,
-            [
-              [:op_eql, 'objectClass', 'person'],
-              [:op_eql, 'gidNumber', '1']
-            ]
-          ],
-          # criteria
-          [:op_eql, 'uidNumber', :wildcard]
-        ]
-      ]
-    )
-  end
+  subject(:relation) { people.present('uidNumber') }
 
-  it 'combined filter' do
-    expect(relation.ldap_string).to eql('(&(&(objectClass=person)(gidNumber=1))(uidNumber=*))')
-  end
-
-  it 'result count' do
-    expect(relation.count).to eql(3)
-  end
 end
