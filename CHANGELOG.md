@@ -1,4 +1,33 @@
-# 0.0.13 / tbc
+# 0.1.0 / to-be-released
+
+### Changed
+
+- [BREAKING] rom-core (4.2.1) depends upon dry-types (0.15.0) which is only supported by ruby 2.4 and above. Change minimum supported version to 2.4
+
+### Fixed 
+
+- Use [Semantic Versioning](https://semver.org/) from now on, however changing the Ruby version dependency should constitute a MAJOR change, we are not yet ready for the public 1.0.0 release
+
+[Compare v0.0.14...develop](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.0.13...develop)
+
+
+
+# 0.0.14 / 2019-03-15 
+
+### Added 
+
+- Draft `dry-monitor` LDAP logger [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/018dbd51b1d675b3153d8ec1d12a2a1f0416243b)
+
+### Changed
+
+- Remove Struct convenience class [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/0c151d6aac915094a85096b40269efbe9099d042)
+
+
+[Compare v0.0.13...v0.0.14](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.0.13...v0.0.14)
+
+
+
+# 0.0.13 / 2019-03-14
 
 ### Added
 
@@ -75,7 +104,7 @@
 
 
 
-# 0.0.9 / 2018-12-07
+# 0.0.9 / 2017-12-07
 
 [Compare v0.0.8...v0.0.9](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.0.8...v0.0.9)
 
