@@ -8,7 +8,8 @@ require 'rom/ldap/responses'
 module ROM
   module LDAP
 
-
+    # Matches an ldap protocol url ldap://host:port/base
+    #
     LDAPURI_REGEX = %r"^ldaps?://[\w/\.]+:?\d*/?(\w+=\w+,?)*.*$"
     # LDAPURI_REGEX = /^ldaps?:\/\/.+$/
 
@@ -140,9 +141,6 @@ module ROM
     # are represented as a backslash followed by the two hexadecimal digits
     # representing the value of the encoded octet.
     #
-    # @return [Regexp]
-    #
-    # UNESCAPE_REGEX   = /\\([a-fA-F\d]{2})/.freeze
     UNESCAPE_REGEX   = /\\([a-f\d]{2})/i.freeze
 
     #

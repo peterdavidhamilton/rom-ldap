@@ -25,7 +25,7 @@ module ROM
     # is the default behavior.
     DEREF_ALWAYS = 3 # "always"
 
-    #
+    # Array of all dereferencing modes
     DEREF_ALL = [DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS].freeze
 
 
