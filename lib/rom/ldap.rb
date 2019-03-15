@@ -14,7 +14,6 @@ require 'rom/ldap/associations'
 require 'rom/ldap/gateway'
 require 'rom/ldap/commands'
 require 'rom/ldap/extensions'
-require 'rom/ldap/struct'
 
 if defined?(Rails)
   ROM::LDAP.load_extensions(:active_support_notifications, :rails_log_subscriber)
