@@ -19,7 +19,9 @@ Bundler.require :default, :development
 # Entity
 # =============================================================================
 module Entities
-  class Animal < ROM::LDAP::Struct
+  class Animal < ROM::Struct
+    transform_types { |type| type.meta(omittable: true) }
+
     def common_name
       cn.first.upcase
     end
