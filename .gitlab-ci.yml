@@ -2,9 +2,8 @@
 # docker build -t registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest . -f ./docker/rom-ldap/Dockerfile
 # docker push registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest
 #
-# image: 'ruby:2.3'
-
-image : registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest
+image: ruby:2.4
+# image : registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest
 
 before_script:
   - bundle install
