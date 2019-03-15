@@ -12,6 +12,9 @@ module ROM
 
       include AttributeDSL
 
+      # @param args [Mixed]
+      # @return [ROM::LDAP::Attribute]
+      #
       # @api private
       def self.[](*args)
         fetch_or_store(args) { new(*args) }
