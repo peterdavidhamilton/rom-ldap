@@ -1,0 +1,8 @@
+--title 'rom-ldap'
+--markup markdown
+--readme README.md
+--private
+lib/**/*.rb
+-
+CHANGELOG.md
+TODO.md
