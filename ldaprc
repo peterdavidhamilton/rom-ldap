@@ -1,4 +1,19 @@
 VERSION 3
-BASE dc=rom,dc=ldap
-PORT 389
-BINDDN uid=admin,ou=system
+# BASE dc=rom,dc=ldap
+# BASE dc=example,dc=com
+
+# openldap
+# PORT 2389
+# BINDDN cn=admin,dc=rom,dc=ldap
+
+# apacheds
+# PORT 1389
+# BINDDN uid=admin,ou=system
+
+# 389
+# PORT 3389
+# BINDDN cn=Directory Manager
+
+# opendj
+# BINDDN cn=Directory Manager
+# PORT 4389
