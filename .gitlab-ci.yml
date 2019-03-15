@@ -63,7 +63,7 @@ test:
 pages:
   stage: deploy
   dependencies:
-    - rspec
+    - test
   script:
     - mv coverage/ public/
   artifacts:
