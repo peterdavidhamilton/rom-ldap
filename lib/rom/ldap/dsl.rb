@@ -47,7 +47,6 @@ module ROM
       #
       # @api public
       def `(value)
-        binding.pry
         Parsers::FilterAbstracter.new(value, schemas: EMPTY_ARRAY).call
       end
 

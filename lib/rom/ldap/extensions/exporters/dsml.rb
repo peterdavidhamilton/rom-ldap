@@ -34,7 +34,7 @@ module ROM
         #   <?xml version="1.0" encoding="UTF-8"?>
         #   <dsml>
         #     <directory-entries>
-        #       <entry dn="#{dn}">
+        #       <entry dn="dn">
         #
         # @return [String]
         #
@@ -50,7 +50,7 @@ module ROM
 
         private
 
-        # <entry dn="#{dn}">
+        # <entry dn="dn">
         #
         # @yield [LibXML::XML::Node]
         #
@@ -87,7 +87,8 @@ module ROM
 
         # @example
         #
-        #   {'cn'=>['Peter']} => <attr name="cn"><value>Peter</value></attr>
+        #   {'cn'=>['Peter']}
+        #     => <attr name="cn"><value>Peter</value></attr>
         #
         # @yield [LibXML::XML::Node]
         #

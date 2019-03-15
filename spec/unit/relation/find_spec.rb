@@ -25,8 +25,6 @@ RSpec.describe ROM::LDAP::Relation, '#find' do
 
       expect(animals.project(:genus, :order).find(var).count).to eql(2)
 
-
-# binding.pry
       # expect(animals.find(var).count).to eql(4)
       # expect(animals.project(:family, :genus, :order).find(var).count).to eql(3)
     end

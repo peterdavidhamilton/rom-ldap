@@ -34,7 +34,6 @@ RSpec.describe ROM::LDAP::Directory do
 
   describe '#add' do
     it 'persists valid entries' do
-      # binding.pry
       expect(directory.add(dn: dn, cn: 'Lucas Bishop', sn: 'Bishop', objectClass: 'person')).to be_a(ROM::LDAP::Directory::Entry)
       expect(directory.find(dn)).to be_a(ROM::LDAP::Directory::Entry)
     end

@@ -28,7 +28,7 @@ RSpec.shared_context 'associations' do
         associations do
           belongs_to :researchers,
             as: :researcher,
-            combine_key: :field,
+            # combine_key: :field,
             # combine_keys: { study: :field },
             combine_key: { study: :field },
             view: :biography,

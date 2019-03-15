@@ -104,7 +104,7 @@ module ROM
       Bools     = Array.constructor(Functions[:map_to_booleans])
 
       #
-      Jpegs  = String.constructor(Functions[:to_base64])
+      Jpegs     = String.constructor(Functions[:to_base64])
 
       #
       # Special LDAP Read Types --------

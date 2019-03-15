@@ -1,4 +1,5 @@
 require 'rom/initializer'
+require 'dry/equalizer'
 
 module ROM
   module LDAP

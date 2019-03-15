@@ -15,7 +15,7 @@ module ROM
         private
 
         #
-        # @param tuples [Array<Entry>]
+        # @param entries [Array<Directory::Entry>]
         #
         # @api private
         def finalize(entries, *)
