@@ -10,7 +10,7 @@ https://docs.gitlab.com/ee/ci/ssh_keys/README.html
 Create passwordless ssh key for access to private repos (ldap-ber).
 
 `$ ssh-keygen -o -t rsa -b 4096 -C "rom-ldap CI/CD"`
-`$ pbcopy < ~/.ssh/rom-ldap.pub`    
+`$ pbcopy < ~/.ssh/rom-ldap`    
 
 
 - `$ cd ./docker/apacheds`
