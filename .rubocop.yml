@@ -4,16 +4,16 @@ inherit_from: .rubocop_todo.yml
 AllCops:
   Include:
     - Rakefile
-    - lib/**/*
-    - rakelib/*
+    - lib/**/*.rb
+    - rakelib/*.rake
   Exclude:
     - '**/.DS_Store' # Lint/Syntax: Invalid byte sequence in utf-8.
     - doc/**/*
-    - examples/**/*
+    - docker/**/*
     - log/*
     - spec/**/*
     - vendor/**/*
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.4
 
 Style/LambdaCall:
   Enabled: false
