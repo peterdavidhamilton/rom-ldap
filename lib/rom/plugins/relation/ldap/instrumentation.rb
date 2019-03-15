@@ -12,9 +12,11 @@ module ROM
             klass.class_eval do
               include ROM::Plugins::Relation::Instrumentation
 
+              # @overload [Hash]
+              #
               # @api private
               def notification_payload(relation)
-                super.merge(query: relation.filter)
+                super.merge(query: relation.to_filter)
               end
             end
           end
