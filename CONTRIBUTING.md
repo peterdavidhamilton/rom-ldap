@@ -1,0 +1,3 @@
+# Issue Guidelines
+
+## Reporting bugs
