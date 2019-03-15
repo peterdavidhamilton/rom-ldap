@@ -26,7 +26,9 @@ module ROM
         extend Initializer
         extend Dry::Core::Cache
 
+        #
         include Dry::Equalizer(:dn, :attributes, :canonical, :formatted)
+        #
         include Memoizable
 
         # @see Dataset::Persistence

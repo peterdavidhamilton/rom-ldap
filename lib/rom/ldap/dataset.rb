@@ -30,7 +30,9 @@ module ROM
       #   @return [Array] Query AST
       option :criteria, type: Types::Strict::Array, reader: :private, default: -> { EMPTY_ARRAY }
 
-
+      #
+      # @!attribute [r] direction
+      #   @return [Symbol]
       option :direction, type: Types::Direction, reader: :private, default: -> { :asc }
 
       # Valid Distinguished Name. A relation class value or the gateway default.
@@ -39,14 +41,17 @@ module ROM
       #   @return [String] Set when initializing a relation
       option :base, type: Types::DN, reader: :private, optional: true
 
-      # @option :offset [Integer] Pagination per_page(20).
       #
+      # @!attribute [r] offset
+      #   @return [Integer] Pagination per_page(20).
       option :offset, type: Types::Strict::Integer, reader: :private, optional: true
 
       # @option :limit [Integer] Pagination page(1).
       #
       option :limit, type: Types::Strict::Integer, reader: :private, optional: true
 
+      # @option :rand [TrueClass] Switch for randomisation
+      #
       option :rand, type: Types::Strict::Bool, reader: :private, default: -> { false }
 
       # Attributes to return. Needs to be set to the projected schema.

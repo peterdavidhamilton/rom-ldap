@@ -9,6 +9,8 @@ module ROM
   module Plugins
     module Relation
       module LDAP
+        # Novell eDirectory Namespace
+        #
         module EDirectory
           # Novell eDirectory specific extension.
           #

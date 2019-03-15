@@ -72,8 +72,6 @@ module ROM
           #   ctx.set_params(tls_options) unless ssl.empty?
           #   @socket = OpenSSL::SSL::SSLSocket.new(@socket, ctx)
 
-          #   binding.pry
-
           #   @socket.extend(GetbyteForSSLSocket) unless @socket.respond_to?(:getbyte)
           #   @socket.extend(FixSSLSocketSyncClose)
           # end
@@ -128,9 +126,6 @@ module ROM
 
 
       # Read from socket and wrap in PDU class.
-      #
-      # @param syntax [Array<Symbol>]
-      # @see BER
       #
       # @return [PDU]
       #

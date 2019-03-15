@@ -13,19 +13,9 @@ module ROM
     class Gateway < ROM::Gateway
       adapter :ldap
 
-
-      # @!attribute [r] uri
+      # @!attribute [r] directory
       #   @return [String]
       attr_reader :directory
-
-
-      # @!attribute [r] uri
-      #   @return [String]
-      # attr_reader :uri
-
-      # @!attribute [r] options
-      #   @return [Hash] Options passed to gateway
-      # attr_reader :options
 
       # @!attribute [r] logger
       #   @return [Object] configured gateway logger

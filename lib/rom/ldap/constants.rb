@@ -136,7 +136,7 @@ module ROM
     # ESC and HEX values
     #
     # The value encoding rule ensures that the entire filter string is a valid
-    # UTF-8 string and provides that the octets that represent theses {ESCAPES}
+    # UTF-8 string and provides that the octets that represent theses ESCAPES
     # are represented as a backslash followed by the two hexadecimal digits
     # representing the value of the encoded octet.
     #
