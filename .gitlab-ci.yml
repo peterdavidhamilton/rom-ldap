@@ -5,21 +5,15 @@
 #   - deploy
 
 
-# image: ruby:2.4.5
-# image: ruby:2.5.5
-# image: ruby:2.6.2
-
-
 #
 # docker build -t registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest . -f ./docker/rom-ldap/Dockerfile
 # docker push registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest
 #
-image: ruby:2.4
+image: ruby:2.4.5
+# image: ruby:2.5.5
+# image: ruby:2.6.2
 
 before_script:
-  - eval $(ssh-agent -s)
-  - echo "$SSH_PRIVATE_KEY" | ssh-add -
-  - mkdir -p ~/.ssh && chmod 700 ~/.ssh
   - bundle install
 
 
@@ -37,7 +31,6 @@ before_script:
 #
 test:
   variables:
-    # SSH_PRIVATE_KEY:
     LDAPURI:    ldap://directory:10389/ou=specs,dc=rom,dc=ldap
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
