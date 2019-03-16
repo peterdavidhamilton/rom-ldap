@@ -23,7 +23,7 @@ test:
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest
       alias: apacheds
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389:latest
-      alias: 389
+      alias: '389'
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
       alias: opendj
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
