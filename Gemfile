@@ -5,7 +5,8 @@ gemspec
 gem 'dry-struct', github: 'dry-rb/dry-struct'
 gem 'dry-types', github: 'dry-rb/dry-types'
 
-gem 'ldap-ber', git: 'ssh://git@gitlab.com/peterdavidhamilton/ldap-ber', branch: 'develop'
+# gem 'ldap-ber', git: 'ssh://git@gitlab.com/peterdavidhamilton/ldap-ber', branch: 'develop'
+gem 'ldap-ber', git: "https://oauth2:#{ENV['GITLAB_TOKEN']}@gitlab.com/peterdavidhamilton/ldap-ber", branch: 'develop'
 
 gem 'rom', github: 'rom-rb/rom' do
   gem 'rom-core'
