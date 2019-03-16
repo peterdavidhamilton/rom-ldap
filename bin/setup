@@ -33,12 +33,12 @@ chmod 700 ./ldappw
 ldapsearch -x -y ldappw + \*
 
 
-if [[ `chruby | grep ruby-2.3` ]]; then
+if [[ `chruby | grep ruby-2.4` ]]; then
   gem install bundle
   bundle install
 else
-  ruby-install ruby 2.3
-  chruby 2.3
+  ruby-install ruby 2.4.5
+  chruby 2.4
 fi
 
 

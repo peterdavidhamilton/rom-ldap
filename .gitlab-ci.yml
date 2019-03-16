@@ -13,42 +13,25 @@ image: ruby:2.4.5
 # image: ruby:2.5.5
 # image: ruby:2.6.2
 
-before_script:
-  - bundle install
-
-
-# Run specs and leave SimpleCov output.
-#
-# $ cd ./docker/apacheds
-#
-# $ docker build -t registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest .
-#
-# $ docker push registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest
-#
-# $ gitlab-runner exec docker test
-#
-# $ gitlab-runner exec docker --docker-volumes /Users/pdh/.ssh/pdh:/root/.ssh/id_rsa:ro
-#
 test:
   variables:
-    LDAPURI:    ldap://directory:10389/ou=specs,dc=rom,dc=ldap
+    LDAPURI:    ldap://apacheds:10389/ou=specs,dc=rom,dc=ldap
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
 
   services:
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest
-      alias: directory
-    #   alias: apacheds
-    # - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389:latest
-    #   alias: 389
-    # - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
-    #   alias: opendj
-    # - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
-    #   alias: openldap
+      alias: apacheds
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389:latest
+      alias: 389
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
+      alias: opendj
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
+      alias: openldap
   script:
-    # - bundle install
+    - bundle install --without development benchmark
     - ulimit -n 1024
-    - rake # rspec
+    - rake
   artifacts:
     paths:
       - coverage/
