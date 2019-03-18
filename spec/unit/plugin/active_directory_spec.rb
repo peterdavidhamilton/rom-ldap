@@ -1,4 +1,4 @@
-RSpec.describe ROM::LDAP::Relation, 'ActiveDirectory::Helper' do
+RSpec.describe ROM::LDAP::Relation, 'ActiveDirectory' do
 
   include_context 'directory'
 
@@ -6,7 +6,7 @@ RSpec.describe ROM::LDAP::Relation, 'ActiveDirectory::Helper' do
     before do
       conf.relation(:foo) do
         schema('(objectclass=*)', infer: true) # NB: note case of attr here
-        use :ad_helper
+        use :active_directory
       end
     end
 
