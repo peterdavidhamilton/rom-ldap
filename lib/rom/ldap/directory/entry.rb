@@ -35,11 +35,11 @@ module ROM
         #
         # Accessed when iterating over dataset during #modify and #delete
         #
-        param :dn, proc(&:to_s)
+        param :dn, proc(&:to_s), type: Types::Strict::String
 
         #
         #
-        param :attributes, SORT_PROC, type: Types::Strict::Hash, reader: :private
+        param :attributes, SORT_PROC, type: Types::Strict::Array, reader: :private
 
 
         # Retrieve values for a given attribute.
@@ -112,7 +112,7 @@ module ROM
         # @return [String]
         #
         def inspect
-          %(#<#{self.class} #{dn} />).freeze
+          %(#<#{self.class} #{dn.empty? ? 'rootDSE' : dn} />).freeze
         end
 
 

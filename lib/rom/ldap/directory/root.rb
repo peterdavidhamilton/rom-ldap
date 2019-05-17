@@ -44,7 +44,7 @@ module ROM
         #
         # @api public
         def od?
-          root['objectClass']&.include?('OpenLDAProotDSE')
+          !!root['objectClass']&.include?('OpenLDAProotDSE')
         end
 
 
@@ -160,21 +160,27 @@ module ROM
             scope: SCOPE_BASE,
             attributes: ALL_ATTRS
           ).first
+
+          @root || raise(ResponseMissingError, 'Directory root failed to load')
         end
 
         # Representation of directory SubSchema
         #
         # @return [Directory::Entry]
         #
+        # @raise [ResponseMissingError]
+        #
         # @api private
         def sub_schema
           @sub_schema ||= query(
             base: sub_schema_entry,
-            filter: '(objectClass=subschema)',
             scope: SCOPE_BASE,
             attributes:  %w[objectClasses attributeTypes],
+            filter: '(objectClass=subschema)',
             max_results: 1
           ).first
+
+          @sub_schema || raise(ResponseMissingError, 'Directory schema failed to load')
         end
       end
     end

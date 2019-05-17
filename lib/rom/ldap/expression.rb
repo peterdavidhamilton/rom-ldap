@@ -6,7 +6,7 @@ module ROM
     class Expression
       extend Initializer
 
-      ExpType = Types::String | Types.Instance(Expression)
+      ExpType = Types::Strict::String | Types.Instance(Expression)
 
       param :op, type: Types::Strict::Symbol
 
