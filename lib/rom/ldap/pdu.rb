@@ -22,20 +22,13 @@ module ROM
     class PDU
       extend Initializer
 
-      param :message_id, proc(&:to_i),
-        reader: true,
-        type: Types::Strict::Integer
+      param :message_id, proc(&:to_i), reader: true, type: Types::Strict::Integer
 
       # @!attribute [r] tag
       #   @return [Array]
-      param :tag,
-        reader: :private,
-        type: Types::Strict::Array
+      param :tag, reader: :private, type: Types::Strict::Array
 
-      param :ctrls,
-        reader: :private,
-        type: Types::Strict::Array,
-        default: -> { EMPTY_ARRAY }
+      param :ctrls, reader: :private, type: Types::Strict::Array, default: -> { EMPTY_ARRAY }
 
       # @return [Integer]
       #

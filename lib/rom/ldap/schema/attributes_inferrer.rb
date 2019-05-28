@@ -17,7 +17,7 @@ module ROM
 
           inferred = columns.map do |name|
             type = type_builder.call(name, schema.name)
-            attr_class.new(type)
+            attr_class.new(type, name: name.to_sym)
           end
 
           missing = columns - inferred.map { |attr| attr.meta[:name] }

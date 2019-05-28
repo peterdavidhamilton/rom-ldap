@@ -8,11 +8,11 @@ module ROM
       CONSTRUCTOR_REGEX = Regexp.union(/\s*\|\s*/, /\s*\&\s*/)
 
       #
-      #  Rfc2254 -> AST          # Rfc2254Abstracter
-      #  Rfc2254 -> Expression   # Rfc2254Expresser
+      #  Filter -> AST         # FilterAbstracter
+      #  Filter -> Expression  # FilterExpresser
       #
-      #  AST     -> Rfc2254      # ASTRecompiler
-      #  AST     -> Expression   # ASTExpresser
+      #  AST    -> Filter      # ASTRecompiler
+      #  AST    -> Expression  # ASTExpresser
       #
       class Base
 
@@ -20,17 +20,11 @@ module ROM
 
         option :schemas, reader: :private
 
-        option :constructors,
-          type: Dry::Types['strict.hash'],
-          default: -> { CONSTRUCTORS }
+        option :constructors, type: Types::Strict::Hash, default: -> { CONSTRUCTORS }
 
-        option :operators,
-          type: Dry::Types['strict.hash'],
-          default: -> { OPERATORS }
+        option :operators, type: Types::Strict::Hash, default: -> { OPERATORS }
 
-        option :values,
-          type: Dry::Types['strict.hash'],
-          default: -> { VALUES_MAP }
+        option :values, type: Types::Strict::Hash, default: -> { VALUES_MAP }
 
 
         # @raise [NotImplementedError]

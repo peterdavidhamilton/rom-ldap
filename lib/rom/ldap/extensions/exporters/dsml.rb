@@ -27,9 +27,9 @@ module ROM
         include LibXML
 
 
-        # Array of Hash-like objects
+        # Dataset
         #
-        param :tuples
+        param :tuples, type: Types::Strict::Array.of(Types::Strict::Hash)
 
         #   <?xml version="1.0" encoding="UTF-8"?>
         #   <dsml>
@@ -127,7 +127,7 @@ module ROM
         #
         # @api public
         def to_dsml
-          Exporter.new([ self ]).to_dsml
+          Exporter.new([self]).to_dsml
         end
       end
 

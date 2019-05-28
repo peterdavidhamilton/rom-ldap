@@ -32,8 +32,7 @@ RSpec.shared_context 'directory' do
 
   let(:base) { 'ou=specs,dc=rom,dc=ldap' }
 
-  let(:uri) { "ldaps://127.0.0.1:10389/#{base}" }
-  # let(:uri) { "ldaps://192.168.99.102:1389/#{base}" } # apacheds 5 mins slower
+  let(:uri) { "ldap://127.0.0.1:10389/#{base}" }
 
   let(:bind_dn) { 'uid=admin,ou=system' }
 

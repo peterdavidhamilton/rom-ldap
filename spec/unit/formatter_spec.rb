@@ -52,7 +52,8 @@ RSpec.describe ROM::LDAP, 'schema formatting' do
     end
   end
 
-
+  # NB: ROM Attribute#name must now be a symbol
+  #
   context 'when formatter proc is default or nil' do
     before do
       ROM::LDAP.use_formatter(nil)
@@ -60,7 +61,7 @@ RSpec.describe ROM::LDAP, 'schema formatting' do
       conf.relation(:unformatted) { schema('(mail=*)', infer: true) }
     end
 
-    let(:attributes) { relations[:unformatted].schema.to_h.keys }
+    let(:attributes) { relations[:unformatted].schema.map(&:name) }
 
     it { expect(ROM::LDAP.formatter.to_s).to match(/formatter.rb:6/) }
 
@@ -68,7 +69,7 @@ RSpec.describe ROM::LDAP, 'schema formatting' do
 
       expect(ROM::LDAP.formatter['=HELLO World']).to eql('=HELLO World')
 
-      expect(attributes).to include(*%w[
+      expect(attributes).to include(*%i[
                                         apple-imhandle
                                         cn
                                         dn

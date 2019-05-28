@@ -19,27 +19,21 @@ module ROM
       # @api public
       class Entry
 
-        # Ensure entry attributes are always sorted alphabetically.
-        #
-        SORT_PROC = ->(attrs) { attrs.sort_by(&:first).freeze }.freeze
-
         extend Initializer
         extend Dry::Core::Cache
 
-        #
         include Dry::Equalizer(:dn, :attributes, :canonical, :formatted)
-        #
         include Memoizable
 
         # @see Dataset::Persistence
         #
+        # BER format converted to primitive String
         # Accessed when iterating over dataset during #modify and #delete
         #
         param :dn, proc(&:to_s), type: Types::Strict::String
 
-        #
-        #
-        param :attributes, SORT_PROC, type: Types::Strict::Array, reader: :private
+        # Array of Array of Strings
+        param :attributes, type: Types::Strict::Array, reader: :private
 
 
         # Retrieve values for a given attribute.
@@ -96,8 +90,8 @@ module ROM
         #
         # @api public
         def include?(tuple)
-          tuple.flat_map { |attr,vals| vals.map { |v| fetch(attr).include?(v) } }.all?
-          rescue NoMethodError
+          tuple.flat_map { |attr, vals| vals.map { |v| fetch(attr).include?(v) } }.all?
+        rescue NoMethodError
           false
         end
 
@@ -106,7 +100,7 @@ module ROM
         #
         #
         def method_missing(meth, *args, &block)
-          formatted.send(meth, *args, &block) if formatted.respond_to?(meth)
+          formatted.send(meth, *args, &block) if formatted.respond_to?(meth) || super
         end
 
         # @return [String]
@@ -147,7 +141,7 @@ module ROM
         #
         # @api private
         def with_dn
-          attributes.dup.unshift(['dn', dn])
+          attributes.dup.sort.unshift(['dn', dn])
         end
 
         # Create canonical tuple

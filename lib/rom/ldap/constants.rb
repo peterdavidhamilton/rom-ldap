@@ -98,6 +98,11 @@ module ROM
         op_ext: ':='    # Bitwise comparison of numeric values
       }.freeze
 
+
+    # @return [Array]
+    #
+    ABSTRACTS = [*OPERATORS.keys, *CONSTRUCTORS.keys].freeze
+
     # Symbolic abstraction of LDIF booleans and wildcard matcher
     #
     # @return [Hash]

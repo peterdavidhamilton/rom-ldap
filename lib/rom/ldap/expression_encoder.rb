@@ -49,10 +49,16 @@ module ROM
 
       extend Initializer
 
-      param :op, type: Dry::Types['strict.symbol']
-      param :left
-      param :right
+      param :op, type: Types::Abstract
 
+      # anything that responds to #to_s
+      param :left, type: Types::Any
+
+      # anything that responds to #to_s
+      param :right, type: Types::Any
+
+      # @return [BER]
+      #
       def call
         case op
 

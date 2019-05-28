@@ -13,7 +13,7 @@ require 'rom-changeset'
 
 config = ROM::Configuration.new(:ldap,
   'ldap://127.0.0.1:10389/dc=rom,dc=ldap',
-  # 'ldap://192.168.99.102:4389/dc=rom,dc=ldap',
+  # 'ldap://rancher:1389/dc=rom,dc=ldap',
   extensions: %i[
     compatibility
     dsml_export

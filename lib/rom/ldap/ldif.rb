@@ -21,9 +21,9 @@ module ROM
       class Exporter
         extend Initializer
 
-        # Array of Hash-like objects
+        # Dataset
         #
-        param :tuples
+        param :tuples, type: Types::Strict::Array.of(Types::Strict::Hash)
 
         # @return [String]
         #
@@ -78,7 +78,7 @@ module ROM
         #
         # @api public
         def to_ldif
-          Exporter.new( [self] ).to_ldif
+          Exporter.new([self]).to_ldif
         end
       end
 

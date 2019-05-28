@@ -24,6 +24,14 @@ module ROM
       #
       Deref = Strict::Integer.constrained(included_in: DEREF_ALL)
 
+      # Abstraction of LDAP symbols: :con_and, :op_eql etc
+      Abstract = Strict::Symbol.constrained(included_in: ABSTRACTS)
+
+      # Compatible filter fields (formatters may symbolise)
+      Field = Strict::String | Strict::Symbol
+
+      # Compatible filter values (including wildcard abstraction)
+      Value = Strict::String | Strict::Integer | Strict::Symbol.constrained(included_in: %i[wildcard])
 
       # @see Schema::Attribute read types
       #

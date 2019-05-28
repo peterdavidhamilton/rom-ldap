@@ -62,7 +62,7 @@ module ROM
         # @return [URI::LDAP, URI::LDAPS]
         #
         def uri
-          URI(URI.unescape(connection || default_connection))
+          URI(URI.decode_www_form_component(connection || default_connection))
         end
 
 

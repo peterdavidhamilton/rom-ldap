@@ -65,9 +65,7 @@ module ROM
 
         extend Initializer
 
-        param :attribute,
-          type: Types::Strict::String,
-          reader: :private
+        param :attribute, type: Types::Strict::String, reader: :private
 
         def call
           Array(canonical_names).map do |original_name|

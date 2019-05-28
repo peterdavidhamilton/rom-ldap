@@ -6,7 +6,7 @@ module ROM
     module Parsers
       class AST < Base
 
-        param :ast, type: Dry::Types['strict.array']
+        param :ast, type: Types::Strict::Array
 
         def call
           case ast.size

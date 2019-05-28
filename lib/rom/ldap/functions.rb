@@ -56,7 +56,7 @@ module ROM
       # @api public
       def self.identify_value(val)
         case val
-        when Symbol, TrueClass, FalseClass
+        when ::Symbol, ::TrueClass, ::FalseClass
           VALUES_MAP.fetch(val, val)
         else
           VALUES_MAP.invert.fetch(val, val)
@@ -72,10 +72,10 @@ module ROM
       # @api public
       def self.stringify(value)
         case value
-        when Numeric    then value.to_s
-        when Enumerable then value.map(&:to_s)
-        when Hash       then value.to_json
-        when String     then value
+        when ::Numeric    then value.to_s
+        when ::Enumerable then value.map(&:to_s)
+        when ::Hash       then value.to_json
+        when ::String     then value
         end
       end
 
@@ -119,13 +119,15 @@ module ROM
         ::Base64.strict_encode64(value).prepend("data:#{mime};base64,")
       end
 
+      # @todo
+      #   submit patch to Transproc
       # @note
-      #   Transproc::Coercions::TRUE_VALUES is missing 'TRUE'
+      #   LDAP stores boolean values as capitalised strings.
       #
       # @return [TrueClass, FalseClass]
       #
       def self.to_boolean(value)
-        Dry::Types['params.bool'][value]
+        Transproc::Coercions::BOOLEAN_MAP.merge('TRUE' => true, 'FALSE' => false).fetch(value)
       end
 
       # The 18-digit Active Directory timestamps,

@@ -6,20 +6,26 @@ module ROM
     class Expression
       extend Initializer
 
-      ExpType = Types::Strict::String | Types.Instance(Expression)
+      param :op, type: Types::Abstract
 
-      param :op, type: Types::Strict::Symbol
+      param :left, type: Types::Field | Types.Instance(Expression)
 
-      param :left, type: ExpType
+      param :right, optional: true, type: Types::Value | Types.Instance(Expression)
 
-      param :right, optional: true, type: ExpType
 
+      # Bracketed filter string
+      #
+      # @return [String]
+      #
       def to_filter
         "(#{to_raw_filter})"
       end
-
       alias to_s to_filter
 
+      # Unbracketed filter string
+      #
+      # @return [String]
+      #
       def to_raw_filter
         case op
         when :con_not then "!(#{left}=#{right})"
@@ -34,20 +40,20 @@ module ROM
         end
       end
 
+      # @return [String]
+      #
       def inspect
         %(#<#{self.class} op=#{op} left=#{left} right=#{right} />)
       end
 
+      # @return [String]
+      #
       def to_ber
-        ExpressionEncoder.new(op, left, right).call
+        ExpressionEncoder.new(*options.values).call
       end
 
       def with(sym, other = nil)
         self.class.new(sym, self, other)
-      end
-
-      def [](args)
-        # noop - allows Type.Instance(?)
       end
 
       # @return [Array]

@@ -48,19 +48,6 @@ module ROM
         meta[:single].equal?(false)
       end
 
-      # Return a new attribute with an alias
-      #
-      # @example
-      #   users[:id].aliased(:user_id)
-      #
-      # @return [LDAP::Attribute]
-      #
-      # @api public
-      def aliased(name)
-        super.meta(name: meta.fetch(:name, name))
-      end
-      alias as aliased
-
       # Return a new attribute marked as joined
       #
       # Whenever you join two schemas, the right schema's attribute
