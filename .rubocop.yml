@@ -15,15 +15,19 @@ AllCops:
     - vendor/**/*
   TargetRubyVersion: 2.4
 
-Style/LambdaCall:
-  Enabled: false
+Naming/FileName:
+  Exclude:
+    - 'lib/rom-ldap.rb'
 
-Metrics/LineLength:
-  Enabled: false
+# Style/LambdaCall:
+#   Enabled: false
 
-Style/Encoding:
-  Enabled: true
+# Metrics/LineLength:
+#   Enabled: false
 
-Style/FrozenStringLiteralComment:
-  EnforcedStyle: when_needed
-  Enabled: false
+# Style/Encoding:
+#   Enabled: true
+
+# Style/FrozenStringLiteralComment:
+#   EnforcedStyle: when_needed
+#   Enabled: false
