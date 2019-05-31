@@ -47,6 +47,19 @@ module ROM
           !!root['objectClass']&.include?('OpenLDAProotDSE')
         end
 
+        # @return [String]
+        #
+        # @api public
+        def vendor_name
+          'Unknown'
+        end
+
+        # @return [String]
+        #
+        # @api public
+        def vendor_version
+          'Unknown'
+        end
 
         # @return [Array<String>]
         #
@@ -56,22 +69,7 @@ module ROM
         #
         # @api public
         def vendor
-          [vendor_name, vendor_version].freeze
-        end
-
-
-        # @return [String]
-        #
-        # @api public
-        def vendor_name
-          root.first('vendorName')
-        end
-
-        # @return [String]
-        #
-        # @api public
-        def vendor_version
-          root.first('vendorVersion')
+          [vendor_name, vendor_version]
         end
 
         # Distinguished name of subschema
@@ -133,7 +131,6 @@ module ROM
         def supported_versions
           root['supportedLDAPVersion'].sort.map(&:to_i)
         end
-
 
         # @return [String]
         #

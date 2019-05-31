@@ -1,29 +1,30 @@
 module ROM
   module LDAP
     #
-    # OpenLDAP
+    # OpenLDAP Extension
     #
     module OpenLDAP
       #
       # @return [String]
       #
       def vendor_name
-        'OpenLDAP'.freeze
+        'OpenLDAP'
       end
 
       #
       # @return [String]
       #
       def vendor_version
-        '0.0'.freeze
+        '0.0'
       end
 
       #
       # @return [String]
       #
       def organization
-        query(filter: '(objectClass=organization)').first['o'][0]
+        query(base: contexts[0]).first.first('o')
       end
+
     end
 
     Directory.send(:include, OpenLDAP)

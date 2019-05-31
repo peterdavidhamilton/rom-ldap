@@ -1,11 +1,35 @@
 module ROM
   module LDAP
-    IGNORE_ATTRS_REGEX = /^[m-|ads|entry].*$/.freeze
-
-    # Apache Directory Server
+    #
+    # Apache Directory Extension
+    #
     module ApacheDS
+      IGNORE_ATTRS_REGEX = /^[m-|ads|entry].*$/.freeze
 
-      # TODO: default development env stuff?
+      # @return [String]
+      #
+      # @api public
+      def vendor_name
+        root.first('vendorName')
+      end
+
+      # @return [String]
+      #
+      # @api public
+      def vendor_version
+        root.first('vendorVersion')
+      end
+
+      # @return [Array]
+      #
+      # @api public
+      def schemas
+        query(base: 'ou=schema', filter: '(objectClass=metaAttributeType)')
+      end
+
+      # def schemas
+      #   query(base: 'ou=schema', filter: '(objectClass=metaObjectClass)')
+      # end
     end
 
     Directory.send(:include, ApacheDS)

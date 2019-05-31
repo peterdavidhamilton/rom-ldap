@@ -1,6 +1,8 @@
 module ROM
   module LDAP
-    # Microsoft Active Directory
+    #
+    # Microsoft Active Directory Extension
+    #
     module ActiveDirectory
 
       #
@@ -91,7 +93,7 @@ module ROM
       # @return [Array<String>]
       #
       def supported_capabilities
-        root.fetch('supportedCapabilities').sort
+        root['supportedCapabilities'].sort
       end
 
     end

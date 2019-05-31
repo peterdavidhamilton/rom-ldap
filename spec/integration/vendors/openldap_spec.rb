@@ -1,39 +1,36 @@
 RSpec.describe 'OpenLDAP' do
 
-  include_context 'directory'
-
-  # let(:uri) { 'ldaps://192.168.99.102:2389' }
-  # let(:bind_dn) { 'cn=admin,dc=rom,dc=ldap' }
-  # let(:bind_pw) { 'topsecret' }
-
-  xit 'vendor extension' do
-    expect(directory.vendor_name).to eql('OpenLDAP')
-    expect(directory.vendor_version).to eql('0.0')
+  let(:gateway) do
+    TestConfiguration.new(:ldap,
+      'ldap://openldap',
+      username: 'cn=admin,dc=rom,dc=ldap',
+      password: 'topsecret'
+    ).gateways[:default]
   end
 
-  xit 'reveals directory vendor name' do
-    expect(conf.gateways[:default].directory_type).to eql(:open_ldap)
+  it '#type' do
+    expect(gateway.directory.type).to eql(:open_ldap)
+  end
+
+  it '#od?' do
+    expect(gateway.directory.od?).to eql(true)
+  end
+
+  it '#ad?' do
+    expect(gateway.directory.ad?).to eql(false)
+  end
+
+  describe 'extension' do
+    it '#vendor_name' do
+      expect(gateway.directory.vendor_name).to eql('OpenLDAP')
+    end
+
+    it '#vendor_version' do
+      expect(gateway.directory.vendor_version).to eql('0.0')
+    end
+
+    it '#organization' do
+      expect(gateway.directory.organization).to eql('ROM-LDAP OpenLDAP Server')
+    end
   end
 end
-
-
-# RSpec.describe 'OpenLDAP' do
-
-#   let(:gateway) do
-#     TestConfiguration.new(:ldap,
-#       'ldaps://192.168.99.102:2389',
-#       username: 'cn=admin,dc=rom,dc=ldap',
-#       password: 'topsecret'
-#     ).gateways[:default]
-#   end
-
-#   it 'vendor extension' do
-#     expect(gateway.directory.vendor_name).to eql('OpenLDAP')
-#     expect(gateway.directory.vendor_version).to eql('0.0')
-#   end
-
-#   it 'reveals directory vendor name' do
-#     expect(gateway.directory_type).to eql(:open_ldap)
-#     expect(gateway.directory.type).to eql(:open_ldap)
-#   end
-# end

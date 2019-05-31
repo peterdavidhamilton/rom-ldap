@@ -35,7 +35,7 @@ module ROM
     #=======================================
     # Autoloaded by vendor
     #
-    # Extendeds directory only ATM
+    # Extends directory only ATM
     #=======================================
 
     register_extension(:open_ldap) do
@@ -48,6 +48,10 @@ module ROM
 
     register_extension(:open_directory) do
       require 'rom/ldap/extensions/vendors/open_directory'
+    end
+
+    register_extension(:open_dj) do
+      require 'rom/ldap/extensions/vendors/open_dj'
     end
 
     register_extension(:e_directory) do
