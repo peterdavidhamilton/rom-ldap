@@ -50,9 +50,9 @@ module ROM
       #
       option :limit, type: Types::Strict::Integer, reader: :private, optional: true
 
-      # @option :rand [TrueClass] Switch for randomisation
+      # @option :random [TrueClass] Switch for randomisation
       #
-      option :rand, type: Types::Strict::Bool, reader: :private, default: -> { false }
+      option :random, type: Types::Strict::Bool, reader: :private, default: -> { false }
 
       # Attributes to return. Needs to be set to the projected schema.
       #
@@ -105,11 +105,13 @@ module ROM
       def each(*args, &block)
         results = paginated? ? entries[page_range] : entries
 
+        # Fix when server-side sorting not available
+        #
         # if sort_attrs && !directory.sortable?
         #   results = results.sort_by { |tuple| tuple[*sort_attrs] }
         # end
 
-        results = results.sort_by { rand } if rand
+        results = results.sort_by { rand } if random
         results = results.reverse_each if reversed?
 
         block_given? ? results.each(*args, &block) : results.to_enum

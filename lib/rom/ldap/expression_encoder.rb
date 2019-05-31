@@ -66,7 +66,7 @@ module ROM
           if right == WILDCARD
             left.to_s.to_ber_contextspecific(7)
 
-          elsif /[*]/.match(right.to_s) # substring
+          elsif /[*]/ =~ right.to_s # substring
 
             ary = right.split(/[*]+/, -1)
 

@@ -7,6 +7,7 @@ module ROM
 
     # LDAP CONTROL OIDs
     #
+    # http://oid-info.com/get/{{OID}}
     # https://ldap.com/ldap-oid-reference-guide/
     # http://ldapwiki.com/wiki/LDAP%20Extensions%20and%20Controls%20Listing
     #
@@ -30,11 +31,13 @@ module ROM
       permissive_modify:                '1.2.840.113556.1.4.1413',
       fast_concurrent_bind:             '1.2.840.113556.1.4.1781',
       matching_rule_in_chain:           '1.2.840.113556.1.4.1941',
+      server_policy_hints:              '1.2.840.113556.1.4.2239',
       cancel_operation:                 '1.3.6.1.1.8',
       assertion:                        '1.3.6.1.1.12',
       pre_read:                         '1.3.6.1.1.13.1',
       post_read:                        '1.3.6.1.1.13.2',
       modify_increment:                 '1.3.6.1.1.14',
+      transaction_spec_request:         '1.3.6.1.1.21.2',
       dont_use_copy:                    '1.3.6.1.1.22',
       password_policy_request:          '1.3.6.1.4.1.42.2.27.8.5.1',
       get_effective_rights_request:     '1.3.6.1.4.1.42.2.27.9.5.2',

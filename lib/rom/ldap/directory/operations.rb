@@ -175,7 +175,7 @@ module ROM
           end
 
 
-          if attrs.keys.include?('userPassword')
+          if attrs.key?('userPassword')
             new_pwd = attrs.delete('userPassword')
             entry   = find(dn)
             old_pwd = entry['userPassword']
@@ -185,7 +185,7 @@ module ROM
 
 
           if !attrs.empty?
-            if attrs.keys.include?(rdn_attr) && !attrs.keys.include?(rdn_val)
+            if attrs.key?(rdn_attr) && !attrs.key?(rdn_val)
               attrs[rdn_attr] = Array(attrs[rdn_attr]).unshift(rdn_val)
             end
 

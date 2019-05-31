@@ -77,14 +77,13 @@ module ROM
           # end
         end
 
-
         yield(@socket)
       end
 
 
 
       def closed?
-        socket.nil? || socket.closed?
+        socket.nil? || (socket.is_a?(::Socket) && socket.closed?)
       end
 
 

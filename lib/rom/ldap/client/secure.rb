@@ -91,7 +91,7 @@ module ROM
         # #
         # #  :simple_tls or :start_tls
         # #
-        # def setup_encryption(method:, tls_options: EMPTY_HASH, timeout: nil)
+        # def setup_encryption(method:, tls_options: EMPTY_OPTS, timeout: nil)
 
         #   request_type = pdu_lookup(:extended_request)
         #   message_id  = next_msgid

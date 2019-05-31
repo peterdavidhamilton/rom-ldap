@@ -14,7 +14,7 @@ module ROM
         #
         # @api public
         def capabilities
-          @capabilities ||= CONTROLS.invert.values_at(*supported_controls).freeze
+          @capabilities ||= CONTROLS.invert.values_at(*supported_controls).compact.freeze
         end
 
         # Is the server able to order the entries.

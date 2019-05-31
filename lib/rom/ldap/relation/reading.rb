@@ -303,7 +303,7 @@ module ROM
         # @api public
         def random
           # new(dataset.sort_by { rand })
-          new(dataset.with(rand: true))
+          new(dataset.with(random: true))
         end
 
         # Searches attributes of the projected schema for a match.

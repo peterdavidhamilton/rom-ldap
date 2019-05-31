@@ -31,7 +31,7 @@ module ROM
 
         param :connection, reader: :private, type: Types::URI, default: -> { ::ENV['LDAPURI'] }
 
-        param :config, reader: :private, type: Types::Strict::Hash, default: -> { EMPTY_HASH }
+        param :config, reader: :private, type: Types::Strict::Hash, default: -> { EMPTY_OPTS }
 
 
               # TODO: allow setting a starting scope, filter and attributes through the uri?
