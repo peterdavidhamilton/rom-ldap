@@ -17,7 +17,7 @@ module ROM
         @directory = directory
       end
 
-      def run(opts = EMPTY_HASH)
+      def run(opts = EMPTY_OPTS)
         directory.transaction(opts) { yield(self) }
       rescue ::ROM::Transaction::Rollback
         # noop

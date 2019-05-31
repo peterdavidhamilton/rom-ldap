@@ -107,7 +107,7 @@ module ROM
         #
         # @return [LibXML::XML::Node]
         #
-        def create_node(type, params = EMPTY_HASH)
+        def create_node(type, params = EMPTY_OPTS)
           node = XML::Node.new(type)
           unless params.empty?
             params.each do |key, value|

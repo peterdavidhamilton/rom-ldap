@@ -109,7 +109,7 @@ module ROM
       # @return [Mixed]
       #
       # @api public
-      def transaction(opts = EMPTY_HASH, &block)
+      def transaction(opts = EMPTY_OPTS, &block)
         Transaction.new(dataset.directory).run(opts, &block)
       end
 

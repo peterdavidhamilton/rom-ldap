@@ -46,7 +46,7 @@ module ROM
       #
       # @return [LDAP::Gateway]
       #
-      def initialize(uri = nil, options = EMPTY_HASH)
+      def initialize(uri = nil, options = EMPTY_OPTS)
         @directory = Directory.new(uri, options)
         @logger = options.fetch(:logger) { ::Logger.new(STDOUT) }
 

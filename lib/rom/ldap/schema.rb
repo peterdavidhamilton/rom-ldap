@@ -80,7 +80,7 @@ module ROM
       end
 
       # @api private
-      def finalize_attributes!(options = EMPTY_HASH)
+      def finalize_attributes!(options = EMPTY_OPTS)
         super do
           initialize_primary_key_names
         end
