@@ -146,8 +146,3 @@ Benchmark.ips do |bm|
   bm.compare!
 end
 
-
-
-
-
-
