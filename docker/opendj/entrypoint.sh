@@ -5,7 +5,10 @@ LDAPS_PORT=${LDAPS_PORT:-636}
 
 
 if [[ $(/opt/opendj/bin/status) == *"not configured"* ]]; then
-  echo "Running OpenDJ setup...."
+
+  # https://github.com/OpenIdentityPlatform/OpenDJ/issues/53
+  # Requires 5GB of free space
+  echo "Configuring OpenDJ server..."
 
   LDIF_FILE=/ldif/domain.ldif
 
@@ -28,10 +31,13 @@ if [[ $(/opt/opendj/bin/status) == *"not configured"* ]]; then
 
   /opt/opendj/bin/start-ds --systemInfo
 
+  echo "Testing OpenDJ server..."
+
   /opt/opendj/bin/status
 fi
 
 echo "Starting OpenDJ server...."
+
 /opt/opendj/bin/start-ds --nodetach
-# \
-#   && tail -f /opt/opendj/logs/access
+
+tail -F /opt/opendj/logs/error

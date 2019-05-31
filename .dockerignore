@@ -1,0 +1,10 @@
+
+docker
+coverage
+doc
+
+tmp/*
+!tmp/.keep
+
+log/*
+!log/.keep

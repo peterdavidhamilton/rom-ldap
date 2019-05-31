@@ -10,7 +10,7 @@ https://docs.gitlab.com/ee/ci/ssh_keys/README.html
 Create passwordless ssh key for access to private repos (ldap-ber).
 
 `$ ssh-keygen -o -t rsa -b 4096 -C "rom-ldap CI/CD"`
-`$ pbcopy < ~/.ssh/rom-ldap`    
+`$ pbcopy < ~/.ssh/rom-ldap`
 
 
 - `$ cd ./docker/apacheds`
@@ -34,12 +34,17 @@ Suite currently built against ApacheDS
 
 
 
+connect to container command line
+
+`$ docker exec -i -t opendj /bin/bash`
 
 
 start open-ldap
+
 `$ docker run --name my-openldap-container -p 3897:389 --detach osixia/openldap:1.2.0`
 
 query docker-machine exposed port
+
 `$ ldapsearch -x -H ldap://$(docker-machine ip default):3897 -b dc=example,dc=org -D "cn=admin,dc=example,dc=org" -w admin`
 
 
@@ -55,6 +60,18 @@ https://docs.oracle.com/cd/E19424-01/820-4811/fnyth/
 https://www.centos.org/docs/5/html/CDS/ag/8.0/LDIF_File_Format-Representing_Binary_Data.html
 https://www.digitalocean.com/community/tutorials/how-to-use-ldif-files-to-make-changes-to-an-openldap-system#an-aside-adding-binary-data-to-an-entry
 
+
+Increase resource limits for the docker-machine to enable tests to run quickly
+
+`$ docker-machine stop rancher`
+
+`$ VBoxManage modifyvm rancher --cpus 2`
+
+`$ VBoxManage modifyvm rancher --memory 6144`
+
+`$ docker-machine start rancher`
+
+docker run -m=4g {imageID}
 
 
 

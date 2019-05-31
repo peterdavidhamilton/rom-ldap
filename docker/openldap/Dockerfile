@@ -34,4 +34,6 @@ ADD entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
-CMD ["/entrypoint.sh"]
+WORKDIR /etc/ldap
+
+CMD /entrypoint.sh

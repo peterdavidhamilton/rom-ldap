@@ -1,52 +1,84 @@
 #
+# docker-compose rm && docker-compose up --build
+#
 # OpenLDAP - cn=admin,cn=config       secret
 # ApacheDS - uid=admin,ou=system      secret
 # 389      - cn=Directory Manager     topsecret
 # OpenDJ   - cn=Directory Manager     secret
 #
-version: '3.3'
+version: '2.4'
+
+networks:
+  rom-ldap-network:
+
+
 services:
 
-  # # the gem
-  # #
-  # rom:
-  #   container_name: rom-ldap
-  #   build:
-  #     context: ..
-  #     dockerfile: ./rom-ldap/Dockerfile
-  #   environment:
-  #     RACK_ENV: test
-  #     LDAPHOST: rom-apacheds
-  #     LDAPPORT: '10389'
-  #     LDAPBASE: dc=rom,dc=ldap
-  #     LDAPBINDDN: uid=admin,ou=system
-  #     LDAPBINDPW: secret
+  # docker attach rom-ldap
+  rom:
+    container_name: rom-ldap
+    mem_limit: 6g
+    mem_reservation: 2g
+    build:
+      context: ..
+      dockerfile: docker/rom-ldap/Dockerfile
+      labels:
+        name: ROM LDAP Adapter
+    environment:
+      LDAPURI: ldap://apacheds:10389
+    restart: on-failure
+    # entrypoint: bundle exec rake spec
+    # entrypoint: ./bin/console
+    volumes:
+      - ../log:/src/log/:rw
+    healthcheck:
+      test: ldapsearch -H ldap://apacheds:10389 -x
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    tty: true
+    stdin_open: true
+    depends_on:
+      - 389ds
+      - apacheds
+      - opendj
+      - openldap
+    networks:
+      - rom-ldap-network
+
 
 
   # 1 ubuntu
   # docker build -t apacheds .
-  # docker run -it -p 1389:10389 apacheds
+  # docker run -it -p 1389:10389 -e APACHEDS_INSTANCE=rom apacheds
   # ou=schema
   #
-  apache_ds:
-    container_name: rom-apacheds
+  apacheds:
+    container_name: apacheds
+    mem_limit: 6g
+    mem_reservation: 4g
     build:
       context: ./apacheds
       labels:
         vendor: Apache
       args:
-        version: 2.0.0-M24
         # version: 2.0.0.AM25
+        version: 2.0.0-M24
+        repo: archive.apache.org
         architecture: amd64
+    tty: true
+    stdin_open: true
     ports:
       - 1389:10389
       - 1636:10636
     volumes:
-      - /var/lib/apacheds/log
+      - ../log:/var/lib/apacheds/log:rw
     hostname: rom.ldap
     restart: on-failure
     environment:
       APACHEDS_INSTANCE: rom
+    networks:
+      - rom-ldap-network
 
 
 
@@ -54,8 +86,8 @@ services:
   # docker build -t openldap .
   # docker run -it -p 2389:389 -e LDAP_DOMAIN=rom.ldap -e LDAP_BASE_DN=dc=rom,dc=ldap openldap
   #
-  open_ldap:
-    container_name: rom-openldap
+  openldap:
+    container_name: openldap
     build:
       context: ./openldap
       labels:
@@ -71,25 +103,29 @@ services:
     hostname: rom.ldap
     restart: on-failure
     environment:
-      # LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
-      LDAP_LOG_LEVEL: 0
+      # LDAP_LOG_LEVEL: 256
+      LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
       LDAP_DOMAIN: rom.ldap
       LDAP_BASE_DN: dc=rom,dc=ldap
       LDAP_ADMIN_PASSWORD: topsecret
+    networks:
+      - rom-ldap-network
 
 
 
   # 3 centos
-  # docker build -t 389 .
+  # cd ./389ds && docker build -t 389ds .
   # docker run -it -p 3389:389 -e DIRSRV_FQDN=rom.ldap -e DIRSRV_SUFFIX=dc=rom,dc=ldap 389
   # cn=schema
   #
-  three_eight_nine:
-    container_name: rom-389
+  389ds:
+    container_name: 389ds
     build:
-      context: ./389
+      context: ./389ds
       labels:
-        vendor: '389'
+        vendor: 389ds
+    tty: true
+    stdin_open: true
     ports:
       - 3389:389
       - 3636:636
@@ -97,18 +133,21 @@ services:
     volumes:
       - /etc/dirsrv
       - /var/lib/dirsrv
-      - /var/log/dirsrv
+      - ../log:/var/log/dirsrv:rw
+      # - /var/log/dirsrv
     hostname: rom.ldap
     restart: on-failure
     environment:
+      LDAP_LOG_LEVEL: 0
       DIRSRV_ID: rom
-      LDAP_LOG_LEVEL: '0'
       DIRSRV_FQDN: rom.ldap
       DIRSRV_SUFFIX: dc=rom,dc=ldap
       DIRSRV_ROOT_DN: cn=Directory Manager
       DIRSRV_ROOT_DN_PASSWORD: topsecret
       # DIRSRV_ADMIN_USERNAME: admin
       # DIRSRV_ADMIN_PASSWORD: adminpassword
+    networks:
+      - rom-ldap-network
 
 
 
@@ -117,14 +156,16 @@ services:
   # docker build -t opendj .
   # docker run -it -p 4389:389 -e BASE_DN=dc=rom,dc=ldap opendj
   #
-  open_dj:
-    container_name: rom-opendj
+  opendj:
+    container_name: opendj
     build:
       context: ./opendj
       args:
         version: 4.3.1
       labels:
         vendor: OpenIdentity
+    tty: true
+    stdin_open: true
     ports:
       - 4389:389
       - 4636:636
@@ -137,3 +178,5 @@ services:
       BASE_DN: dc=rom,dc=ldap
       ROOT_USER_DN: cn=Directory Manager
       ROOT_PASSWORD: topsecret
+    networks:
+      - rom-ldap-network

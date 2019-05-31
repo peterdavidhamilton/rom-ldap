@@ -1,7 +1,7 @@
 FROM centos:7
 
 LABEL maintainer="rom-ldap" \
-      name="389"
+      name="389ds"
 
 ENV container "docker"
 
@@ -13,7 +13,6 @@ RUN yum -y install 389-ds-base \
 
 # $HOSTNAME
 ENV DIRSRV_FQDN "example.org"
-
 ENV DIRSRV_SUFFIX "dc=example,dc=org"
 
 # auth
@@ -43,4 +42,4 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chown dirsrv:dirsrv /entrypoint.sh \
     && chmod +x /entrypoint.sh
 
-CMD ["/entrypoint.sh"]
+CMD /entrypoint.sh

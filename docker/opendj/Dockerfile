@@ -7,7 +7,6 @@ ARG version=4.3.1
 
 ENV OPENDJ_URL https://github.com/OpenIdentityPlatform/OpenDJ/releases/download/$version/opendj-$version.zip
 
-
 ENV BASE_DN "dc=example,dc=com"
 ENV ROOT_USER_DN "cn=Directory Manager"
 ENV ROOT_PASSWORD "secret"
@@ -39,4 +38,6 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chown opendj /entrypoint.sh \
     && chmod +x /entrypoint.sh
 
-CMD ["/entrypoint.sh"]
+WORKDIR /opt/opendj
+
+CMD /entrypoint.sh

@@ -1,10 +1,9 @@
 #!/usr/bin/dumb-init /bin/bash
 
-APACHEDS_INSTANCE=${APACHEDS_INSTANCE:-default}
 APACHEDS_INSTANCE_DIRECTORY="${APACHEDS_DATA}/${APACHEDS_INSTANCE}"
 PIDFILE="${APACHEDS_INSTANCE_DIRECTORY}/run/apacheds-${APACHEDS_INSTANCE}.pid"
 
-# When a fresh data folder is detected then bootstrap the instance configuration.
+
 if [ ! -d ${APACHEDS_INSTANCE_DIRECTORY} ]; then
   echo "Configuring new instance ${APACHEDS_INSTANCE}"
   mkdir -p ${APACHEDS_INSTANCE_DIRECTORY}
@@ -29,8 +28,17 @@ shutdown(){
 
 trap shutdown INT TERM
 
-touch ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log
+echo "Starting ApacheDS server..."
 
- # && tail -n 0 --pid=$(cat $PIDFILE) -f ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log
-/opt/apacheds-${APACHEDS_VERSION}/bin/apacheds start ${APACHEDS_INSTANCE} \
- && tail -f ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log
+/opt/apacheds-${APACHEDS_VERSION}/bin/apacheds start ${APACHEDS_INSTANCE}
+sleep 20
+
+echo "Loading custom schemas..."
+
+# Edited: schema/ou=schema/cn=system/ou=attributetypes/m-oid=2.5.4.49.ldif to add m-name: dn
+
+for schema in /schema/*.ldif; do
+  /usr/bin/ldapadd -x -c -v -f $schema
+done
+
+tail -F ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log
