@@ -16,7 +16,7 @@ require 'rom-ldap'
 
 require 'dry-types'
 module Types
-  include Dry::Types.module
+  include Dry.Types
 end
 
 require 'pathname'

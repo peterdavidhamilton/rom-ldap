@@ -6,7 +6,7 @@ RSpec.describe ROM::LDAP::Client, '#connect' do
   # let(:auth) {  }
   # let(:ssl) {  }
 
-  let(:client) { described_class.new({ host: '127.0.0.1', port: 10389 }) }
+  let(:client) { described_class.new({ host: 'apacheds', port: 10389 }) }
 
   it 'raise error with no block' do
     expect { client.connect }.to raise_error(LocalJumpError, 'no block given (yield)')

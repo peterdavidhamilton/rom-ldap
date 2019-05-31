@@ -84,6 +84,7 @@ RSpec.describe ROM::LDAP::Relation, 'server-side ordering' do
 
   describe 'times' do
     before do
+      # TODO: Fix time format for factories
       [[1700,12,30], [2001,12,30,15,59], [1900,12,30]].map do |args|
         factories[:animal,
           discovery_date: Time.new(*args,'+00:00').utc.strftime("%Y%m%d%H%M%SZ")
@@ -94,8 +95,8 @@ RSpec.describe ROM::LDAP::Relation, 'server-side ordering' do
     it 'in chronological order' do
       expect(animals.order(:discovery_date).map(:discovery_date).to_a).to eql(
         [
-          ['17001229230000Z'],
-          ['19001229230000Z'],
+          ['17001230000000Z'],
+          ['19001230000000Z'],
           ['20011230155900Z']
         ]
       )
@@ -105,8 +106,8 @@ RSpec.describe ROM::LDAP::Relation, 'server-side ordering' do
       expect(animals.order(:discovery_date).reverse.map(:discovery_date).to_a).to eql(
         [
           ['20011230155900Z'],
-          ['19001229230000Z'],
-          ['17001229230000Z']
+          ['19001230000000Z'],
+          ['17001230000000Z']
         ]
       )
     end

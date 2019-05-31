@@ -89,7 +89,7 @@ RSpec.describe ROM::LDAP::Commands::Create do
     expect(result.first[:created_at]).to be_an_instance_of(Time)
 
     # docker-machine ssh "sudo date -u $(date -u +%m%d%H%M%Y)"
-    expect(result.first[:created_at].to_s).to eql(time_now.to_s)
+    expect(result.first[:created_at]).to be_within(1).of(time_now)
 
   end
 

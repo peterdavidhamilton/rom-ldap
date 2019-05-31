@@ -25,7 +25,7 @@ RSpec.describe ROM::LDAP::Types do
 
     it 'coerces Active Directory timestamps' do
       expect(type['131862601330000000'].to_s).to eq('2018-11-09 18:02:13 +0000')
-      expect(type[0].to_s).to eql('1601-01-01 01:00:00 +0100')
+      expect(type[0].to_s).to eql('1601-01-01 00:00:00 +0000')
     end
   end
 

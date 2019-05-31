@@ -21,18 +21,9 @@ RSpec.shared_context 'directory' do
     ->(key) { key.to_s.downcase.tr('-= ', '').to_sym }
   end
 
-
-  # apacheds  'secret'
-  # others    'topsecret'
-  # apacheds  'uid=admin,ou=system'
-  # openldap  'cn=admin,dc=rom,dc=ldap'
-  # opendj    'cn=Directory Manager'
-  # 389       'cn=Directory Manager'
-  #
-
   let(:base) { 'ou=specs,dc=rom,dc=ldap' }
 
-  let(:uri) { "ldap://127.0.0.1:10389/#{base}" }
+  let(:uri) { "ldap://apacheds:10389/#{base}" }
 
   let(:bind_dn) { 'uid=admin,ou=system' }
 
