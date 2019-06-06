@@ -77,12 +77,7 @@ module ROM
         end
 
         def ssl
-          return unless uri.scheme.eql?('ldaps')
-          {
-            cert: '/Users/pdh/.minikube/machines/server.pem',
-            # key: 'docker/files/certs/server-key.pem'
-            key: '/Users/pdh/.minikube/machines/server-key.pem'
-          }
+          config[:ssl] unless uri.scheme.eql?('ldaps')
         end
 
         # @return [Hash]

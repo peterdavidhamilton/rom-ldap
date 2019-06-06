@@ -29,6 +29,7 @@ group :test do
   gem 'rubocop', '~> 0.58', require: false
   gem 'rubocop-performance', require: false
   gem 'simplecov', require: false
+  gem 'webmock'
 end
 
 group :benchmark do

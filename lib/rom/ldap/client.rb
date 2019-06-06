@@ -1,26 +1,12 @@
 require 'rom/initializer'
 
-require 'rom/ldap/pdu'
-require 'rom/ldap/socket'
 require 'rom/ldap/message_queue'
+require 'rom/ldap/pdu'
+
+require 'rom/ldap/socket'
+require 'rom/ldap/secure_socket'
 
 require 'rom/ldap/client/operations'
-
-module GetbyteForSSLSocket
-  def getbyte
-    getc.ord
-  end
-end
-
-module FixSSLSocketSyncClose
-  def close
-    super
-    io.close
-  end
-end
-
-
-
 
 module ROM
   module LDAP
@@ -39,7 +25,7 @@ module ROM
       param :auth, reader: :private, type: Types::Strict::Hash, optional: true
 
       # cert / key ...
-      # param :ssl, reader: :private, type: Types::Strict::Hash, optional: true
+      param :ssl, reader: :private, type: Types::Strict::Hash, optional: true
 
       option :queue, default: -> { MessageQueue }
 
@@ -47,7 +33,10 @@ module ROM
 
       attr_reader :socket
 
-      def connect
+
+      # @return [::Socket]
+      #
+      def open
         unless alive?
           @socket = Socket.new(envs).call
 
@@ -55,26 +44,29 @@ module ROM
             raise ConfigError, "Authentication failed for #{auth[:username]}" unless bind(auth).success?
           end
 
-          # if ssl
+          if ssl
+            # binding.pry
+            @socket = SecureSocket.new(@socket, **ssl)
 
-          #   tls_options = {
-          #     cert:    OpenSSL::X509::Certificate.new(File.open(ssl[:cert])),
-          #     key:     OpenSSL::PKey::RSA.new(File.open(ssl[:key])),
-          #     # cert:    OpenSSL::X509::Certificate.new(File.open('server.pem')),
-          #     # key:     OpenSSL::PKey::RSA.new(File.open('server-key.pem')),
-          #     ca_file: File.open('ca.pem')
-          #     # verify_mode: OpenSSL::SSL::VERIFY_NONE
-          #   }
+            # tls_options = {
+            #   cert:    OpenSSL::X509::Certificate.new(File.open(ssl[:cert])),
+            #   key:     OpenSSL::PKey::RSA.new(File.open(ssl[:key])),
+            #   # cert:    OpenSSL::X509::Certificate.new(File.open('server.pem')),
+            #   # key:     OpenSSL::PKey::RSA.new(File.open('server-key.pem')),
+            #   ca_file: File.open('ca.pem')
+            #   # verify_mode: OpenSSL::SSL::VERIFY_NONE
+            # }
 
-          #   rescue OpenSSL::X509::CertificateError
+            # rescue OpenSSL::X509::CertificateError
 
-          #   ctx = OpenSSL::SSL::SSLContext.new
-          #   ctx.set_params(tls_options) unless ssl.empty?
-          #   @socket = OpenSSL::SSL::SSLSocket.new(@socket, ctx)
+            # ctx = OpenSSL::SSL::SSLContext.new
+            # ctx.set_params(tls_options) unless ssl.empty?
 
-          #   @socket.extend(GetbyteForSSLSocket) unless @socket.respond_to?(:getbyte)
-          #   @socket.extend(FixSSLSocketSyncClose)
-          # end
+            # @socket = OpenSSL::SSL::SSLSocket.new(@socket, ctx)
+
+            # @socket.extend(GetbyteForSSLSocket) unless @socket.respond_to?(:getbyte)
+            # @socket.extend(FixSSLSocketSyncClose)
+          end
         end
 
         yield(@socket)
@@ -130,7 +122,7 @@ module ROM
       #
       # @api private
       def read
-        connect do |socket|
+        open do |socket|
           return unless ber_object = socket.read_ber
 
           PDU.new(*ber_object)
@@ -149,7 +141,7 @@ module ROM
       #
       # @api private
       def write(request, controls = nil, message_id)
-        connect do |socket|
+        open do |socket|
           packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
           socket.write(packet)
           socket.flush
@@ -208,6 +200,7 @@ module ROM
 
         if pdu&.app_tag == pdu_lookup(type)
           # puts pdu.advice if ENV['DEBUG'] && pdu.advice && !pdu.advice.empty?
+          puts pdu.advice if pdu.advice && !pdu.advice.empty?
           pdu
         else
           raise(ResponseMissingOrInvalidError, "Invalid #{type}")
