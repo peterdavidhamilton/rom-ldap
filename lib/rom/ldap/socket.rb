@@ -23,112 +23,85 @@ module ROM
 
 
       # Config
-      option :timeout, type: Types::Strict::Integer, reader: :private, default: -> { 10 }
-      # option :read_timeout, type: Types::Strict::Integer, reader: :private, default: -> { 30 }
-      # option :write_timeout, type: Types::Strict::Integer, reader: :private, default: -> { 30 }
+      # option :timeout, type: Types::Strict::Integer, reader: :private, default: -> { 10 }
 
-      # option :retry_count, type: Types::Strict::Integer, reader: :private, default: -> { 3 }
+      option :read_timeout, type: Types::Strict::Integer, reader: :private, default: -> { 20 }
+
+      option :write_timeout, type: Types::Strict::Integer, reader: :private, default: -> { 10 }
+
+      option :retry_count, type: Types::Strict::Integer, reader: :private, default: -> { 3 }
 
       option :keep_alive, type: Types::Strict::Bool, reader: :private, default: -> { true }
 
       option :buffered, type: Types::Strict::Bool, reader: :private, default: -> { true }
 
 
-      # @return [Socket]
-      #
+
       def call
-        # socket = ::Socket.new((path ? :UNIX : :INET), :STREAM, 0)
-
-        if keep_alive
-          # socket.setsockopt(:SOCKET, :KEEPALIVE, 1)
-          socket.setsockopt(:SOCKET, :KEEPALIVE, true)
-          socket.do_not_reverse_lookup = false
-        end
-
-        unless buffered
-          socket.sync = true
-          # socket.setsockopt(:TCP, :NODELAY, 1)
-          socket.setsockopt(:TCP, :NODELAY, true)
-        end
-
-        begin
-          socket.connect_nonblock(sockaddr) # , exception: false)
-
-        rescue Errno::EADDRNOTAVAIL
-          raise ConnectionError, "Host or port is invalid - #{host}:#{port}"
-
-        rescue Errno::EHOSTDOWN
-          raise ConnectionError, "Server is down - #{host}:#{port}"
-
-        rescue Errno::ECONNREFUSED
-          raise ConnectionError, "Connection refused - #{host}:#{port}"
-
-        rescue Errno::EAFNOSUPPORT
-          raise ConnectionError, "Connection is not supported - #{host}:#{port}"
-
-        rescue IO::WaitWritable
-          # IO.select will block until the socket is writable or the timeout
-          # is exceeded - whichever comes first.
-          if writable?
-            begin
-              # Verify there is now a good connection
-              socket.connect_nonblock(sockaddr)
-            rescue Errno::EISCONN
-              #=> This means connection to remote host has established successfully.
-              socket
-            rescue => error
-              # An unexpected exception was raised - the connection is no good.
-              socket.close
-              raise ConnectionError, "Connection failed - #{host}:#{port}"
-            end
-          else
-            # IO.select returns nil when the socket is not ready before timeout
-            # seconds have elapsed
-            socket.close
-            raise ConnectionError, "Connection write timeout - #{host}:#{port}"
-          end
-
-        rescue IO::WaitReadable
-          raise ConnectionError, "Connection read timeout - #{host}:#{port}" unless readable?
-          retry
-        end
+        socket.do_not_reverse_lookup = true
+        socket.sync = !!buffered
+        socket.setsockopt(:SOCKET, :KEEPALIVE, keep_alive)
+        socket.setsockopt(:TCP, :NODELAY, !!buffered)
+        connect!
       end
 
 
       private
 
+
+      #
+      #
+      # @return [::Socket]
+      #
       def socket
-        return @socket if @socket
-
-        socket = ::Socket.new((path ? :UNIX : :INET), :STREAM, 0)
-
-        # if ssl
-
-        #   tls_options = {
-        #     cert:         OpenSSL::X509::Certificate.new(File.open(ssl[:cert])),
-        #     key:          OpenSSL::PKey::RSA.new(File.open(ssl[:key])),
-        #     ca_file:      '/Users/pdh/.minikube/ca.pem',
-        #     verify_mode:  OpenSSL::SSL::VERIFY_NONE
-        #   }
-
-
-        #   ctx = OpenSSL::SSL::SSLContext.new
-        #   ctx.set_params(tls_options) unless ssl.empty?
-
-        #   ssl_socket = OpenSSL::SSL::SSLSocket.new(socket, ctx)
-
-
-        #   ssl_socket.extend(GetbyteForSSLSocket) unless ssl_socket.respond_to?(:getbyte)
-        #   ssl_socket.extend(FixSSLSocketSyncClose)
-
-        #   @socket = ssl_socket
-        # else
-          @socket = socket
-        # end
-      rescue OpenSSL::X509::CertificateError => e
-        binding.pry
-
+        @socket ||= ::Socket.new((path ? :UNIX : :INET), :STREAM)
       end
+
+      # @return [::Socket]
+      #
+      # @raise [ConnectionError]
+      #
+      def connect!
+        socket.connect_nonblock(sockaddr)
+        socket
+      rescue Errno::EISCONN
+        socket
+      rescue IO::WaitWritable
+        if writable?
+          connect!
+        else
+          disconnect!
+          raise ConnectionError, "Connection write timeout - #{host}:#{port}"
+        end
+      rescue IO::WaitReadable
+        if readable?
+          # TODO: retry_count
+          retry
+        else
+          raise ConnectionError, "Connection read timeout - #{host}:#{port}"
+        end
+      rescue Errno::EADDRNOTAVAIL
+        raise ConnectionError, "Host or port is invalid - #{host}:#{port}"
+      rescue Errno::ENOENT
+        raise ConnectionError, "Path to unix socket is invalid - #{path}"
+      rescue Errno::EHOSTDOWN
+        raise ConnectionError, "Server is down - #{host}:#{port}"
+      rescue Errno::ECONNREFUSED
+        raise ConnectionError, "Connection refused - #{host}:#{port}"
+      rescue Errno::EAFNOSUPPORT
+        raise ConnectionError, "Connection is not supported - #{host}:#{port}"
+      rescue => e
+        disconnect!
+        raise ConnectionError, "Connection failed - #{host}:#{port}"
+      end
+
+      # @return [NilClass]
+      #
+      def disconnect!
+        socket.close
+        @socket = nil
+      end
+
 
       #
       #
@@ -136,38 +109,37 @@ module ROM
       #
       # @api private
       def sockaddr
-        if host
+        if addrinfo.unix?
+          ::Socket.pack_sockaddr_un(addrinfo.unix_path)
+        elsif addrinfo.ipv4?
           ::Socket.pack_sockaddr_in(addrinfo.ip_port, addrinfo.ip_address)
-        else
-          ::Socket.pack_sockaddr_un(addrinfo.path)
         end
       end
 
-      #
+      # Does DNS lookup
       #
       # @return [Addrinfo]
       #
       # @api private
       def addrinfo
-        if host
-          Addrinfo.tcp(host, port)
-        else
-          Addrinfo.unix(path)
-        end
+        return Addrinfo.unix(path) if path
+        Addrinfo.tcp(host, port)
+      rescue SocketError
+        raise ConnectionError, "Host could not be resolved - #{host}:#{port}"
       end
 
 
       #
       # @api private
       def writable?
-        IO.select(nil, [socket], nil, timeout)
+        IO.select(nil, [socket], nil, write_timeout)
       end
 
 
       #
       # @api private
       def readable?
-        IO.select([socket], nil, nil, timeout)
+        IO.select([socket], nil, nil, read_timeout)
       end
 
 
