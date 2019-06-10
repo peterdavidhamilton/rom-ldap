@@ -7,30 +7,51 @@ module ROM
       include ROM::Types
 
       # protocols of ldap and ldaps only
+      #
+      # @return [Dry::Types::Constrained]
+      #
       URI = Strict::String.constrained(format: LDAPURI_REGEX)
 
       # Something in parentheses
-      Filter = Strict::String.constrained(format: /^\s*\(.*\)\s*$/)
+      #
+      # @return [Dry::Types::Constrained]
+      #
+      Filter = Strict::String.constrained(format: FILTER_REGEX)
 
       # empty string
+      #
+      # @return [Dry::Types::Constrained]
+      #
       DN = Strict::String.constrained(format: DN_REGEX)
 
+      # @return [Dry::Types::Constrained]
       #
       Direction = Strict::Symbol.constrained(included_in: %i[asc desc])
 
+      # @return [Dry::Types::Constrained]
       #
       Scope = Strict::Integer.constrained(included_in: SCOPES)
 
+      # @return [Dry::Types::Constrained]
       #
       Deref = Strict::Integer.constrained(included_in: DEREF_ALL)
 
       # Abstraction of LDAP symbols: :con_and, :op_eql etc
+      #
+      # @return [Dry::Types::Constrained]
+      #
       Abstract = Strict::Symbol.constrained(included_in: ABSTRACTS)
 
       # Compatible filter fields (formatters may symbolise)
+      #
+      # @return [Dry::Types::Sum::Constrained]
+      #
       Field = Strict::String | Strict::Symbol
 
       # Compatible filter values (including wildcard abstraction)
+      #
+      # @return [Dry::Types::Sum::Constrained]
+      #
       Value = Strict::String | Strict::Integer | Strict::Symbol.constrained(included_in: %i[wildcard])
 
       # @see Schema::Attribute read types

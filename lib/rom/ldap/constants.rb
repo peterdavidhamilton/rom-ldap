@@ -10,14 +10,18 @@ module ROM
 
     # Matches an ldap protocol url ldap://host:port/base
     #
+    # @return [Regexp]
     LDAPURI_REGEX = %r"^ldaps?://[\w/\.]+:?\d*/?(\w+=\w+,?)*.*$"
-    # LDAPURI_REGEX = /^ldaps?:\/\/.+$/
-
 
     # Any word character or hyphen, equals
     #
-    #
+    # @return [Regexp]
     DN_REGEX = /(([-\w]+=[-\w]+)*,?)/
+
+    # Something in parentheses
+    #
+    # @return [Regexp]
+    FILTER_REGEX = /^\s*\(.*\)\s*$/
 
     # @return [String]
     NEW_LINE  = "\n".freeze
