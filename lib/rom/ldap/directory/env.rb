@@ -34,50 +34,28 @@ module ROM
         param :config, reader: :private, type: Types::Strict::Hash, default: -> { EMPTY_OPTS }
 
 
-              # TODO: allow setting a starting scope, filter and attributes through the uri?
-
-              # def scope
-              #   uri.scope or config.fetch(:scope, SCOPE_SUB)
-              # end
-
-              # def extensions
-              #   uri.extensions
-              # end
-
-              # def hierarchical?
-              #   uri.hierarchical?
-              # end
-
-              # Set default
-              #
-              # def attributes
-              #   config.fetch(:attributes, uri.attributes)
-              # end
-
-              # def filter
-              #   config.fetch(:filter, uri.filter)
-              # end
-
-
         # @return [URI::LDAP, URI::LDAPS]
         #
         def uri
           URI(URI.decode_www_form_component(connection || default_connection))
         end
 
-
+        # @return [String]
+        #
         def base
           uri.dn or ::ENV.fetch('LDAPBASE', EMPTY_STRING)
         end
 
-
+        # @return [Hash, NilClass]
+        #
         def auth
-          return unless bind_dn
-          { username: bind_dn, password: bind_pw }
+          { username: bind_dn, password: bind_pw } if bind_dn
         end
 
+        # @return [Hash, NilClass]
+        #
         def ssl
-          config[:ssl] unless uri.scheme.eql?('ldaps')
+          config[:ssl] if uri.scheme.eql?('ldaps')
         end
 
         # @return [Hash]
@@ -91,6 +69,7 @@ module ROM
         def inspect
           "<#{self.class.name} uri=#{uri} />".freeze
         end
+
 
         private
 
@@ -135,10 +114,10 @@ module ROM
 
         # LDAPPORT or 389
         #
-        # @return [String]
+        # @return [Integer]
         #
         def default_port
-          ::ENV.fetch('LDAPPORT', '389')
+          ::ENV.fetch('LDAPPORT', 389)
         end
 
         #

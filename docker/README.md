@@ -15,7 +15,8 @@ To detach the tty without exiting the shell, use the escape sequence Ctrl-p + Ct
 **Test Suite**
 
 inside container
-`$ docker exec -i -t rom-ldap bundle exec rake spec`
+- `$ docker exec -i -t rom-ldap bundle exec rake spec`
+- `$ docker exec -i -t rom-ldap bundle exec rspec`
 
 locally
 - `$ LDAPURI=ldap://rancher:1389 bundle exec rake spec`

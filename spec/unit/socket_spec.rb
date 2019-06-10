@@ -1,16 +1,20 @@
-require 'webmock/rspec'
-
-WebMock.disable_net_connect! # (allow_localhost: true)
+# mock a server
 
 RSpec.describe ROM::LDAP::Socket do
 
   describe 'host:port' do
-    let(:sock) { described_class.new(host: 'apacheds', port: 10389) }
+    # let(:sock) { described_class.new(host: 'apacheds', port: 10389) }
+    # let(:sock) { described_class.new(host: 'rancher', port: 1389) }
+    let(:sock) { described_class.new(host: ENV['LDAPHOST'], port: ENV['LDAPPORT'].to_i) }
 
     it 'takes options' do
       expect(sock).to respond_to(:options)
-      expect(sock.options[:host]).to eql('apacheds')
-      expect(sock.options[:port]).to eql(10389)
+      # expect(sock.options[:host]).to eql('rancher')
+      # expect(sock.options[:port]).to eql(1389)
+      # expect(sock.options[:host]).to eql(ENV['LDAPHOST'])
+      # expect(sock.options[:port]).to eql(ENV['LDAPPORT'].to_i)
+      # expect(sock.options[:host]).to eql('apacheds')
+      # expect(sock.options[:port]).to eql(10389)
       expect(sock.options[:path]).to eql(nil)
       expect(sock.options[:read_timeout]).to eql(20)
       expect(sock.options[:write_timeout]).to eql(10)

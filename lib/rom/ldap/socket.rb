@@ -15,7 +15,7 @@ module ROM
       # TCP
       option :host, type: Types::Strict::String, reader: :private, optional: true
 
-      option :port, type: Types::Coercible::Integer, reader: :private, optional: true
+      option :port, type: Types::Strict::Integer, reader: :private, optional: true
 
 
       # OpenSSL

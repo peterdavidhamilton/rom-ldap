@@ -29,11 +29,10 @@ module ROM
 
         # Output through relation output_schema
         #
-        # @param entries [Array<Entry>]
+        # @param entries [Array<Entry, FalseClass>]
         #
         # @api private
         def finalize(entries, *)
-          # entries.map { |t| relation.output_schema[t] if t.is_a?(Hash) }
           entries.map { |t| relation.output_schema[t] }
         end
       end

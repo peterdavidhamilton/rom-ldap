@@ -14,7 +14,7 @@ end
 group :development do
   gem 'awesome_print'
   gem 'dry-monitor'
-  gem 'rouge'
+  gem 'rouge' # bin/ldap_logger.rb
   gem 'pry', platforms: %i[jruby rbx]
   gem 'pry-byebug', platforms: :mri
 end
@@ -29,7 +29,6 @@ group :test do
   gem 'rubocop', '~> 0.58', require: false
   gem 'rubocop-performance', require: false
   gem 'simplecov', require: false
-  gem 'webmock'
 end
 
 group :benchmark do

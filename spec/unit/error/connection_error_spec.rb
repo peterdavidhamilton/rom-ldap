@@ -9,12 +9,12 @@ RSpec.describe ROM::LDAP::ConnectionError do
   end
 
   context 'incorrect server' do
-    let(:uri) { 'ldaps://127.0.0.1:6389' }
+    let(:uri) { 'ldap://127.0.0.1:999' }
 
     it 'raises connection error' do
       expect { container }.to raise_error(
         ROM::LDAP::ConnectionError,
-        'Connection failed - 127.0.0.1:6389'
+        'Connection refused - 127.0.0.1:999'
       )
     end
   end
