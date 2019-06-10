@@ -15,7 +15,7 @@ module ROM
       # TCP
       option :host, type: Types::Strict::String, reader: :private, optional: true
 
-      option :port, type: Types::Strict::Integer, reader: :private, optional: true
+      option :port, type: Types::Coercible::Integer, reader: :private, optional: true
 
 
       # OpenSSL
@@ -41,7 +41,7 @@ module ROM
         socket.do_not_reverse_lookup = true
         socket.sync = !!buffered
         socket.setsockopt(:SOCKET, :KEEPALIVE, keep_alive)
-        socket.setsockopt(:TCP, :NODELAY, !!buffered)
+        socket.setsockopt(:TCP, :NODELAY, !!buffered) unless path
         connect!
       end
 
@@ -82,6 +82,8 @@ module ROM
         end
       rescue Errno::EADDRNOTAVAIL
         raise ConnectionError, "Host or port is invalid - #{host}:#{port}"
+      rescue SocketError
+        raise ConnectionError, "Host could not be resolved - #{host}:#{port}"
       rescue Errno::ENOENT
         raise ConnectionError, "Path to unix socket is invalid - #{path}"
       rescue Errno::EHOSTDOWN
@@ -124,8 +126,6 @@ module ROM
       def addrinfo
         return Addrinfo.unix(path) if path
         Addrinfo.tcp(host, port)
-      rescue SocketError
-        raise ConnectionError, "Host could not be resolved - #{host}:#{port}"
       end
 
 
@@ -142,8 +142,6 @@ module ROM
         IO.select([socket], nil, nil, read_timeout)
       end
 
-
     end
-
   end
 end

@@ -95,19 +95,19 @@ module ROM
         private
 
 
-        # @return [String]
+        # @return [String, NilClass]
         #
         def path
           uri.path unless uri.host
         end
 
-        # @return [String]
+        # @return [String, NilClass]
         #
         def host
           uri.host unless path
         end
 
-        # @return [Integer]
+        # @return [Integer, NilClass]
         #
         def port
           uri.port unless path
@@ -125,18 +125,24 @@ module ROM
           config.fetch(:password, ::ENV['LDAPBINDPW'])
         end
 
+        # LDAPHOST or 127.0.0.1
+        #
         # @return [String]
         #
         def default_host
           ::ENV.fetch('LDAPHOST', '127.0.0.1')
         end
 
-        # @return [Integer]
+        # LDAPPORT or 389
+        #
+        # @return [String]
         #
         def default_port
-          ::ENV.fetch('LDAPPORT', 389)
+          ::ENV.fetch('LDAPPORT', '389')
         end
 
+        #
+        #
         # @return [String]
         #
         def default_connection
