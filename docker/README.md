@@ -1,6 +1,64 @@
 # README
 
+To detach the tty without exiting the shell, use the escape sequence Ctrl-p + Ctrl-q
+
 ## CI/CD Setup
+
+`$ docker-machine stop rancher`
+
+`$ VBoxManage modifyvm rancher --cpus 2`
+
+`$ VBoxManage modifyvm rancher --memory 6144`
+
+`$ docker-machine start rancher`
+
+**Test Suite**
+
+inside container
+`$ docker exec -i -t rom-ldap bundle exec rake spec`
+
+locally
+- `$ LDAPURI=ldap://rancher:1389 bundle exec rake spec`
+- `$ LDAPPORT=10389 rspec`
+
+
+**Console**
+
+Enter console with debugging enabled inside container
+`$ docker exec -i -t -e DEBUG=y rom-ldap ./bin/console`
+
+Run console locally
+`$ LDAPURI=ldap://rancher:1389 ./bin/console`
+
+
+
+**Demo**
+
+inside container
+`$ docker exec -i -t -e DEBUG=y rom-ldap ./bin/demo`
+
+locally
+`$ LDAPURI=ldap://rancher:1389 ./bin/demo`
+
+
+
+**Benchmark**
+
+inside container
+`$ docker exec -i -t rom-ldap ./bin/benchmark`
+
+locally
+`$ LDAPHOST=rancher LDAPPORT=1389 LDAPBASE=dc=rom,dc=ldap LDAPBINDDN=uid=admin,ou=system LDAPBINDPW=secret ./bin/benchmark`
+
+
+
+
+* OpenLDAP - cn=admin,cn=config       secret
+* ApacheDS - uid=admin,ou=system      secret
+* 389      - cn=Directory Manager     topsecret
+* OpenDJ   - cn=Directory Manager     secret
+
+
 
 
 https://gitlab.com/peterdavidhamilton/rom-ldap/settings/ci_cd
@@ -17,6 +75,8 @@ Create passwordless ssh key for access to private repos (ldap-ber).
 - `$ docker build -t registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest .`
 - `$ docker push registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest`
 
+
+`$ docker exec -i -t -e DEBUG=y rom-ldap bundle exec rake spec`
 
 
 <https://directory.fedoraproject.org/>
@@ -63,13 +123,7 @@ https://www.digitalocean.com/community/tutorials/how-to-use-ldif-files-to-make-c
 
 Increase resource limits for the docker-machine to enable tests to run quickly
 
-`$ docker-machine stop rancher`
 
-`$ VBoxManage modifyvm rancher --cpus 2`
-
-`$ VBoxManage modifyvm rancher --memory 6144`
-
-`$ docker-machine start rancher`
 
 docker run -m=4g {imageID}
 

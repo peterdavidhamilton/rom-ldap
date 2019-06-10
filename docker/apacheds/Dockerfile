@@ -21,7 +21,7 @@ ENV APACHEDS_VERSION $version
 ENV APACHEDS_REPO $repo
 ENV APACHEDS_ARCH $architecture
 
-ENV LDAPURI "ldap://localhost:10389"
+ENV LDAPURI "ldap://127.0.0.1:10389"
 
 ENV APACHEDS_ARCHIVE "apacheds-${APACHEDS_VERSION}-${APACHEDS_ARCH}.deb"
 ENV APACHEDS_URL "https://${APACHEDS_REPO}/dist/directory/apacheds/dist"

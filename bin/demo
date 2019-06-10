@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 #
-# NB: depends upon fixtures
-#
 # A demonstration of rom-ldap using biological classification
 # and taxonomic hierarchy as an example dataset.
 #
@@ -10,17 +8,28 @@
 # lib = File.expand_path('../lib', __FILE__)
 # $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'bundler'
+require 'bundler/setup'
 
-Bundler.require :default, :development
+Bundler.setup
 
+require 'pry'
+require 'pry-byebug'
+
+require 'rom-ldap'
+require 'rom-repository'
+require 'rom-changeset'
+require 'rom/transformer'
+
+
+ENV['DEBUG'] = 'y'
+ENV['LDAPBASE'] = 'ou=animals,dc=rom,dc=ldap'
 
 #
 # Entity
 # =============================================================================
 module Entities
   class Animal < ROM::Struct
-    transform_types { |type| type.meta(omittable: true) }
+    transform_types(&:omittable)
 
     def common_name
       cn.first.upcase
@@ -28,11 +37,15 @@ module Entities
   end
 end
 
+
+
 #
 # Configuration
 # =============================================================================
+logger = Logger.new(File.open('./log/demo.log', 'a'))
+
 config = ROM::Configuration.new(
-    default: [:ldap, 'ldap://127.0.0.1:10389', extensions: %i[compatibility]],
+    default: [:ldap, nil, extensions: %i[compatibility], logger: logger],
     other: [:memory]
   )
 
@@ -107,7 +120,7 @@ class AnimalRepo < ROM::Repository[:animals]
   end
 
   def apes_to_ldif
-    animals.great_apes.add_timestamps.to_ldif
+    animals.great_apes.to_ldif
   end
 
   def reptiles_to_yaml
@@ -175,7 +188,6 @@ end
 #
 # Mapper
 # =============================================================================
-require 'rom/transformer'
 
 class TransformAnimal < ROM::Transformer
   relation    :animals
@@ -385,6 +397,7 @@ new_animals = [
     population_count: 2_000,
     extinct: false,
     endangered: false
+    # study: 'herpetology'
   }
 ]
 
@@ -393,6 +406,7 @@ new_animals = [
 #
 # Examples
 # =============================================================================
+binding.pry # breakpoint
 
 animals.where(objectClass: 'top').count # => 26
 

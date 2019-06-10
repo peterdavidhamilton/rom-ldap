@@ -1,11 +1,3 @@
-#
-# docker-compose rm && docker-compose up --build
-#
-# OpenLDAP - cn=admin,cn=config       secret
-# ApacheDS - uid=admin,ou=system      secret
-# 389      - cn=Directory Manager     topsecret
-# OpenDJ   - cn=Directory Manager     secret
-#
 version: '2.4'
 
 networks:
@@ -25,12 +17,16 @@ services:
       labels:
         name: ROM LDAP Adapter
     environment:
-      LDAPURI: ldap://apacheds:10389
+      LDAPHOST: apacheds
+      LDAPPORT: 10389
+      LDAPBASE: dc=rom,dc=ldap
+      LDAPBINDDN: uid=admin,ou=system
+      LDAPBINDPW: secret
     restart: on-failure
     # entrypoint: bundle exec rake spec
     # entrypoint: ./bin/console
     volumes:
-      - ../log:/src/log/:rw
+      - ../log:/src/log:rw
     healthcheck:
       test: ldapsearch -H ldap://apacheds:10389 -x
       interval: 1m30s

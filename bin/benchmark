@@ -1,48 +1,31 @@
 #!/usr/bin/env ruby
-#
-#                 NET one:    11.0 i/s
-#      ROM [explicit] one:    6.5 i/s - 1.68x   (± 0.00) slower
-#      ROM [explicit] all:    5.3 i/s - 2.07x   (± 0.00) slower
-#   ROM [inferred] struct:    4.4 i/s - 2.48x   (± 0.00) slower
-#              NET struct:    4.3 i/s - 2.55x   (± 0.00) slower
-#                 NET all:    3.9 i/s - 2.83x   (± 0.00) slower
-#      ROM [inferred] one:    3.8 i/s - 2.89x   (± 0.00) slower
-#   ROM [explicit] struct:    3.4 i/s - 3.19x   (± 0.00) slower
-#      ROM [inferred] all:    1.5 i/s - 7.10x   (± 0.00) slower
-#    ROM [explicit] order:    1.4 i/s - 7.84x   (± 0.00) slower
-#    ROM [inferred] order:    0.7 i/s - 15.81x  (± 0.00) slower
-#
-#
 
-require 'bundler'
+require 'bundler/setup'
 
-Bundler.require :default, :development, :benchmark
+Bundler.setup
+
+require 'benchmark/ips'
+require 'net-ldap'
+require 'rom-ldap'
 
 net_ldap = Net::LDAP.new(
-            host: '127.0.0.1',
-            port: '10389',
-            base: 'ou=users,dc=rom,dc=ldap',
+            host: ENV['LDAPHOST'],
+            port: ENV['LDAPPORT'],
+            base: ENV['LDAPBASE'],
             auth: {
               method: :simple,
-              username: 'uid=admin,ou=system',
-              password: 'secret'
+              username: ENV['LDAPBINDDN'],
+              password: ENV['LDAPBINDPW']
             }
           )
 
 
 logger = Logger.new(File.open('./log/benchmark.log', 'a'))
-# logger = ::Logger.new(IO::NULL)
 
 filter = '(objectclass=*)'
 
-config = ROM::Configuration.new(:ldap,
-          'ldap://127.0.0.1:10389/ou=users,dc=rom,dc=ldap',
-          extensions: %i[compatibility],
-          username: 'uid=admin,ou=system',
-          password: 'secret',
-          logger: logger,
-          timeout: 10
-        )
+# Pass nil to use ENV vars.
+config = ROM::Configuration.new(:ldap, nil, extensions: %i[compatibility], logger: logger)
 
 # Inferred => all attributes including operational
 #

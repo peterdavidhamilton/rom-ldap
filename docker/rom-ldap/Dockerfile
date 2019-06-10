@@ -15,7 +15,7 @@ WORKDIR /src
 #
 # ./bundle/config cache => true
 #
-RUN bundle install --deployment --without benchmark
+RUN bundle install --deployment
 
 # docker exec -i -t rom-ldap spec
 # ENTRYPOINT ["/usr/local/bundle/bin/bundle exec"]
