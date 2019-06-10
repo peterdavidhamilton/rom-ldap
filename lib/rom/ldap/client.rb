@@ -118,7 +118,7 @@ module ROM
 
       # Read from socket and wrap in PDU class.
       #
-      # @return [PDU]
+      # @return [PDU, NilClass]
       #
       # @api private
       def read
@@ -129,7 +129,6 @@ module ROM
         end
       rescue Errno::ECONNRESET => e
         close
-        # TODO: use a counter here to prevent too many attempts
         retry
       end
 
@@ -147,7 +146,6 @@ module ROM
           socket.flush
         end
       rescue Errno::EPIPE, IOError => e
-        # TODO: use a counter here to prevent too many attempts
         close
         retry
       end
@@ -184,11 +182,12 @@ module ROM
 
 
 
-
+      # Persist changes to the server and return response object.
+      # Enable stdout debugging with DEBUG=y.
+      #
       # @return [PDU]
       #
       # @raise [ResponseMissingOrInvalidError]
-      #
       #
       # @api private
       def submit(type, request, controls = nil)
@@ -199,8 +198,7 @@ module ROM
         pdu = from_queue(message_id)
 
         if pdu&.app_tag == pdu_lookup(type)
-          # puts pdu.advice if ENV['DEBUG'] && pdu.advice && !pdu.advice.empty?
-          puts pdu.advice if pdu.advice && !pdu.advice.empty?
+          puts pdu.advice if ENV['DEBUG'] && pdu.advice && !pdu.advice.empty?
           pdu
         else
           raise(ResponseMissingOrInvalidError, "Invalid #{type}")
