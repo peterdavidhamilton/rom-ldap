@@ -119,15 +119,12 @@ module ROM
         ::Base64.strict_encode64(value).prepend("data:#{mime};base64,")
       end
 
-      # @todo
-      #   submit patch to Transproc
-      # @note
-      #   LDAP stores boolean values as capitalised strings.
+      #
       #
       # @return [TrueClass, FalseClass]
       #
       def self.to_boolean(value)
-        Transproc::Coercions::BOOLEAN_MAP.merge('TRUE' => true, 'FALSE' => false).fetch(value)
+        Transproc::Coercions::BOOLEAN_MAP.fetch(value.to_s.downcase)
       end
 
       # The 18-digit Active Directory timestamps,
