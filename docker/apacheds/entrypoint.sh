@@ -35,8 +35,6 @@ sleep 20
 
 echo "Loading custom schemas..."
 
-# Edited: schema/ou=schema/cn=system/ou=attributetypes/m-oid=2.5.4.49.ldif to add m-name: dn
-
 for schema in /schema/*.ldif; do
   /usr/bin/ldapadd -x -c -v -f $schema
 done
