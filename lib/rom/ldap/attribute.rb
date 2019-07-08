@@ -20,6 +20,20 @@ module ROM
         fetch_or_store(args) { new(*args) }
       end
 
+      # Return a new attribute with an alias
+      #
+      # @example
+      #   users[:id].aliased(:user_id)
+      #
+      # @return [LDAP::Attribute]
+      #
+      # @api public
+      def aliased(alias_name)
+        super.with(name: name || alias_name)
+      end
+      alias_method :as, :aliased
+
+
       # Attribute definition identifies this is not a directory internal attribute
       # and values can be altered.
       #
