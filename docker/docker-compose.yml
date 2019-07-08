@@ -26,6 +26,9 @@ services:
       AD_PW:        ${AD_PW}
 
       # TZ: America/Los_Angeles
+      # ADURI:
+      # ADUSER:
+      # ADPWD:
     restart: on-failure
     depends_on:
       - 389ds
