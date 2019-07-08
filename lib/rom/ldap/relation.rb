@@ -25,12 +25,6 @@ module ROM
         relation.dataset { with(base: relation.base || directory.base) }
       end
 
-      # @api private
-      def initialize(dataset, schema:, **)
-        dataset = dataset.with(attrs: schema.map(&:name)) if dataset.is_a?(Dataset)
-        super
-      end
-
 
       defines :base
       defines :branches
@@ -55,7 +49,7 @@ module ROM
         if attribute
           attribute.alias || attribute.name
         else
-          :entry_dn
+          :dn
         end
       end
 
@@ -90,20 +84,12 @@ module ROM
         associations[name].call
       end
 
-      # @return [Relation]
-      #
-      # @api public
-      def project(*names)
-        with(schema: schema.project(*names))
-      end
 
-      # @return [Relation]
+      # LDAP Transactions (LDAPTXN) is an experimental RFC.
+      # The latest revision can be found at http://tools.ietf.org/rfc/rfc5805.txt
       #
-      # @api public
-      def exclude(*names)
-        with(schema: schema.exclude(*names))
-      end
-
+      # @see https://directory.fedoraproject.org/docs/389ds/design/ldap-transactions.html
+      #
       # @yield [t] Transaction
       #
       # @return [Mixed]

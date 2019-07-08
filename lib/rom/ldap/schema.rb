@@ -1,6 +1,7 @@
 require 'rom/schema'
 require 'rom/ldap/schema/dsl'
 require 'rom/ldap/restriction_dsl'
+require 'rom/ldap/projection_dsl'
 require 'rom/ldap/schema/inferrer'
 
 module ROM
@@ -27,16 +28,7 @@ module ROM
       #
       # @api public
       def call(relation)
-        relation.new(relation.dataset, schema: self)
-      end
-
-      # Project schema so that it only contains primary key
-      #
-      # @return [Schema]
-      #
-      # @api private
-      def project_pk
-        project(*primary_key_names)
+        relation.new(relation.dataset.with(attrs: map(&:name)), schema: self)
       end
 
       # Return a new schema with attributes marked as qualified
@@ -48,6 +40,40 @@ module ROM
       # @api public
       def qualified(table_alias = nil)
         new(map { |attr| attr.qualified(table_alias) })
+      end
+
+      # Project a schema
+      #
+      # @see ROM::Schema#project
+      # @see Relation#select
+      #
+      # @return [Schema] A new schema with projected attributes
+      #
+      # @api public
+      def project(*names, &block)
+        if block
+          super(*(names + ProjectionDSL.new(self).(&block)))
+        else
+          super
+        end
+      end
+
+      # Project schema so that it only contains primary key
+      #
+      # @return [Schema]
+      #
+      # @api private
+      def project_pk
+        project(*primary_key_names)
+      end
+
+      # Project schema so that it only contains renamed foreign key
+      #
+      # @return [Schema]
+      #
+      # @api private
+      def project_fk(mapping)
+        new(rename(mapping).map(&:foreign_key))
       end
 
       # Join with another schema

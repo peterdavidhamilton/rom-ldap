@@ -374,6 +374,88 @@ module ROM
           schema.qualified.call(self)
         end
 
+        # Rename attributes in a relation
+        #
+        # This method is intended to be used internally within a relation object
+        #
+        # @example
+        #   users.rename(name: :user_name).first
+        #   # {:id => 1, :user_name => "Jane" }
+        #
+        # @param [Hash<Symbol=>Symbol>] options A name => new_name map
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def rename(options)
+          schema.rename(options).(self)
+        end
+
+        # Select specific attributes
+        #
+        # @overload select(*attributes)
+        #   Project relation using schema attributes
+        #
+        #   @example using attributes
+        #     users.select(:id, :name).first
+        #     # {:id => 1, :name => "Jane"}
+        #
+        #   @example using schema
+        #     users.select(*schema.project(:id)).first
+        #     # {:id => 1}
+        #
+        #   @param [Array<LDAP::Attribute>] columns A list of schema attributes
+        #
+        # @overload select(&block)
+        #   Project relation using projection DSL
+        #
+        #   @example using attributes
+        #     users.select { cn.as(:user_name) }
+        #     # {:user_name => "Peter Hamilton"}
+        #
+        #     users.select { [uidnumber, sn] }
+        #     # {:uidnumber => 501, :name => "Hamilton"}
+        #
+        #   @param [Array<LDAP::Attribute>] columns A list of schema attributes
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def select(*args, &block)
+          schema.project(*args, &block).(self)
+        end
+        alias_method :project, :select
+
+
+
+        # Rename attributes in a relation
+        #
+        # This method is intended to be used internally within a relation object
+        #
+        # @example
+        #   users.rename(name: :user_name).first
+        #   # {:id => 1, :user_name => "Jane" }
+        #
+        # @param [Hash<Symbol=>Symbol>] options A name => new_name map
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def rename(options)
+          schema.rename(options).(self)
+        end
+
+
+        # Append specific columns to select clause
+        #
+        # @see Relation#select
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def select_append(*args, &block)
+          schema.merge(schema.canonical.project(*args, &block)).(self)
+        end
       end
     end
   end
