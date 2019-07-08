@@ -23,7 +23,7 @@ RSpec.shared_context 'directory' do
 
   let(:base) { 'ou=specs,dc=rom,dc=ldap' }
 
-  let(:uri) { "ldap://apacheds:10389/#{base}" }
+  let(:uri) { ENV['LDAPURI'] || "ldap://apacheds:10389/#{base}" }
 
   let(:bind_dn) { 'uid=admin,ou=system' }
 
