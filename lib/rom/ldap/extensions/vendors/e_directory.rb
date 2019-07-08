@@ -18,6 +18,11 @@ module ROM
       def vendor_version
         root.first('vendorVersion')
       end
+
+
+
+      # def transactions
+      # end
     end
 
     Directory.include EDirectory

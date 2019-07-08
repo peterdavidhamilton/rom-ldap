@@ -37,6 +37,7 @@ module ROM
       pre_read:                         '1.3.6.1.1.13.1',
       post_read:                        '1.3.6.1.1.13.2',
       modify_increment:                 '1.3.6.1.1.14',
+      transaction_start_request:        '1.3.6.1.1.21.1',
       transaction_spec_request:         '1.3.6.1.1.21.2',
       dont_use_copy:                    '1.3.6.1.1.22',
       password_policy_request:          '1.3.6.1.4.1.42.2.27.8.5.1',
