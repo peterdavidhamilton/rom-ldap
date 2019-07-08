@@ -13,12 +13,15 @@ RSpec.describe ROM::LDAP::Dataset do
     expect(dataset).to respond_to(:to_a)
   end
 
-  xit '#with' do
+
+  it '#unfiltered' do
+    expect(dataset.present(:foo).unfiltered.opts[:criteria]).to eql([])
   end
 
-  xit 'init' do
-    Class.new(ROM::LDAP::Dataset) do
-    end
+  it '#grep' do
+    expect(dataset.grep(%i'givenname sn', 'foo').opts[:criteria]).to eql([
+      :con_or, [[:op_eql, :givenname, '*foo*'], [:op_eql, :sn, '*foo*']]
+    ])
   end
 
   it 'reveals internal options' do
@@ -34,5 +37,13 @@ RSpec.describe ROM::LDAP::Dataset do
     expect(dataset.opts).to have_key(:directory)
   end
 
+
+  # xit '#with' do
+  # end
+
+  # xit 'init' do
+  #   Class.new(ROM::LDAP::Dataset) do
+  #   end
+  # end
 
 end

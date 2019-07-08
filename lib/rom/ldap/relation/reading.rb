@@ -48,7 +48,7 @@ module ROM
         #
         # @api public
         def unfiltered
-          new(dataset.with(criteria: EMPTY_ARRAY))
+          new(dataset.unfiltered)
         end
 
         # Replace the relation filter with a new query.
@@ -316,10 +316,16 @@ module ROM
         #   relation.find('eo')
         #
         # @api public
-        def find(value)
-          new(dataset.grep(schema.map(&:name).sort, value))
-        end
+        def grep(value)
+          meta_fields = schema.attributes.select { |a| a.meta[:grep] }
+          fields = meta_fields.any? ? meta_fields : schema
 
+          new(dataset.grep(fields.map(&:name).sort, value))
+        end
+        alias find grep
+
+        # Overwrites forwarding to Dataset#where
+        #
         # A Hash argument is passed straight to Dataset#equal.
         # Otherwise the RestrictionDSL builds abstract queries
         #

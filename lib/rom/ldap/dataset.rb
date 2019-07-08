@@ -96,6 +96,16 @@ module ROM
         options.merge(ast: to_ast, filter: to_filter).freeze
       end
 
+      # Resets the search criteria.
+      #
+      # @return [LDAP::Dataset]
+      #
+      # @api public
+      def unfiltered
+        with(criteria: EMPTY_ARRAY)
+      end
+
+
       # Iterate over the entries return from the server.
       #
       # @return [Array <Directory::Entry>]
@@ -136,6 +146,17 @@ module ROM
       end
 
       # Wildcard search on multiple attributes.
+      #
+      # @example
+      #   dataset.grep([:givenname, :sn], 'foo').opts[:criteria] =>
+      #     [:con_or, [[:op_eql, :givenname, "*foo*"], [:op_eql, :sn, "*foo*"]]]
+      #
+      #
+      # @see Relation::Reading#grep
+      #
+      # @param attrs [Array<Symbol>] schema attribute names
+      #
+      # @param value [String] search parameter
       #
       # @return [Relation]
       #
