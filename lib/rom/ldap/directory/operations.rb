@@ -228,37 +228,27 @@ module ROM
           pdu.success? ? entry : pdu.success?
         end
 
-        # directory.transaction(opts) { yield(self) }
-        #
-        # @todo Transactions WIP
-        #
-        # @api public
-        def transaction(_opts)
-          yield()
-        end
-
-
-
 
         private
 
 
-
-       # first bit of dn
+        # RDN - relative distinguished name
         #
+        # @return [String]
+        #
+        # @api private
         def get_rdn(dn)
           dn.split(',')[0]
         end
 
-
-
+        # Parent DN
+        #
+        # @return [String]
+        #
+        # @api private
         def get_parent_dn(dn)
           dn.split(',')[1..-1].join(',')
         end
-
-
-
-
 
 
         # Log operation attempt

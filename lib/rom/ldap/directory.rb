@@ -5,6 +5,7 @@ require 'rom/ldap/directory/password'
 require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/capabilities'
 require 'rom/ldap/directory/operations'
+require 'rom/ldap/directory/transactions'
 require 'rom/ldap/directory/tokenization'
 
 
@@ -43,6 +44,7 @@ module ROM
       include Capabilities
       include Tokenization
       include Operations
+      include Transactions
 
       # Expected method inside gateway.
       #
