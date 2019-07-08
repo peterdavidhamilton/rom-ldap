@@ -96,6 +96,18 @@ module ROM
         end
 
 
+        # Compatibility method with Ruby < 2.5
+        #
+        # @see Relation::Reading#pluck
+        #
+        # @return [Hash]
+        #
+        # @api public
+        def slice(*keys)
+          formatted.select { |k,v| keys.include?(k) }
+        end
+
+
         # Defer to enumerable hash methods before entry values.
         #
         #

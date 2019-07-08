@@ -380,6 +380,50 @@ module ROM
           schema.qualified.call(self)
         end
 
+
+
+        # Pluck value(s) from a specific attribute - unwrapped only if all are lone results
+        #
+        # @example Single value
+        #   users.pluck(:uidnumber)
+        #   # ["1", "2"]
+        #
+        #   users.pluck(:cn)
+        #   # [["Cat", "House Cat"], ["Mouse"]]
+        #
+        # @example Multiple values
+        #   users.pluck(:gidnumber, :uid)
+        #   # [["1", "Jane"] ["2", "Joe"]]
+        #
+        # @return [Array<String, Array>]
+        #
+        # @api public
+        def pluck(*names)
+          map do |entry|
+            attribute_values = entry.slice(*names).values
+
+            results =
+              if attribute_values.map(&:one?).all?
+                attribute_values.map(&:first)
+              else
+                attribute_values
+              end
+
+            results.one? ? results.first : results
+          end
+        end
+
+
+        # Returns tuples with popped values.
+        #
+        # @return [LDAP::Relation]
+        #
+        def unwrap
+          new Functions[:map_array, Functions[:map_values, :pop]].call(self)
+        end
+
+
+
         # Rename attributes in a relation
         #
         # This method is intended to be used internally within a relation object
@@ -462,6 +506,7 @@ module ROM
         def select_append(*args, &block)
           schema.merge(schema.canonical.project(*args, &block)).(self)
         end
+
       end
     end
   end
