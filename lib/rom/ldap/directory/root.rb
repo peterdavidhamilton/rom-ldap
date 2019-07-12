@@ -61,11 +61,13 @@ module ROM
           'Unknown'
         end
 
-        # @return [Array<String>]
+        # FIXME: is being overwritten in test suite against multiple servers
         #
         # @example
         #   [ 'Apple', '510.30' ]
         #   [ 'Apache Software Foundation', '2.0.0-M24' ]
+        #
+        # @return [Array<String>]
         #
         # @api public
         def vendor

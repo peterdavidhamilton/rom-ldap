@@ -30,9 +30,6 @@ module ROM
     WILDCARD  = '*'.freeze
 
     # @return [Array<String>]
-    #
-    # @see Relation#add_operational
-    #
     OP_ATTRS  = %w'+'.freeze
 
     # @return [Array<String>]

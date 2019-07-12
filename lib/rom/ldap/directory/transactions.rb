@@ -1,5 +1,6 @@
 # https://ldapwiki.com/wiki/Lightweight%20Directory%20Access%20Protocol%20%28LDAP%29%20Transactions
 # https://tools.ietf.org/html/rfc5805
+# https://ldapwiki.com/wiki/EDirectory%20LDAP%20Transaction
 # 1.3.6.1.1.21.1
 # 1.3.6.1.1.21.3 ?
 module ROM

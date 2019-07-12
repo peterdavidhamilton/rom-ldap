@@ -51,6 +51,15 @@ module ROM
           new(dataset.unfiltered)
         end
 
+        # Include internal operational attributes in the tuples.
+        #
+        # @return [Relation]
+        #
+        # @api public
+        def operational
+          new(dataset.with(attrs: ALL_ATTRS))
+        end
+
         # Replace the relation filter with a new query.
         #
         # @param new_filter [String] Valid LDAP filter string
@@ -211,7 +220,7 @@ module ROM
         #
         # @api public
         def last
-          dataset.reverse_each.first
+          dataset.reverse_each.first.to_h
         end
 
         # Use server-side sorting if available.
