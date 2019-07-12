@@ -25,6 +25,12 @@ RSpec.shared_context 'people' do
 
     conf.relation(:people) do
       schema('(objectClass=person)', infer: true)
+      # do
+        # when the schema is only inferred and therefore has read values for attributes
+        # select_label stops working
+        # attribute :uid_number, ROM::LDAP::Types::Integer, read: ROM::LDAP::Types::Integer
+        # attribute :cn,         ROM::LDAP::Types::String
+      # end
     end
 
 
