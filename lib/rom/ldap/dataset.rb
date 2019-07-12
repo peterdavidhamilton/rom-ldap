@@ -78,6 +78,9 @@ module ROM
         DSL.public_instance_methods(false)
       end
 
+      # Dataset#where
+      alias where equal
+
       # Initialise a new class overriding options.
       #
       # @return [ROM::LDAP::Dataset]

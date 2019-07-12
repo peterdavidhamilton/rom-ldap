@@ -106,13 +106,6 @@ module ROM
       end
 
       # @api private
-      def finalize_attributes!(options = EMPTY_OPTS)
-        super do
-          initialize_primary_key_names
-        end
-      end
-
-      # @api private
       def finalize_associations!(relations:)
         super do
           associations.map do |definition|

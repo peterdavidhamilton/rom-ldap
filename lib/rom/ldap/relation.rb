@@ -49,7 +49,7 @@ module ROM
         if attribute
           attribute.alias || attribute.name
         else
-          :dn
+          :entry_dn
         end
       end
 

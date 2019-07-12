@@ -28,7 +28,6 @@ module ROM
         def equal(args)
           chain(*array_dsl(args))
         end
-        alias where equal
 
         # Antonym of 'equal'
         #
