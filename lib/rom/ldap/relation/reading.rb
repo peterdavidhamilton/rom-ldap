@@ -199,7 +199,7 @@ module ROM
         #
         # @api public
         def first
-          dataset.first
+          dataset.first.to_h
         end
 
         # Last tuple from the relation

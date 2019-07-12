@@ -8,8 +8,8 @@ RSpec.describe 'Overview' do
       expect(dragons.auto_struct?).to eql(false)
     end
 
-    it '#first returns ROM::LDAP::Directory::Entry whose values are Arrays of strings' do
-      expect(dragons.first).to be_a(ROM::LDAP::Directory::Entry)
+    it '#first returns Hash whose values are Arrays of strings' do
+      expect(dragons.first).to be_a(Hash)
       expect(dragons.first[:species]).to eql(%w'dragon')
       expect(dragons.first[:extinct]).to eql(%w'TRUE')
       expect(dragons.first[:population_count]).to eql(%w'0')
