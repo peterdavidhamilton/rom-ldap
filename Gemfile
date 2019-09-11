@@ -4,7 +4,7 @@ gemspec
 
 gem 'ldap-ber', git: "https://oauth2:#{ENV['GITLAB_TOKEN']}@gitlab.com/peterdavidhamilton/ldap-ber", branch: 'develop'
 
-gem 'rom', github: 'rom-rb/rom' do
+gem 'rom', git: 'https://github.com/rom-rb/rom' do
   gem 'rom-changeset'
   gem 'rom-core'
   gem 'rom-mapper'
@@ -14,24 +14,23 @@ end
 group :development do
   gem 'awesome_print'
   gem 'dry-monitor'
-  gem 'rouge' # bin/ldap_logger.rb
+  gem 'rouge' # WIP bin/ldap_logger.rb
   gem 'pry', platforms: %i[jruby rbx]
   gem 'pry-byebug', platforms: :mri
 end
 
 group :test do
-  # gem 'codeclimate-test-reporter', require: false
-  gem 'msgpack', '~> 1.2.4', require: false # @see spec/unit/relation/export_spec.rb
-  gem 'libxml-ruby', require: false # @see spec/unit/relation/export_spec.rb
-  gem 'faker', github: 'stympy/faker', branch: 'master', require: false
+  # gem 'codeclimate-test-reporter'
+  gem 'msgpack', '~> 1.2.4' # @see spec/unit/relation/export_spec.rb
+  gem 'libxml-ruby'         # @see spec/unit/relation/export_spec.rb
   gem 'rom-factory'
   gem 'rspec'
-  gem 'rubocop', '~> 0.58', require: false
-  gem 'rubocop-performance', require: false
-  gem 'simplecov', require: false
+  gem 'rubocop', '~> 0.58'
+  gem 'rubocop-performance'
+  gem 'simplecov'
 end
 
 group :benchmark do
-  gem 'benchmark-ips', github: 'evanphx/benchmark-ips', branch: 'master'
+  gem 'benchmark-ips'
   gem 'net-ldap'
 end
