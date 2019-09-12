@@ -43,7 +43,7 @@ module ROM
         # @return [String]
         #
         def base
-          uri.dn or ::ENV.fetch('LDAPBASE', EMPTY_STRING)
+          connection ? uri.dn : ::ENV.fetch('LDAPBASE', EMPTY_STRING)
         end
 
         # @return [Hash, NilClass]

@@ -2,7 +2,7 @@ RSpec.describe 'OpenLDAP' do
 
   let(:gateway) do
     TestConfiguration.new(:ldap,
-      'ldap://openldap',
+      'ldap://openldap/ou=specs,dc=rom,dc=ldap',
       username: 'cn=admin,dc=rom,dc=ldap',
       password: 'topsecret'
     ).gateways[:default]

@@ -1,7 +1,8 @@
-
 docker
-coverage
 doc
+
+coverage/*
+!coverage/.keep
 
 tmp/*
 !tmp/.keep

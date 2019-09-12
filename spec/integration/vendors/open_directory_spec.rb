@@ -2,7 +2,7 @@ RSpec.xdescribe 'OpenDirectory' do
 
   let(:gateway) do
     TestConfiguration.new(:ldap,
-      'ldap://opendirectory',
+      'ldap://opendirectory/ou=specs,dc=rom,dc=ldap',
       username: 'cn=diradmin,dc=rom,dc=ldap',
       password: 'password'
     ).gateways[:default]

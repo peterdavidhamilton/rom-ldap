@@ -9,8 +9,6 @@ RUN yum -y install 389-ds-base \
     && rm -rf /usr/lib/systemd/system \
     && sed -i 's/updateSelinuxPolicy($inf);//g' /usr/lib64/dirsrv/perl/*
 
-
-
 # $HOSTNAME
 ENV DIRSRV_FQDN "example.org"
 ENV DIRSRV_SUFFIX "dc=example,dc=org"
@@ -23,17 +21,7 @@ ENV DIRSRV_ADMIN_USERNAME "unused-admin"
 ENV DIRSRV_ADMIN_PASSWORD "adminpassword"
 ENV DIRSRV_ID "default"
 
-#
-# COPY wildlife.ldif /etc/dirsrv/schema/99user.ldif
-
-# COPY wildlife.ldif /etc/dirsrv/wildlife.ldif
-
 COPY domain.ldif /etc/dirsrv/domain.ldif
-
-
-
-
-VOLUME /etc/dirsrv /var/lib/dirsrv /var/log/dirsrv
 
 EXPOSE 389 636 9830
 

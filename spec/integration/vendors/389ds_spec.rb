@@ -2,7 +2,7 @@ RSpec.describe '389DS' do
 
   let(:gateway) do
     TestConfiguration.new(:ldap,
-      'ldap://389ds',
+      'ldap://389ds/ou=specs,dc=rom,dc=ldap',
       username: 'cn=Directory Manager',
       password: 'topsecret'
     ).gateways[:default]

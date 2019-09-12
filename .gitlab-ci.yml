@@ -9,15 +9,21 @@
 # docker build -t registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest . -f ./docker/rom-ldap/Dockerfile
 # docker push registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest
 #
-image: ruby:2.4.5
-# image: ruby:2.5.5
-# image: ruby:2.6.2
+image: ruby:2.4.5-alpine3.8
 
+# before_script:
+#   - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $registry
+
+
+# gitlab-runner exec docker test --docker-pull-policy never
 test:
   variables:
-    LDAPURI:    ldap://apacheds:10389/ou=specs,dc=rom,dc=ldap
+    LDAPHOST:   apacheds
+    LDAPBASE:   dc=rom,dc=ldap
+    LDAPPORT:   '10389'
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
+    LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema
 
   services:
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest
@@ -28,13 +34,22 @@ test:
       alias: opendj
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
       alias: openldap
+    # - opendirectory
+    # - activedirectory
+
+
+
   script:
-    - bundle install --without development benchmark
-    - ulimit -n 1024
+    - apk upgrade --no-cache
+    - apk add --no-cache build-base libxml2-dev openldap-clients git
+    - gem install bundler --no-document
+    - bundle install
+    - bundle exec rake ldap:modify
     - rake
   artifacts:
     paths:
       - coverage/
+      # - tmp/
 
 
 

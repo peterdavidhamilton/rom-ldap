@@ -1,10 +1,10 @@
-RSpec.describe 'Active Directory' do
+RSpec.xdescribe 'Active Directory' do
 
   let(:gateway) do
     TestConfiguration.new(:ldap,
-      'ldap://addc4.leedsbeckett.ac.uk/ou=usr,dc=leedsbeckett,dc=ac,dc=uk',
-      username: 'hamilt09@leedsbeckett.ac.uk',
-      password: 'Th3Chun?'
+      ENV['AD_URI'],
+      username: ENV['AD_USER'],
+      password: ENV['AD_PW']
     ).gateways[:default]
   end
 

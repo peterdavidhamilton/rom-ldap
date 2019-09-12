@@ -1,22 +1,21 @@
-# docker build -t rom-ldap . -f ./docker/rom-ldap/Dockerfile
-#
 FROM ruby:2.4.5-alpine3.8 as gem
 
-# install ldapsearch to run a health check before specs
 RUN apk --no-cache upgrade && \
-    apk --no-cache add build-base libxml2-dev openldap-clients
+    apk --no-cache add build-base libxml2-dev openldap-clients git && \
+    gem install bundler --no-document
 
-RUN gem install bundler && bundle config git.allow_insecure true
+ENV LDAPHOST="apacheds" \
+    LDAPPORT="10389" \
+    LDAPBASE="dc=rom,dc=ldap" \
+    LDAPBINDDN="uid=admin,ou=system" \
+    LDAPBINDPW="secret" \
+    LDAPDIR="/schema"
 
-COPY . /src
+VOLUME $LDAPDIR
+VOLUME /src
 
 WORKDIR /src
 
-#
-# ./bundle/config cache => true
-#
-RUN bundle install --deployment
+ENTRYPOINT ["/src/docker-entrypoint.sh"]
 
-# docker exec -i -t rom-ldap spec
-# ENTRYPOINT ["/usr/local/bundle/bin/bundle exec"]
-# CMD ["rake -T"]
+CMD ["rspec", "--fail-fast=10"]

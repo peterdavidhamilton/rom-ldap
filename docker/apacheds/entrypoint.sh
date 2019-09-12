@@ -30,13 +30,4 @@ trap shutdown INT TERM
 
 echo "Starting ApacheDS server..."
 
-/opt/apacheds-${APACHEDS_VERSION}/bin/apacheds start ${APACHEDS_INSTANCE}
-sleep 20
-
-echo "Loading custom schemas..."
-
-for schema in /schema/*.ldif; do
-  /usr/bin/ldapadd -x -c -v -f $schema
-done
-
-tail -F ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log
+/opt/apacheds-${APACHEDS_VERSION}/bin/apacheds start ${APACHEDS_INSTANCE} && tail -F ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log

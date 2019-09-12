@@ -2,6 +2,7 @@
 # Leverage LDAP env variables or RC files.
 #
 require 'pathname'
+require 'pry'
 
 module ROM
   module LDAP
@@ -9,8 +10,7 @@ module ROM
       module_function
 
       def message
-        puts "Using #{root}, set LDAPDIR=/path/to/root"
-        puts "Add LDAPBINDDN password to #{passwd}" unless ldappw.readable?
+        puts "Using #{root}, alternatively set LDAPDIR=/path/to/root"
         puts
         puts "=========================================="
       end
@@ -24,12 +24,12 @@ module ROM
 
       # ldapmodify with simple authentication and continuous operation.
       #
-      def modify(path:, file:)
+      def modify(dir: root)
         puts 'ldapmodify is not installed!' if ldapmodify.empty?
 
-        path_to_ldif = "#{root.join(path)}/#{file}.ldif"
-
-        system(ldapmodify, '-x', *auth, '-a', '-c', '-v', '-f', path_to_ldif)
+        Dir.glob("#{dir}/*.ldif") do |file|
+          system(ldapmodify, '-x', *auth, '-a', '-c', '-v', '-f', file)
+        end
       end
 
       private_instance_methods
@@ -43,7 +43,7 @@ module ROM
       end
 
       def auth
-        ['-y', ldappw.to_s] if ldappw.readable?
+        ['-w', ENV['LDAPBINDPW']]
       end
 
       def ldapsearch
@@ -63,20 +63,14 @@ namespace :ldap do
     ROM::LDAP::RakeSupport.message
   end
 
-
-  # 'ldap:modify[posix,path/to/ldif]'
+  # Iterate through *.ldif files in a folder.
   #
-  # @example
-  #   $ rake ldap:modify            # => root/example/ldif/animals.ldif
-  #   $ rake ldap:modify[file]      # => root/example/ldif/file.ldif
-  #   $ rake ldap:modify[file,path] # => root/path/file.ldif
+  # 'ldap:modify[/schema]'
   #
   desc 'Use ldapmodify'
-  task :modify, [:file, :path] => :env do |_t, args|
-    args.with_defaults(path: 'example/ldif', file: 'wildlife/domain')
+  task :modify, [:dir] => :env do |_t, args|
     ROM::LDAP::RakeSupport.modify(args)
   end
-
 
 
   # 'LDAPBASE=dc=foo ldap:search[cn=*foo,gn.sn]'

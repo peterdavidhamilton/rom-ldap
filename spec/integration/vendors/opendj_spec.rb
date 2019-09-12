@@ -2,7 +2,7 @@ RSpec.describe 'OpenDJ' do
 
   let(:gateway) do
     TestConfiguration.new(:ldap,
-      'ldap://opendj',
+      'ldap://opendj/ou=specs,dc=rom,dc=ldap',
       username: 'cn=Directory Manager',
       password: 'topsecret'
     ).gateways[:default]

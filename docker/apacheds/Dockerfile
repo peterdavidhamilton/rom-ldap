@@ -15,7 +15,8 @@ RUN apt-get update \
 
 ARG version=2.0.0.AM25
 ARG architecture=amd64
-ARG repo=www.eu.apache.org
+# ARG repo=www.eu.apache.org
+ARG repo=archive.apache.org
 
 ENV APACHEDS_VERSION $version
 ENV APACHEDS_REPO $repo
@@ -37,8 +38,6 @@ ENV APACHEDS_BIN "/opt/apacheds-${APACHEDS_VERSION}/bin"
 ENV PATH "${PATH}:${APACHEDS_BIN}"
 
 RUN ln -s ${APACHEDS_DATA}-${APACHEDS_VERSION} ${APACHEDS_DATA}
-
-ADD schema /schema
 
 ADD instance/* ${APACHEDS_BOOTSTRAP}/conf/
 
