@@ -1,11 +1,38 @@
 image: ruby:2.4.5-alpine3.8
 
-cache:
-  paths:
-    - vendor/ruby
+# cache:
+#   paths:
+#     - vendor/ruby
+
+variables:
+  # apacheds
+  APACHEDS_INSTANCE: rom
+
+  # openldap
+  LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
+  LDAP_DOMAIN: rom.ldap
+  LDAP_BASE_DN: dc=rom,dc=ldap
+  LDAP_ADMIN_PASSWORD: topsecret
+
+  # 389ds
+  LDAP_LOG_LEVEL: 0
+  DIRSRV_ID: rom
+  DIRSRV_FQDN: rom.ldap
+  DIRSRV_SUFFIX: dc=rom,dc=ldap
+  DIRSRV_ROOT_DN: cn=Directory Manager
+  DIRSRV_ROOT_DN_PASSWORD: topsecret
+
+  # opendj
+  BASE_DN: dc=rom,dc=ldap
+  ROOT_USER_DN: cn=Directory Manager
+  ROOT_PASSWORD: topsecret
+
+
+
 
 test:
   variables:
+    # rom
     LDAPHOST:   apacheds
     LDAPBASE:   dc=rom,dc=ldap
     LDAPPORT:   '10389'
@@ -25,14 +52,12 @@ test:
     # - opendirectory
     # - activedirectory
 
-
-
   script:
     - apk upgrade --no-cache
     - apk add --no-cache build-base libxml2-dev openldap-clients git
     - gem install bundler --no-document
     - bundle install
-    - bundle install -j $(nproc) --path vendor
+    # - bundle install -j $(nproc) --path vendor
     - bundle exec rake ldap:modify
     - bundle exec rake
   artifacts:

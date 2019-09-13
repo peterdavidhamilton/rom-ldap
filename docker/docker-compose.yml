@@ -67,9 +67,9 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 1
-    # environment:
-    #   APACHEDS_INSTANCE: rom
-    #   TZ: America/Los_Angeles
+    environment:
+      APACHEDS_INSTANCE: rom
+      # TZ: America/Los_Angeles
     networks:
       - rom-ldap-network
 
