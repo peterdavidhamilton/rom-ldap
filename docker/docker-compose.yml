@@ -1,11 +1,8 @@
 version: '2.4'
-
 networks:
   rom-ldap-network:
 
-
 services:
-
   rom:
     container_name: rom-ldap
     build:
@@ -14,21 +11,17 @@ services:
       labels:
         name: ROM LDAP Adapter
     environment:
-      LDAPHOST:     apacheds
-      LDAPPORT:     10389
-      LDAPBASE:     dc=rom,dc=ldap
-      LDAPBINDDN:   uid=admin,ou=system
-      LDAPBINDPW:   secret
-      LDAPDIR:      /src/docker/schema
-      GITLAB_TOKEN: ${GITLAB_TOKEN}
-      AD_URI:       ${AD_URI}
-      AD_USER:      ${AD_USER}
-      AD_PW:        ${AD_PW}
-
-      # TZ: America/Los_Angeles
-      # ADURI:
-      # ADUSER:
-      # ADPWD:
+      - LDAPHOST=apacheds
+      - LDAPPORT=10389
+      - LDAPBASE=dc=rom,dc=ldap
+      - LDAPBINDDN=uid=admin,ou=system
+      - LDAPBINDPW=secret
+      - LDAPDIR=/src/docker/schema
+      - GITLAB_TOKEN
+      - AD_URI
+      - AD_USER
+      - AD_PW
+      #- TZ=America/Los_Angeles
     restart: on-failure
     depends_on:
       - 389ds

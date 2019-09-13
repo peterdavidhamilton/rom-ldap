@@ -15,6 +15,12 @@ image: ruby:2.4.5-alpine3.8
 #   - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $registry
 
 
+# Cache gems in between builds
+cache:
+  paths:
+    - vendor/ruby
+
+
 # gitlab-runner exec docker test --docker-pull-policy never
 test:
   variables:
@@ -26,9 +32,9 @@ test:
     LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema # /builds/peterdavidhamilton/rom-ldap/docker/schema
 
   services:
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
       alias: apacheds
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389:latest
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:latest
       alias: 389ds
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
       alias: opendj
@@ -43,7 +49,8 @@ test:
     - apk upgrade --no-cache
     - apk add --no-cache build-base libxml2-dev openldap-clients git
     - gem install bundler --no-document
-    - bundle install
+    - bundle install --without development
+    - bundle install -j $(nproc) --path vendor
     - bundle exec rake ldap:modify
     - bundle exec rake
   artifacts:

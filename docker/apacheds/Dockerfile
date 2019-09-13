@@ -13,7 +13,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG version=2.0.0.AM25
+# ARG version=2.0.0.AM25
+ARG version=2.0.0-M24
 ARG architecture=amd64
 # ARG repo=www.eu.apache.org
 ARG repo=archive.apache.org
@@ -62,4 +63,4 @@ RUN chown apacheds:apacheds /entrypoint.sh \
 
 WORKDIR ${APACHEDS_DATA}
 
-CMD /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

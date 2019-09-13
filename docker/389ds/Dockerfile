@@ -30,4 +30,4 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chown dirsrv:dirsrv /entrypoint.sh \
     && chmod +x /entrypoint.sh
 
-CMD /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

@@ -36,4 +36,4 @@ RUN chmod +x /entrypoint.sh
 
 WORKDIR /etc/ldap
 
-CMD /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

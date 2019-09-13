@@ -40,4 +40,4 @@ RUN chown opendj /entrypoint.sh \
 
 WORKDIR /opt/opendj
 
-CMD /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
