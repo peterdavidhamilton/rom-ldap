@@ -23,13 +23,13 @@ test:
     LDAPPORT:   '10389'
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
-    LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema
+    LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema # /builds/peterdavidhamilton/rom-ldap/docker/schema
 
   services:
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:latest
       alias: apacheds
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389:latest
-      alias: '389'
+      alias: 389ds
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
       alias: opendj
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
@@ -45,7 +45,7 @@ test:
     - gem install bundler --no-document
     - bundle install
     - bundle exec rake ldap:modify
-    - rake
+    - bundle exec rake
   artifacts:
     paths:
       - coverage/
