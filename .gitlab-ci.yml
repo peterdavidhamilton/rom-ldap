@@ -1,27 +1,9 @@
-
-# stages:
-#   - build
-#   - test
-#   - deploy
-
-
-#
-# docker build -t registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest . -f ./docker/rom-ldap/Dockerfile
-# docker push registry.gitlab.com/peterdavidhamilton/rom-ldap/rom-ldap:latest
-#
 image: ruby:2.4.5-alpine3.8
 
-# before_script:
-#   - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $registry
-
-
-# Cache gems in between builds
 cache:
   paths:
     - vendor/ruby
 
-
-# gitlab-runner exec docker test --docker-pull-policy never
 test:
   variables:
     LDAPHOST:   apacheds
@@ -29,7 +11,7 @@ test:
     LDAPPORT:   '10389'
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
-    LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema # /builds/peterdavidhamilton/rom-ldap/docker/schema
+    LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema
 
   services:
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
@@ -49,20 +31,15 @@ test:
     - apk upgrade --no-cache
     - apk add --no-cache build-base libxml2-dev openldap-clients git
     - gem install bundler --no-document
-    - bundle install --without development
+    - bundle install
     - bundle install -j $(nproc) --path vendor
     - bundle exec rake ldap:modify
     - bundle exec rake
   artifacts:
     paths:
       - coverage/
-      # - tmp/
 
 
-
-
-# Publish spec coverage for the master branch.
-#
 pages:
   stage: deploy
   dependencies:
@@ -74,4 +51,4 @@ pages:
       - public
     expire_in: 30 days
   only:
-    - master
+    - deploy
