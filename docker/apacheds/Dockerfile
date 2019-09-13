@@ -32,7 +32,7 @@ RUN wget --quiet --no-check-certificate ${APACHEDS_URL}/${APACHEDS_VERSION}/${AP
     && dpkg -i ${APACHEDS_ARCHIVE} \
     && rm ${APACHEDS_ARCHIVE}
 
-ENV APACHEDS_INSTANCE "default"
+ENV APACHEDS_INSTANCE "rom"
 ENV APACHEDS_BOOTSTRAP "/bootstrap"
 ENV APACHEDS_DATA "/var/lib/apacheds"
 ENV APACHEDS_BIN "/opt/apacheds-${APACHEDS_VERSION}/bin"
@@ -40,7 +40,7 @@ ENV PATH "${PATH}:${APACHEDS_BIN}"
 
 RUN ln -s ${APACHEDS_DATA}-${APACHEDS_VERSION} ${APACHEDS_DATA}
 
-ADD instance/* ${APACHEDS_BOOTSTRAP}/conf/
+ADD ${APACHEDS_INSTANCE}/* ${APACHEDS_BOOTSTRAP}/conf/
 
 RUN mkdir ${APACHEDS_BOOTSTRAP}/cache \
     && mkdir ${APACHEDS_BOOTSTRAP}/run \
