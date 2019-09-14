@@ -21,6 +21,7 @@ ARG architecture=amd64
 # ARG repo=www.eu.apache.org
 ARG repo=archive.apache.org
 
+ENV APACHEDS_INSTANCE $instance
 ENV APACHEDS_VERSION $version
 ENV APACHEDS_REPO $repo
 ENV APACHEDS_ARCH $architecture
@@ -34,11 +35,10 @@ RUN wget --quiet --no-check-certificate ${APACHEDS_URL}/${APACHEDS_VERSION}/${AP
       && dpkg -i ${APACHEDS_ARCHIVE} \
       && rm ${APACHEDS_ARCHIVE}
 
-ENV APACHEDS_INSTANCE $instance
-ENV APACHEDS_BOOTSTRAP "/bootstrap"
-ENV APACHEDS_DATA "/var/lib/apacheds"
-ENV APACHEDS_BIN "/opt/apacheds-${APACHEDS_VERSION}/bin"
-ENV PATH "${PATH}:${APACHEDS_BIN}"
+ENV APACHEDS_BOOTSTRAP="/bootstrap" \
+    APACHEDS_DATA="/var/lib/apacheds" \
+    APACHEDS_BIN="/opt/apacheds-${APACHEDS_VERSION}/bin" \
+    PATH="${PATH}:${APACHEDS_BIN}"
 
 RUN ln -s ${APACHEDS_DATA}-${APACHEDS_VERSION} ${APACHEDS_DATA}
 

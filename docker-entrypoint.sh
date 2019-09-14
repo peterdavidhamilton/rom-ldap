@@ -2,7 +2,11 @@
 
 set -e
 
-bundle install
+gem install bundler --no-document
+
+bundle binstubs bundler --force
+
+bundle check || bundle install --binstubs="$BUNDLE_BIN"
 
 bundle exec rake ldap:modify
 

@@ -148,3 +148,10 @@ Output LDIF
 Convert binary to LDIF
 `$ ldif -b jpegPhoto <  mark.jpg > out.ldif`
 
+
+
+
+`$ gitlab-runner exec docker test --docker-pull-policy never`
+
+
+`$ GITLAB_TOKEN=<repo-read-token> docker-compose up --build rom`

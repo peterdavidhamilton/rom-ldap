@@ -1,8 +1,9 @@
 image: ruby:2.4.5-alpine3.8
 
-# cache:
-#   paths:
-#     - vendor/ruby
+cache:
+  key: $CI_PROJECT_NAME
+  paths:
+    - vendor/ruby
 
 variables:
   # apacheds
@@ -15,7 +16,7 @@ variables:
   LDAP_ADMIN_PASSWORD: topsecret
 
   # 389ds
-  LDAP_LOG_LEVEL: 0
+  LDAP_LOG_LEVEL: '0'
   DIRSRV_ID: rom
   DIRSRV_FQDN: rom.ldap
   DIRSRV_SUFFIX: dc=rom,dc=ldap
@@ -39,6 +40,7 @@ test:
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
     LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema
+    # GITLAB_TOKEN: <repo-read> # for ldap-ber
 
   services:
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
@@ -56,8 +58,7 @@ test:
     - apk upgrade --no-cache
     - apk add --no-cache build-base libxml2-dev openldap-clients git
     - gem install bundler --no-document
-    - bundle install
-    # - bundle install -j $(nproc) --path vendor
+    - bundle install -j $(nproc) --path vendor
     - bundle exec rake ldap:modify
     - bundle exec rake
   artifacts:

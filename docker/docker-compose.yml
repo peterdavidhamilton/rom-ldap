@@ -30,6 +30,8 @@ services:
       - openldap
     volumes:
       - ..:/src
+      # - bundle_cache:/bundle
+      - ../tmp/bundler:/bundle
     tty: true
     stdin_open: true
     networks:
@@ -38,7 +40,7 @@ services:
 
 
   # 1 ubuntu
-  # docker build -t apacheds .
+  # docker build --build-arg instance=rom -t apacheds:2.0.0-M24 .
   # docker run -it -p 1389:10389 -e APACHEDS_INSTANCE=rom apacheds
   # ou=schema
   #
@@ -49,6 +51,7 @@ services:
       labels:
         vendor: Apache
       args:
+        instance: rom
         # version: 2.0.0.AM25
         version: 2.0.0-M24
         # repo: archive.apache.org
@@ -64,9 +67,9 @@ services:
     restart: on-failure
     healthcheck:
       test: curl ldap://127.0.0.1:10389/dc=rom,dc=ldap || exit 1
-      interval: 1m30s
+      interval: 2m
       timeout: 10s
-      retries: 1
+      retries: 3
     environment:
       APACHEDS_INSTANCE: rom
       # TZ: America/Los_Angeles
@@ -192,3 +195,7 @@ services:
       # TZ: America/Los_Angeles
     networks:
       - rom-ldap-network
+
+
+# volumes:
+#   bundle_cache:
