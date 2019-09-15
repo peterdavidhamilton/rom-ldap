@@ -1,0 +1,19 @@
+image: ruby:2.4.5-alpine3.8
+
+pipelines:
+  default:
+    - step:
+        caches:
+          - bundler
+        script:
+          - apk upgrade --no-cache
+          - apk add --no-cache build-base libxml2-dev openldap-clients git
+          - gem install bundler --no-document
+          - bundle install -j $(nproc) --path vendor
+          - bundle exec rake ldap:modify
+          - bundle exec rspec        
+          - bundle install
+
+definitions:
+  caches:
+    bundler: ./vendor
