@@ -1,5 +1,4 @@
 image: ruby:2.4.5-alpine3.8
-
 pipelines:
   default:
     - step:
@@ -12,8 +11,42 @@ pipelines:
           - bundle install -j $(nproc) --path vendor
           - bundle exec rake ldap:modify
           - bundle exec rspec        
-          - bundle install
-
+          - bundle install          
+        services:
+          - apacheds
+          - 389ds
+          - openldap
+          - opendj
 definitions:
   caches:
     bundler: ./vendor
+  services:
+    apacheds:
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
+      variables:
+        APACHEDS_INSTANCE: rom    
+    389ds:
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:latest
+      memory: 512
+      variables:
+        LDAP_LOG_LEVEL: '0'
+        DIRSRV_ID: rom
+        DIRSRV_FQDN: rom.ldap
+        DIRSRV_SUFFIX: dc=rom,dc=ldap
+        DIRSRV_ROOT_DN: cn=Directory Manager
+        DIRSRV_ROOT_DN_PASSWORD: topsecret
+    openldap:
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
+      memory: 512
+      variables:
+        LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
+        LDAP_DOMAIN: rom.ldap
+        LDAP_BASE_DN: dc=rom,dc=ldap
+        LDAP_ADMIN_PASSWORD: topsecret
+    opendj:
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
+      memory: 512
+      variables:
+        BASE_DN: dc=rom,dc=ldap
+        ROOT_USER_DN: cn=Directory Manager
+        ROOT_PASSWORD: topsecret
