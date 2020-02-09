@@ -19,7 +19,6 @@ module ROM
       end
     end
 
-    Dataset.send(:prepend, ActiveSupportInstrumentation)
+    Dataset.prepend ActiveSupportInstrumentation
   end
 end
-

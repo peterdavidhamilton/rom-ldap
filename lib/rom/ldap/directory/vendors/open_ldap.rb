@@ -1,12 +1,16 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
     #
     # OpenLDAP Extension
     #
-    module OpenLDAP
+    # @api private
+    module OpenLdap
       #
       # @return [String]
       #
+      # @api public
       def vendor_name
         'OpenLDAP'
       end
@@ -14,6 +18,7 @@ module ROM
       #
       # @return [String]
       #
+      # @api public
       def vendor_version
         '0.0'
       end
@@ -21,12 +26,10 @@ module ROM
       #
       # @return [String]
       #
+      # @api public
       def organization
         query(base: contexts[0]).first.first('o')
       end
-
     end
-
-    Directory.send(:include, OpenLDAP)
   end
 end

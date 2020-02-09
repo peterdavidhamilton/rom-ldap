@@ -2,9 +2,7 @@ require 'msgpack'
 
 module ROM
   module LDAP
-
     module MsgPackExport
-
       # Export the relation as MessagePack Binary
       #
       # @return [String]
@@ -16,10 +14,8 @@ module ROM
       def to_msgpack
         export.to_msgpack
       end
-
     end
 
-    Relation.send(:include, MsgPackExport)
-
+    Relation.include MsgPackExport
   end
 end

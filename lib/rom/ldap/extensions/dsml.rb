@@ -1,17 +1,16 @@
+# frozen_string_literal: true
+
 require 'rom/initializer'
 require 'libxml'
 
-# https://publib.boulder.ibm.com/tividd/td/ITIM/SC32-1149-01/en_US/HTML/Policy_Org_Admin395.htm
-
-
 module ROM
   module LDAP
-
     #
     # Directory Service Markup Language (DSML)
     #
     # Refines Array and Hash with #to_dsml method.
     #
+    # @see https://publib.boulder.ibm.com/tividd/td/ITIM/SC32-1149-01/en_US/HTML/Policy_Org_Admin395.htm
     # @see Directory::Entry
     # @see Relation::Exporting
     #
@@ -22,10 +21,10 @@ module ROM
       #
       # @api private
       class Exporter
+
         extend Initializer
 
         include LibXML
-
 
         # Dataset
         #
@@ -116,6 +115,7 @@ module ROM
           end
           node
         end
+
       end
 
       # Extend functionality of Hash class.
@@ -145,16 +145,17 @@ module ROM
       end
     end
 
-
     module DSMLExport
       using DSML
       #
+      # @return [String]
+      #
+      # @api public
       def to_dsml
         export.to_dsml
       end
     end
 
-    Relation.send(:include, DSMLExport)
-
+    Relation.include DSMLExport
   end
 end

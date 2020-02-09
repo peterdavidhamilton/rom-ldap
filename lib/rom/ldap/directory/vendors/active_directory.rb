@@ -3,8 +3,8 @@ module ROM
     #
     # Microsoft Active Directory Extension
     #
+    # @api private
     module ActiveDirectory
-
       #
       # @note
       #   Use the AD Forest configuration container as a search base.
@@ -95,14 +95,9 @@ module ROM
       def supported_capabilities
         root['supportedCapabilities'].sort
       end
-
     end
 
-    # Directory.include ActiveDirectory
-    Directory.send(:include, ActiveDirectory)
-
-
-    # CONTROLS = CONTROLS.dup.merge!(
+    # OID = OID.dup.merge!(
     #   extended_dn:    '1.2.840.113556.1.4.529',   # Extended DN control (Stateless)
     #   get_stats:      '1.2.840.113556.1.4.970',   # Get stats control (Stateless)
     #   verify_name:    '1.2.840.113556.1.4.1338',  # Verify name control (Stateless)
@@ -130,6 +125,3 @@ module ROM
     # ).freeze
   end
 end
-
-
-

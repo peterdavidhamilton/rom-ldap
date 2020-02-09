@@ -3,13 +3,14 @@ require 'active_support/log_subscriber'
 module ROM
   module LDAP
     class RailsLogSubscriber < ActiveSupport::LogSubscriber
+
       def ldap(event)
         return unless logger.debug?
 
         payload = event.payload
 
         name = format('%s (%.1fms)', payload[:name], event.duration)
-        ldap  = payload[:ldap].squeeze(' ')
+        ldap = payload[:ldap].squeeze(' ')
         binds = payload[:binds].to_a.inspect if payload[:binds]
 
         if odd?
@@ -27,6 +28,7 @@ module ROM
       def odd?
         @odd_or_even = !odd_or_even
       end
+
     end
 
     RailsLogSubscriber.attach_to(:rom)

@@ -37,7 +37,8 @@ module ROM
 
         @logger = options.fetch(:logger, Logger.new($stdout))
 
-        LDAP.load_extensions(type) if LDAP.available_extension?(type)
+        require "rom/ldap/directory/vendors/#{type}"
+        extend LDAP.const_get(Inflector.camelize(type))
       end
 
       include Root

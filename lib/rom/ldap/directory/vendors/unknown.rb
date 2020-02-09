@@ -1,25 +1,22 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
-    #
-    # Apple Open Directory Extension
-    #
-    module OpenDirectory
-
+    # @api private
+    module Unknown
       # @return [String]
       #
       # @api public
       def vendor_name
-        root.first('vendorName')
+        'Unknown'
       end
 
       # @return [String]
       #
       # @api public
       def vendor_version
-        root.first('vendorVersion')
+        'Unknown'
       end
     end
-
-    Directory.include OpenDirectory
   end
 end
