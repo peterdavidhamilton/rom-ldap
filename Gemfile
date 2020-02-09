@@ -13,11 +13,13 @@ end
 
 group :development do
   gem 'awesome_print'
-  gem 'dry-monitor'
-  gem 'rouge' # WIP bin/ldap_logger.rb
   gem 'pry', platforms: %i[jruby rbx]
   gem 'pry-byebug', platforms: :mri
   gem 'yard-junk'
+  gem 'rubocop-performance'
+
+  gem 'dry-monitor'         # @see bin/console
+  gem 'rouge'               # @see lib/dry/monitor/ldap/logger.rb
 end
 
 group :test do

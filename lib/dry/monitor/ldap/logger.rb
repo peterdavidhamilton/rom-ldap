@@ -11,17 +11,16 @@ module Dry
         extend Dry::Core::Extensions
         extend Dry::Configurable
 
-        # register_extension(:default_colorizer) do
-        #   require_relative './colorizers/default'
+        register_extension(:default_colorizer) do
+          require_relative './colorizers/default'
 
-        #   def colorizer
-        #     @colorizer ||= Colorizers::Default.new(config.theme)
-        #   end
-        # end
+          def colorizer
+            @colorizer ||= Colorizers::Default.new(config.theme)
+          end
+        end
 
         register_extension(:rouge_colorizer) do
-          # require_relative './colorizers/rouge'
-          require_relative './ldap_lexer'
+          require_relative './colorizers/rouge'
 
           def colorizer
             @colorizer ||= Colorizers::Rouge.new(config.theme)
@@ -35,7 +34,7 @@ module Dry
         attr_reader :logger
         attr_reader :template
 
-        # load_extensions(:default_colorizer)
+        load_extensions(:default_colorizer)
         load_extensions(:rouge_colorizer)
 
         def initialize(logger, config = self.class.config)
