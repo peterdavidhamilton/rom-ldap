@@ -2,6 +2,7 @@ module ROM
   module LDAP
     module Commands
       class Update < ROM::Commands::Update
+
         adapter :ldap
 
         use :schema
@@ -25,6 +26,7 @@ module ROM
         def update(*args)
           relation.update(*args)
         end
+
       end
     end
   end

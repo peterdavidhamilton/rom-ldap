@@ -10,6 +10,7 @@ require 'rom/ldap/transaction'
 module ROM
   module LDAP
     class Relation < ROM::Relation
+
       adapter :ldap
 
       include LDAP
@@ -17,19 +18,42 @@ module ROM
       include Writing
       include Exporting
 
+      # @!method self.base
+      #   Per relation override for the search base.
+      #
+      #   @overload base
+      #     Return search base value
+      #     @return [String]
+      #
+      #   @overload base(value)
+      #     Set search base value
+      defines :base
+
+      # @!method self.branches
+      #   Alternative search bases by name.
+      #
+      #   @overload branches
+      #     Return hash of search branches.
+      #     @return [Hash]
+      #
+      #   @overload branches(value)
+      #     Set hash of search branches.
+      defines :branches
+      branches EMPTY_HASH
+
       extend Notifications::Listener
 
-      # Set dataset search base value to be the default or class specific.
       subscribe('configuration.relations.schema.set', adapter: :ldap) do |event|
         relation = event[:relation]
-        relation.dataset { with(base: relation.base || directory.base) }
+        relation.dataset do
+          # @return [Dataset]
+          #
+          # @override Dataset#base
+          #
+          # Set dataset search base using either class-level value or gateway config.
+          with(base: relation.base || directory.base)
+        end
       end
-
-
-      defines :base
-      defines :branches
-
-      branches EMPTY_HASH
 
       schema_class      LDAP::Schema
       schema_attr_class LDAP::Attribute
@@ -38,7 +62,7 @@ module ROM
 
       forward(*Dataset.dsl)
 
-      # Fallsback to :entry_dn operational value.
+      # Fallsback to 'entrydn' operational value.
       #
       # @return [Symbol]
       #
@@ -49,10 +73,9 @@ module ROM
         if attribute
           attribute.alias || attribute.name
         else
-          :entry_dn
+          DEFAULT_PK
         end
       end
-
 
       # Expose the search base currently in use.
       #
@@ -84,7 +107,6 @@ module ROM
         associations[name].call
       end
 
-
       # LDAP Transactions (LDAPTXN) is an experimental RFC.
       # The latest revision can be found at http://tools.ietf.org/rfc/rfc5805.txt
       #
@@ -98,6 +120,13 @@ module ROM
       def transaction(opts = EMPTY_OPTS, &block)
         Transaction.new(dataset.directory).run(opts, &block)
       end
+
+      #
+      # @api private
+      # def join(source_table, join_keys)
+      #   binding.pry
+      #   __registry__[source_table].where(join_keys)
+      # end
 
     end
   end

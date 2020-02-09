@@ -4,6 +4,7 @@ require 'rom/initializer'
 module ROM
   module LDAP
     class Schema
+
       #
       # ATTRIBUTE TYPE
       #
@@ -12,31 +13,31 @@ module ROM
       #
       # The components of an attribute type definition include:
       #
-      # - An OID used to uniquely identify the attribute type.
-      # - A set of zero or more names that can be used to more easily reference the attribute type.
-      # - An optional equality matching rule that specifies how equality matching
-      #   should be performed on values of that attribute.
-      #   If no equality matching rule is specified, then the default equality rule
-      #   for the associated attribute syntax will be used.
-      #   If the associated syntax doesn't have a default equality matching rule,
-      #   then equality operations will not be allowed for that attribute.
-      # - An optional ordering matching rule that specifies how ordering operations
-      #   should be performed on values of that attribute.
-      #   If no ordering matching rule is specified, then the default ordering rule
-      #   for the associated attribute syntax will be used.
-      #   If the associated syntax doesn't have a default ordering matching rule,
-      #   then ordering operations will not be allowed for that attribute.
-      # - An optional substring matching rule that specifies how substring matching
-      #   should be performed on values of that attribute.
-      #   If no substring matching rule is specified, then the default substring rule
-      #   for the associated attribute syntax will be used.
-      #   If the associated syntax doesn't have a default substring matching rule,
-      #   then substring operations will not be allowed for that attribute.
-      # - An optional syntax OID that specifies the syntax for values of the attribute.
-      #   If no syntax is specified, then it will default to the directory string syntax.
-      # - A flag that indicates whether the attribute is allowed to have multiple values.
-      # - An optional attribute usage string indicating the context in which the attribute is to be used.
-      # - An optional flag that indicates whether the attribute can be modified by external clients.
+      #     - An OID used to uniquely identify the attribute type.
+      #     - A set of zero or more names that can be used to more easily reference the attribute type.
+      #     - An optional equality matching rule that specifies how equality matching
+      #       should be performed on values of that attribute.
+      #       If no equality matching rule is specified, then the default equality rule
+      #       for the associated attribute syntax will be used.
+      #       If the associated syntax doesn't have a default equality matching rule,
+      #       then equality operations will not be allowed for that attribute.
+      #     - An optional ordering matching rule that specifies how ordering operations
+      #       should be performed on values of that attribute.
+      #       If no ordering matching rule is specified, then the default ordering rule
+      #       for the associated attribute syntax will be used.
+      #       If the associated syntax doesn't have a default ordering matching rule,
+      #       then ordering operations will not be allowed for that attribute.
+      #     - An optional substring matching rule that specifies how substring matching
+      #       should be performed on values of that attribute.
+      #       If no substring matching rule is specified, then the default substring rule
+      #       for the associated attribute syntax will be used.
+      #       If the associated syntax doesn't have a default substring matching rule,
+      #       then substring operations will not be allowed for that attribute.
+      #     - An optional syntax OID that specifies the syntax for values of the attribute.
+      #       If no syntax is specified, then it will default to the directory string syntax.
+      #     - A flag that indicates whether the attribute is allowed to have multiple values.
+      #     - An optional attribute usage string indicating the context in which the attribute is to be used.
+      #     - An optional flag that indicates whether the attribute can be modified by external clients.
       #
       # @see Directory.attributes
       #
@@ -46,6 +47,7 @@ module ROM
       #
       # @api private
       class TypeBuilder
+
         extend Initializer
 
         param :attributes
@@ -65,7 +67,7 @@ module ROM
             **attribute,
             source:   schema,
             name:     attribute_name,
-            read:     read_type.meta(oid: attribute[:oid]),
+            read:     read_type.meta(oid: attribute[:oid])
           )
         end
 
@@ -121,7 +123,9 @@ module ROM
             'String'
           end
         end
+
       end
+
     end
   end
 end

@@ -4,13 +4,14 @@ require 'rom/initializer'
 require 'rom/support/memoizable'
 require 'rom/ldap/functions'
 
-
 module ROM
   module LDAP
     class Directory
+
       # A Hash-like object wrapping the DN and attributes returned by the server.
-      #   Contains the canonical attributes hash and a formatted version.
-      #
+      # Contains the canonical attributes hash and a formatted version.
+      # BER format converted to primitive String ensures clean output in #to_yaml.
+      # Accessed when iterating over dataset during #modify and #delete.
       # Exposes methods #fetch, #first, #each_value and #include?.
       # All other method calls are forwarded to the formatted tuple.
       #
@@ -22,19 +23,26 @@ module ROM
         extend Initializer
         extend Dry::Core::Cache
 
+        # Uses Dry::Equalizer
+        # @!parse
+        #   include Dry::Equalizer
         include Dry::Equalizer(:dn, :attributes, :canonical, :formatted)
+
         include Memoizable
 
         # @see Dataset::Persistence
         #
-        # BER format converted to primitive String
-        # Accessed when iterating over dataset during #modify and #delete
+        # @!attribute [r] dn
+        #   @return [String] Distinguished Name
         #
+        #   @api public
         param :dn, proc(&:to_s), type: Types::Strict::String
 
-        # Array of Array of Strings
+        # @!attribute [r] attributes
+        #   @return [Array<Array>]
+        #
+        #   @api private
         param :attributes, type: Types::Strict::Array, reader: :private
-
 
         # Retrieve values for a given attribute.
         #
@@ -44,7 +52,6 @@ module ROM
         #
         # @param key [String, Symbol]
         #
-        # @api public
         def fetch(key)
           formatted.fetch(rename(key), canonical[key])
         end
@@ -58,7 +65,6 @@ module ROM
         #
         # @return [String]
         #
-        # @api public
         def first(key)
           fetch(key)&.first
         end
@@ -72,11 +78,9 @@ module ROM
         #   entry.each_value(:object_class, &:to_sym)
         #   entry.each_value(:object_class) { |o| o.to_sym }
         #
-        # @api public
         def each_value(key, &block)
           fetch(key).map(&block)
         end
-
 
         # Mostly used by the test suite.
         #
@@ -86,15 +90,13 @@ module ROM
         #
         # @param tuple [Hash] keys and array of values
         #
-        # @return [TrueClass]
+        # @return [TrueClass, FalseClass]
         #
-        # @api public
         def include?(tuple)
           tuple.flat_map { |attr, vals| vals.map { |v| fetch(attr).include?(v) } }.all?
         rescue NoMethodError
           false
         end
-
 
         # Compatibility method with Ruby < 2.5
         #
@@ -102,14 +104,11 @@ module ROM
         #
         # @return [Hash]
         #
-        # @api public
         def slice(*keys)
-          formatted.select { |k,v| keys.include?(k) }
+          formatted.select { |k, _v| keys.include?(k) }
         end
 
-
         # Defer to enumerable hash methods before entry values.
-        #
         #
         def method_missing(meth, *args, &block)
           formatted.send(meth, *args, &block) if formatted.respond_to?(meth) || super
@@ -121,13 +120,13 @@ module ROM
           %(#<#{self.class} #{dn.empty? ? 'rootDSE' : dn} />).freeze
         end
 
-
         private
 
         # @param meth [Symbol]
         #
         # @return [TrueClass, FalseClass]
         #
+        # @api private
         def respond_to_missing?(meth, include_private = false)
           formatted.respond_to?(meth) || super
         end
@@ -143,6 +142,7 @@ module ROM
 
         # Convert keys of the canonical tuple using the chosen formatting proc.
         #
+        # @api private
         def formatted
           Functions[:map_keys, LDAP.formatter][canonical]
         end
@@ -164,8 +164,9 @@ module ROM
         #
         # @return [Hash] canonical camelCase keys ordered alphabetically
         #
-        # Dataset#export
+        # @see Dataset#export
         #
+        # @api private
         def canonical
           stringify_keys[stringify_values[with_dn]]
         end
@@ -189,7 +190,9 @@ module ROM
         end
 
         memoize :canonical, :formatted
+
       end
+
     end
   end
 end

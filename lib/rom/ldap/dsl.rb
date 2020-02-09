@@ -1,14 +1,13 @@
 require 'concurrent/map'
 require 'rom/support/inflector'
 require 'rom/constants'
-
 require 'rom/ldap/types'
-require 'rom/ldap/parsers/filter_abstracter'
 
 module ROM
   module LDAP
     # @api private
     class DSL < BasicObject
+
       # @!attribute [r] schema
       #   @return [LDAP::Schema]
       attr_reader :schema
@@ -37,17 +36,6 @@ module ROM
         else
           [result]
         end
-      end
-
-      # Parse a raw query to AST.
-      #
-      # @param [String] value
-      #
-      # @return [AST]
-      #
-      # @api public
-      def `(value)
-        Parsers::FilterAbstracter.new(value, schemas: EMPTY_ARRAY).call
       end
 
       # @api private
@@ -80,6 +68,7 @@ module ROM
           end
         end
       end
+
     end
   end
 end

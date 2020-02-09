@@ -1,14 +1,14 @@
-require 'rom/ldap/parsers/ast_recompiler'
-require 'rom/ldap/parsers/filter_abstracter'
+require 'rom/ldap/parsers/abstract_syntax'
+require 'rom/ldap/parsers/filter_syntax'
 
 module ROM
   module LDAP
     class Dataset
+
       # Parsing Formats
       #
       # @api public
       module Conversion
-
         # Extends the class with filter abstraction behavior.
         #
         # @api private
@@ -16,25 +16,11 @@ module ROM
           klass.class_eval do
             extend Dry::Core::ClassAttributes
 
-            defines :ast_class
             defines :filter_class
+            filter_class Parsers::FilterSyntax
 
-            ast_class    Parsers::FilterAbstracter
-            filter_class Parsers::ASTRecompiler
-          end
-
-          # @return [Parsers::Rfc2254Abstracter]
-          #
-          # @api public
-          def filter_to_ast
-            self.class.ast_class
-          end
-
-          # @return [Parsers::ASTRecompiler]
-          #
-          # @api public
-          def ast_to_filter
-            self.class.filter_class
+            defines :ast_class
+            ast_class Parsers::AbstractSyntax
           end
         end
 
@@ -44,13 +30,13 @@ module ROM
         #
         # @api private
         def to_filter
-          ast_to_filter.new(to_ast, schemas: directory.attribute_types).call
+          self.class.ast_class.new(to_ast, directory.attribute_types).call.to_filter
         end
 
         # Combine original relation dataset name (LDAP filter string)
         #   with search criteria (AST).
         #
-        # @return [String]
+        # @return [Array]
         #
         # @api private
         def to_ast
@@ -65,10 +51,10 @@ module ROM
         #
         # @api private
         def source_ast
-          filter_to_ast.new(name, schemas: directory.attribute_types).call
+          self.class.filter_class.new(name, directory.attribute_types).call
         end
-
       end
+
     end
   end
 end

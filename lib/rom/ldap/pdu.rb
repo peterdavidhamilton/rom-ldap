@@ -6,6 +6,8 @@ module ROM
   module LDAP
     # @see PDU
     #
+    # @return [Array<Symbol>]
+    #
     SUCCESS_CODES = %i[
       success
       time_limit_exceeded
@@ -16,10 +18,11 @@ module ROM
       sasl_bind_in_progress
     ].freeze
 
-
     # LDAP Message Protocol Data Unit (PDU)
     #
+    # @api private
     class PDU
+
       extend Initializer
 
       param :message_id, proc(&:to_i), reader: true, type: Types::Strict::Integer
@@ -43,7 +46,6 @@ module ROM
       end
 
       #
-      #
       # @return [String]
       #
       def matched_dn
@@ -59,19 +61,17 @@ module ROM
         tag[2]
       end
 
-
       def search_referrals
         return unless search_referral?
+
         tag[3] || EMPTY_ARRAY
       end
 
-
       def result_server_sasl_creds
         return unless bind_result? && gteq4?
+
         tag[3]
       end
-
-
 
       # @return [Array] => [version, username, password]
       #
@@ -79,29 +79,27 @@ module ROM
       def bind_result
         return unless bind_result?
         raise ResponseTypeInvalidError, 'Invalid bind_result' unless gteq_3?
+
         tag
       end
-
 
       #
       # @return [OpenStruct] => :version, :name, :authentication
       #
       def bind_parameters
         return unless bind_request?
-binding.pry
+
         s = ::OpenStruct.new
         s.version, s.name, s.authentication = tag
         s
       end
 
-
-
       #
-      # @return [OpenStruct,Nil] => :version, :name, :authentication
+      # @return [OpenStruct, NilClass] => :version, :name, :authentication
       #
       def search_parameters
         return unless search_request?
-binding.pry
+
         s = ::OpenStruct.new
         s.base_object,
         s.scope,
@@ -118,31 +116,31 @@ binding.pry
       #
       # @example => "No attribute with the name false exists in the server's schema"
       #
-      # @return [String,Nil]
+      # @return [String, NilClass]
       #
       def extended_response
-        raise ResponseTypeInvalidError, "Invalid extended_response" unless gteq_3?
+        raise ResponseTypeInvalidError, 'Invalid extended_response' unless gteq_3?
+
         tag[3] if extended_response?
       end
 
       # ["dn", [ entry... ]]
       #
-      # @return [Array,Nil]
+      # @return [Array, NilClass]
       #
       def search_entry
-        raise ResponseTypeInvalidError, "Invalid search_entry" unless gteq_2?
+        raise ResponseTypeInvalidError, 'Invalid search_entry' unless gteq_2?
+
         tag if search_result?
       end
 
-
-
       # RFC-2251, an LDAP 'control' is a sequence of tuples, each consisting of
-      # - an OID
-      # - a boolean criticality flag defaulting FALSE
-      # - and an optional Octet String
+      #   - an OID
+      #   - a boolean criticality flag defaulting FALSE
+      #   - and an optional Octet String
       #
-      # If only two fields are given, the second one may be either criticality or data, since criticality has a default value.
-      # RFC-2696 is a good example.
+      # If only two fields are given, the second one may be either criticality
+      # or data, since criticality has a default value. RFC-2696 is a good example.
       #
       # @see Connection::Read#search
       #
@@ -156,9 +154,7 @@ binding.pry
         end
       end
 
-
       # logging =======================  #
-
 
       # First item from responses.yaml
       #
@@ -188,7 +184,6 @@ binding.pry
         detailed_response[2]
       end
 
-
       # predicates =======================  #
 
       # @return [TrueClass, FalseClass]
@@ -205,9 +200,9 @@ binding.pry
         pdu_type == :bind_request
       end
 
-      # @see https://tools.ietf.org/html/rfc4511#section-4.2.2
-      #
       # A successful operation is indicated by a BindResponse with a resultCode set to success.
+      #
+      # @see https://tools.ietf.org/html/rfc4511#section-4.2.2
       #
       # @return [TrueClass, FalseClass]
       #
@@ -251,31 +246,25 @@ binding.pry
         !success?
       end
 
-
       # conversion =======================  #
 
       # @return [Symbol]
       #
       def pdu_type
-        # BER.lookup(:response, app_tag) || raise(ResponseTypeInvalidError, "Unknown pdu_type: #{app_tag}")
         BER.fetch(:response, app_tag) || raise(ResponseTypeInvalidError, "Unknown pdu_type: #{app_tag}")
       end
 
       # @return [Symbol]
       #
       def result_code_symbol
-        # BER.lookup(:result, result_code)
         BER.fetch(:result, result_code)
       end
-
 
       private
 
       def detailed_response
         RESPONSES[result_code_symbol]
       end
-
-
 
       # @return [TrueClass, FalseClass]
       #

@@ -11,6 +11,5 @@ module ROM
     RESPONSES_PATH = Pathname(__dir__).join('../../../config/responses.yml').realpath.freeze
 
     RESPONSES = ::YAML.load_file(RESPONSES_PATH).freeze
-
   end
 end

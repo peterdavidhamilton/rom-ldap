@@ -1,8 +1,8 @@
 module ROM
   module LDAP
     class Relation < ROM::Relation
-      module Reading
 
+      module Reading
         # Specify an alternative search base.
         #
         # @example
@@ -41,14 +41,13 @@ module ROM
           with_base(self.class.branches[key])
         end
 
-
         # Remove additional search criteria and return to initial filter.
         #
         # @return [Relation]
         #
         # @api public
         def unfiltered
-          new(dataset.unfiltered)
+          new(dataset.with(criteria: EMPTY_ARRAY))
         end
 
         # Include internal operational attributes in the tuples.
@@ -129,7 +128,6 @@ module ROM
         end
 
         # Count the number of entries in the dataset.
-        #   Unrestricted by the gateway search limit.
         #
         # @return [Integer]
         #
@@ -172,10 +170,10 @@ module ROM
         # Find tuples by primary_key which defaults to :entry_dn
         # Method is required by commands.
         #
-        # @param pks [Integer, String] single values
+        # @param pks [Integer, String]
         #
         # @example
-        #   relation.by_pk(1001, 1002)
+        #   relation.by_pk(1001, 1002, 1003, 1004)
         #   relation.by_pk('uid=test1,ou=users,dc=example,dc=com')
         #
         # @return [Relation]
@@ -227,31 +225,29 @@ module ROM
         #
         # Orders the dataset by a given attribute using the coerced value.
         #
-        # @see https://tools.ietf.org/html/rfc2891
-        #
-        # SortResult ::= SEQUENCE {
-        #     sortResult  ENUMERATED {
-        #        success                   (0), -- results are sorted
-        #        operationsError           (1), -- server internal failure
-        #        timeLimitExceeded         (3), -- timelimit reached before
-        #                                       -- sorting was completed
-        #        strongAuthRequired        (8), -- refused to return sorted
-        #                                       -- results via insecure
-        #                                       -- protocol
-        #        adminLimitExceeded       (11), -- too many matching entries
-        #                                       -- for the server to sort
-        #        noSuchAttribute          (16), -- unrecognized attribute
-        #                                       -- type in sort key
-        #        inappropriateMatching    (18), -- unrecognized or inappro-
-        #                                       -- priate matching rule in
-        #                                       -- sort key
-        #        insufficientAccessRights (50), -- refused to return sorted
-        #                                       -- results to this client
-        #        busy                     (51), -- too busy to process
-        #        unwillingToPerform       (53), -- unable to sort
-        #        other                    (80)
-        #        },
-        #     attributeType [0] AttributeType OPTIONAL }
+        #       SortResult ::= SEQUENCE {
+        #           sortResult  ENUMERATED {
+        #              success                   (0), -- results are sorted
+        #              operationsError           (1), -- server internal failure
+        #              timeLimitExceeded         (3), -- timelimit reached before
+        #                                             -- sorting was completed
+        #              strongAuthRequired        (8), -- refused to return sorted
+        #                                             -- results via insecure
+        #                                             -- protocol
+        #              adminLimitExceeded       (11), -- too many matching entries
+        #                                             -- for the server to sort
+        #              noSuchAttribute          (16), -- unrecognized attribute
+        #                                             -- type in sort key
+        #              inappropriateMatching    (18), -- unrecognized or inappro-
+        #                                             -- priate matching rule in
+        #                                             -- sort key
+        #              insufficientAccessRights (50), -- refused to return sorted
+        #                                             -- results to this client
+        #              busy                     (51), -- too busy to process
+        #              unwillingToPerform       (53), -- unable to sort
+        #              other                    (80)
+        #              },
+        #           attributeType [0] AttributeType OPTIONAL }
         #
         # @param attribute [Symbol]
         #
@@ -265,16 +261,11 @@ module ROM
         #
         # @return [Relation]
         #
+        # @see https://tools.ietf.org/html/rfc2891
+        #
         # @api public
         def order(*attribute)
           new(dataset.with(sort_attrs: attribute))
-
-          # Move this inside the Dataset so it is always a Dataset class never an Array
-          # if dataset.directory.sortable?
-          #   new(dataset.with(sort_attrs: dataset.map_attribute(attribute)))
-          # else
-          #   new(dataset.sort_by { |tuple| output_schema[tuple][attribute] || EMPTY_ARRAY })
-          # end
         end
 
         # Reverses the dataset.
@@ -311,7 +302,6 @@ module ROM
         #
         # @api public
         def random
-          # new(dataset.sort_by { rand })
           new(dataset.with(random: true))
         end
 
@@ -363,35 +353,8 @@ module ROM
           end
         end
 
-
-        # List values of the "member" attribute for a group.
-        #
-        # @param [String] dn Distinguished name.
-        #
-        # @return [Array<String>]
-        #
-        # @api public
-        def members_of_group(dn)
-          with(auto_struct: false).by_pk(dn).list(:member)
-        end
-
-
-        # Requires attribute to respond to #qualified
-        #
-        # Qualifies all columns in a relation
-        #
-        # This method is intended to be used internally within a relation object
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def qualified
-          schema.qualified.call(self)
-        end
-
-
-
-        # Pluck value(s) from a specific attribute - unwrapped only if all are lone results
+        # Pluck value(s) from specific attribute(s)
+        #   unwrapped only if all are lone results.
         #
         # @example Single value
         #   users.pluck(:uidnumber)
@@ -404,24 +367,20 @@ module ROM
         #   users.pluck(:gidnumber, :uid)
         #   # [["1", "Jane"] ["2", "Joe"]]
         #
+        # @param names [Symbol, String, Array<String, Symbol>]
+        #
         # @return [Array<String, Array>]
         #
         # @api public
         def pluck(*names)
+          raise ArgumentError, 'no attributes provided' if names.empty?
+
           map do |entry|
-            attribute_values = entry.slice(*names).values
-
-            results =
-              if attribute_values.map(&:one?).all?
-                attribute_values.map(&:first)
-              else
-                attribute_values
-              end
-
-            results.one? ? results.first : results
+            results = values = names.map { |n| entry[n] }
+            results = values.map(&:pop) if values.map(&:one?).all?
+            results.one? ? results.pop : results
           end
         end
-
 
         # Returns tuples with popped values.
         #
@@ -429,25 +388,6 @@ module ROM
         #
         def unwrap
           new Functions[:map_array, Functions[:map_values, :pop]].call(self)
-        end
-
-
-
-        # Rename attributes in a relation
-        #
-        # This method is intended to be used internally within a relation object
-        #
-        # @example
-        #   users.rename(name: :user_name).first
-        #   # {:id => 1, :user_name => "Jane" }
-        #
-        # @param [Hash<Symbol=>Symbol>] options A name => new_name map
-        #
-        # @return [Relation]
-        #
-        # @api public
-        def rename(options)
-          schema.rename(options).(self)
         end
 
         # Select specific attributes
@@ -481,11 +421,9 @@ module ROM
         #
         # @api public
         def select(*args, &block)
-          schema.project(*args, &block).(self)
+          schema.project(*args, &block).call(self)
         end
-        alias_method :project, :select
-
-
+        alias project select
 
         # Rename attributes in a relation
         #
@@ -501,9 +439,8 @@ module ROM
         #
         # @api public
         def rename(options)
-          schema.rename(options).(self)
+          schema.rename(options).call(self)
         end
-
 
         # Append specific columns to select clause
         #
@@ -513,10 +450,10 @@ module ROM
         #
         # @api public
         def select_append(*args, &block)
-          schema.merge(schema.canonical.project(*args, &block)).(self)
+          schema.merge(schema.canonical.project(*args, &block)).call(self)
         end
-
       end
+
     end
   end
 end

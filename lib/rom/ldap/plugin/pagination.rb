@@ -12,7 +12,10 @@ module ROM
         #
         # @api public
         class Pager
+
           extend Initializer
+
+          # @!parse include Dry::Equalizer
           include Dry::Equalizer(:dataset, :options)
 
           # @!attribute [r] dataset
@@ -86,6 +89,7 @@ module ROM
           end
 
           alias limit_value per_page
+
         end
 
         # @api private

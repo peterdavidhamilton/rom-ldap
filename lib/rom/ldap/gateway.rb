@@ -11,6 +11,7 @@ module ROM
     #   and passing them to the relations.
     #
     class Gateway < ROM::Gateway
+
       adapter :ldap
 
       # @!attribute [r] directory
@@ -20,7 +21,6 @@ module ROM
       # @!attribute [r] logger
       #   @return [Object] configured gateway logger
       attr_reader :logger
-
 
       # Initialize an LDAP gateway
       #
@@ -32,7 +32,7 @@ module ROM
       #   @example
       #     ROM.container(:ldap, uri, {})
       #
-      #   @param uri [String] 'ldap://127.0.0.1:389'
+      #   @param uri [String] 'ldap://127.0.0.1:389' or nil
       #
       #   @option options :username [String] BINDDN Directory admin username.
       #
@@ -52,6 +52,7 @@ module ROM
 
         options.fetch(:extensions, EMPTY_ARRAY).each do |ext|
           next unless LDAP.available_extension?(ext)
+
           LDAP.load_extensions(ext)
         end
 
@@ -101,7 +102,7 @@ module ROM
       # @param name [String] An ldap compatible filter string.
       #   Used as the param to schema block in relation classes.
       #
-      # @return [Dataset] Scoped by base and filter.
+      # @return [Dataset] Scoped by name filter.
       #
       # @api public
       #

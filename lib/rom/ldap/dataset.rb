@@ -10,20 +10,27 @@ module ROM
     #
     # @api private
     class Dataset
+
       extend Initializer
       include Enumerable
 
-      #
+      # Directory instance
       #
       # @!attribute [r] directory
       #   @return [Directory]
       option :directory
 
-      # Defined in relation schema.
+      # LDAP filter defined in relation schema.
       #
       # @!attribute [r] name
       #   @return [String] Valid LDAP filter filter string.
       option :name, type: Types::Filter, reader: :private
+
+      # Valid Distinguished Name. A relation class value or the gateway default.
+      #
+      # @!attribute [r] base
+      #   @return [String] Set when initializing a relation
+      option :base, type: Types::DN, reader: :private, default: -> { directory.base }
 
       #
       # @!attribute [r] criteria
@@ -34,12 +41,6 @@ module ROM
       # @!attribute [r] direction
       #   @return [Symbol]
       option :direction, type: Types::Direction, reader: :private, default: -> { :asc }
-
-      # Valid Distinguished Name. A relation class value or the gateway default.
-      #
-      # @!attribute [r] base
-      #   @return [String] Set when initializing a relation
-      option :base, type: Types::DN, reader: :private, optional: true
 
       #
       # @!attribute [r] offset
@@ -57,6 +58,10 @@ module ROM
       # Attributes to return. Needs to be set to the projected schema.
       #
       option :attrs, type: Types::Strict::Array, reader: :private, optional: true
+
+      # @option :aliases [Array]
+      #
+      option :aliases, type: Types::Strict::Array, reader: :private, default: -> { EMPTY_ARRAY }
 
       # @option :sort_attrs [String,Symbol] Attribute name(s) to sort by.
       #
@@ -99,16 +104,6 @@ module ROM
         options.merge(ast: to_ast, filter: to_filter).freeze
       end
 
-      # Resets the search criteria.
-      #
-      # @return [LDAP::Dataset]
-      #
-      # @api public
-      def unfiltered
-        with(criteria: EMPTY_ARRAY)
-      end
-
-
       # Iterate over the entries return from the server.
       #
       # @return [Array <Directory::Entry>]
@@ -117,15 +112,9 @@ module ROM
       # @api public
       def each(*args, &block)
         results = paginated? ? entries[page_range] : entries
-
-        # Fix when server-side sorting not available
-        #
-        # if sort_attrs && !directory.sortable?
-        #   results = results.sort_by { |tuple| tuple[*sort_attrs] }
-        # end
-
         results = results.sort_by { rand } if random
         results = results.reverse_each if reversed?
+        results = results.map { |e| apply_aliases(e) } if aliases.any?
 
         block_given? ? results.each(*args, &block) : results.to_enum
       end
@@ -225,7 +214,6 @@ module ROM
 
       private
 
-
       # Communicate with LDAP servers.
       #   @see Connection::SearchRequest for #query keywords defintion.
       #
@@ -257,20 +245,8 @@ module ROM
         directory.canonical_attributes(sort_attrs) if sort_attrs
       end
 
-
-      # Convert formatted attribute names into canonical names.
+      # @return [Range]
       #
-      # @param attrs [Array<String, Symbol>]
-      #
-      # @return [Array<String, Symbol>]
-      #
-      # @api public
-      # def map_attributes(attrs)
-      #   directory.canonical_attributes(attrs)
-      # end
-
-
-
       # @api private
       def page_range
         offset..(offset + limit - 1)
@@ -285,6 +261,15 @@ module ROM
       def reversed?
         direction.eql?(:desc)
       end
+
+      def apply_aliases(entry)
+        Functions[:rename_keys][alias_map, entry].invert
+      end
+
+      def alias_map
+        { dn: :dn }.merge(attrs.zip(aliases).to_h)
+      end
+
     end
   end
 end

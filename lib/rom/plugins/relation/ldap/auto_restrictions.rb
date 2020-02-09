@@ -11,9 +11,9 @@ module ROM
         #
         #     config.plugin(:ldap, relations: :auto_restrictions)
         #
-        #     config.relation('(cn=*)', as: :users) do
-        #       schema(infer: true) do
-        #         attribute :cn, Types::Strings.meta(index: true)
+        #     config.relation(:users) do
+        #       schema('(cn=*)', infer: true) do
+        #         attribute :cn, ROM::LDAP::Types::Strings.meta(index: true)
         #       end
         #     end
         #   end

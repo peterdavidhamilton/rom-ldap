@@ -1,6 +1,7 @@
 module ROM
   module LDAP
     class Dataset
+
       module Persistence
         # Interface to Directory#add
         #
@@ -35,6 +36,7 @@ module ROM
           map { |e| directory.delete(e.dn) }
         end
       end
+
     end
   end
 end

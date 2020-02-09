@@ -1,91 +1,81 @@
-require 'rom/initializer'
+require 'ber'
 
+require 'rom/initializer'
 require 'rom/ldap/message_queue'
 require 'rom/ldap/pdu'
-
 require 'rom/ldap/socket'
-require 'rom/ldap/secure_socket'
-
 require 'rom/ldap/client/operations'
+require 'rom/ldap/client/authentication'
 
 module ROM
   module LDAP
     #
-    # Uses socket to read and write
+    # Uses socket to read and write using BER encoding.
     #
+    # @api private
     class Client
+
       using ::BER
 
       extend Initializer
 
-      # host:port / path
-      param :envs, reader: :private, type: Types::Strict::Hash
+      # @!attribute [r] host
+      #   @return [String]
+      option :host, reader: :private, type: Types::Strict::String
 
-      # username / password
-      param :auth, reader: :private, type: Types::Strict::Hash, optional: true
-
-      # cert / key ...
-      param :ssl, reader: :private, type: Types::Strict::Hash, optional: true
-
+      option :port, reader: :private, type: Types::Strict::Integer
+      option :path, reader: :private, type: Types::Strict::String
+      option :auth, reader: :private, type: Types::Strict::Hash, optional: true
+      option :ssl,  reader: :private, type: Types::Strict::Hash, optional: true
       option :queue, default: -> { MessageQueue }
 
       include Operations
+      include Authentication
 
       attr_reader :socket
 
-
-      # @return [::Socket]
+      # Create connection (encrypted) and authenticate.
       #
+      # @yield [Socket]
+      #
+      # @raise [ConfigError]
       def open
         unless alive?
-          @socket = Socket.new(envs).call
+          @socket = Socket.new(options).call
 
-          if auth
-            raise ConfigError, "Authentication failed for #{auth[:username]}" unless bind(auth).success?
-          end
-
+          # tls
           if ssl
-            # binding.pry
-            @socket = SecureSocket.new(@socket, **ssl)
-
-            # tls_options = {
-            #   cert:    OpenSSL::X509::Certificate.new(File.open(ssl[:cert])),
-            #   key:     OpenSSL::PKey::RSA.new(File.open(ssl[:key])),
-            #   # cert:    OpenSSL::X509::Certificate.new(File.open('server.pem')),
-            #   # key:     OpenSSL::PKey::RSA.new(File.open('server-key.pem')),
-            #   ca_file: File.open('ca.pem')
-            #   # verify_mode: OpenSSL::SSL::VERIFY_NONE
-            # }
-
-            # rescue OpenSSL::X509::CertificateError
-
-            # ctx = OpenSSL::SSL::SSLContext.new
-            # ctx.set_params(tls_options) unless ssl.empty?
-
-            # @socket = OpenSSL::SSL::SSLSocket.new(@socket, ctx)
-
-            # @socket.extend(GetbyteForSSLSocket) unless @socket.respond_to?(:getbyte)
-            # @socket.extend(FixSSLSocketSyncClose)
+            start_tls
+            sasl_bind # (mechanism:, credentials:, challenge:)
           end
+
+          # simple
+          if auth && bind(auth).failure?
+            raise ConfigError, "Authentication failed for #{auth[:username]}"
+          end
+
         end
 
         yield(@socket)
       end
 
-
-
+      # @return [TrueClass, FalseClass]
+      #
       def closed?
         socket.nil? || (socket.is_a?(::Socket) && socket.closed?)
       end
 
-
+      # @return [NilClass]
+      #
       def close
         return if socket.nil?
+
         socket.close
         @socket = nil
       end
 
-
+      # @return [TrueClass, FalseClass]
+      #
       def alive?
         return false if closed?
 
@@ -98,9 +88,6 @@ module ROM
         false
       end
 
-
-
-
       private
 
       # @see BER
@@ -108,35 +95,25 @@ module ROM
       # @param symbol [Symbol]
       #
       # @return [Integer]
-      #
-      # @api private
       def pdu_lookup(symbol)
         ::BER.fetch(:response, symbol)
       end
 
-
-
       # Read from socket and wrap in PDU class.
       #
       # @return [PDU, NilClass]
-      #
-      # @api private
       def read
         open do |socket|
-          return unless ber_object = socket.read_ber
+          return unless (ber_object = socket.read_ber)
 
           PDU.new(*ber_object)
         end
-      rescue Errno::ECONNRESET => e
+      rescue Errno::ECONNRESET
         close
         retry
       end
 
-
-
       # Write to socket.
-      #
-      #
       #
       # @api private
       def write(request, controls = nil, message_id)
@@ -145,22 +122,22 @@ module ROM
           socket.write(packet)
           socket.flush
         end
-      rescue Errno::EPIPE, IOError => e
+      rescue Errno::EPIPE, IOError
         close
         retry
       end
 
-
-
-
+      # @return [PDU]
+      #
       # @api private
       def from_queue(message_id)
-        if pdu = queue[message_id].shift
+        if (pdu = queue[message_id].shift)
           return pdu
         end
 
-        while pdu = read
+        while (pdu = read)
           return pdu if pdu.message_id.eql?(message_id)
+
           queue[pdu.message_id].push(pdu)
           next
         end
@@ -168,19 +145,13 @@ module ROM
         pdu
       end
 
-
-
       # Increment the message counter.
       #
       # @return [Integer]
-      #
-      # @api private
       def next_msgid
         @msgid ||= 0
         @msgid += 1
       end
-
-
 
       # Persist changes to the server and return response object.
       # Enable stdout debugging with DEBUG=y.
@@ -188,8 +159,6 @@ module ROM
       # @return [PDU]
       #
       # @raise [ResponseMissingOrInvalidError]
-      #
-      # @api private
       def submit(type, request, controls = nil)
         message_id = next_msgid
 

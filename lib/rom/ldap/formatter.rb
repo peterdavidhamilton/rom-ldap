@@ -1,6 +1,5 @@
 module ROM
   module LDAP
-
     # Proc that returns input value.
     #
     DEFAULT_FORMATTER = ->(v) { v }
@@ -21,6 +20,5 @@ module ROM
     def self.formatter
       @formatter || DEFAULT_FORMATTER
     end
-
   end
 end

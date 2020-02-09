@@ -6,7 +6,6 @@ module ROM
         #
         # @api public
         module ActiveDirectory
-
           ACCOUNT_DISABLED               = 2
           ACCOUNT_TEMP_DUPLICATE         = 256
           ACCOUNT_NORMAL                 = 512
@@ -40,11 +39,12 @@ module ROM
           USE_DES_KEY_ONLY               = 2_097_152
           WORKSTATION_TRUST_ACCOUNT      = 4096
 
-          RULE_BIT = ROM::LDAP::CONTROLS[:matching_rule_bit_and]
+          RULE_BIT = ROM::LDAP::OID[:matching_rule_bit_and]
+          RULE_CHAIN = ROM::LDAP::OID[:matching_rule_in_chain]
 
           FLAG   = "systemFlags:#{RULE_BIT}:".freeze
           GROUP  = "groupType:#{RULE_BIT}:".freeze
-          MEMBER = "memberOf:#{ROM::LDAP::CONTROLS[:matching_rule_in_chain]}:".freeze
+          MEMBER = "memberOf:#{RULE_CHAIN}:".freeze
           OPTS   = "options:#{RULE_BIT}:".freeze
           UAC    = "userAccountControl:#{RULE_BIT}:".freeze
 
@@ -58,15 +58,12 @@ module ROM
             equal('anr' => value)
           end
 
-    # All DC's and their versions
-    # '(&(&(&(&(samAccountType=805306369)(primaryGroupId=516))(objectCategory=computer)(operatingSystem=*))))'
-
-
+          # All DC's and their versions
+          # '(&(&(&(&(samAccountType=805306369)(primaryGroupId=516))(objectCategory=computer)(operatingSystem=*))))'
 
           #
           # Accounts
           #
-
 
           # @return [Relation]
           #

@@ -2,6 +2,7 @@ module ROM
   module LDAP
     module Commands
       class Create < ROM::Commands::Create
+
         adapter :ldap
 
         use :schema
@@ -17,10 +18,6 @@ module ROM
         # @api public
         def execute(tuples)
           Array([tuples]).flatten(1).map do |tuple|
-
-            # filter through input schema
-            # attributes = input[tuple]
-
             relation.insert(tuple)
           end
         end
@@ -35,6 +32,7 @@ module ROM
         def finalize(entries, *)
           entries.map { |t| relation.output_schema[t] }
         end
+
       end
     end
   end

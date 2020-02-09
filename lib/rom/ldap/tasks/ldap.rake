@@ -6,6 +6,10 @@ require 'pry'
 
 module ROM
   module LDAP
+    #
+    # `$ ldapmodify -a -H ldap://127.0.0.1:3389 -D 'cn=Directory Manager'
+    #     -w 'topsecret' -c -v -f spec/fixtures/ldif/examples/users.ldif`
+    #
     module RakeSupport
       module_function
 
@@ -38,12 +42,8 @@ module ROM
         Pathname(ENV['LDAPDIR'] || Dir.pwd)
       end
 
-      def ldappw
-        root.join('ldappw')
-      end
-
       def auth
-        ['-w', ENV['LDAPBINDPW']]
+        ['-D', ENV['LDAPBINDDN'], '-w', ENV['LDAPBINDPW']]
       end
 
       def ldapsearch
@@ -65,7 +65,13 @@ namespace :ldap do
 
   # Iterate through *.ldif files in a folder.
   #
-  # 'ldap:modify[/schema]'
+  # @example
+  #
+  #   $ LDAPURI=ldap://127.0.0.1:3389 \
+  #     LDAPBINDDN='cn=Directory Manager' \
+  #     LDAPBINDPW=topsecret \
+  #     LDAPDIR=./spec/fixtures/ldif \
+  #     rake ldap:modify
   #
   desc 'Use ldapmodify'
   task :modify, [:dir] => :env do |_t, args|

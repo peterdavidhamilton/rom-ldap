@@ -19,7 +19,6 @@ module ROM
         RestrictionDSL.new(self).call(&block)
       end
 
-
       # Create a new relation based on the schema definition
       #
       # @param relation [Relation] The source relation
@@ -28,18 +27,8 @@ module ROM
       #
       # @api public
       def call(relation)
-        relation.new(relation.dataset.with(attrs: map(&:name)), schema: self)
-      end
-
-      # Return a new schema with attributes marked as qualified
-      #
-      # @param table_alias [?]
-      #
-      # @return [Schema]
-      #
-      # @api public
-      def qualified(table_alias = nil)
-        new(map { |attr| attr.qualified(table_alias) })
+        dataset = relation.dataset.with(attrs: map(&:name), aliases: map(&:alias))
+        relation.new(dataset, schema: self)
       end
 
       # Project a schema
@@ -52,7 +41,7 @@ module ROM
       # @api public
       def project(*names, &block)
         if block
-          super(*(names + ProjectionDSL.new(self).(&block)))
+          super(*(names + ProjectionDSL.new(self).call(&block)))
         else
           super
         end
@@ -114,7 +103,8 @@ module ROM
         end
       end
 
-      memoize :qualified, :project_pk, :canonical, :joined
+      memoize :project_pk, :canonical, :joined
+
     end
   end
 end

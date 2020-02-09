@@ -1,16 +1,14 @@
 module ROM
   module LDAP
     class Dataset
+
       # AST Query Interface
       #
-      # @api public
+      # @api private
       module DSL
-
         # Invert the whole query
         #
         # @return [Dataset]
-        #
-        # @api public
         def inverse
           with(criteria: [:con_not, criteria])
         end
@@ -18,13 +16,13 @@ module ROM
         # Equality filter aliased as 'where'.
         #
         # @example
-        #   relation.where(uid: 'pete')
-        #   relation.where(uid: %w[pete leanda])
-        #   relation.where(uid: 'leanda', sn: 'hamilton')
+        #   relation.where(uid: 'Pietro')
+        #   relation.where(uid: %w[Pietro Wanda])
+        #   relation.where(uid: 'Pietro', sn: 'Maximoff')
+        #
+        # @param args [Hash]
         #
         # @return [Dataset]
-        #
-        # @api public
         def equal(args)
           chain(*array_dsl(args))
         end
@@ -32,12 +30,12 @@ module ROM
         # Antonym of 'equal'
         #
         # @example
-        #   relation.unequal(uid: 'pete')
-        #   relation.unequal(uid: %w[pete leanda])
+        #   relation.unequal(uid: 'Pietro')
+        #   relation.unequal(uid: %w[Pietro Wanda])
+        #
+        # @param args [Hash]
         #
         # @return [Dataset]
-        #
-        # @api public
         def unequal(args)
           chain(:con_not, array_dsl(args))
         end
@@ -48,9 +46,9 @@ module ROM
         #   relation.present(:uid)
         #   relation.has(:mail)
         #
-        # @return [Dataset]
+        # @param attribute [Symbol]
         #
-        # @api public
+        # @return [Dataset]
         def present(attribute)
           chain(:op_eql, attribute, :wildcard)
         end
@@ -62,9 +60,9 @@ module ROM
         #   relation.missing(:uid)
         #   relation.hasnt(:mail)
         #
-        # @return [Dataset]
+        # @param attribute [Symbol]
         #
-        # @api public
+        # @return [Dataset]
         def missing(attribute)
           chain(:con_not, [:op_eql, attribute, :wildcard])
         end
@@ -72,9 +70,9 @@ module ROM
 
         # Greater than filter
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def gt(args)
           chain(:con_not, [:op_lte, *args.to_a[0]])
         end
@@ -82,9 +80,9 @@ module ROM
 
         # Less than filter
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def lt(args)
           chain(:con_not, [:op_gte, *args.to_a[0]])
         end
@@ -92,43 +90,43 @@ module ROM
 
         # Greater than or equal filter
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def gte(args)
           chain(:op_gte, *args.to_a[0])
         end
 
         # Less than or equal filter
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def lte(args)
           chain(:op_lte, *args.to_a[0])
         end
 
         # Starts with filter
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def begins(args)
           chain(*match_dsl(args, right: WILDCARD))
         end
 
         # Ends with filter
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def ends(args)
           chain(*match_dsl(args, left: WILDCARD))
         end
 
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def contains(args)
           chain(*match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
@@ -136,16 +134,16 @@ module ROM
 
         # negate #contains
         #
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def excludes(args)
           chain(:con_not, match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
 
         # @param args [Range]
         #
-        # @api public
+        # @return [Dataset]
         def within(args)
           chain(:con_and, cover_dsl(args))
         end
@@ -155,35 +153,31 @@ module ROM
         #
         # @param args [Range]
         #
-        # @api public
+        # @return [Dataset]
         def outside(args)
           chain(:con_not, [:con_and, cover_dsl(args)])
         end
 
-
-
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def binary_equal(args)
-          chain(:op_eq, *args.to_a[0])
+          chain(:op_bineq, *args.to_a[0])
         end
 
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def approx(args)
           chain(:op_prx, *args.to_a[0])
         end
 
-        # @return [Dataset]
+        # @param args [Hash]
         #
-        # @api public
+        # @return [Dataset]
         def bitwise(args)
           chain(:op_ext, *args.to_a[0])
         end
-
-
 
         private
 
@@ -196,8 +190,6 @@ module ROM
         # @param exprs [Mixed] AST built by QueryDSL
         #
         # @return [Dataset]
-        #
-        # @api private
         def chain(*exprs)
           if criteria.empty?
             with(criteria: exprs)
@@ -205,7 +197,6 @@ module ROM
             with(criteria: [:con_and, [criteria, exprs]])
           end
         end
-
 
         # Handle multiple criteria with an OR join.
         #   @see #chain for AND join.
@@ -215,21 +206,20 @@ module ROM
         # @return [Array] AST
         #
         # @example
-        #   array_dsl(sn: 'hamilton', gn: %w[leanda peter])
+        #   array_dsl(sn: 'Maximoff', gn: %w[Wanda Pietror])
         #   =>
         #       [ :con_or,
         #         [
-        #           [ :op_eql, :sn, "hamilton" ],
+        #           [ :op_eql, :sn, "Maximoff" ],
         #           [ :con_or,
         #             [
-        #               [ :op_eql, :gn, "leanda" ],
-        #               [ :op_eql, :gn, "peter" ]
+        #               [ :op_eql, :gn, "Wanda" ],
+        #               [ :op_eql, :gn, "Pietror" ]
         #             ]
         #           ]
         #         ]
         #       ]
         #
-        # @api private
         def array_dsl(args)
           expressions = args.map do |left, right|
             values = Array(right).map { |v| [:op_eql, left, escape(v)] }
@@ -246,8 +236,6 @@ module ROM
         # @param operator [Symbol] :con_or, :con_and
         #
         # @param ary [Array] [[op, left, right],[op, left, right]]
-        #
-        # @api private
         def join_dsl(operator, ary)
           ary.size >= 2 ? [operator, ary] : ary.first
         end
@@ -265,31 +253,22 @@ module ROM
         #   match_dsl(bar: 'foo', left: '*', right: '*')
         #       => [:op_eql, :bar, '*foo*']
         #
-        # @api private
         def match_dsl(args, left: EMPTY_STRING, right: EMPTY_STRING)
           expressions = args.map do |att, val|
-            values = Array(val).map { |v|
-                        value = left.to_s + escape(v) + right.to_s
-                        [:op_eql, att, value]
-                      }
+            values = Array(val).map do |v|
+              value = left.to_s + escape(v) + right.to_s
+              [:op_eql, att, value]
+            end
 
             join_dsl(:con_or, values)
           end
           join_dsl(:con_or, expressions)
-
-          # attribute, value = args.to_a[0]
-          # value = left.to_s + escape(value) + right.to_s
-          # [:op_eql, attribute, value]
         end
 
-
-        #
         #
         # @param args [Range,Array]
         #
         # @return [Array]
-        #
-        # @api private
         def cover_dsl(args)
           attribute, range = args.to_a[0]
           lower, *_, upper = range.to_a
@@ -305,11 +284,14 @@ module ROM
         #
         # "(", ")", "\", ,"/" "*", "null"
         #
-        # @api private
+        # @param value [String, Integer]
+        #
+        # @return [String]
         def escape(value)
           value.to_s.gsub(ESCAPE_REGEX) { |char| '\\' + ESCAPES[char] }
         end
       end
+
     end
   end
 end

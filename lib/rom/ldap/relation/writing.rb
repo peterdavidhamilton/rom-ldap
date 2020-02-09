@@ -1,6 +1,7 @@
 module ROM
   module LDAP
     class Relation < ROM::Relation
+
       module Writing
         # @example
         #   relation.insert(
@@ -55,6 +56,7 @@ module ROM
           dataset.delete
         end
       end
+
     end
   end
 end

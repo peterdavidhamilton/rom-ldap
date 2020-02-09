@@ -3,8 +3,10 @@ require 'rom/initializer'
 module ROM
   module LDAP
     class Schema < ROM::Schema
+
       # @api private
       class AttributesInferrer
+
         extend Initializer
 
         option :type_builder
@@ -32,7 +34,6 @@ module ROM
 
         private
 
-
         # All possible formatted Entry attribute names.
         #
         # @see Directory#query_attributes
@@ -48,7 +49,9 @@ module ROM
         def dataset_attributes(gateway, dataset)
           gateway[dataset].flat_map(&:keys).uniq.sort
         end
+
       end
+
     end
   end
 end

@@ -1,6 +1,5 @@
 require 'dry/core/cache'
 require 'rom/attribute'
-require 'rom/ldap/attribute_dsl'
 
 module ROM
   module LDAP
@@ -8,31 +7,17 @@ module ROM
     #
     # @api public
     class Attribute < ROM::Attribute
+
       extend Dry::Core::Cache
 
-      include AttributeDSL
-
       # @param args [Mixed]
+      #
       # @return [ROM::LDAP::Attribute]
       #
-      # @api private
+      # @api public
       def self.[](*args)
         fetch_or_store(args) { new(*args) }
       end
-
-      # Return a new attribute with an alias
-      #
-      # @example
-      #   users[:id].aliased(:user_id)
-      #
-      # @return [LDAP::Attribute]
-      #
-      # @api public
-      def aliased(alias_name)
-        super.with(name: name || alias_name)
-      end
-      alias_method :as, :aliased
-
 
       # Attribute definition identifies this is not a directory internal attribute
       # and values can be altered.
@@ -41,7 +26,7 @@ module ROM
       #
       # @api public
       def editable?
-        meta[:editable].eql?(true)
+        meta[:editable].equal?(true)
       end
 
       # Attribute definition identifies this attribute can not have multiple values.
@@ -89,21 +74,6 @@ module ROM
         meta[:joined].equal?(true)
       end
 
-      # Return if an attribute type is qualified
-      #
-      # @example
-      #   id = users[:id].qualify
-      #
-      #   id.qualified?
-      #   # => true
-      #
-      # @return [TrueClass, FalseClass]
-      #
-      # @api public
-      def qualified?
-        meta[:qualified].equal?(true) || meta[:qualified].is_a?(Symbol)
-      end
-
       # Return a new attribute marked as a FK
       #
       # @return [LDAP::Attribute]
@@ -127,10 +97,9 @@ module ROM
       # @return [String]
       #
       # @api public
-      def to_definition
+      def definition
         meta[:definition]
       end
-
 
       # Attribute's syntax Numeric Object Identifier
       #
@@ -157,11 +126,12 @@ module ROM
       #
       # @api public
       def to_s
-        meta[:canonical]
+        meta[:canonical] || name.to_s
       end
       alias original_name to_s
 
-
+      # @return [TrueClass, FalseClass]
+      #
       # @api public
       def indexed?
         meta[:index].equal?(true)
@@ -169,12 +139,16 @@ module ROM
 
       # Returns a new attribute marked as indexed
       #
+      # @return [LDAP::Attribute]
+      #
       # @api public
       def indexed
         meta(index: true)
       end
 
       # Return a new attribute in its canonical form
+      #
+      # @see Dataset#export
       #
       # @return [LDAP::Attribute]
       #
@@ -187,20 +161,165 @@ module ROM
         end
       end
 
-      # @todo Relevance to LDAP environment?
+      # @example
+      #   users.where { given_name.exists }
+      #   users.where { ~given_name }
       #
-      # @see Schema#qualified
-      #
-      # @return [LDAP::Attribute]
+      # @return [Array]
       #
       # @api public
-      def qualified(table_alias = nil)
-        return self if qualified? && table_alias.nil?
+      def exists
+        [:op_eql, name, :wildcard]
+      end
+      alias ~@ exists
 
-        meta(qualified: table_alias || true)
+      # @example
+      #   users.where { !given_name }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def !@
+        [:con_not, exists]
       end
 
-      memoize :joined, :canonical, :to_s
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { id.is(1) }
+      #   users.where { id == 1 }
+      #
+      #   users.where(users[:id].is(1))
+      #
+      # @return [Array]
+      #
+      # @api public
+      def is(value)
+        [:op_eql, name, value]
+      end
+      alias == is
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { id.not(1) }
+      #   users.where { id != 1 }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def not(value)
+        [:con_not, is(value)]
+      end
+      alias != not
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { uid_number.gt(101) }
+      #   users.where { uid_number > 101 }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def gt(value)
+        [:con_not, lte(value)]
+      end
+      alias > gt
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { uid_number.lt(101) }
+      #   users.where { uid_number < 101 }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def lt(value)
+        [:con_not, gte(value)]
+      end
+      alias < lt
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { uid_number.gte(101) }
+      #   users.where { uid_number >= 101 }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def gte(value)
+        [:op_gte, name, value]
+      end
+      alias >= gte
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { uid_number.lte(101) }
+      #   users.where { uid_number <= 101 }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def lte(value)
+        [:op_lte, name, value]
+      end
+      alias <= lte
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { given_name.like('peter') }
+      #   users.where { given_name =~ 'peter' }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def like(value)
+        [:op_prx, name, value]
+      end
+      alias =~ like
+
+      # @param value [Mixed]
+      #
+      # @example
+      #   users.where { given_name.not_like('peter') }
+      #   users.where { given_name !~ 'peter' }
+      #
+      # @return [Array]
+      #
+      # @api public
+      def not_like(value)
+        [:con_not, like(value)]
+      end
+      alias !~ not_like
+
+      # @param value [Mixed]
+      #
+      # @see https://ldapwiki.com/wiki/ExtensibleMatch
+      #
+      # @return [Array]
+      #
+      # @api public
+      def extensible(value)
+        [:op_ext, name, value]
+      end
+
+      # @param value [Mixed]
+      #
+      # @return [Array]
+      #
+      # @api public
+      def bitwise(value)
+        [:op_eql, name, value]
+      end
+      alias === bitwise
+
+      memoize :oid, :syntax, :joined, :canonical, :to_s
+
     end
   end
 end

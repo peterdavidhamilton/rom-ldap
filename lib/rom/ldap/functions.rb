@@ -4,16 +4,13 @@ require 'rom/support/inflector'
 
 module ROM
   module LDAP
+    # @api private
     module Functions
       extend Transproc::Registry
 
       import Transproc::Coercions
       import Transproc::ArrayTransformations
       import Transproc::HashTransformations
-
-      # import :to_string, from: Transproc::Coercions, as: :stringify
-
-
 
       # Build tuple from arguments.
       #   Translates keys into original schema names and stringify values.
@@ -24,20 +21,20 @@ module ROM
       #
       # @note Directory#add will receive a hash with key :dn
       #
-      # @api public
+      # @api private
       def self.tuplify(tuple, matrix)
         fn = t(:rename_keys, matrix) >>
              t(:map_values, t(:identify_value)) >>
-             t(:map_values, t(:stringify)) >>
-             t(:prune)
+             t(:map_values, t(:stringify)) >> t(:reject_blank)
 
         fn.call(tuple)
       end
 
       # remove keys with blank values
+      # nil values allow attribute to be deleted
       #
-      def self.prune(tuple)
-        tuple.reject { |_k, v| v.nil? or v.empty? }
+      def self.reject_blank(tuple)
+        tuple.reject { |_k, v| v&.empty? }
       end
 
       # Map from
@@ -51,72 +48,76 @@ module ROM
       #   id_value('TRUE') => true
       #   id_value('peter hamilton') => 'peter hamilton'
       #
-      # @return [Symbol,String,Boolean]
+      # @return [Mixed]
       #
-      # @api public
+      # @api private
       def self.identify_value(val)
         case val
-        when ::Symbol, ::TrueClass, ::FalseClass
+        when ::Symbol, ::TrueClass, ::FalseClass, ::NilClass
           VALUES_MAP.fetch(val, val)
         else
           VALUES_MAP.invert.fetch(val, val)
         end
       end
 
-      # Ensure tuple values are strings
+      # Ensure tuple values are strings or nil
       #
       # @param value [Mixed]
       #
-      # @return [String, Array<String>]
+      # @return [String, NilClass]
       #
-      # @api public
+      # @api private
       def self.stringify(value)
         case value
         when ::Numeric    then value.to_s
         when ::Enumerable then value.map(&:to_s)
         when ::Hash       then value.to_json
         when ::String     then value
+        else
+          value
         end
       end
 
-      def self.to_hexidecimal(value)
-        value.each_byte.map { |b| b.to_s(16) }.join #.force_encoding(Encoding::UTF_8)
-      end
-
-      def self.to_hex(values)
-        t(:map_array, t(:to_hexidecimal)).call(values)
-      end
-
-      # def self.to_decimal(value)
-      #   value.each_byte.map { |b| b.to_s(10) }.join.force_encoding(Encoding::UTF_8)
-      # end
-
-      def self.to_binary(values)
-        t(:map_array, t(:to_base64)).call(values)
-      end
-
+      # Compare Magic Bytes
+      #
       # @see https://en.wikipedia.org/wiki/List_of_file_signatures
       # @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
       # @see https://github.com/sdsykes/fastimage/blob/master/lib/fastimage.rb
       #
       # @param value [String] UTF-8 encoded
       #
-      def self.to_base64(value)
+      def self.mime_type(value)
         mime =
           case value[0, 2]
-          when "\xFF\xD8" then 'image/jpeg'
-          # when 0x89.chr + 'P'
-          when "\x89P"    then 'image/png'
-          when 'BM'       then 'image/bitmap'
-          when 'II', 'MM' then 'image/tiff'
-          # when 0xff.chr + 0xfb.chr, 'ID'
-          when "\xFF\xFBID" then 'audio/mpeg'
-          when 'WA'         then 'audio/x-wav'
+          when "\xFF\xD8".b
+            'image/jpeg'
+          when "\x89P".b
+            'image/png'
+          when 'BM'
+            'image/bitmap'
+          when 'II', 'MM'
+            'image/tiff'
+          when "\xFF\xFBID".b
+            'audio/mpeg'
+          when 'WA'
+            'audio/x-wav'
           else
             'application/octet-stream'
           end
+        to_base64(value).prepend("data:#{mime};base64,")
+      end
 
-        ::Base64.strict_encode64(value).prepend("data:#{mime};base64,")
+      # Base64 encoded string, with optional new line characters.
+      #
+      # @return [String]
+      #
+      def self.to_base64(value, strict: true)
+        if strict
+          Base64.strict_encode64(value).chomp
+        else
+          # [value].pack('m').chomp
+          Base64.encode64(value).chomp
+        end
       end
 
       #
@@ -127,33 +128,45 @@ module ROM
         Transproc::Coercions::BOOLEAN_MAP.fetch(value.to_s.downcase)
       end
 
-      # The 18-digit Active Directory timestamps,
-      # also named 'Windows NT time format','Win32 FILETIME or SYSTEMTIME' or NTFS file time.
+      # The 18-digit Active Directory timestamps, also named
+      # 'Windows NT time format','Win32 FILETIME or SYSTEMTIME' or 'NTFS file time'.
       #
       # These are used in Microsoft Active Directory for
       # pwdLastSet, accountExpires, LastLogon, LastLogonTimestamp and LastPwdSet.
       #
-      # The timestamp is the number of 100-nanoseconds intervals (1 nanosecond = one billionth of a second)
-      # since Jan 1, 1601 UTC.
-      #
-      # Milliseconds are discarded (last 7 digits of the LDAP timestamp)
+      # The number of 100-nanoseconds intervals since 12:00 A.M. January 1st, 1601 (UTC).
+      # NB:
+      #   1 nanosecond = a billionth of a second
+      #   Accurate to the nearest millisecond (7 digits)
       #
       # @see ROM::LDAP::Types::Time
+      # @see https://ldapwiki.com/wiki/Microsoft%20TIME
       #
       # @param value [String] time or integer
       #
+      # @return [Time] UTC formatted
+      #
       def self.to_time(value)
         unix_epoch_time = (Integer(value) / TEN_MILLION) - SINCE_1601
-        ::Time.at(unix_epoch_time)
+        ::Time.at(unix_epoch_time).utc
       rescue ArgumentError
         ::Time.parse(value).utc
       end
 
+      # @return [Array<String>]
+      #
+      def self.map_to_base64(values)
+        t(:map_array, t(:to_base64)).call(values)
+      end
 
+      # @return [Array<Integer>]
+      #
       def self.map_to_integers(tuples)
         t(:map_array, t(:to_integer)).call(tuples)
       end
 
+      # @return [Array<Symbol>]
+      #
       def self.map_to_symbols(tuples)
         t(:map_array, t(:to_symbol)).call(tuples)
       end
@@ -164,10 +177,11 @@ module ROM
         t(:map_array, t(:to_boolean)).call(values)
       end
 
+      # @return [Array<Time>]
+      #
       def self.map_to_times(values)
         t(:map_array, t(:to_time)).call(values)
       end
-
 
       # Convert string to snake case.
       #
@@ -186,7 +200,6 @@ module ROM
         fn = t(:to_string) >> t(:to_underscore) >> t(:to_symbol)
         fn.call(value)
       end
-
     end
   end
 end

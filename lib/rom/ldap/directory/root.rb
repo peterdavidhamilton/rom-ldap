@@ -1,8 +1,8 @@
 module ROM
   module LDAP
     class Directory
-      module Root
 
+      module Root
         # Identify the LDAP server vendor, type determines vendor extension to load.
         #
         # @see https://ldapwiki.com/wiki/Determine%20LDAP%20Server%20Vendor
@@ -29,40 +29,20 @@ module ROM
           end
         end
 
-        # Check if vendor identifies as ActiveDirectory
-        #
-        # @return [Boolean]
-        #
-        # @api public
-        def ad?
-          !root['forestFunctionality'].nil?
-        end
-
-        # Check if vendor identifies as OpenLDAP
-        #
-        # @return [Boolean]
-        #
-        # @api public
-        def od?
-          !!root['objectClass']&.include?('OpenLDAProotDSE')
-        end
-
         # @return [String]
         #
         # @api public
         def vendor_name
-          'Unknown'
+          root.first('vendorName')
         end
 
         # @return [String]
         #
         # @api public
         def vendor_version
-          'Unknown'
+          root.first('vendorVersion')
         end
 
-        # FIXME: is being overwritten in test suite against multiple servers
-        #
         # @example
         #   [ 'Apple', '510.30' ]
         #   [ 'Apache Software Foundation', '2.0.0-M24' ]
@@ -143,7 +123,6 @@ module ROM
 
         private
 
-
         # Representation of directory RootDSE
         #
         # @see https://ldapwiki.com/wiki/Retrieving%20RootDSE
@@ -181,7 +160,26 @@ module ROM
 
           @sub_schema || raise(ResponseMissingError, 'Directory schema failed to load')
         end
+
+        # Check if vendor identifies as ActiveDirectory
+        #
+        # @return [TrueClass, FalseClass]
+        #
+        # @api private
+        def ad?
+          !root['forestFunctionality'].nil?
+        end
+
+        # Check if vendor identifies as OpenLDAP
+        #
+        # @return [TrueClass, FalseClass]
+        #
+        # @api private
+        def od?
+          root['objectClass']&.include?('OpenLDAProotDSE')
+        end
       end
+
     end
   end
 end

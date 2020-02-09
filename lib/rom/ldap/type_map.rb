@@ -1,16 +1,14 @@
 module ROM
   module LDAP
-
+    # LDAPv3 Syntaxes
+    # @see https://ldapwiki.com/wiki/LDAPSyntaxes
+    #
     OID_TYPE_MAP = {
       '1.3.6.1.1.16.1'                =>  'String',     # UUID
-
-      # LDAPv3 Syntaxes
-      # @see https://ldapwiki.com/wiki/LDAPSyntaxes
-      #
       '1.3.6.1.4.1.1466.115.121.1.1'  =>  'String',     # ACI Item
       '1.3.6.1.4.1.1466.115.121.1.2'  =>  'String',     # Access Point
       '1.3.6.1.4.1.1466.115.121.1.3'  =>  'String',     # Attribute Type Description
-      '1.3.6.1.4.1.1466.115.121.1.4'  =>  'Audio',      # Audio
+      '1.3.6.1.4.1.1466.115.121.1.4'  =>  'Binary',     # Audio
       '1.3.6.1.4.1.1466.115.121.1.5'  =>  'Binary',     # Binary
       '1.3.6.1.4.1.1466.115.121.1.6'  =>  'String',     # Bit String
       '1.3.6.1.4.1.1466.115.121.1.7'  =>  'Bool',       # Boolean
@@ -31,7 +29,7 @@ module ROM
       '1.3.6.1.4.1.1466.115.121.1.25' =>  'String',     # Guide
       '1.3.6.1.4.1.1466.115.121.1.26' =>  'String',     # IA5String - IA5 ISO-646 (ASCII).
       '1.3.6.1.4.1.1466.115.121.1.27' =>  'Integer',    # INTEGER - IntegerMatch / integerOrderingMatch
-      '1.3.6.1.4.1.1466.115.121.1.28' =>  'Jpeg',       # JPEG - RFC2798: Joint Photographic Experts Group (JPEG) image syntax from inetOrgPerson object class schema.
+      '1.3.6.1.4.1.1466.115.121.1.28' =>  'Binary',     # JPEG - RFC2798: Joint Photographic Experts Group (JPEG) image syntax from inetOrgPerson object class schema.
       '1.3.6.1.4.1.1466.115.121.1.32' =>  'String',     # Mail Preference
       '1.3.6.1.4.1.1466.115.121.1.34' =>  'String',     # Name And Optional UID
       '1.3.6.1.4.1.1466.115.121.1.35' =>  'String',     # Name Form Description
@@ -39,7 +37,7 @@ module ROM
       '1.3.6.1.4.1.1466.115.121.1.37' =>  'String',     # Object Class Description
       '1.3.6.1.4.1.1466.115.121.1.38' =>  'String',     # OID
       '1.3.6.1.4.1.1466.115.121.1.39' =>  'String',     # Other Mailbox
-      '1.3.6.1.4.1.1466.115.121.1.40' =>  'Octet',      # Octet String - Treated as transparent 8-bit bytes.
+      '1.3.6.1.4.1.1466.115.121.1.40' =>  'String',     # Octet String - Treated as transparent 8-bit bytes. (passwords)
       '1.3.6.1.4.1.1466.115.121.1.41' =>  'String',     # Postal Address - UTF-8 ISO-10646 (Unicode). Split by dollar sign "$".
       '1.3.6.1.4.1.1466.115.121.1.42' =>  'String',     # Protocol Information
       '1.3.6.1.4.1.1466.115.121.1.43' =>  'String',     # Presentation Address
@@ -72,7 +70,7 @@ module ROM
       '1.2.840.113556.1.4.159'        =>  'Time',       # accountExpires
       '1.2.840.113556.1.4.371'        =>  'Integer',    # rIDAllocationPool
       '1.2.840.113556.1.4.662'        =>  'Time',       # lockoutTime
-      '1.2.840.113556.1.4.903'        =>  'Octet',      # DNWithOctetString
+      '1.2.840.113556.1.4.903'        =>  'String',     # DNWithOctetString
       '1.2.840.113556.1.4.904'        =>  'String',     # DNWithString
       '1.2.840.113556.1.4.905'        =>  'String',     # Telex
       '1.2.840.113556.1.4.906'        =>  'Integer',    # INTEGER8
@@ -81,6 +79,5 @@ module ROM
       '1.2.840.113556.1.4.1362'       =>  'String',     # CaseExactString
       '1.2.840.113556.1.4.1696'       =>  'Time'        # lastLogonTimeStamp
     }.freeze
-
   end
 end

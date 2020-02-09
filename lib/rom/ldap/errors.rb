@@ -1,6 +1,5 @@
 module ROM
   module LDAP
-
     # @see ROM::LDAP::Gateway
     #
     # @see ROM::LDAP::Schema::Inferrer
@@ -17,8 +16,7 @@ module ROM
       Errno::EPIPE,
       Errno::ETIMEDOUT,
       IOError
-    ]
-
+    ].freeze
 
     #
     ConfigError                   = Class.new(StandardError)
@@ -33,6 +31,5 @@ module ROM
     ResponseMissingError          = Class.new(StandardError)
     ResponseMissingOrInvalidError = Class.new(StandardError)
     ResponseTypeInvalidError      = Class.new(StandardError)
-
   end
 end

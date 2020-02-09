@@ -1,17 +1,46 @@
-require 'rom/ldap/expression_encoder'
+# frozen_string_literal: true
 
 module ROM
   module LDAP
     # @api private
     class Expression
+
       extend Initializer
 
-      param :op, type: Types::Abstract
+      option :op, type: Types::Abstract
 
-      param :left, type: Types::Field | Types.Instance(Expression)
+      option :field, optional: true, type: Types::Field
 
-      param :right, optional: true, type: Types::Value | Types.Instance(Expression)
+      option :value, optional: true, type: Types::Value
 
+      option :exps,  optional: true, type: Types::Array.of(Types.Instance(Expression))
+
+      #
+      #
+      # @return [String]
+      #
+      # @api public
+      def to_ber
+        require 'rom/ldap/expression_encoder'
+        ExpressionEncoder.new(options).call
+      end
+
+      # Unbracketed filter string
+      #
+      # @return [String]
+      #
+      def to_raw_filter
+        case op
+        when :op_eql, :op_bineq then "#{field}=#{value}"
+        when :op_ext  then "#{field}:=#{value}"
+        when :op_gte  then "#{field}>=#{value}"
+        when :op_lte  then "#{field}<=#{value}"
+        when :op_prx  then "#{field}~=#{value}"
+        when :con_and then "&#{exps.map(&:to_filter).join}"
+        when :con_or  then "|#{exps.map(&:to_filter).join}"
+        when :con_not then "!#{exps[0].to_filter}"
+        end
+      end
 
       # Bracketed filter string
       #
@@ -22,49 +51,25 @@ module ROM
       end
       alias to_s to_filter
 
-      # Unbracketed filter string
+      # AST with original atrributes and values
       #
-      # @return [String]
+      # @return [Array]
       #
-      def to_raw_filter
+      def to_ast
         case op
-        when :con_not then "!(#{left}=#{right})"
-        when :op_eql  then "#{left}=#{right}"
-        when :op_ext  then "#{left}:=#{right}"
-        when :op_prx  then "#{left}~=#{right}"
-        when :op_gte  then "#{left}>=#{right}"
-        when :op_lte  then "#{left}<=#{right}"
-        when :con_and then "&(#{left.to_raw_filter})(#{right.to_raw_filter})"
-        when :con_or  then "|(#{left.to_raw_filter})(#{right.to_raw_filter})"
-        when :con_not then "!(#{left.to_raw_filter})"
+        when :con_and then [op, exps.map(&:to_ast)]
+        when :con_or  then [op, exps.map(&:to_ast)]
+        when :con_not then [op, exps[0].to_ast]
+        else
+          [op, field, value]
         end
       end
+      alias to_a to_ast
 
       # @return [String]
       #
       def inspect
-        %(#<#{self.class} op=#{op} left=#{left} right=#{right} />)
-      end
-
-      # @return [String]
-      #
-      def to_ber
-        ExpressionEncoder.new(*options.values).call
-      end
-
-      def with(sym, other = nil)
-        self.class.new(sym, self, other)
-      end
-
-      # @return [Array]
-      #
-      # @api private
-      def join_with(operator)
-        if op == operator
-          [left.join_with(operator), right.join_with(operator)]
-        else
-          [self]
-        end
+        %(#<#{self.class} #{to_raw_filter} />)
       end
 
     end

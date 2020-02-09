@@ -5,64 +5,65 @@ require 'rom/ldap/expression'
 
 module ROM
   module LDAP
-    # @see https://tools.ietf.org/html/rfc4511#section-4.5.1
-    #
     # The Search request is defined as follows:
     #
-    #   SearchRequest ::= [APPLICATION 3] SEQUENCE {
-    #        baseObject      LDAPDN,
-    #        scope           ENUMERATED {
-    #             baseObject              (0),
-    #             singleLevel             (1),
-    #             wholeSubtree            (2),
-    #             ...  },
-    #        derefAliases    ENUMERATED {
-    #             neverDerefAliases       (0),
-    #             derefInSearching        (1),
-    #             derefFindingBaseObj     (2),
-    #             derefAlways             (3) },
-    #        sizeLimit       INTEGER (0 ..  maxInt),
-    #        timeLimit       INTEGER (0 ..  maxInt),
-    #        typesOnly       BOOLEAN,
-    #        filter          Filter,
-    #        attributes      AttributeSelection }
+    #       SearchRequest ::= [APPLICATION 3] SEQUENCE {
+    #            baseObject      LDAPDN,
+    #            scope           ENUMERATED {
+    #                 baseObject              (0),
+    #                 singleLevel             (1),
+    #                 wholeSubtree            (2),
+    #                 ...  },
+    #            derefAliases    ENUMERATED {
+    #                 neverDerefAliases       (0),
+    #                 derefInSearching        (1),
+    #                 derefFindingBaseObj     (2),
+    #                 derefAlways             (3) },
+    #            sizeLimit       INTEGER (0 ..  maxInt),
+    #            timeLimit       INTEGER (0 ..  maxInt),
+    #            typesOnly       BOOLEAN,
+    #            filter          Filter,
+    #            attributes      AttributeSelection }
     #
-    #   AttributeSelection ::= SEQUENCE OF selector LDAPString
-    #                   -- The LDAPString is constrained to
-    #                   -- <attributeSelector> in Section 4.5.1.8
+    #       AttributeSelection ::= SEQUENCE OF selector LDAPString
+    #                       -- The LDAPString is constrained to
+    #                       -- <attributeSelector> in Section 4.5.1.8
     #
-    #   Filter ::= CHOICE {
-    #        and             [0] SET SIZE (1..MAX) OF filter Filter,
-    #        or              [1] SET SIZE (1..MAX) OF filter Filter,
-    #        not             [2] Filter,
-    #        equalityMatch   [3] AttributeValueAssertion,
-    #        substrings      [4] SubstringFilter,
-    #        greaterOrEqual  [5] AttributeValueAssertion,
-    #        lessOrEqual     [6] AttributeValueAssertion,
-    #        present         [7] AttributeDescription,
-    #        approxMatch     [8] AttributeValueAssertion,
-    #        extensibleMatch [9] MatchingRuleAssertion,
-    #        ...  }
+    #       Filter ::= CHOICE {
+    #            and             [0] SET SIZE (1..MAX) OF filter Filter,
+    #            or              [1] SET SIZE (1..MAX) OF filter Filter,
+    #            not             [2] Filter,
+    #            equalityMatch   [3] AttributeValueAssertion,
+    #            substrings      [4] SubstringFilter,
+    #            greaterOrEqual  [5] AttributeValueAssertion,
+    #            lessOrEqual     [6] AttributeValueAssertion,
+    #            present         [7] AttributeDescription,
+    #            approxMatch     [8] AttributeValueAssertion,
+    #            extensibleMatch [9] MatchingRuleAssertion,
+    #            ...  }
     #
-    #   SubstringFilter ::= SEQUENCE {
-    #        type           AttributeDescription,
-    #        substrings     SEQUENCE SIZE (1..MAX) OF substring CHOICE {
-    #             initial [0] AssertionValue,  -- can occur at most once
-    #             any     [1] AssertionValue,
-    #             final   [2] AssertionValue } -- can occur at most once
-    #        }
+    #       SubstringFilter ::= SEQUENCE {
+    #            type           AttributeDescription,
+    #            substrings     SEQUENCE SIZE (1..MAX) OF substring CHOICE {
+    #                 initial [0] AssertionValue,  -- can occur at most once
+    #                 any     [1] AssertionValue,
+    #                 final   [2] AssertionValue } -- can occur at most once
+    #            }
     #
-    #   MatchingRuleAssertion ::= SEQUENCE {
-    #        matchingRule    [1] MatchingRuleId OPTIONAL,
-    #        type            [2] AttributeDescription OPTIONAL,
-    #        matchValue      [3] AssertionValue,
-    #        dnAttributes    [4] BOOLEAN DEFAULT FALSE }
+    #       MatchingRuleAssertion ::= SEQUENCE {
+    #            matchingRule    [1] MatchingRuleId OPTIONAL,
+    #            type            [2] AttributeDescription OPTIONAL,
+    #            matchValue      [3] AssertionValue,
+    #            dnAttributes    [4] BOOLEAN DEFAULT FALSE }
     #
     #
     #
+    #
+    # @see https://tools.ietf.org/html/rfc4511#section-4.5.1
     #
     # @api private
     class SearchRequest
+
       extend Initializer
 
       # @see https://tools.ietf.org/html/rfc4511#section-4.5.1.7
@@ -76,7 +77,6 @@ module ROM
       # @!attribute [r] base
       #   @return [String] Set to Relation default_base:
       option :base, proc(&:to_s), type: Types::DN, default: -> { EMPTY_STRING }
-
 
       # Defaults to only searching entries under base object.
       #
@@ -140,7 +140,6 @@ module ROM
       # @!attribute [r] sort
       #   @return [Array<String>]
       option :sorted, type: Types::Strict::Array, optional: true
-
 
       # Search request components.
       #
@@ -210,7 +209,7 @@ module ROM
         # [99.to_ber, EMPTY_STRING.to_ber]
       end
 
-      # Control ::= SEQUENCE {
+      #       Control ::= SEQUENCE {
       #         controlType             LDAPOID,
       #         criticality             BOOLEAN DEFAULT FALSE,
       #         controlValue            OCTET STRING OPTIONAL }
@@ -221,7 +220,7 @@ module ROM
       #
       def build_controls(type, payload)
         [
-          CONTROLS[type].to_ber,
+          OID[type].to_ber,
           false.to_ber,
           payload.to_ber_sequence.to_s.to_ber
         ].to_ber_sequence
@@ -229,14 +228,14 @@ module ROM
 
       # Only uses attribute names because not all vendors have fully implemented SSS.
       #
-      #
-      # @see https://tools.ietf.org/html/rfc2891
-      # @see https://docs.ldap.com/ldap-sdk/docs/javadoc/com/unboundid/ldap/sdk/controls/ServerSideSortRequestControl.html
-      #
-      # SortKeyList ::= SEQUENCE OF SEQUENCE {
+      #       SortKeyList ::= SEQUENCE OF SEQUENCE {
       #            attributeType   AttributeDescription,
       #            orderingRule    [0] MatchingRuleId OPTIONAL,
       #            reverseOrder    [1] BOOLEAN DEFAULT FALSE }
+      #
+      #
+      # @see https://tools.ietf.org/html/rfc2891
+      # @see https://docs.ldap.com/ldap-sdk/docs/javadoc/com/unboundid/ldap/sdk/controls/ServerSideSortRequestControl.html
       #
       # @api private
       def sort_rules

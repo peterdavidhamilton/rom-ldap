@@ -1,13 +1,12 @@
+require 'rom/ldap/client'
+
 require 'rom/ldap/directory/env'
 require 'rom/ldap/directory/entry'
-require 'rom/ldap/directory/password'
-
 require 'rom/ldap/directory/root'
 require 'rom/ldap/directory/capabilities'
 require 'rom/ldap/directory/operations'
 require 'rom/ldap/directory/transactions'
 require 'rom/ldap/directory/tokenization'
-
 
 module ROM
   module LDAP
@@ -15,26 +14,19 @@ module ROM
     #   Builds LDAP directory abstraction over TCP connection instance.
     #   Includes vendor specific modules once initialised.
     #
-    #
     class Directory
 
       attr_accessor :logger
-
-      attr_reader :client
       attr_reader :env
 
-      # Load vendor specific modules.
+      # Load vendor specific methods into the instance as singletons
       #
-      # @see rom/ldap/extensions/{vendor}
       # @see Gateway#directory
       #
       # @return [ROM::LDAP::Directory]
       #
       def initialize(uri, options)
         @env    = ENV.new(uri, options)
-
-        @client = Client.new(@env.to_h, @env.auth, @env.ssl)
-
         @logger = options.fetch(:logger, Logger.new($stdout))
 
         require "rom/ldap/directory/vendors/#{type}"
@@ -47,6 +39,23 @@ module ROM
       include Operations
       include Transactions
 
+      # Initial search base.
+      #
+      # @return [String] Defaults to empty string.
+      #
+      # @api public
+      def base
+        env.base
+      end
+
+      # Encapsulates encoding and binding using socket.
+      #
+      # @return [Client]
+      #
+      def client
+        @client ||= Client.new(env.to_h)
+      end
+
       # Expected method inside gateway.
       #
       # @return [TrueClass]
@@ -54,15 +63,6 @@ module ROM
       def disconnect
         client.close
         client.closed?
-      end
-
-
-      # Initial search base.
-      #
-      # @return [String] Defaults to "".
-      #
-      def base
-        env.base || EMPTY_STRING
       end
 
       # Parsed attributes.
@@ -116,7 +116,7 @@ module ROM
       #
       # @api public
       def inspect
-        "#<#{self.class} uri='#{env.uri}' vendor='#{vendor_name}' version='#{vendor_version}' />"
+        "#<#{self.class} uri='#{env.connection}' vendor='#{vendor_name}' version='#{vendor_version}' />"
       end
 
     end

@@ -5,8 +5,10 @@ require 'rom/ldap/attribute'
 module ROM
   module LDAP
     class Schema < ROM::Schema
+
       # @api private
       class Inferrer < ROM::Schema::Inferrer
+
         attributes_inferrer ->(schema, gateway, options) do
           builder  = TypeBuilder.new(gateway.attribute_types)
           inferrer = AttributesInferrer.new(type_builder: builder, **options)
@@ -38,7 +40,9 @@ module ROM
         def suppress_errors
           with(raise_on_error: false, silent: true)
         end
+
       end
+
     end
   end
 end

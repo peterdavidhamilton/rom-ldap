@@ -1,11 +1,11 @@
 module ROM
   module LDAP
     class Directory
+
       #
       # Convenience predicates
       #
       module Capabilities
-
         # Named capabilities
         #
         # @see rom/ldap/constants.rb
@@ -14,7 +14,7 @@ module ROM
         #
         # @api public
         def capabilities
-          @capabilities ||= CONTROLS.invert.values_at(*supported_controls).compact.freeze
+          @capabilities ||= OID.invert.values_at(*supported_controls).compact.freeze
         end
 
         # Is the server able to order the entries.
@@ -63,6 +63,7 @@ module ROM
             capabilities.include?(:language_range_options)
         end
       end
+
     end
   end
 end

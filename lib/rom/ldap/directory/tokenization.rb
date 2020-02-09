@@ -1,15 +1,15 @@
-require 'rom/ldap/parsers/filter_expresser'
-require 'rom/ldap/parsers/ast_expresser'
+require 'rom/ldap/parsers/abstract_syntax'
+require 'rom/ldap/parsers/filter_syntax'
 require 'rom/ldap/parsers/attribute'
 
 module ROM
   module LDAP
     class Directory
+
       # Parsing Formats
       #
-      # @api public
+      # @api private
       module Tokenization
-
         # Allows adapters that subclass Directory to use custom parsers.
         # Extends the class with filter abstraction behavior.
         #
@@ -19,15 +19,15 @@ module ROM
             extend Dry::Core::ClassAttributes
 
             defines :attribute_class
-            defines :abstract_class
-            defines :filter_class
-
             attribute_class Parsers::Attribute
-            abstract_class  Parsers::ASTExpresser
-            filter_class    Parsers::FilterExpresser
+
+            defines :filter_class
+            filter_class Parsers::FilterSyntax
+
+            defines :ast_class
+            ast_class Parsers::AbstractSyntax
           end
         end
-
 
         private
 
@@ -37,17 +37,16 @@ module ROM
         # @param input [Array, String] RFC2254 or AST
         #
         def to_expression(input)
-          if input.is_a?(String)
-            klass = self.class.filter_class
-            attrs = !!@attribute_types ? attribute_types : EMPTY_ARRAY
-          else
-            klass = self.class.abstract_class
-            attrs = attribute_types
+          attrs = !@attribute_types.nil? ? attribute_types : EMPTY_ARRAY
+
+          # Filter > AST
+          unless input.is_a?(Array)
+            input = self.class.filter_class.new(input, attrs).call
           end
 
-          klass.new(input, schemas: attrs).call
+          # AST > Expression
+          self.class.ast_class.new(input, attrs).call
         end
-
 
         # Create parsed attribute from definiton.
         #
@@ -58,8 +57,8 @@ module ROM
         def to_attribute(attr_def)
           self.class.attribute_class.new(attr_def).call
         end
-
       end
+
     end
   end
 end
