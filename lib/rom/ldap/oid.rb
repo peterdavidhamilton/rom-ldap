@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Layout/HashAlignment
+
 module ROM
   module LDAP
     # LDAP OID hash map
@@ -11,6 +13,7 @@ module ROM
     # @return [Hash]
     #
     # @api private
+    #
     OID = {
       matched_values:                   '1.2.826.0.1.3344810.2.3',
       paged_results:                    '1.2.840.113556.1.4.319',
@@ -93,3 +96,5 @@ module ROM
     }.freeze
   end
 end
+
+# rubocop:enable Layout/HashAlignment

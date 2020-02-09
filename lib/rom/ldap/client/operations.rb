@@ -36,7 +36,7 @@ module ROM
           message_id = next_msgid
 
           loop do
-            write(request, controls, message_id)
+            write(request, message_id, controls)
 
             result_pdu = nil
             controls   = EMPTY_ARRAY

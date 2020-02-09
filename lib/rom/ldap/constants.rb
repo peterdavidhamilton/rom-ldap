@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Layout/HashAlignment
+
 require 'rom/ldap/oid'
 require 'rom/ldap/scope'
 require 'rom/ldap/alias'
@@ -179,3 +181,5 @@ module ROM
     LDIF_LINE_REGEX = /^([^:]+):([\:]?)[\s]*<?(.*)$/.freeze
   end
 end
+
+# rubocop:enable Layout/HashAlignment

@@ -112,7 +112,7 @@ module ROM
       # Write to socket.
       #
       # @api private
-      def write(request, controls = nil, message_id)
+      def write(request, message_id, controls = nil)
         open do |socket|
           packet = [message_id.to_ber, request, controls].compact.to_ber_sequence
           socket.write(packet)
@@ -158,7 +158,7 @@ module ROM
       def submit(type, request, controls = nil)
         message_id = next_msgid
 
-        write(request, controls, message_id)
+        write(request, message_id, controls)
 
         pdu = from_queue(message_id)
 

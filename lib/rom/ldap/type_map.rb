@@ -1,6 +1,8 @@
+# rubocop:disable Layout/HashAlignment
 module ROM
   module LDAP
     # LDAPv3 Syntaxes
+    #
     # @see https://ldapwiki.com/wiki/LDAPSyntaxes
     #
     OID_TYPE_MAP = {
@@ -81,3 +83,4 @@ module ROM
     }.freeze
   end
 end
+# rubocop:enable Layout/HashAlignment

@@ -1,3 +1,4 @@
+# rubocop:disable Lint/SuppressedException
 begin
   # TODO: Windows NTLM authentication
   # @see https://github.com/winrb/rubyntlm
@@ -5,6 +6,7 @@ begin
 rescue LoadError
   # ntlm_bind
 end
+# rubocop:enable Lint/SuppressedException
 
 module ROM
   module LDAP
