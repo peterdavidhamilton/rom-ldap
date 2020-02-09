@@ -18,7 +18,7 @@ RSpec.describe ROM::LDAP::Commands::Create do
         relation    :accounts
         register_as :timestamp_mapper
 
-        map_array do
+        map do
           rename_keys modify_timestamp: :updated_at,
                       create_timestamp: :created_at
         end

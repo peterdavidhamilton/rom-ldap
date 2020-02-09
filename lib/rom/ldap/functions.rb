@@ -1,4 +1,4 @@
-require 'transproc'
+require 'dry/transformer/all'
 require 'base64'
 require 'rom/support/inflector'
 
@@ -6,11 +6,12 @@ module ROM
   module LDAP
     # @api private
     module Functions
-      extend Transproc::Registry
 
-      import Transproc::Coercions
-      import Transproc::ArrayTransformations
-      import Transproc::HashTransformations
+      extend Dry::Transformer::Registry
+
+      import Dry::Transformer::Coercions
+      import Dry::Transformer::ArrayTransformations
+      import Dry::Transformer::HashTransformations
 
       # Build tuple from arguments.
       #   Translates keys into original schema names and stringify values.
@@ -125,7 +126,7 @@ module ROM
       # @return [TrueClass, FalseClass]
       #
       def self.to_boolean(value)
-        Transproc::Coercions::BOOLEAN_MAP.fetch(value.to_s.downcase)
+        Dry::Transformer::Coercions::BOOLEAN_MAP.fetch(value.to_s.downcase)
       end
 
       # The 18-digit Active Directory timestamps, also named
