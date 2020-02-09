@@ -27,7 +27,7 @@ definitions:
       variables:
         APACHEDS_INSTANCE: rom
     389ds:
-      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:latest
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:1.3.8.4
       memory: 512
       variables:
         LDAP_LOG_LEVEL: '0'
@@ -37,7 +37,7 @@ definitions:
         DIRSRV_ROOT_DN: cn=Directory Manager
         DIRSRV_ROOT_DN_PASSWORD: topsecret
     openldap:
-      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.48
       memory: 512
       variables:
         LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
@@ -45,7 +45,7 @@ definitions:
         LDAP_BASE_DN: dc=rom,dc=ldap
         LDAP_ADMIN_PASSWORD: topsecret
     opendj:
-      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
+      image: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3
       memory: 512
       variables:
         BASE_DN: dc=rom,dc=ldap
