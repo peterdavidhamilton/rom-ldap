@@ -1,64 +1,77 @@
 #!/usr/bin/env ruby
+#
+# $ LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
+#     rake 'ldif:import[config/ldif/examples/users.ldif]'
+#
+# $ LDAPHOST=127.0.0.1 \
+#     LDAPPORT=1389 \
+#     LDAPBASE=dc=rom,dc=ldap \
+#     LDAPBINDDN=uid=admin,ou=system \
+#     LDAPBINDPW=secret \
+#     ./bin/benchmark
+#
 
 require 'bundler/setup'
 
 Bundler.setup
+
+# require 'pry'
+# require 'pry-byebug'
 
 require 'benchmark/ips'
 require 'net-ldap'
 require 'rom-ldap'
 
 net_ldap = Net::LDAP.new(
-            host: ENV['LDAPHOST'],
-            port: ENV['LDAPPORT'],
-            base: ENV['LDAPBASE'],
-            auth: {
-              method: :simple,
-              username: ENV['LDAPBINDDN'],
-              password: ENV['LDAPBINDPW']
-            }
-          )
-
+  host: ENV['LDAPHOST'],
+  port: ENV['LDAPPORT'],
+  base: ENV['LDAPBASE'],
+  auth: {
+    method: :simple,
+    username: ENV['LDAPBINDDN'],
+    password: ENV['LDAPBINDPW']
+  }
+)
 
 logger = Logger.new(File.open('./log/benchmark.log', 'a'))
 
 filter = '(objectclass=*)'
 
-# Pass nil to use ENV vars.
 config = ROM::Configuration.new(:ldap, nil, extensions: %i[compatibility], logger: logger)
 
-# Inferred => all attributes including operational
-#
 config.relation(:rom) do
-  schema(filter, infer: true)
-end
-
-
-# Explicit => schema only attributes
-#
-config.relation(:static) do
-  schema(filter) do
-    attribute :cn,      ROM::LDAP::Types::Strings
-    # attribute :study,   ROM::LDAP::Types::Symbol
-    # attribute :family,  ROM::LDAP::Types::String
-    # attribute :genus,   ROM::LDAP::Types::String
-    # attribute :order,   ROM::LDAP::Types::String
-    # attribute :species, ROM::LDAP::Types::String
-
-    use :timestamps, attributes: %i(create_timestamp), type: ROM::LDAP::Types::Time
+  schema(filter, infer: true) do
+    # use :timestamps,
+    #   attributes: %i(create_timestamp),
+    #   type: ROM::LDAP::Types::Time
   end
 end
 
+config.relation(:static) do
+  schema(filter) do
+    attribute :cn, ROM::LDAP::Types::Strings
+
+    # use :timestamps,
+    #   attributes: %i(create_timestamp),
+    #   type: ROM::LDAP::Types::Time
+  end
+end
 
 rom = ROM.container(config)
 
+if rom.gateways[:default].directory.base_total <= 10
+  abort("
+  NB: seed directory with entries first.
+
+  $ rake 'ldif:import[spec/fixtures/ldif/examples/users.ldif]'
+  ")
+end
 
 Benchmark.ips do |bm|
-
   bm.config(time: 5, warmup: 0.5, iterations: 3)
 
   #
-  # One Attribute
+  # Single Attribute
   #
   bm.report('NET one') do
     net_ldap.search(attributes: %w[cn]).to_a
@@ -71,8 +84,6 @@ Benchmark.ips do |bm|
   bm.report('ROM [inferred] one') do
     rom.relations[:rom].project(:cn).to_a
   end
-
-
 
   #
   # All Attributes
@@ -89,30 +100,8 @@ Benchmark.ips do |bm|
     rom.relations[:rom].to_a
   end
 
-
-
   #
-  # Ordered Attributes
-  #
-  # bm.report('NET order') do
-  #   binding.pry
-  #   net_ldap.search(sort_controls: ['cn'])
-  #   # net_ldap.search
-  # end
-
-  bm.report('ROM [explicit] order') do
-    rom.relations[:static].order(:cn).to_a
-  end
-
-  bm.report('ROM [inferred] order') do
-    rom.relations[:rom].order(:cn).to_a
-  end
-
-
-
-
-  #
-  # Structs
+  # Converted to Structs
   #
   bm.report('NET struct') do
     net_ldap.search.map { |e| OpenStruct.new(e.instance_variable_get(:@myhash)) }
@@ -126,6 +115,35 @@ Benchmark.ips do |bm|
     rom.relations[:rom].with(auto_struct: true).has(:cn).project(:cn).to_a
   end
 
+  #
+  # With Operational Attributes
+  #
+  bm.report('NET operational') do
+    net_ldap.search(attributes: %w[* +])
+  end
+
+  bm.report('ROM [explicit] operational') do
+    rom.relations[:static].operational.has(:cn).to_a
+  end
+
+  bm.report('ROM [inferred] operational') do
+    rom.relations[:rom].operational.has(:cn).to_a
+  end
+
+  #
+  # Ordered Entries
+  #
+  # bm.report('NET order') do
+  #   net_ldap.search(sort_controls: ['cn'])
+  # end
+
+  bm.report('ROM [explicit] order') do
+    rom.relations[:static].order(:cn).to_a
+  end
+
+  bm.report('ROM [inferred] order') do
+    rom.relations[:rom].order(:cn).to_a
+  end
+
   bm.compare!
 end
-

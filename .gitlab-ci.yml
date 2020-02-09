@@ -34,22 +34,21 @@ variables:
 test:
   variables:
     # rom
-    LDAPHOST:   apacheds
-    LDAPBASE:   dc=rom,dc=ldap
-    LDAPPORT:   '10389'
+    # LDAP variables used by rake to update schema
+    LDAPURI:    ldap://apacheds:10389
     LDAPBINDDN: uid=admin,ou=system
     LDAPBINDPW: secret
-    LDAPDIR:    ${CI_PROJECT_DIR}/docker/schema
+    LDAPDIR:    ${CI_PROJECT_DIR}/spec/fixtures/ldif
     # GITLAB_TOKEN: <repo-read> # for ldap-ber
 
   services:
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:1.3.8.4
+      alias: 389ds
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
       alias: apacheds
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:latest
-      alias: 389ds
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:latest
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3
       alias: opendj
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:latest
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.48
       alias: openldap
     # - opendirectory
     # - activedirectory

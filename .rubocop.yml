@@ -5,14 +5,15 @@ require: rubocop-performance
 AllCops:
   Include:
     - Rakefile
-    - lib/**/*.rb
+    - lib/rom/**/*.rb
     - rakelib/*.rake
   Exclude:
-    - '**/.DS_Store' # Lint/Syntax: Invalid byte sequence in utf-8.
+    - '**/.*'
     - doc/**/*
     - docker/**/*
     - log/*
     - spec/**/*
+    - tmp/**/*
     - vendor/**/*
   TargetRubyVersion: 2.4
 
@@ -20,15 +21,19 @@ Naming/FileName:
   Exclude:
     - 'lib/rom-ldap.rb'
 
-# Style/LambdaCall:
-#   Enabled: false
+Style/SymbolProc:
+  Enabled: false
 
-# Metrics/LineLength:
-#   Enabled: false
+Style/ParallelAssignment:
+  Enabled: false
 
-# Style/Encoding:
-#   Enabled: true
+Layout/EmptyLinesAroundClassBody:
+  EnforcedStyle: empty_lines
 
-# Style/FrozenStringLiteralComment:
-#   EnforcedStyle: when_needed
-#   Enabled: false
+Layout/EmptyLinesAroundModuleBody:
+  EnforcedStyle: no_empty_lines
+
+Style/FrozenStringLiteralComment:
+  # EnforcedStyle: always
+  Enabled: false
+

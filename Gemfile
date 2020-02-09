@@ -23,14 +23,16 @@ group :development do
 end
 
 group :test do
-  # gem 'codeclimate-test-reporter'
   gem 'msgpack', '~> 1.2.4' # @see spec/unit/relation/export_spec.rb
   gem 'libxml-ruby'         # @see spec/unit/relation/export_spec.rb
   gem 'rom-factory'
   gem 'rspec'
-  gem 'rubocop', '~> 0.58'
-  gem 'rubocop-performance'
   gem 'simplecov'
+
+  # gem 'rails'               # @see spec/integration/rails_sql_spec.rb
+  # gem 'rom-sql'             # @see spec/integration/rails_sql_spec.rb
+  # gem 'rubyntlm'            # @see spec/unit ...
+  # gem 'sqlite3'             # @see spec/integration/rails_sql_spec.rb
 end
 
 group :benchmark do

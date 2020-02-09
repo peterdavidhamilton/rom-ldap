@@ -1,12 +1,9 @@
 #!/usr/bin/env ruby
 #
 # A demonstration of rom-ldap using biological classification
-# and taxonomic hierarchy as an example dataset.
+# and taxonomic hierarchy as an example dataset in an ApacheDS directory.
 #
 #
-
-# lib = File.expand_path('../lib', __FILE__)
-# $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'bundler/setup'
 
@@ -21,8 +18,8 @@ require 'rom-changeset'
 require 'rom/transformer'
 
 
-ENV['DEBUG'] = 'y'
-ENV['LDAPBASE'] = 'ou=animals,dc=rom,dc=ldap'
+ENV['DEBUG'] ||= 'y'
+ENV['LDAPURI'] ||= 'ldap://uid=admin,ou=system:secret@localhost:1389'
 
 #
 # Entity
@@ -42,12 +39,12 @@ end
 #
 # Configuration
 # =============================================================================
-logger = Logger.new(File.open('./log/demo.log', 'a'))
-
 config = ROM::Configuration.new(
-    default: [:ldap, nil, extensions: %i[compatibility], logger: logger],
+    default: [:ldap, nil, extensions: %i[compatibility dsml_export]],
     other: [:memory]
   )
+
+
 
 #
 # Repository
@@ -146,10 +143,6 @@ class AnimalRepo < ROM::Repository[:animals]
     animals.list(:genus)
   end
 
-  def domesticated
-    animals.unfiltered.members_of_group('cn=domestic,ou=groups,dc=rom,dc=ldap')
-  end
-
   def with_researchers
     animals.combine(:researcher)
   end
@@ -217,6 +210,22 @@ config.relation(:researchers, adapter: :memory) do
 end
 
 
+config.relation(:groups, adapter: :ldap) do
+  schema '(objectClass=groupOfNames)', as: :groups, infer: true do
+    # associations do
+    # end
+  end
+
+  def wild_animals
+    where(cn: 'Wild Animals').list(:member)
+  end
+
+  def domestic_animals
+    where(cn: 'Domesticated Animals').list(:member)
+  end
+end
+
+
 config.relation(:animals, adapter: :ldap) do
   schema '(species=*)', as: :animals, infer: true do
     # attribute :cn,      ROM::LDAP::Types::Strings.meta(index: true, alias: :common_name)
@@ -229,11 +238,10 @@ config.relation(:animals, adapter: :ldap) do
     attribute :species, ROM::LDAP::Types::String.meta(index: true)
     # attribute :audio,   ROM::LDAP::Types::Binary
 
-    # only returned with #add_timestamps
-    #
-    # use :timestamps,
-    #   attributes: %i(create_timestamp modify_timestamp),
-    #   type: ROM::LDAP::Types::Time
+    # only returned with Relation#operational
+    use :timestamps,
+      attributes: %i(create_timestamp modify_timestamp),
+      type: ROM::LDAP::Types::Time
 
     associations do
       # has_many :researchers
@@ -338,7 +346,6 @@ end
 config.register_command(CreateAnimal)
 config.register_command(UpdateAnimal)
 config.register_command(DeleteAnimal)
-config.register_command(DeleteAnimal)
 
 config.register_mapper(TransformAnimal)
 
@@ -349,25 +356,23 @@ container = ROM.container(config)
 animals = container.relations[:animals]
 # => #<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>
 
+groups = container.relations[:groups]
+# =>
+
 researchers = container.relations[:researchers]
 # => #<ROM::Relation[Researchers] name=ROM::Relation::Name(researchers) dataset=#<ROM::Memory::Dataset data=[]>>
 
-researchers << [
-  { id: 1, name: 'George Edwards', field: 'ornithology' },
-  { id: 2, name: 'Dian Fossey', field: 'primatology' },
-  { id: 3, name: 'Steve Irwin', field: 'herpetology' },
-  { id: 4, name: 'Eugenie Clark', field: 'ichthyology' }
-]
+
+researchers << { id: 1, name: 'George Edwards',  field: 'ornithology' }
+researchers << { id: 2, name: 'Dian Fossey',     field: 'primatology' }
+researchers << { id: 3, name: 'Steve Irwin',     field: 'herpetology' }
+researchers << { id: 4, name: 'Eugenie Clark',   field: 'ichthyology' }
+researchers << { id: 5, name: 'Jane Goodall',    field: 'primatology' }
+
 
 create_animals = container.commands[:animals][:create]
-# => #<CreateAnimal relation=#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>> options={:relation=>#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>, :type=>nil, :source=>#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>, :result=>:many, :input=>Hash, :curry_args=>[], :before=>[], :after=>[]}>
-
 update_animal  = container.commands[:animals][:update]
-# => #<UpdateAnimal relation=#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>> options={:relation=>#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>, :type=>nil, :source=>#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>, :result=>:one, :input=>Hash, :curry_args=>[], :before=>[], :after=>[:finalize]}>
-
 delete_animal  = container.commands[:animals][:delete]
-# => #<DeleteAnimal relation=#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>> options={:relation=>#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>, :type=>nil, :source=>#<ROM::Relation[Animals] name=ROM::Relation::Name(animals on (species=*)) dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>>, :result=>:one, :input=>Hash, :curry_args=>[], :before=>[], :after=>[]}>
-
 repo           = AnimalRepo.new(container)
 # => #<AnimalRepo struct_namespace=Entities auto_struct=true>
 
@@ -408,7 +413,7 @@ new_animals = [
 # =============================================================================
 binding.pry # breakpoint
 
-animals.where(objectClass: 'top').count # => 26
+animals.count # => 26
 
 animals.where(cn: :zebra).count # => 1
 
@@ -500,6 +505,11 @@ animals.limit(4).project(:cn, :object_class).to_a
 #     #<Entities::Animal cn=["Carpincho", "Capybara", "Water Pig"] object_class=["top", "mammalia", "extensibleObject"]>,
 #     #<Entities::Animal cn=["Lion"] object_class=["top", "mammalia", "extensibleObject"]>,
 #     #<Entities::Animal cn=["Dog", "Domestic Dog"] object_class=["top", "mammalia", "extensibleObject"]>]
+
+
+animals.base # => "dc=rom,dc=ldap"
+
+animals.whole_tree.base # => ""
 
 animals.map(:cn).to_a
 # => [["Leopard Gecko"],
@@ -654,6 +664,9 @@ animals.per_page(6).page(2).map(:order).to_a
 #     ["Caudata"],
 #     ["Passeriformes"]]
 
+animals.page(2).pager
+# => #<ROM::LDAP::Plugin::Pagination::Pager dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]> options={:dataset=>#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>, :current_page=>2, :per_page=>4}>
+
 animals.page(2).pager.next_page
 # => 3
 
@@ -709,13 +722,7 @@ repo.mammals.to_a
 #     #<Entities::Animal cn=["Cat", "Domestic Cat"] description=nil species="Felis silvestris">]
 
 
-
-animals.unfiltered.members_of_group('cn=domestic,ou=groups,dc=rom,dc=ldap')
-# => ["cn=Spur-thighed Tortoise, ou=animals, dc=rom, dc=ldap",
-#     "cn=Cat, ou=animals, dc=rom, dc=ldap",
-#     "cn=Dog, ou=animals, dc=rom, dc=ldap"]
-
-animals.unfiltered.members_of_group('cn=wild,ou=groups,dc=rom,dc=ldap')
+groups.wild_animals
 # => ["cn=Red Fox, ou=animals, dc=rom, dc=ldap",
 #     "cn=American Robin, ou=animals, dc=rom, dc=ldap",
 #     "cn=Sun Bear, ou=animals, dc=rom, dc=ldap",
@@ -726,12 +733,7 @@ animals.unfiltered.members_of_group('cn=wild,ou=groups,dc=rom,dc=ldap')
 #     "cn=Platypus, ou=animals, dc=rom, dc=ldap",
 #     "cn=Sulawesi Fruit Bat, ou=animals, dc=rom, dc=ldap"]
 
-animals.page(2).pager
-# => #<ROM::LDAP::Plugin::Pagination::Pager dataset=#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]> options={:dataset=>#<ROM::LDAP::Dataset: base="dc=rom,dc=ldap" [:op_eql, :species, :wildcard]>, :current_page=>2, :per_page=>4}>
-
-animals.base # => "dc=rom,dc=ldap"
-
-repo.domesticated.to_a
+groups.domestic_animals
 # => ["cn=Spur-thighed Tortoise, ou=animals, dc=rom, dc=ldap",
 #     "cn=Cat, ou=animals, dc=rom, dc=ldap",
 #     "cn=Dog, ou=animals, dc=rom, dc=ldap"]

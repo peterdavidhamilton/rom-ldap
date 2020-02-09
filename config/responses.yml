@@ -1,6 +1,6 @@
 ---
 # Detailed responses from LDAP server.
-#
+# @see https://ldapwiki.com/wiki/LDAP%20Result%20Codes
 #
 :success:
   - Success

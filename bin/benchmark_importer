@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+#
+# $ LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' ./bin/benchmark_importer
+#
+require 'bundler/setup'
+
+Bundler.setup
+
+require 'pry'
+require 'pry-byebug'
+
+require 'benchmark/ips'
+require 'rom-ldap'
+
+logger = Logger.new(File.open('./log/benchmark.log', 'a'))
+
+config = ROM::Configuration.new(:ldap, nil, logger: logger) do |conf|
+  conf.relation(:rom) do
+    schema('(objectClass=*)') do
+      attribute :dn,            ROM::LDAP::Types::String
+      attribute :cn,            ROM::LDAP::Types::Strings
+      attribute :uid,           ROM::LDAP::Types::String
+      attribute :givenName,     ROM::LDAP::Types::String
+      attribute :sn,            ROM::LDAP::Types::String
+      attribute :mail,          ROM::LDAP::Types::Strings
+      attribute :userPassword,  ROM::LDAP::Types::String
+      attribute :objectClass,   ROM::LDAP::Types::Strings
+    end
+  end
+end
+
+rom = ROM.container(config)
+
+data = File.read('spec/fixtures/ldif/examples/users.ldif')
+
+Benchmark.ips do |bm|
+  bm.config(time: 1, warmup: 0)
+
+  bm.report('Relation#insert') do
+    ROM::LDAP::LDIF(data) do |tuple|
+      rom.relations[:rom].insert(tuple)
+    end
+  end
+
+  bm.compare!
+end

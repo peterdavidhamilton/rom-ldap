@@ -1,14 +1,13 @@
 VERSION 3
 # BASE dc=rom,dc=ldap
-# BASE dc=example,dc=com
-
-# openldap
-# PORT 2389
-# BINDDN cn=admin,dc=rom,dc=ldap
 
 # apacheds
 # PORT 1389
 # BINDDN uid=admin,ou=system
+
+# openldap
+# PORT 2389
+# BINDDN cn=admin,dc=rom,dc=ldap
 
 # 389
 # PORT 3389

@@ -1,15 +1,31 @@
 # TODO
 
-- Improve Yard docs, currently 70% complete @ v0.0.13, see tmp/undocumented.txt
-- Improve Rspec coverage, currently 90% complete @ v0.0.13
-- Fix gte and lte operations.
-- Fix Relation#find
-- Fix spec discrepancies when run against docker container. Relation#total mismatch and missing DSE extension
-- Fix test suite performance when run using a docker container. Suite slows from 1:45 mins to 7 mins
-- Loading custom schema into containerised servers
-- Make test suite more fun with custom data and schemas
-- Saving binary data to attributes like JPEG
-- SSL connections
-- Setup CI/CD using Gitlab (also running locally)
-- Tidy functions to employ chaining more methods
-- Work on readme and documentation
+1. **Time out limit and retry in client.**
+    Test timeout expiration and retry in client methods.
+
+2. **SSL connections.**  
+    Hand secure connections; also some vendors only permit certain functions through a secure connection.
+
+3. **Rouge lexer for LDAP filters.**  
+    Custom terminal syntax for LDAP similar to rom-sql.
+
+4. **Paged results.**  
+    Use a real paged request instead of chunking all results
+
+5. **Transactions.**  
+    
+
+6. **Associated relations - preload_assoc and transproc.**   
+    Build LDAP to LDAP relation associations automatically.
+    Simple rudimentary RDMS.
+    <https://www.openldap.org/doc/admin24/intro.html#LDAP%20vs%20RDBMS>
+
+7. **Rails integration**
+
+8. Directory instrumentation using dry-monitor to replace debug logging
+
+## ONGOING
+
+- Improve Rspec coverage, currently 90% complete @ v0.1.0
+- Improve Yard docs, currently 72% complete @ v0.1.0, see tmp/undocumented.txt
+- Ensure Rubocop style compliance
