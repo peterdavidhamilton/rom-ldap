@@ -1,3 +1,5 @@
+require 'rom/ldap/directory/password'
+
 RSpec.describe ROM::LDAP::Directory::Password do
 
   subject(:pwd) { ROM::LDAP::Directory::Password }
@@ -34,7 +36,7 @@ RSpec.describe ROM::LDAP::Directory::Password do
   end
 
   describe 'SSHA' do
-    let(:ssha) { "{SSHA}wfcMnM9z2sBm5qihja8lLQGq6mE0NmYzMjI4NjQ5NDg2MGViNzYyYWJhZjNh\nZDM2NDNhMA==" }
+    let(:ssha) { "{SSHA}wfcMnM9z2sBm5qihja8lLQGq6mE0NmYzMjI4NjQ5NDg2MGViNzYyYWJhZjNhZDM2NDNhMA==" }
 
     it 'encodes ssha' do
       expect(pwd.generate(:ssha, string, salt)).to eql(ssha)
@@ -42,6 +44,18 @@ RSpec.describe ROM::LDAP::Directory::Password do
 
     it 'checks ssha' do
       expect(pwd.check_ssha(string, ssha)).to be(true)
+    end
+  end
+
+  describe 'SSHA512' do
+    let(:ssha512) { "{SSHA512}i2Odj3KQ7AnVeqCcEKmhYkFxDkCaTWVMx9q4l8yTAp1PH5ramVMJTRQwIBRGbJ1umpwTZlK57RW5n80ar+9OETQ2ZjMyMjg2NDk0ODYwZWI3NjJhYmFmM2FkMzY0M2Ew" }
+
+    it 'encodes ssha512' do
+      expect(pwd.generate(:ssha512, string, salt)).to eql(ssha512)
+    end
+
+    it 'checks ssha512' do
+      expect(pwd.check_ssha512(string, ssha512)).to be(true)
     end
   end
 end

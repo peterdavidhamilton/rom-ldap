@@ -1,5 +1,4 @@
-require 'rom/ldap/extensions/exporters/dsml'
-
+require 'rom/ldap/extensions/dsml'
 
 RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
 
@@ -10,29 +9,28 @@ RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
       it 'returns a single entry in DSML format' do
 
         entry = {
-          'dn' => %w'cn=foo,dc=rom,dc=ldap',
+          'dn' => %w'cn=Magneto,dc=rom,dc=ldap',
           'objectClass' => %w'top person inetOrgPerson',
-          'multi' => %w'foo bar baz',
-          'givenName' => %w'foo'
+          'powers' => %w'Magnetokinesis Ferrokinesis',
+          'givenName' => %w'Erik'
         }
 
         output = <<~EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <dsml>
             <directory-entries>
-              <entry dn="cn=foo,dc=rom,dc=ldap">
+              <entry dn="cn=Magneto,dc=rom,dc=ldap">
                 <objectclass>
                   <oc-value>top</oc-value>
                   <oc-value>person</oc-value>
                   <oc-value>inetOrgPerson</oc-value>
                 </objectclass>
-                <attr name="multi">
-                  <value>foo</value>
-                  <value>bar</value>
-                  <value>baz</value>
+                <attr name="powers">
+                  <value>Magnetokinesis</value>
+                  <value>Ferrokinesis</value>
                 </attr>
                 <attr name="givenName">
-                  <value>foo</value>
+                  <value>Erik</value>
                 </attr>
               </entry>
             </directory-entries>
@@ -43,7 +41,7 @@ RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
       end
 
       it 'values must respond to each' do
-        expect { { 'cn' => 'baz' }.to_dsml }.to raise_error(NoMethodError, /each/)
+        expect { { 'cn' => 'Magneto' }.to_dsml }.to raise_error(NoMethodError, /each/)
       end
     end
 
@@ -63,17 +61,17 @@ RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
 
         entries = [
           {
-            'dn' => ['cn=leanda,dc=rom,dc=ldap'],
+            'dn' => ['cn=Wanda,dc=rom,dc=ldap'],
             'objectClass' => ['person', 'inetOrgPerson'],
-            'multi' => %w'foo bar baz',
-            'cn' => ['leanda christine hamilton'],
-            'givenName' => ['leanda']
+            'powers' => %w'Telekinesis Telepathy Hypnosis',
+            'cn' => ['Wanda Maximoff'],
+            'givenName' => ['Wanda']
           },
           {
-            'dn' => ['cn=peter,dc=rom,dc=ldap'],
+            'dn' => ['cn=Pietro,dc=rom,dc=ldap'],
             'objectClass' => ['person', 'inetOrgPerson'],
-            'cn' => ['peter david hamilton'],
-            'givenName' => ['peter']
+            'cn' => ['Pietro Maximoff'],
+            'givenName' => ['Pietro']
           }
         ]
 
@@ -81,33 +79,33 @@ RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
           <?xml version="1.0" encoding="UTF-8"?>
           <dsml>
             <directory-entries>
-              <entry dn="cn=leanda,dc=rom,dc=ldap">
+              <entry dn="cn=Wanda,dc=rom,dc=ldap">
                 <objectclass>
                   <oc-value>person</oc-value>
                   <oc-value>inetOrgPerson</oc-value>
                 </objectclass>
-                <attr name="multi">
-                  <value>foo</value>
-                  <value>bar</value>
-                  <value>baz</value>
+                <attr name="powers">
+                  <value>Telekinesis</value>
+                  <value>Telepathy</value>
+                  <value>Hypnosis</value>
                 </attr>
                 <attr name="cn">
-                  <value>leanda christine hamilton</value>
+                  <value>Wanda Maximoff</value>
                 </attr>
                 <attr name="givenName">
-                  <value>leanda</value>
+                  <value>Wanda</value>
                 </attr>
               </entry>
-              <entry dn="cn=peter,dc=rom,dc=ldap">
+              <entry dn="cn=Pietro,dc=rom,dc=ldap">
                 <objectclass>
                   <oc-value>person</oc-value>
                   <oc-value>inetOrgPerson</oc-value>
                 </objectclass>
                 <attr name="cn">
-                  <value>peter david hamilton</value>
+                  <value>Pietro Maximoff</value>
                 </attr>
                 <attr name="givenName">
-                  <value>peter</value>
+                  <value>Pietro</value>
                 </attr>
               </entry>
             </directory-entries>

@@ -4,7 +4,12 @@ RSpec.describe ROM::LDAP::Types do
     subject(:type) { ROM::LDAP::Types::Address }
 
     it 'splits on $' do
-      expect(type['street$town$region$country']).to eq(%w[street town region country])
+      expect(type['street$town$region$country']).to eq(%w[
+        street
+        town
+        region
+        country
+      ])
       expect(type['']).to eq([])
       expect(type['single_line_address']).to eq(%w[single_line_address])
     end
@@ -24,11 +29,10 @@ RSpec.describe ROM::LDAP::Types do
     end
 
     it 'coerces Active Directory timestamps' do
-      expect(type['131862601330000000'].to_s).to eq('2018-11-09 18:02:13 +0000')
-      expect(type[0].to_s).to eql('1601-01-01 00:00:00 +0000')
+      expect(type['131862601330000000'].to_s).to eq('2018-11-09 18:02:13 UTC')
+      expect(type[0].to_s).to eql('1601-01-01 00:00:00 UTC')
     end
   end
-
 
   describe 'Bool' do
     subject(:type) { ROM::LDAP::Types::Bool }
@@ -50,19 +54,16 @@ RSpec.describe ROM::LDAP::Types do
     end
   end
 
-  describe 'Jpeg' do
-    subject(:type) { ROM::LDAP::Types::Jpeg }
+  describe 'Binary' do
+    subject(:type) { ROM::LDAP::Types::Binary }
 
-    it 'coerces binary data to base64 encoded string' do
+    # 'convert -size 1x1 xc:white /tmp/pixel.jpg'
+    it 'encodes to base64' do
+      test_image = SPEC_ROOT.join('fixtures/pixel.jpg')
+      image_data = File.binread(test_image)
+      value = [image_data]
 
-      # generate on demand
-      # .delete("\n")
-      # 'convert -size 1x1 xc:white /tmp/pixel.jpg'
-      test_image = SPEC_ROOT.join('support/pixel.jpg')
-      image_data = File.read(test_image)
-      input      = [image_data]
-
-      expect(type[input]).to eql('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==')
+      expect(type[value]).to eql('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AVN//2Q==')
     end
   end
 end

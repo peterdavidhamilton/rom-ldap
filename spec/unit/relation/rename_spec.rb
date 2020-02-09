@@ -3,9 +3,7 @@ RSpec.describe ROM::LDAP::Relation, '#rename' do
   include_context 'people'
 
   before do
-    10.times.map { 'user' }.each.with_index(1) do |gn, i|
-      factories[:person, uid: "#{gn}#{i}"]
-    end
+    10.times { factories[:person, :sequence] }
   end
 
   subject(:relation) do

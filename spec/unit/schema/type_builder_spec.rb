@@ -16,7 +16,6 @@ RSpec.describe ROM::LDAP::Schema::TypeBuilder do
       end
 
       it 'to Time' do
-        # expect(struct.fetch(:create_timestamp)).to be_a(Time)
         expect(struct.fetch(:discovery_date)).to be_a(Time)
       end
 
@@ -28,23 +27,42 @@ RSpec.describe ROM::LDAP::Schema::TypeBuilder do
   end
 
   context 'when inferring the schema' do
-    include_context 'animals'
 
-    describe 'builds LDAP schema into metadata' do
-      let(:descriptions) do
-        animals.schema.to_h.values.map { |attr|
-          [attr.name, attr.type.meta[:description]]
-        }.sort.to_h
-      end
+    include_context 'people'
 
-      it 'including the description for attributes' do
-        expect(descriptions.fetch(:dn)).to eql(nil)
-        # VENDOR: apacheds
-        expect(descriptions.fetch(:cn)).to eql("RFC2256: common name(s) for which the entity is known by")
-        # VENDOR: openldap
-        # expect(descriptions.fetch(:cn)).to eql("RFC4519: common name(s) for which the entity is known by")
-        expect(descriptions.fetch(:species)).to eql("The scientific name of the animal")
+    let(:descriptions) do
+      people.schema.to_h.values.map { |attr|
+        [attr.name, attr.type.meta[:description]]
+      }.sort.to_h
+    end
+
+    describe 'builds directory schema into attribute metadata if available' do
+      with_vendors do
+        it do
+          case vendor
+          when 'apache_ds'
+            expect(descriptions.fetch(:cn)).to eql("RFC2256: common name(s) for which the entity is known by")
+          when 'open_ldap'
+            expect(descriptions.fetch(:cn)).to eql("RFC4519: common name(s) for which the entity is known by")
+          when '389_ds', 'open_dj'
+            expect(descriptions.fetch(:cn)).to eql(nil)
+          end
+        end
+
+
+        it do
+          case vendor
+          when 'apache_ds', 'open_dj'
+            expect(descriptions.fetch(:gid_number)).to eql("An integer uniquely identifying a group in an administrative domain")
+          when 'open_ldap'
+            expect(descriptions.fetch(:gid_number)).to eql("RFC2307: An integer uniquely identifying a group in an administrative domain")
+          when '389_ds'
+            expect(descriptions.fetch(:gid_number)).to eql("Standard LDAP attribute type")
+          end
+        end
+
       end
     end
+
   end
 end

@@ -2,84 +2,102 @@ require 'rom/lint/spec'
 
 RSpec.describe ROM::LDAP::Gateway do
 
-  include_context 'dragons'
+  with_vendors do
 
-  it_behaves_like 'a rom gateway' do
-    let(:identifier) { :ldap }
-    let(:gateway) { ROM::LDAP::Gateway }
-  end
+    let(:gateway) { container.gateways[:default] }
 
-
-  let(:gateway) { container.gateways[:default] }
-
-  describe 'with minimal options' do
-    it 'establishes an LDAP connection' do
-      gateway = ROM::LDAP::Gateway.new(uri, gateway_opts)
-      expect(gateway).to be_instance_of(ROM::LDAP::Gateway)
-    end
-  end
-
-  describe '#dataset?' do
-    it 'returns true if a entries exist' do
-      expect(gateway.dataset?('(cn=*)')).to be(true)
+    it_behaves_like 'a rom gateway' do
+      let(:identifier) { :ldap }
+      let(:gateway) { ROM::LDAP::Gateway }
     end
 
-    it 'returns false if entries do not exist' do
-      expect(gateway.dataset?('(foo=bar)')).to be(false)
+
+    it 'allows options to be passed to the directory' do
+      gateway = described_class.new(uri, base: 'foo')
+      expect(gateway.directory.base).to eql('foo')
     end
-  end
+
+    it 'allows extensions' do
+      extensions = [:compatibility, :dsml_export]
+
+      expect(ROM::LDAP).to receive(:load_extensions).with(:compatibility)
+      expect(ROM::LDAP).to receive(:load_extensions).with(:dsml_export)
+
+      described_class.new(uri, extensions: extensions)
+    end
 
 
-  describe 'authenticated connection' do
-    let(:gateway) { ROM::LDAP::Gateway.new(uri, auth_gateway_opts) }
 
-    context 'with valid credentials' do
-      let(:auth_gateway_opts) do
-        {
-          **gateway_opts,
-          username: 'uid=admin,ou=system',
-          password: 'secret',
-        }
+    describe 'authenticated connection' do
+      context 'with valid credentials' do
+        it do
+          expect { gateway.dataset('(objectClass=*)') }.to_not raise_error
+        end
       end
 
-      it 'binds to server' do
-        expect(gateway.dataset('(genus=*)').to_a).to_not be_empty
+      context 'with invalid credentials' do
+        it do
+          expect { described_class.new(uri, username: 'cn=Carnage') }.to raise_error(
+            ROM::LDAP::ConfigError,
+            'Authentication failed for cn=Carnage'
+            )
+        end
       end
     end
 
-    context 'with invalid credentials' do
-      let(:auth_gateway_opts) do
-        {
-          **gateway_opts,
-          username: 'uid=admin,ou=system',
-          password: 'wrong password',
-        }
+
+
+    describe '#dataset?' do
+
+      before do
+        directory.add(
+          dn: "cn=Venom,#{base}",
+          cn: 'Venom',
+          sn: 'Brock',
+          object_class: 'person'
+        )
       end
 
-      it 'raises error' do
-        expect { gateway.dataset('(genus=*)').to_a }.to raise_error(
-          ROM::LDAP::ConfigError,
-          'Authentication failed for uid=admin,ou=system'
-          )
+      after do
+        directory.delete("cn=Venom,#{base}")
+      end
+
+      context 'when entries exist' do
+        it do
+          expect(gateway.dataset('(objectclass=*)').count).to be > 0
+          expect(gateway.dataset?('(objectclass=*)')).to be(true)
+        end
+      end
+
+      context 'when entries do not exist' do
+        it do
+          expect(gateway.dataset('(foo=bar)').count).to be(0)
+          expect(gateway.dataset?('(foo=bar)')).to be(false)
+        end
       end
     end
-  end
 
 
-  describe '#disconnect' do
-    let(:gateway) { ROM::LDAP::Gateway.new(uri, gateway_opts) }
-
-    it 'closes client connection' do
-      expect(gateway.directory.client).to receive(:close)
-      gateway.disconnect
+    describe '#disconnect' do
+      it 'closes client connection' do
+        expect(gateway.directory.client).to receive(:close)
+        gateway.disconnect
+      end
     end
-  end
 
-  describe '#call' do
-    it 'queries for attributes' do
-      expect(gateway.('(description=*)')).to be_an(Array)
-      expect(gateway.('(description=*)').size).to eql(1)
+    describe '#call' do
+      it 'queries for attributes' do
+        expect(gateway.('(objectClass=*)')).to be_an(Array)
+        expect(gateway.('(objectClass=*)')).to_not be_empty
+      end
     end
-  end
 
+    describe '#attribute_types' do
+      subject { gateway.attribute_types }
+
+      it { is_expected.to be_an(Array) }
+      it { is_expected.to_not be_empty }
+    end
+
+  end
 end

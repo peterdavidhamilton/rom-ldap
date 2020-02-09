@@ -28,7 +28,7 @@ RSpec.describe ROM::LDAP::Schema::Inferrer do
   end
 
   it 'has inferred attribute types' do
-    primitives = animals.schema.to_h.values.map { |v| v.type.primitive.name }.uniq.sort
+    primitives = animals.schema.to_h.values.map { |v| v.type.type.name }.uniq.sort
     expect(primitives).to eql(['Integer', 'String', 'Time', 'TrueClass | FalseClass'])
   end
 end

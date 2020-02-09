@@ -1,41 +1,30 @@
-require 'rom/ldap/extensions/exporters/dsml'
-require 'rom/ldap/extensions/exporters/msgpack'
+require 'rom/ldap/extensions/dsml'
+require 'rom/ldap/extensions/msgpack'
 
+# Using ApacheDS as other vendors classes differ
+#
 RSpec.describe ROM::LDAP::Relation, 'exporting' do
 
   include_context 'people'
 
   before do
-    %w[Peter Leanda].each.with_index(123) do |gn, i|
-      factories[:person, given_name: gn, uid_number: i, sn: 'Hamilton']
-    end
-  end
-
-  after do
-    people.delete
+    factories[:person,  uid_number: 123, given_name: 'Scott', sn: 'Summers']
+    factories[:person,  uid_number: 124, given_name: 'Alex', sn: 'Summers']
   end
 
   let(:attrs) { %i[uid_number cn object_class sn given_name] }
 
-
-  # it 'raises error when the Dataset has been enumerated' do
-  #   expect {
-  #     binding.pry
-  #     people.random.to_ldif
-  #   }.to raise_error('The dataset is no longer a Dataset class')
-  # end
-
   context 'with a single tuple' do
 
-    let(:relation) { people.where(given_name: 'leanda').project(*attrs) }
+    let(:relation) { people.where(given_name: 'Alex').project(*attrs) }
 
     it '#to_msgpack' do
       output = {
-        "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],
-        "cn"          => ["Leanda Hamilton"],
-        "givenName"   => ["Leanda"],
+        "dn"          => ["cn=Alex Summers,ou=specs,dc=rom,dc=ldap"],
+        "cn"          => ["Alex Summers"],
+        "givenName"   => ["Alex"],
         "objectClass" => ["top", "inetOrgPerson", "person", "organizationalPerson", "extensibleObject"],
-        "sn"          => ["Hamilton"],
+        "sn"          => ["Summers"],
         "uidNumber"   => ["124"]
       }
 
@@ -44,15 +33,15 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
 
     it '#to_ldif' do
       output = <<~LDIF
-        dn: cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
-        cn: Leanda Hamilton
-        givenName: Leanda
+        dn: cn=Alex Summers,ou=specs,dc=rom,dc=ldap
+        cn: Alex Summers
+        givenName: Alex
         objectClass: top
         objectClass: inetOrgPerson
         objectClass: person
         objectClass: organizationalPerson
         objectClass: extensibleObject
-        sn: Hamilton
+        sn: Summers
         uidNumber: 124
 
         LDIF
@@ -61,13 +50,13 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     end
 
     it '#to_json' do
-      output = '{"dn":["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],"cn":["Leanda Hamilton"],"givenName":["Leanda"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"sn":["Hamilton"],"uidNumber":["124"]}'
+      output = '{"dn":["cn=Alex Summers,ou=specs,dc=rom,dc=ldap"],"cn":["Alex Summers"],"givenName":["Alex"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"sn":["Summers"],"uidNumber":["124"]}'
 
       # output = <<~JSON
       #   {
-      #     "dn": ["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],
-      #     "cn": ["Leanda Hamilton"],
-      #     "givenName": ["Leanda"],
+      #     "dn": ["cn=Alex Summers,ou=specs,dc=rom,dc=ldap"],
+      #     "cn": ["Alex Summers"],
+      #     "givenName": ["Alex"],
       #     "objectClass": [
       #       "top",
       #       "inetOrgPerson",
@@ -75,7 +64,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       #       "organizationalPerson",
       #       "extensibleObject"
       #     ],
-      #     "sn": ["Hamilton"],
+      #     "sn": ["Summers"],
       #     "uidNumber": ["124"]
       #   }
       #   JSON
@@ -87,11 +76,11 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       output = <<~YAML
         ---
         dn:
-        - cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
+        - cn=Alex Summers,ou=specs,dc=rom,dc=ldap
         cn:
-        - Leanda Hamilton
+        - Alex Summers
         givenName:
-        - Leanda
+        - Alex
         objectClass:
         - top
         - inetOrgPerson
@@ -99,7 +88,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
         - organizationalPerson
         - extensibleObject
         sn:
-        - Hamilton
+        - Summers
         uidNumber:
         - '124'
         YAML
@@ -112,7 +101,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
         <?xml version="1.0" encoding="UTF-8"?>
         <dsml>
           <directory-entries>
-            <entry dn="cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap">
+            <entry dn="cn=Alex Summers,ou=specs,dc=rom,dc=ldap">
               <objectclass>
                 <oc-value>top</oc-value>
                 <oc-value>inetOrgPerson</oc-value>
@@ -121,13 +110,13 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
                 <oc-value>extensibleObject</oc-value>
               </objectclass>
               <attr name="cn">
-                <value>Leanda Hamilton</value>
+                <value>Alex Summers</value>
               </attr>
               <attr name="givenName">
-                <value>Leanda</value>
+                <value>Alex</value>
               </attr>
               <attr name="sn">
-                <value>Hamilton</value>
+                <value>Summers</value>
               </attr>
               <attr name="uidNumber">
                 <value>124</value>
@@ -146,24 +135,24 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
 
   context 'with multiple tuples' do
 
-    let(:relation) { people.where(sn: 'Hamilton').order(:uid_number).project(*attrs) }
+    let(:relation) { people.where(sn: 'Summers').order(:uid_number).project(*attrs) }
 
     it '#to_msgpack' do
       output = [
         {
-          "dn"          => ["cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap"],
-          "cn"          => ["Peter Hamilton"],
-          "givenName"   => ["Peter"],
+          "dn"          => ["cn=Scott Summers,ou=specs,dc=rom,dc=ldap"],
+          "cn"          => ["Scott Summers"],
+          "givenName"   => ["Scott"],
           "objectClass" => ["top", "inetOrgPerson", "person", "organizationalPerson", "extensibleObject"],
-          "sn"          => ["Hamilton"],
+          "sn"          => ["Summers"],
           "uidNumber"   => ["123"]
         },
         {
-          "dn"          => ["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],
-          "cn"          => ["Leanda Hamilton"],
-          "givenName"   => ["Leanda"],
+          "dn"          => ["cn=Alex Summers,ou=specs,dc=rom,dc=ldap"],
+          "cn"          => ["Alex Summers"],
+          "givenName"   => ["Alex"],
           "objectClass" => ["top", "inetOrgPerson", "person", "organizationalPerson", "extensibleObject"],
-          "sn"          => ["Hamilton"],
+          "sn"          => ["Summers"],
           "uidNumber"   => ["124"]
         }
       ]
@@ -173,27 +162,27 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
 
     it '#to_ldif' do
       output = <<~LDIF
-        dn: cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap
-        cn: Peter Hamilton
-        givenName: Peter
+        dn: cn=Scott Summers,ou=specs,dc=rom,dc=ldap
+        cn: Scott Summers
+        givenName: Scott
         objectClass: top
         objectClass: inetOrgPerson
         objectClass: person
         objectClass: organizationalPerson
         objectClass: extensibleObject
-        sn: Hamilton
+        sn: Summers
         uidNumber: 123
 
 
-        dn: cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
-        cn: Leanda Hamilton
-        givenName: Leanda
+        dn: cn=Alex Summers,ou=specs,dc=rom,dc=ldap
+        cn: Alex Summers
+        givenName: Alex
         objectClass: top
         objectClass: inetOrgPerson
         objectClass: person
         objectClass: organizationalPerson
         objectClass: extensibleObject
-        sn: Hamilton
+        sn: Summers
         uidNumber: 124
 
         LDIF
@@ -202,7 +191,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
     end
 
     it '#to_json' do
-      output = '[{"dn":["cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap"],"cn":["Peter Hamilton"],"givenName":["Peter"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"sn":["Hamilton"],"uidNumber":["123"]},{"dn":["cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap"],"cn":["Leanda Hamilton"],"givenName":["Leanda"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"sn":["Hamilton"],"uidNumber":["124"]}]'
+      output = '[{"dn":["cn=Scott Summers,ou=specs,dc=rom,dc=ldap"],"cn":["Scott Summers"],"givenName":["Scott"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"sn":["Summers"],"uidNumber":["123"]},{"dn":["cn=Alex Summers,ou=specs,dc=rom,dc=ldap"],"cn":["Alex Summers"],"givenName":["Alex"],"objectClass":["top","inetOrgPerson","person","organizationalPerson","extensibleObject"],"sn":["Summers"],"uidNumber":["124"]}]'
 
       expect(relation.to_json).to eql(output)
     end
@@ -211,11 +200,11 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
       output = <<~YAML
         ---
         - dn:
-          - cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap
+          - cn=Scott Summers,ou=specs,dc=rom,dc=ldap
           cn:
-          - Peter Hamilton
+          - Scott Summers
           givenName:
-          - Peter
+          - Scott
           objectClass:
           - top
           - inetOrgPerson
@@ -223,15 +212,15 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
           - organizationalPerson
           - extensibleObject
           sn:
-          - Hamilton
+          - Summers
           uidNumber:
           - '123'
         - dn:
-          - cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap
+          - cn=Alex Summers,ou=specs,dc=rom,dc=ldap
           cn:
-          - Leanda Hamilton
+          - Alex Summers
           givenName:
-          - Leanda
+          - Alex
           objectClass:
           - top
           - inetOrgPerson
@@ -239,7 +228,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
           - organizationalPerson
           - extensibleObject
           sn:
-          - Hamilton
+          - Summers
           uidNumber:
           - '124'
         YAML
@@ -252,7 +241,7 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
         <?xml version="1.0" encoding="UTF-8"?>
         <dsml>
           <directory-entries>
-            <entry dn="cn=Peter Hamilton,ou=specs,dc=rom,dc=ldap">
+            <entry dn="cn=Scott Summers,ou=specs,dc=rom,dc=ldap">
               <objectclass>
                 <oc-value>top</oc-value>
                 <oc-value>inetOrgPerson</oc-value>
@@ -261,19 +250,19 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
                 <oc-value>extensibleObject</oc-value>
               </objectclass>
               <attr name="cn">
-                <value>Peter Hamilton</value>
+                <value>Scott Summers</value>
               </attr>
               <attr name="givenName">
-                <value>Peter</value>
+                <value>Scott</value>
               </attr>
               <attr name="sn">
-                <value>Hamilton</value>
+                <value>Summers</value>
               </attr>
               <attr name="uidNumber">
                 <value>123</value>
               </attr>
             </entry>
-            <entry dn="cn=Leanda Hamilton,ou=specs,dc=rom,dc=ldap">
+            <entry dn="cn=Alex Summers,ou=specs,dc=rom,dc=ldap">
               <objectclass>
                 <oc-value>top</oc-value>
                 <oc-value>inetOrgPerson</oc-value>
@@ -282,13 +271,13 @@ RSpec.describe ROM::LDAP::Relation, 'exporting' do
                 <oc-value>extensibleObject</oc-value>
               </objectclass>
               <attr name="cn">
-                <value>Leanda Hamilton</value>
+                <value>Alex Summers</value>
               </attr>
               <attr name="givenName">
-                <value>Leanda</value>
+                <value>Alex</value>
               </attr>
               <attr name="sn">
-                <value>Hamilton</value>
+                <value>Summers</value>
               </attr>
               <attr name="uidNumber">
                 <value>124</value>

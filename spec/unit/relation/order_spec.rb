@@ -1,6 +1,6 @@
-RSpec.describe ROM::LDAP::Relation, 'server-side ordering' do
+RSpec.describe ROM::LDAP::Relation, '#order' do
 
-  include_context 'animals'
+  include_context 'animals', 'apache_ds'
 
   describe 'integers' do
     before do
@@ -84,15 +84,21 @@ RSpec.describe ROM::LDAP::Relation, 'server-side ordering' do
 
   describe 'times' do
     before do
-      # TODO: Fix time format for factories
       [[1700,12,30], [2001,12,30,15,59], [1900,12,30]].map do |args|
         factories[:animal,
-          discovery_date: Time.new(*args,'+00:00').utc.strftime("%Y%m%d%H%M%SZ")
+          discovery_date: Time.new(*args).strftime("%Y%m%d%H%M%SZ")
         ]
       end
     end
 
     it 'in chronological order' do
+      expect(animals.order(:discovery_date).to_a.map { |h| h[:discovery_date].to_s }).to eql(
+        [
+          '1700-12-30 00:00:00 UTC',
+          '1900-12-30 00:00:00 UTC',
+          '2001-12-30 15:59:00 UTC'
+        ]
+      )
       expect(animals.order(:discovery_date).map(:discovery_date).to_a).to eql(
         [
           ['17001230000000Z'],
@@ -103,6 +109,13 @@ RSpec.describe ROM::LDAP::Relation, 'server-side ordering' do
     end
 
     it 'in reverse chronological order' do
+      expect(animals.order(:discovery_date).reverse.to_a.map { |h| h[:discovery_date].to_s }).to eql(
+        [
+          '2001-12-30 15:59:00 UTC',
+          '1900-12-30 00:00:00 UTC',
+          '1700-12-30 00:00:00 UTC'
+        ]
+      )
       expect(animals.order(:discovery_date).reverse.map(:discovery_date).to_a).to eql(
         [
           ['20011230155900Z'],

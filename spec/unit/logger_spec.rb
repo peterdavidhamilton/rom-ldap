@@ -1,6 +1,6 @@
 RSpec.describe 'Logger' do
 
-  include_context 'directory'
+  include_context 'vendor', 'apache_ds'
 
   let(:new_logger) { Logger.new(IO::NULL) }
 
@@ -11,6 +11,6 @@ RSpec.describe 'Logger' do
     gateway.use_logger(new_logger)
 
     expect(gateway.logger).to be(new_logger)
-    # expect(directory.logger).to be(new_logger)
+    expect(directory.logger).to be(new_logger)
   end
 end

@@ -1,14 +1,8 @@
-RSpec.shared_context 'people' do
+RSpec.shared_context 'people' do |vendor|
 
-  include_context 'factory'
+  include_context 'factory', vendor
 
   before do
-
-    # TODO: check for essential custom non-standard attribute
-
-
-    # Requires 'apple' and 'posix' schemas to be loaded into LDAP.
-    #
     directory.add(
       dn: "cn=person,#{base}",
       cn: 'person',
@@ -17,20 +11,13 @@ RSpec.shared_context 'people' do
       uid: 'uid',
       mail: 'mail',
       user_password: 'user_password',
-      gid_number: 1,                      # not apacheds standard attribute
-      uid_number: 1,                      # not apacheds standard attribute
-      apple_imhandle: 'apple_imhandle',   # not apacheds standard attribute
+      gid_number: 1,
+      uid_number: 1,
       object_class: %w[extensibleObject person]
     )
 
     conf.relation(:people) do
       schema('(objectClass=person)', infer: true)
-      # do
-        # when the schema is only inferred and therefore has read values for attributes
-        # select_label stops working
-        # attribute :uid_number, ROM::LDAP::Types::Integer, read: ROM::LDAP::Types::Integer
-        # attribute :cn,         ROM::LDAP::Types::String
-      # end
     end
 
 
@@ -70,18 +57,20 @@ RSpec.shared_context 'people' do
         fake(:internet, :safe_email, cn)
       end
 
-      f.apple_imhandle do |uid|
-        "@#{uid}"
-      end
-
+      # OpenDJ
+      #
+      # Pre-encoded passwords are not allowed for the password attribute userPassword
       f.user_password do |uid|
-        ROM::LDAP::Directory::Password.generate(:sha, uid.reverse)
+        uid.reverse
+        # ROM::LDAP::Directory::Password.generate(:sha, uid.reverse)
       end
 
-      f.trait :foo do |t|
-        t.object_class %w''
-      end
 
+      f.trait :sequence do |t|
+        t.sequence(:uid_number) { |i| i }
+        t.uid { |uid_number| "user#{uid_number}" }
+        t.cn { |uid| uid.upcase }
+      end
     end
 
     directory.delete("cn=person,#{base}")
@@ -93,6 +82,5 @@ RSpec.shared_context 'people' do
   after do
     people.delete
   end
-
 
 end

@@ -1,17 +1,10 @@
 RSpec.describe ROM::LDAP::Client, '#search' do
 
-  include_context 'directory'
+  include_context 'vendor', 'apache_ds'
 
-  before do
-    directory.add(
-      dn: 'ou=specs,dc=rom,dc=ldap',
-      ou: 'specs',
-      objectClass: 'organizationalUnit'
-    )
-  end
 
   let(:exp) do
-    ROM::LDAP::Expression.new(:op_eql, 'objectClass', :wildcard)
+    ROM::LDAP::Expression.new(op: :op_eql, field: 'objectClass', value: :wildcard)
   end
 
   subject(:pdu) { client.search(expression: exp) }

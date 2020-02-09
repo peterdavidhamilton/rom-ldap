@@ -104,11 +104,9 @@ RSpec.describe ROM::LDAP::Dataset::DSL do
 
   describe 'Special queries' do
 
-    # OPTIMIZE: include check for binary input in DSL and change the operator internally
-    #
     it 'op_bineq' do
       expect(dataset.binary_equal(bar: 'binary_data').opts[:criteria]).to eql(
-        [:op_eq, :bar, 'binary_data']
+        [:op_bineq, :bar, 'binary_data']
       )
     end
 

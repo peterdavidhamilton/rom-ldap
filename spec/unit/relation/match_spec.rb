@@ -10,21 +10,24 @@ RSpec.describe ROM::LDAP::Relation, 'matching' do
 
   subject(:relation) { people.with(auto_struct: true) }
 
+  with_vendors do
 
-  it '#begins' do
-    expect(relation.begins(uid: 'b').one.mail).to eql(%w'bob@example.com')
-  end
+    it '#begins' do
+      expect(relation.begins(uid: 'b').one.mail).to eql(%w'bob@example.com')
+    end
 
-  it '#ends' do
-    expect(relation.ends(uid: 'a').one.mail).to eql(%w'rita@example.com')
-  end
+    it '#ends' do
+      expect(relation.ends(uid: 'a').one.mail).to eql(%w'rita@example.com')
+    end
 
-  it '#contains' do
-    expect(relation.contains(uid: 'o').one.mail).to eql(%w'bob@example.com')
-  end
+    it '#contains' do
+      expect(relation.contains(uid: 'o').one.mail).to eql(%w'bob@example.com')
+    end
 
-  it '#excludes' do
-    expect(relation.excludes(uid: 'i').count).to eql(2)
+    it '#excludes' do
+      expect(relation.excludes(uid: 'i').count).to eql(2)
+    end
+
   end
 
 end

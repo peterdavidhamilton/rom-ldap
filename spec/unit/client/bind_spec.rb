@@ -1,6 +1,6 @@
 RSpec.describe ROM::LDAP::Client, '#bind' do
 
-  include_context 'directory'
+  include_context 'vendor', 'apache_ds'
 
   describe ':bind_result' do
 

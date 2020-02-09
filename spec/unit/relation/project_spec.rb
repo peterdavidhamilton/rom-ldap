@@ -6,108 +6,95 @@ RSpec.describe ROM::Relation do
     factories[:person, cn: 'user', uid_number: 1]
   end
 
-  describe '#select/#project' do
+  with_vendors do
 
-    context 'with arguments' do
-      let(:relation) { people.select(:cn) }
+    describe '#select (project)' do
 
-      it do
-        expect(relation.first).to eql(
-          dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
-          cn: ['user']
-        )
+      context 'with arguments' do
+        subject(:relation) { people.project(:cn, :uid_number) }
+
+        it 'returns only those attributes' do
+          expect(relation.first).to eql(
+            dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
+            cn: ['user'],
+            uid_number: ['1']
+          )
+          expect(relation.one.to_h).to eql(cn: ['user'], uid_number: 1)
+          expect(relation.to_a.first).to eql(cn: ['user'], uid_number: 1)
+        end
       end
 
-      it do
-        expect(relation.with(auto_struct: true).one.to_h).to eql(
-          cn: ['user']
-        )
+      context 'with a block' do
+        describe 'using symbols' do
+          subject(:relation) { people.select { [:cn, :uid_number] } }
+
+          it 'returns only those attributes' do
+            expect(relation.first).to eql(
+              dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
+              cn: ['user'],
+              uid_number: ['1']
+            )
+            expect(relation.one.to_h).to eql(cn: ['user'], uid_number: 1)
+            expect(relation.to_a.first).to eql(cn: ['user'], uid_number: 1)
+          end
+        end
+
+
+        describe 'using methods' do
+          subject(:relation) { people.select { [cn, uid_number] } }
+
+          it 'returns only those attributes' do
+            expect(relation.first).to eql(
+              dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
+              cn: ['user'],
+              uid_number: ['1']
+            )
+            expect(relation.one.to_h).to eql(cn: ['user'], uid_number: 1)
+            expect(relation.to_a.first).to eql(cn: ['user'], uid_number: 1)
+          end
+        end
+
+
+        describe 'using aliases' do
+          subject(:relation) do
+            people.select { [ uid_number.as(:value), cn.aliased(:label) ] }
+          end
+
+          it 'returns attributes renamed using their alias' do
+            expect(relation.first).to eql(
+              dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
+              label: ['user'],
+              value: ['1']
+            )
+            expect(relation.one.to_h).to eql(label: ['user'], value: 1)
+            expect(relation.to_a.first).to eql(label: ['user'], value: 1)
+          end
+
+          it 'raise error if unformatted attribute name is used' do
+            expect {
+              people.select { gidNumber.as(:value) }
+            }.to raise_error(NameError, /undefined local variable or method/)
+          end
+        end
       end
     end
 
-    context 'with a block' do
-      it do
-        expect(people.select { [:cn] }.first).to eql(
-          dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
-          cn: ['user']
-        )
-      end
 
-      it do
-        expect(people.with(auto_struct: true).select { [:cn] }.one.to_h).to eql(
-          cn: ['user']
-        )
-      end
+    describe '#select_append' do
 
-      it do
-        expect(people.select { [cn] }.first).to eql(
-          dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
-          cn: ['user']
-        )
-      end
+      subject(:relation) { people.select(:cn).select_append(:uid_number) }
 
-      it do
-        expect(people.with(auto_struct: true).select { [cn] }.one.to_h).to eql(
-          cn: ['user']
-        )
-      end
-
-
-      # can only select by the formatted version i.e. snake_case
-      xit 'works with aliases' do
-        relation = people.select {
-                                  [
-                                    uid_number.as(:value),
-                                    cn.aliased(:label)
-                                  ]
-                                }
-
-        # aliases ignored
+      it 'adds the chosen attributes the current selection' do
         expect(relation.first).to eql(
           cn: ['user'],
           dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
           uid_number: ['1']
         )
-
-
-        expect(relation.to_a.first).to eql(
-          dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
-          label: ['user'],
-          value: ['1']
-        )
-
-        #
-        expect(relation.with(auto_struct: true).one.to_h).to eql(
-          label: ['user'], # these change with the schema read types
-          value: ['1']
-        )
+        expect(relation.one.to_h).to eql(cn: ['user'], uid_number: 1)
+        expect(relation.to_a.first).to eql(cn: ['user'], uid_number: 1)
       end
     end
 
   end
 
-
-
-
-  describe '#select_append' do
-
-    let(:relation) { people.select(:cn).select_append(:uid_number) }
-
-    it do
-      expect(relation.first).to eql(
-        cn: ['user'],
-        dn: ['cn=user,ou=specs,dc=rom,dc=ldap'],
-        uid_number: ['1']
-      )
-    end
-
-    it do
-      expect(relation.with(auto_struct: true).one.to_h).to eql(
-        cn: ['user'],
-        uid_number: 1
-      )
-    end
-  end
-
 end
-

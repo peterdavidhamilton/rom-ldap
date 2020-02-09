@@ -1,6 +1,6 @@
-RSpec.shared_context 'animals' do
+RSpec.shared_context 'animals' do |vendor|
 
-  include_context 'factory'
+  include_context 'factory', vendor
 
   before do
 
@@ -23,41 +23,13 @@ RSpec.shared_context 'animals' do
       object_class: %w[extensibleObject mammalia]
     )
 
-    # Define a relation whose schema is dependent upon the entry return.
-    #
     conf.relation(:animals) do
       schema('(species=*)', infer: true)
     end
 
-
-    # ApacheDS Operational Attributes
-    #
-    # @see http://directory.apache.org/apacheds/advanced-ug/8-operational-attributes.html
-    #
-    # subschema_subentry  'cn=schema'
-    #
-    # create_timestamp    '20180301171714.514Z'
-    # creators_name       '0.9.2342.19200300.100.1.1=admin,2.5.4.11=system'
-    #
-    # modify_timestamp    '20180301171714.514Z'
-    # modifiers_name      '0.9.2342.19200300.100.1.1=admin,2.5.4.11=system'
-    #
-    # entry_csn           '20180827070345.021000Z#000000#001#000000'
-    # entry_dn            'uid=root,ou=users,dc=example,dc=com'
-    # entry_parent_id     '4c3c6602-849d-4554-8969-0f5d3901f597'
-    # entry_uuid          '7791d3ce-eeb2-4eb2-9da1-ba8f9ab2e8c2'
-    #
-    # nb_subordinates     '0'
-    # nb_children         '0'
-    #
-    # pwd_history         'binary data'
-    #
     factories.define(:animal) do |f|
 
-      # animal
-      f.cn do
-        SecureRandom.uuid
-      end
+      f.cn { SecureRandom.uuid }
 
       f.dn do |cn|
         common_name = cn.is_a?(Array) ? cn.first : cn
@@ -90,7 +62,7 @@ RSpec.shared_context 'animals' do
 
       f.trait :bird do |t|
         t.object_class %w'aves extensibleObject'
-        f.species %w'   '.sample
+        f.species %w'Anatidae Phoenicopteridae Spheniscidae'.sample
         t.study 'ornithology'
       end
 
@@ -107,12 +79,12 @@ RSpec.shared_context 'animals' do
       f.description 'description'
 
       f.discovery_date do
-        fake(:date, :birthday, rand).to_time.utc.strftime("%Y%m%d%H%M%SZ")
+        fake(:date, :birthday, rand).to_time.strftime("%Y%m%d%H%M%SZ")
       end
 
       # strings
       f.species do |genus|
-        "#{genus} " + fake(:lorem, :word)
+        [ genus, fake(:lorem, :word) ].join(' ')
       end
 
       f.family { fake(:lorem, :word) }
@@ -125,8 +97,6 @@ RSpec.shared_context 'animals' do
       end
     end
 
-    # Purge temporary seed data.
-    #
     directory.delete("cn=animal,#{base}")
   end
 

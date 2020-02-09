@@ -7,6 +7,15 @@ SimpleCov.start do
   add_filter '/vendor/'
 end
 
+ENV['TZ'] = 'UTC'
+
+ENV['LDAPURI']    = nil
+ENV['LDAPHOST']   = nil
+ENV['LDAPPORT']   = nil
+ENV['LDAPBASE']   = nil
+ENV['LDAPBINDDN'] = nil
+ENV['LDAPBINDPW'] = nil
+
 begin
   require 'pry-byebug'
 rescue LoadError
@@ -22,7 +31,7 @@ end
 require 'pathname'
 SPEC_ROOT = root = Pathname(__FILE__).dirname
 TMP_PATH  = root.join('../tmp')
-
+HOSTS = YAML.load_file(root.join('fixtures/vendors.yml')).freeze
 
 require 'dry/core/deprecations'
 Dry::Core::Deprecations.set_logger!(root.join('../log/deprecations.log'))

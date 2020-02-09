@@ -1,4 +1,4 @@
-RSpec.shared_context 'dragons' do
+RSpec.shared_context 'dragons' do |vendor|
 
   # Define a new relation
   #
@@ -42,7 +42,7 @@ RSpec.shared_context 'dragons' do
     end
   end
 
-  include_context 'animals'
+  include_context 'animals', vendor
 
   before do
     factories[:animal, :reptile,
@@ -57,8 +57,6 @@ RSpec.shared_context 'dragons' do
 
   let(:dragons) { relations[:dragons] }
 
-  after do
-    dragons.delete
-  end
+  after { dragons.delete }
 
 end

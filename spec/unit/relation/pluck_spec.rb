@@ -3,30 +3,36 @@ RSpec.describe ROM::LDAP::Relation, '#pluck' do
   include_context 'people'
 
   before do
-    10.times.map { 'user' }.each.with_index(1) do |gn, i|
-      factories[:person, uid: "#{gn}#{i}", cn: "#{gn}#{i}".upcase]
+    factories[:person,
+      uid: 'gambit',
+      given_name: 'Remy',
+      sn: 'LeBeau',
+      mail: ['ragin_cajun@x-factor.org', 'gambit@x-men.com']
+    ]
+  end
+
+  with_vendors do
+    it 'with no attribute returns empty array' do
+      expect { people.pluck }.to raise_error(ArgumentError)
     end
-  end
 
-  subject(:relation) { people.with(auto_struct: true).order(:uid) }
+    it 'arguments can be formatted or original' do
+      expect(people.pluck('uid')).to eql(%w{gambit})
+    end
 
+    it 'single attribute with single value' do
+      expect(people.pluck(:uid)).to eql(%w{gambit})
+    end
 
-  it 'providing no keys returns empty array' do
-    expect(relation.pluck.first).to be_empty
-  end
+    it 'multiple attributes with single values' do
+      expect(people.pluck(:uid, :sn, :given_name)).to eql([ %w{gambit LeBeau Remy} ])
+    end
 
-  it 'when the keys have a single value' do
-    expect(relation.pluck(:uid)).to be_an(Array)
-    expect(relation.pluck(:uid).first).to be_a(String)
-    expect(relation.pluck(:uid).first).to eql('user1')
-  end
-
-  it 'when the keys have multiple values' do
-    expect(relation.pluck(:uid, :cn)).to be_an(Array)
-    expect(relation.pluck(:uid, :cn).first).to be_a(Array)
-
-    # return in alphabetical order cn then uid
-    expect(relation.pluck(:uid, :cn).first).to eql(['USER1', 'user1'])
+    it 'multiple attributes with many values' do
+      expect(people.pluck(:uid, :mail)).to eql([
+        [ %w{gambit}, %w{ragin_cajun@x-factor.org gambit@x-men.com} ]
+      ])
+    end
   end
 
 end

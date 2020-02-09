@@ -1,10 +1,4 @@
-#
-# No formatter so directory and connection ops
-# require canonical attribute names.
-#
-RSpec.describe ROM::LDAP::Directory do
-
-  include_context 'directory'
+RSpec.describe ROM::LDAP::Directory, 'operations' do
 
   let(:dn) { "cn=Lucas Bishop,#{base}" }
 
@@ -12,55 +6,80 @@ RSpec.describe ROM::LDAP::Directory do
     directory.delete(dn)
   end
 
-  describe '#query' do
-    it 'accepts :filter keyword' do
-      expect(directory.query(filter: '(cn=*)', attributes: %w'species')).to be_empty
+  with_vendors do
+
+    describe '#add' do
+      context 'when valid' do
+        it 'returns created entry' do
+          expect(directory.add(dn: dn, cn: 'Lucas Bishop', sn: 'Bishop', objectClass: 'person')).to be_a(ROM::LDAP::Directory::Entry)
+          expect(directory.find(dn)).to be_a(ROM::LDAP::Directory::Entry)
+        end
+      end
+
+      # NB: would require sn attribute to be valid.
+      context 'when invalid' do
+        it 'returns false' do
+          expect(directory.add(dn: dn, cn: 'Lucas Bishop', objectClass: 'mutant')).to be(false)
+        end
+      end
     end
 
-    it 'defaults to base="", filter="(objectClass=*)"' do
-      expect(directory.query).to be_an(Array)
+    describe '#modify' do
+      before do
+        directory.add(
+          dn: dn,
+          cn: 'Lucas Bishop',
+          sn: 'Bishop',
+          objectClass: 'person')
+      end
+
+      context 'when valid' do
+        it 'returns created entry' do
+          expect(directory.modify(dn, object_class: %w'person extensibleObject', given_name: 'Lucas')).to be_a(ROM::LDAP::Directory::Entry)
+          expect(directory.find(dn)['givenName']).to eql(%w'Lucas')
+          expect(directory.find(dn)[:object_class]).to include('extensibleObject')
+        end
+
+        it 'also replace the dn' do
+          new_dn = "cn=Archbishop,#{base}"
+
+          directory.modify(dn, dn: new_dn, cn: 'Archbishop')
+          expect(directory.find(new_dn)).to include(cn: %w'Archbishop', sn: %w'Bishop')
+          directory.delete(new_dn)
+        end
+      end
+
+      # NB: would require additional objectclass to add this attribute.
+      context 'when invalid' do
+        it 'returns false' do
+          expect(directory.modify(dn, given_name: 'Lucas')).to be(false)
+          expect(directory.modify(dn, givenname: 'Lucas')).to be(false)
+        end
+      end
     end
 
-    it 'can search schema entries' do
-      # VENDOR: apacheds
-      expect(directory.query(filter: '(m-name=discoveryDate)', base: 'cn=wildlife,ou=schema').first['m-oid']).to eql(%w[1.3.6.1.4.1.18055.0.4.1.2.1008])
+
+    describe '#delete' do
+      context 'when entry exists' do
+        before do
+          directory.add(
+            dn: dn,
+            cn: 'Lucas Bishop',
+            sn: 'Bishop',
+            objectClass: 'person')
+        end
+
+        it 'returns deleted entry' do
+          expect(directory.delete(dn)).to be_a(ROM::LDAP::Directory::Entry)
+        end
+      end
+
+      context 'when no entry exists' do
+        it 'returns false' do
+          expect(directory.delete(dn)).to be(false)
+        end
+      end
     end
 
-    xit 'returns the whole tree to a max of 1_432' do
-      expect(directory.query(base: '').count).to eql(1_432)
-    end
   end
-
-
-  describe '#add' do
-    it 'persists valid entries' do
-      expect(directory.add(dn: dn, cn: 'Lucas Bishop', sn: 'Bishop', objectClass: 'person')).to be_a(ROM::LDAP::Directory::Entry)
-      expect(directory.find(dn)).to be_a(ROM::LDAP::Directory::Entry)
-    end
-
-    it "doesn't persist invalid entries" do
-      expect(directory.add(dn: dn, cn: 'Lucas Bishop', objectClass: 'mutant')).to eql(false)
-    end
-  end
-
-
-  describe '#modify' do
-    xit 'can update an attribute schema' do
-      expect(directory.modify('m-oid=1.3.6.1.4.1.18055.0.4.1.2.1001,ou=attributeTypes,cn=wildlife,ou=schema', m_single_value: false)).to eql([])
-      expect(directory.modify('m-oid=1.3.6.1.4.1.18055.0.4.1.2.1001,ou=attributeTypes,cn=wildlife,ou=schema', m_single_value: true)).to eql([])
-    end
-  end
-
-
-  describe '#delete' do
-    before do
-      directory.add(dn: dn, cn: 'Lucas Bishop', sn: 'Bishop', objectClass: 'person')
-    end
-
-    it 'destroys entries' do
-      expect(directory.delete(dn)).to be_a(ROM::LDAP::Directory::Entry)
-      expect(directory.delete(dn)).to be(false)
-    end
-  end
-
 end

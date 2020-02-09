@@ -21,18 +21,26 @@ RSpec.shared_context 'directory' do
     ->(key) { key.to_s.downcase.tr('-= ', '').to_sym }
   end
 
+  let(:uri) { uri_for('apache_ds') }
+
   let(:base) { 'ou=specs,dc=rom,dc=ldap' }
-
-  let(:uri) { ENV['LDAPURI'] || "ldap://apacheds:10389/#{base}" }
-
-  let(:bind_dn) { 'uid=admin,ou=system' }
-
-  let(:bind_pw) { 'secret' }
 
   let(:logger) { Logger.new(File.open('./log/test.log', 'a')) }
 
+  let(:bind_dn) { nil }
+
+  let(:bind_pw) { nil }
+
+  let(:ssl) { nil }
+
   let(:gateway_opts) do
-    { username: bind_dn, password: bind_pw, logger: logger }
+    {
+      base: base,
+      username: bind_dn,
+      password: bind_pw,
+      logger: logger,
+      ssl: ssl
+    }
   end
 
   let(:conf) { TestConfiguration.new(:ldap, uri, gateway_opts) }
