@@ -50,11 +50,11 @@ RSpec.shared_context 'people' do |vendor|
       end
 
       f.uid do |cn|
-        fake(:internet, :username, cn, '_')
+        fake(:internet, :username, specifier: cn, separators: %w(_))
       end
 
       f.mail do |cn|
-        fake(:internet, :safe_email, cn)
+        fake(:internet, :safe_email, name: cn)
       end
 
       # OpenDJ

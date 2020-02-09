@@ -79,7 +79,7 @@ RSpec.shared_context 'animals' do |vendor|
       f.description 'description'
 
       f.discovery_date do
-        fake(:date, :birthday, rand).to_time.strftime("%Y%m%d%H%M%SZ")
+        fake(:date, :birthday, min_age: rand).to_time.strftime("%Y%m%d%H%M%SZ")
       end
 
       # strings
