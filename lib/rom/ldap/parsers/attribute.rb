@@ -61,6 +61,7 @@ module ROM
       # @example
       #   Parsers::Attribute.new("( NAME cn....)").call
       #
+      # @api private
       class Attribute
 
         extend Initializer
@@ -117,15 +118,21 @@ module ROM
 
         # numericoid
         #
+        # @return [String]
+        #
         def attribute_oid
           attribute[/^\( ([\d\.]*)/, 1]
         end
 
+        # @return [TrueClass, FalseClass]
+        #
         def editable?
           modifiable? and public?
         end
 
         # not user modifiable
+        #
+        # @return [TrueClass, FalseClass]
         #
         def modifiable?
           attribute.scan(/NO-USER-MODIFICATION/).none?
@@ -133,11 +140,15 @@ module ROM
 
         # value syntax
         #
+        # @return [String]
+        #
         def syntax_oid
           attribute[/SYNTAX (\S+)/, 1].to_s.tr("'", '')
         end
 
         # userApplications
+        #
+        # @return [TrueClass, FalseClass]
         #
         def public?
           attribute[/USAGE (\S+)/, 1] == 'userApplications'
@@ -147,38 +158,47 @@ module ROM
         # distributedOperation
         # dSAOperation
         #
+        # @return [TrueClass, FalseClass]
+        #
         def private?
           attribute[/USAGE (\S+)/, 1] != 'userApplications'
         end
 
         # An optional human-readable description, which should be enclosed in single quotation marks.
         #
+        # @return [String]
+        #
         def description
-          attribute[/DESC '(.+)' [A-Z]+/, 1]
+          attribute[/DESC '(.+)' [A-Z]+\s/, 1]
         end
 
         # ordering matching rule
+        #
+        # @return [String]
         #
         def ordering_rule
           attribute[/ORDERING (\S+)/, 1]
         end
 
+        # @return [String]
+        #
         def sub_string_rule
           attribute[/SUBSTR (\S+)/, 1]
         end
 
         # single-value
         #
-        # @return [Boolean]
+        # @return [TrueClass, FalseClass]
         #
         def single_value?
           attribute.scan(/SINGLE-VALUE/).any?
         end
 
+        # @return [String]
+        #
         def equality_matcher
           attribute[/EQUALITY (\S+)/, 1]
         end
-
 
         # ================================
         #
@@ -261,6 +281,7 @@ module ROM
         def max_value_count
           attribute[/X-MAX-VALUE-COUNT (\d+)/, 1].to_i
         end
+
       end
     end
   end
