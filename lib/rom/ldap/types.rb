@@ -6,144 +6,149 @@ module ROM
     module Types
       include ROM::Types
 
-      # protocols of ldap and ldaps only
+      # Protocol ldap(s) only
       #
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       URI = Strict::String.constrained(format: LDAPURI_REGEX)
 
       # Something in parentheses
       #
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       Filter = Strict::String.constrained(format: FILTER_REGEX)
 
-      # empty string
       #
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       DN = Strict::String.constrained(format: DN_REGEX)
 
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       Direction = Strict::Symbol.constrained(included_in: %i[asc desc])
 
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       Scope = Strict::Integer.constrained(included_in: SCOPES)
 
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       Deref = Strict::Integer.constrained(included_in: DEREF_ALL)
 
-      # Abstraction of LDAP symbols: :con_and, :op_eql etc
+      # Abstraction of LDAP constructors and operators
       #
       # @return [Dry::Types::Constrained]
       #
+      # @api public
       Abstract = Strict::Symbol.constrained(included_in: ABSTRACTS)
 
       # Compatible filter fields (formatters may symbolise)
       #
       # @return [Dry::Types::Sum::Constrained]
       #
+      # @api public
       Field = Strict::String | Strict::Symbol
 
       # Compatible filter values (including wildcard abstraction)
       #
       # @return [Dry::Types::Sum::Constrained]
       #
-      Value = Strict::String | Strict::Integer | Strict::Symbol.constrained(included_in: %i[wildcard])
+      # @api public
+      Value = Strict::String | Strict::Integer | Strict::Float | Strict::Symbol.constrained(included_in: %i[wildcard])
 
-      # @see Schema::Attribute read types
+      # @example => "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...."
       #
+      # @return [String]
+      #
+      # @api public
+      Media = Constructor(String,  ->(v) { Functions[:mime_type].call(v[0]) })
+
+      #     1.3.6.1.4.1.1466.115.121.1.41
+      #
+      #     A special format which uses UTF-8 encoding of ISO-10646 (Unicode)
+      #     separated by '$' used for generating printable labels or other output.
+      #     DOES allow extended characters e.g. é, Ø, å etc.
+      #     Allows matchingRules of `caseIgnoreListMatch` and `caseIgnoreListSubstringsMatch`.
+      #
+      # @return [Array<String>]
+      #
+      # @api public
+      Address = Constructor(Array, ->(v) { v.split('$').map(&:strip) })
 
       #
       # Single Values --------
       #
+      # @see Schema::Attribute read types
 
-
-      # 1.3.6.1.4.1.1466.115.121.1.40
+      # @return [String]
       #
-      #   Are treated as transparent 8-bit bytes.
-      #   They may, or may not, be printable or human readable.
-      #   Typically used by passwords.
-      #   Allows matchingRules of `octetStringMatch` and `octetStringOrderingMatch`.
-      #
-      Octet   = Constructor(String,  ->(v) { Functions[:to_hex][v][0] }).meta(octet: true)
-
-      #
-      Binary  = Constructor(String,  ->(v) { Functions[:to_binary].(v[0]) }).meta(binary: true)
-
-      #
-      String  = Constructor(String,  ->(v) { Functions[:stringify].(v[0]) })
+      # @api public
+      String  = Constructor(String,  ->(v) { Functions[:stringify].call(v[0]) })
 
       # @return [Integer]
+      #
+      # @api public
       Integer = Constructor(Integer, ->(v) { Functions[:map_to_integers][v][0] })
 
       # @return [Symbol]
+      #
+      # @api public
       Symbol  = Constructor(Symbol,  ->(v) { Functions[:map_to_symbols][v][0] })
 
       # @return [Time]
+      #
+      # @api public
       Time    = Constructor(Time,    ->(v) { Functions[:map_to_times][v][0] })
 
       # @return [TrueClass, FalseClass]
+      #
+      # @api public
       Bool    = Constructor(Bool,    ->(v) { Functions[:map_to_booleans][v][0] })
 
-      # Jpeg    = Constructor(String,  Functions[:to_base64])
-      Jpeg    = String.constructor(Functions[:to_base64])
-
-      # Audio   = Constructor(String,  Functions[:to_base64])
-      Audio   = String.constructor(Functions[:to_base64])
-
-
-      # 1.3.6.1.4.1.1466.115.121.1.41
+      # @return [String]
       #
-      # A special format which uses UTF-8 encoding of ISO-10646 (Unicode)
-      # separated by '$' used for generating printable labels or other output.
-      # DOES allow extended characters e.g. é, Ø, å etc.
-      # Allows matchingRules of `caseIgnoreListMatch` and `caseIgnoreListSubstringsMatch`.
-      #
-      # @return [Array<String>]
-      Address = Constructor(String, ->(v) { v.split('$').map(&:strip) })
+      # @api public
+      Binary  = Constructor(String,  ->(v) { Functions[:map_to_base64][v][0] }).meta(binary: true)
 
       #
       # Multiple Values --------
       #
 
-      #
-      Octets    = Array.constructor(Functions[:to_hex]).meta(octet: true)
-
-      #
-      Binaries  = Array.constructor(Functions[:to_binary]).meta(binary: true)
-
       # @return [Array<String>]
-      # Strings   = Array.constructor(Functions[:stringify])
+      #
+      # @api public
       Strings   = Constructor(Array, Functions[:stringify])
 
       # @return [Array<Integer>]
-      Integers  = Array.constructor(Functions[:map_to_integers])
+      #
+      # @api public
+      Integers  = Constructor(Array, Functions[:map_to_integers])
 
       # @return [Array<Symbol>]
-      Symbols   = Array.constructor(Functions[:map_to_symbols])
+      #
+      # @api public
+      Symbols   = Constructor(Array, Functions[:map_to_symbols])
 
       # @return [Array<Time>]
-      Times     = Array.constructor(Functions[:map_to_times])
+      #
+      # @api public
+      Times     = Constructor(Array, Functions[:map_to_times])
 
       # @return [Array<TrueClass, FalseClass>]
-      Bools     = Array.constructor(Functions[:map_to_booleans])
-
       #
-      Jpegs     = String.constructor(Functions[:to_base64])
+      # @api public
+      Bools     = Constructor(Array, Functions[:map_to_booleans])
 
+      # @return [Array<String>]
       #
-      # Special LDAP Read Types --------
-      #
-
-
-      # Addresses = Constructor(Array, ->(v) { v.map { |a| a.split('$').map(&:strip) }.first })
-
-      # Jpeg  = String.constructor -> (v) { Functions[:to_base64][v] }
-
+      # @api public
+      Binaries  = Constructor(Array, Functions[:map_to_base64]).meta(binary: true)
     end
   end
 end
