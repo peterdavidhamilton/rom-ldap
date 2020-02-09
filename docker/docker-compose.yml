@@ -11,17 +11,16 @@ services:
       labels:
         name: ROM LDAP Adapter
     environment:
-      - LDAPHOST=apacheds
-      - LDAPPORT=10389
-      - LDAPBASE=dc=rom,dc=ldap
+      # - AD_URI
+      # - AD_USER
+      # - AD_PW
+      - GITLAB_TOKEN
+      - DEBUG
+      # LDAP variables used by rake to update schema
+      - LDAPURI=ldap://apacheds:10389
       - LDAPBINDDN=uid=admin,ou=system
       - LDAPBINDPW=secret
-      - LDAPDIR=/src/docker/schema
-      - GITLAB_TOKEN
-      - AD_URI
-      - AD_USER
-      - AD_PW
-      #- TZ=America/Los_Angeles
+      - LDAPDIR=/src/spec/fixtures/ldif
     restart: on-failure
     depends_on:
       - 389ds
@@ -36,7 +35,6 @@ services:
     stdin_open: true
     networks:
       - rom-ldap-network
-
 
 
   # 1 ubuntu
@@ -72,7 +70,6 @@ services:
       retries: 3
     environment:
       APACHEDS_INSTANCE: rom
-      # TZ: America/Los_Angeles
     networks:
       - rom-ldap-network
 
@@ -93,6 +90,7 @@ services:
     volumes:
       # - ../tmp/openldap:/var/lib/ldap
       # - ../tmp/openldap:/etc/ldap/slapd.d
+      - ../tmp/socket:/var/run/slapd
       - ../tmp/openldap:/var/log
     ports:
       - 2389:389
@@ -110,7 +108,6 @@ services:
       LDAP_DOMAIN: rom.ldap
       LDAP_BASE_DN: dc=rom,dc=ldap
       LDAP_ADMIN_PASSWORD: topsecret
-      # TZ: America/Los_Angeles
     networks:
       - rom-ldap-network
 
@@ -132,10 +129,7 @@ services:
     ports:
       - 3389:389
       - 3636:636
-      # - 9830:9830
     volumes:
-      # - ../tmp/389ds:/etc/dirsrv
-      # - ../tmp/389ds:/var/lib/dirsrv
       - ../tmp/389ds:/var/log/dirsrv
     hostname: rom.ldap
     restart: on-failure
@@ -153,7 +147,6 @@ services:
       DIRSRV_ROOT_DN_PASSWORD: topsecret
       # DIRSRV_ADMIN_USERNAME: admin
       # DIRSRV_ADMIN_PASSWORD: adminpassword
-      # TZ: America/Los_Angeles
     networks:
       - rom-ldap-network
 
@@ -169,7 +162,7 @@ services:
     build:
       context: ./opendj
       args:
-        version: 4.3.1
+        version: 4.4.3
       labels:
         vendor: OpenIdentity
     tty: true
@@ -177,10 +170,6 @@ services:
     ports:
       - 4389:389
       - 4636:636
-      # - 4444:4444
-    # volumes:
-    #   - ../tmp/opendj:/opt/opendj
-    #   - ../tmp/opendj:/var/log:rw
     hostname: rom.ldap
     restart: on-failure
     healthcheck:
@@ -192,7 +181,6 @@ services:
       BASE_DN: dc=rom,dc=ldap
       ROOT_USER_DN: cn=Directory Manager
       ROOT_PASSWORD: topsecret
-      # TZ: America/Los_Angeles
     networks:
       - rom-ldap-network
 

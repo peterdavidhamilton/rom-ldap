@@ -672,7 +672,6 @@ objectClass: ads-base
 objectClass: top
 ads-serverId: ldapServer
 ads-confidentialityRequired: FALSE
-# test paging
 ads-maxSizeLimit: 200
 ads-maxTimeLimit: 15000
 ads-maxpdusize: 2000000

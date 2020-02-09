@@ -1,3 +1,4 @@
+# docker build --build-arg version=4.4.3 -t registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3 .
 FROM java:8
 
 LABEL maintainer="rom-ldap" \
@@ -10,7 +11,6 @@ ENV OPENDJ_URL https://github.com/OpenIdentityPlatform/OpenDJ/releases/download/
 ENV BASE_DN "dc=example,dc=com"
 ENV ROOT_USER_DN "cn=Directory Manager"
 ENV ROOT_PASSWORD "secret"
-
 
 WORKDIR /opt
 
@@ -25,10 +25,6 @@ RUN chgrp -R 0 /opt/opendj \
 
 EXPOSE 389 636 4444
 
-# COPY wildlife.ldif /opt/opendj/config/schema/98-wildlife.ldif
-# COPY wildlife.ldif /opt/opendj/config/schema/99-user.ldif
-
-# COPY wildlife.ldif /ldif/wildlife.ldif
 COPY domain.ldif /ldif/domain.ldif
 
 VOLUME /opt/opendj

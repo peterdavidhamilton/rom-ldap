@@ -59,12 +59,7 @@ if [ ! -d "$DIRSRV_BASE" ]; then
     "admin.ServerAdminID=$DIRSRV_ADMIN_USERNAME" \
     "admin.ServerAdminPwd=$DIRSRV_ADMIN_PASSWORD" || ERROR_CODE=$?
 
-  # echo "Configured. Error code $ERROR_CODE"
-
-
-  # cp /etc/dirsrv/schema.ldif /$DIRSRV_BASE/schema/99user.ldif
-  # echo "Installing custom schema"
-  # cp /etc/dirsrv/wildlife.ldif /$DIRSRV_BASE/schema/98wildlife.ldif
+  echo "Configured. Error code $ERROR_CODE"
 fi
 
 echo "Starting 389 Directory server..."

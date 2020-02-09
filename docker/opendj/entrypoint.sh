@@ -27,7 +27,6 @@ if [[ $(/opt/opendj/bin/status) == *"not configured"* ]]; then
     --no-prompt \
     --doNotStart \
     --ldifFile $LDIF_FILE
-    # --ldifFile /ldif/wildlife.ldif
 
   /opt/opendj/bin/start-ds --systemInfo
 

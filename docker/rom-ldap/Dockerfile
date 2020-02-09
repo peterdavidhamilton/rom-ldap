@@ -3,9 +3,7 @@ FROM ruby:2.4.5-alpine3.8 as gem
 RUN apk --no-cache upgrade && \
     apk --no-cache add build-base libxml2-dev openldap-clients git
 
-ENV LDAPHOST="apacheds" \
-    LDAPPORT="10389" \
-    LDAPBASE="dc=rom,dc=ldap" \
+ENV LDAPURI="ldap:://apacheds:10389" \
     LDAPBINDDN="uid=admin,ou=system" \
     LDAPBINDPW="secret" \
     LDAPDIR="/schema" \
