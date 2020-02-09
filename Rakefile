@@ -8,5 +8,6 @@ end
 require 'bundler/gem_tasks'
 
 load 'rom/ldap/tasks/ldap.rake'
+load 'rom/ldap/tasks/ldif.rake'
 
 task default: [:spec]
