@@ -17,6 +17,7 @@ group :development do
   gem 'rouge' # WIP bin/ldap_logger.rb
   gem 'pry', platforms: %i[jruby rbx]
   gem 'pry-byebug', platforms: :mri
+  gem 'yard-junk'
 end
 
 group :test do

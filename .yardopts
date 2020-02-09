@@ -2,6 +2,7 @@
 --markup markdown
 --readme README.md
 --private
+--plugin junk
 lib/**/*.rb
 -
 CHANGELOG.md
