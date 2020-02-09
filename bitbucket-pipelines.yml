@@ -25,14 +25,14 @@ definitions:
     apacheds:
       image:
         name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
-        # username:
+        username: peterdavidhamilton
         password: $GITLAB_TOKEN
       variables:
         APACHEDS_INSTANCE: rom
     389ds:
       image:
         name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:1.3.8.4
-        # username:
+        username: peterdavidhamilton
         password: $GITLAB_TOKEN
       memory: 512
       variables:
@@ -45,7 +45,7 @@ definitions:
     openldap:
       image:
         name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.48
-        # username:
+        username: peterdavidhamilton
         password: $GITLAB_TOKEN
       memory: 512
       variables:
@@ -56,7 +56,7 @@ definitions:
     opendj:
       image:
         name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3
-        # username:
+        username: peterdavidhamilton
         password: $GITLAB_TOKEN
       memory: 512
       variables:
