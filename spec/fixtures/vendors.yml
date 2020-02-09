@@ -1,0 +1,24 @@
+---
+apache_ds:
+  - ldap://uid=admin,ou=system:secret@apacheds:10389
+  - ldaps://uid=admin,ou=system:secret@apacheds:10636
+  - ldap://uid=admin,ou=system:secret@localhost:1389
+  - ldaps://uid=admin,ou=system:secret@localhost:1636
+
+open_ldap:
+  - ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap
+  - ldaps://cn=admin,dc=rom,dc=ldap:topsecret@openldap
+  - ldap://cn=admin,dc=rom,dc=ldap:topsecret@localhost:2389
+  - ldaps://cn=admin,dc=rom,dc=ldap:topsecret@localhost:2636
+
+389_ds:
+  - ldap://cn=Directory Manager:topsecret@389ds
+  - ldaps://cn=Directory Manager:topsecret@389ds
+  - ldap://cn=Directory Manager:topsecret@localhost:3389
+  - ldaps://cn=Directory Manager:topsecret@localhost:3636
+
+open_dj:
+  - ldap://cn=Directory Manager:topsecret@opendj
+  - ldaps://cn=Directory Manager:topsecret@opendj
+  - ldap://cn=Directory Manager:topsecret@localhost:4389
+  - ldaps://cn=Directory Manager:topsecret@localhost:4636

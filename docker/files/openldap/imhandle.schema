@@ -1,7 +1,0 @@
-attributetype (
-  1.3.6.1.4.1.63.1000.1.1.1.1.21
-  NAME ( 'apple-imhandle' )
-  DESC 'IM handle (service:account name)'
-  EQUALITY caseExactMatch
-  SUBSTR caseExactSubstringsMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )

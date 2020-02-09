@@ -1,19 +1,16 @@
 version: 1
 
 dn: ou=animals,dc=rom,dc=ldap
-objectClass: top
-objectClass: organizationalUnit
 ou: animals
+objectClass: organizationalUnit
 
 dn: ou=extinct, ou=animals, dc=rom, dc=ldap
-objectClass: top
-objectClass: organizationalUnit
 ou: extinct
+objectClass: organizationalUnit
 
 dn: ou=groups,dc=rom,dc=ldap
-objectClass: top
-objectClass: organizationalUnit
 ou: groups
+objectClass: organizationalUnit
 
 #########################################################
 #
@@ -29,15 +26,12 @@ family: Hominidae
 order: Primates
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 description: Modern humans are the only extant members of the subtribe Hominina, a branch of the tribe Hominini belonging to the family of great apes.
 populationCount: 7582530942
 extinct: FALSE
 endangered: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Human
 study: anthropology
-# audio:< file://~/Template.plist
-# audio:< file://./recordings/human.wav
 
 dn: cn=Red Fox, ou=animals, dc=rom, dc=ldap
 cn: Red Fox
@@ -47,7 +41,6 @@ family: Canidae
 order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: FALSE
 study: mammalogy
@@ -60,7 +53,6 @@ family: Turdidae
 order: Passeriformes
 objectClass: aves
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: FALSE
 study: ornithology
@@ -74,7 +66,6 @@ family: Equidae
 order: Perissodactyla
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 description: Like all extant zebras, mountain zebras are boldly striped in black or dark brown and no two individuals look exactly alike.
 populationCount: 0
 extinct: FALSE
@@ -90,7 +81,6 @@ family: Testudinidae
 order: Testudines
 objectClass: reptilia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: FALSE
 study: herpetology
@@ -105,7 +95,6 @@ order: Carnivora
 description: The sun bear's fur is usually jet-black, short, and sleek with some under-wool; some individual sun bears are reddish or gray.
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Sun_bear
@@ -119,7 +108,6 @@ family: Dendrobatidae
 order: Anura
 objectClass: amphibia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: FALSE
 study: herpetology
@@ -132,7 +120,6 @@ family: Phoenicopteridae
 order: Phoenicopteriformes
 objectClass: aves
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: FALSE
 study: ornithology
@@ -145,7 +132,6 @@ family: Hominidae
 order: Primates
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 description: The King of the Swingers
 extinct: FALSE
@@ -160,7 +146,6 @@ family: Felidae
 order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 1234567689
 extinct: FALSE
 study: mammalogy
@@ -174,7 +159,6 @@ family: Canidae
 order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 population-count: 999090909
 description: Man's Best Friend
 extinct: FALSE
@@ -188,7 +172,6 @@ family: Felidae
 order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 population-count: 40000
 extinct: FALSE
 study: mammalogy
@@ -205,7 +188,6 @@ family: Ursidae
 order: Carnivora
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 50
 extinct: FALSE
 endangered: TRUE
@@ -221,7 +203,6 @@ family: Phascolarctidae
 order:  Diprotodontia
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 labeledURI: https://en.wikipedia.org/wiki/Koala
 study: mammalogy
 
@@ -234,7 +215,6 @@ family: Elephantidae
 order: Proboscidea
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 2000
 endangered: TRUE
 extinct: FALSE
@@ -249,7 +229,6 @@ family: Macroscelididae
 order: Macroscelidea
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 100000
 extinct: FALSE
 study: mammalogy
@@ -262,7 +241,6 @@ family: Eublepharidae
 order: Squamata
 objectClass: reptilia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 90000
 extinct: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Leopard_gecko
@@ -275,7 +253,6 @@ family: Salamandridae
 order: Caudata
 objectClass: amphibia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 2000000
 extinct: FALSE
 endangered: FALSE
@@ -290,10 +267,8 @@ family: Octopodidae
 order: Octopoda
 objectClass: cephalopoda
 objectClass: extensibleObject
-objectClass: top
 labeledURI: https://en.wikipedia.org/wiki/Octopus_kaurna
 study: teuthology
-
 
 dn: cn=Reef Manta Ray, ou=animals, dc=rom, dc=ldap
 cn: Reef Manta Ray
@@ -303,7 +278,6 @@ family: Myliobatidae
 order:  Myliobatiformes
 objectClass: chondrichthyes
 objectClass: extensibleObject
-objectClass: top
 populationCount: 8000
 extinct: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Reef_manta_ray
@@ -319,7 +293,6 @@ description: The Platypus is a semi-aquatic egg-laying mammal endemic to eastern
 description: It is one of the few species of venomous mammals; the male has a spur on the hind foot that delivers a venom capable of causing severe pain to humans.
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 labeledURI: https://en.wikipedia.org/wiki/Platypus
 study: mammalogy
 
@@ -331,7 +304,6 @@ family: Chamaeleonidae
 order: Squamata
 objectClass: reptilia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 8000
 extinct: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Panther_chameleon
@@ -345,7 +317,6 @@ family: Columbidae
 order:  Columbiformes
 objectClass: aves
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
 extinct: TRUE
 discoveryDate: 15980101000000Z
@@ -356,11 +327,10 @@ species: Myobatrachus gouldii
 genus: Myobatrachus
 family: Myobatrachidae
 order: Anura
-objectClass: Amphibia
+objectClass: amphibia
 objectClass: extensibleObject
-objectClass: top
 populationCount: 0
-extinct: False
+extinct: FALSE
 labeledURI: https://en.wikipedia.org/wiki/Myobatrachus_gouldii
 
 dn: cn=Capybara, ou=animals, dc=rom, dc=ldap
@@ -373,7 +343,6 @@ family: Caviidae
 order: Rodentia
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 labeledURI: https://en.wikipedia.org/wiki/Hydrochoerus_hydrochaeris
 study: rodentology
 
@@ -388,10 +357,8 @@ family: Pteropodidae
 order: Chiroptera
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 labeledURI: https://en.wikipedia.org/wiki/Sulawesi_flying_fox
 study: chiropterology
-
 
 dn: cn=Killer Whale, ou=animals, dc=rom, dc=ldap
 cn: Killer Whale
@@ -403,11 +370,35 @@ family: Delphinidae
 order: Cetacea
 objectClass: mammalia
 objectClass: extensibleObject
-objectClass: top
 
+dn: cn=Platybelodon, ou=animals, dc=rom, dc=ldap
+cn: Platybelodon
+cn: Flat-Spear Tusk
+species: Platybelodon grangeri
+description: Large herbivorous mammals related to the elephant that lived during the middle Miocene Epoch in Africa, Asia and the Caucasus.
+genus: Platybelodon
+family: Amebelodontidae
+order: Proboscidea
+objectClass: mammalia
+objectClass: extensibleObject
+labeledURI: https://en.wikipedia.org/wiki/Platybelodon
+populationCount: 0
+extinct: TRUE
+discoveryDate: 19290101000000Z
+study: mammalogy
 
-
-
+dn: cn=Smallest Frog, ou=animals, dc=rom, dc=ldap
+cn: Smallest Frog
+species: Paedophryne amauensis
+genus: Paedophryne
+family: Microhylidae
+order: Anura
+discoveryDate: 20120101000000Z
+description: In length it is considered the world's smallest known vertebrate.
+description: Discovered by the International Institute for Species Exploration.
+labeledURI: https://en.wikipedia.org/wiki/Paedophryne_amauensis
+objectClass: amphibia
+objectClass: extensibleObject
 
 #########################################################
 #
@@ -415,7 +406,7 @@ objectClass: top
 #
 #########################################################
 
-dn: cn=wild,ou=groups,dc=rom,dc=ldap
+dn: cn=wild, ou=groups, dc=rom, dc=ldap
 cn: Wild Animals
 objectClass: groupOfNames
 member: cn=Red Fox, ou=animals, dc=rom, dc=ldap
@@ -428,7 +419,7 @@ member: cn=Orangutan, ou=animals, dc=rom, dc=ldap
 member: cn=Platypus, ou=animals, dc=rom, dc=ldap
 member: cn=Sulawesi Fruit Bat, ou=animals, dc=rom, dc=ldap
 
-dn: cn=domestic,ou=groups,dc=rom,dc=ldap
+dn: cn=domestic, ou=groups, dc=rom, dc=ldap
 cn: Domesticated Animals
 objectClass: groupOfNames
 member: cn=Spur-thighed Tortoise, ou=animals, dc=rom, dc=ldap

@@ -1,3 +1,7 @@
+#
+# ApacheDS Schema modification.
+# Custom themed attributes and classes.
+#
 version: 1
 
 dn: cn=wildlife, ou=schema

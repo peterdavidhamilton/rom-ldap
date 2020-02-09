@@ -1,0 +1,10 @@
+#
+# ApacheDS Schema modification.
+# Enable the NIS schema including the uidNumber and gidNumber attributes.
+#
+version: 1
+
+dn: cn=nis, ou=schema
+changetype: modify
+replace: m-disabled
+m-disabled: FALSE
