@@ -45,6 +45,8 @@ module ROM
         #
         # @return [PDU] result object
         #
+        # @raise [BindError]
+        #
         # @api public
         def bind(username:, password:)
           request_type = pdu_lookup(:bind_request)
@@ -55,7 +57,10 @@ module ROM
             password.to_ber_contextspecific(0)
           ].to_ber_appsequence(request_type)
 
-          submit(:bind_result, request)
+          pdu = submit(:bind_result, request)
+          raise(BindError, username) if pdu.failure?
+
+          pdu
         end
 
         #
@@ -73,6 +78,12 @@ module ROM
           submit(:extended_response, request)
         end
 
+        #
+        # @return
+        #
+        # @raise [SecureBindError]
+        #
+        # @api private
         def sasl_bind(mechanism:, credentials:, challenge:)
           request_type = pdu_lookup(:bind_request)
           n = 0
@@ -89,7 +100,7 @@ module ROM
               sasl
             ].to_ber_appsequence(request_type)
 
-            raise Error, 'sasl-challenge overflow' if (n += 1) > 10
+            raise SecureBindError, 'sasl-challenge overflow' if (n += 1) > 10
 
             pdu = submit(:bind_request, request)
 

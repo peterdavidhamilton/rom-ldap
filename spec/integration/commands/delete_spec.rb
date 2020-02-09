@@ -45,12 +45,12 @@ RSpec.describe ROM::LDAP::Commands::Delete do
         command = delete_account.by_uid('black_panther')
 
         expect(command.relation).to receive(:delete).and_raise(
-          ROM::LDAP::OperationError, 'distinguished name not found'
+          ROM::LDAP::DistinguishedNameError, 'DN not found'
         )
 
         expect {
           command.call
-        }.to raise_error(ROM::LDAP::OperationError, /distinguished name not found/)
+        }.to raise_error(ROM::LDAP::DistinguishedNameError, 'DN not found')
       end
     end
 

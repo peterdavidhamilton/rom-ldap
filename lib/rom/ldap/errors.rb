@@ -18,18 +18,24 @@ module ROM
       IOError
     ].freeze
 
-    #
-    ConfigError                   = Class.new(StandardError)
-    #
-    ConnectionError               = Class.new(StandardError)
+    # @see Client::Authentication#bind
     #
     BindError                     = Class.new(StandardError)
+
+    # @see Client::Authentication#sasl_bind
+    #
     SecureBindError               = Class.new(StandardError)
-    OperationError                = Class.new(StandardError)
+
+    # @see Directory::Operations#find, #by_dn, #add
+    #
+    DistinguishedNameError        = Class.new(StandardError)
+
+    # @see Socket#connect
+    #
+    ConnectionError               = Class.new(StandardError)
+
+    # @see Directory::Password#generate
+    #
     PasswordError                 = Class.new(StandardError)
-    UnknownAttributeError         = Class.new(StandardError)
-    ResponseMissingError          = Class.new(StandardError)
-    ResponseMissingOrInvalidError = Class.new(StandardError)
-    ResponseTypeInvalidError      = Class.new(StandardError)
   end
 end

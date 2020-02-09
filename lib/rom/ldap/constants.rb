@@ -77,10 +77,10 @@ module ROM
     # @return [Hash]
     #
     CONSTRUCTORS = {
-        con_and: '&',   # AND / AMPERSAND   / %x26
-        con_or:  '|',   # OR  / VERTBAR     / %x7C
-        con_not: '!'    # NOT / EXCLAMATION / %x21
-      }.freeze
+      con_and: '&', # AND / AMPERSAND   / %x26
+      con_or:  '|',   # OR  / VERTBAR     / %x7C
+      con_not: '!'    # NOT / EXCLAMATION / %x21
+    }.freeze
 
     CONSTRUCTOR_REGEX = Regexp.union(/\s*\|\s*/, /\s*\&\s*/).freeze
 
@@ -100,14 +100,13 @@ module ROM
     #                         matchingrule COLON EQUALS assertionvalue )
     #
     OPERATORS = {
-        op_bineq: '=',  # Binary comparison
-
-        op_eql: '=',    # Equal to
-        op_prx: '~=',   # Approximately equal to
-        op_gte: '>=',   # Lexicographically greater than or equal to
-        op_lte: '<=',   # Lexicographically less than or equal to
-        op_ext: ':='    # Bitwise comparison of numeric values
-      }.freeze
+      op_bineq: '=', # Binary comparison
+      op_eql: '=',    # Equal to
+      op_prx: '~=',   # Approximately equal to
+      op_gte: '>=',   # Lexicographically greater than or equal to
+      op_lte: '<=',   # Lexicographically less than or equal to
+      op_ext: ':='    # Bitwise comparison of numeric values
+    }.freeze
 
     OPERATOR_REGEX = Regexp.union(*OPERATORS.values).freeze
 
@@ -120,10 +119,10 @@ module ROM
     # @return [Hash]
     #
     VALUES_MAP = {
-        :wildcard => WILDCARD, #  ANY / ASTERISK / %x2A
-        true      => 'TRUE',
-        false     => 'FALSE'
-      }.freeze
+      :wildcard => WILDCARD, #  ANY / ASTERISK / %x2A
+      true      => 'TRUE',
+      false     => 'FALSE'
+    }.freeze
 
     #
     # DSL dataset methods
@@ -133,12 +132,12 @@ module ROM
     # @return [Hash]
     #
     ESCAPES = {
-        "\0" => '00',   #   NUL      / %x00
-        '*'  => '2A',   #   ASTERISK / %x2A
-        '('  => '28',   #   LPARENS  / %x28
-        ')'  => '29',   #   RPARENS  / %x29
-        '\\' => '5C'    #   ESC      / %x5C
-      }.freeze
+      "\0" => '00',   #   NUL      / %x00
+      '*'  => '2A',   #   ASTERISK / %x2A
+      '('  => '28',   #   LPARENS  / %x28
+      ')'  => '29',   #   RPARENS  / %x29
+      '\\' => '5C'    #   ESC      / %x5C
+    }.freeze
 
     #
     # Expression Encoder

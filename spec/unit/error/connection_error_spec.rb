@@ -13,8 +13,7 @@ RSpec.describe ROM::LDAP::ConnectionError do
 
     it 'raises connection error' do
       expect { container }.to raise_error(
-        ROM::LDAP::ConnectionError,
-        'Connection refused - 127.0.0.1:9999'
+        ROM::LDAP::ConnectionError, 'Connection refused - 127.0.0.1:9999'
       )
     end
   end

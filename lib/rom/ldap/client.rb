@@ -38,7 +38,7 @@ module ROM
       #
       # @yield [Socket]
       #
-      # @raise [ConfigError]
+      # @raise [BindError, SecureBindError]
       def open
         unless alive?
           @socket = Socket.new(options).call
@@ -49,11 +49,7 @@ module ROM
             sasl_bind # (mechanism:, credentials:, challenge:)
           end
 
-          # simple
-          if auth && bind(auth).failure?
-            raise ConfigError, "Authentication failed for #{auth[:username]}"
-          end
-
+          bind(auth) unless auth.nil? # simple auth
         end
 
         yield(@socket)

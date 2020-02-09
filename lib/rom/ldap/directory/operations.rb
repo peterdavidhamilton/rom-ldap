@@ -67,7 +67,7 @@ module ROM
         #
         # @api public
         def by_dn(dn)
-          raise(OperationError, 'distinguished name is required') unless dn
+          raise(DistinguishedNameError, 'DN is required') unless dn
 
           query(base: dn, max: 1, attributes: ALL_ATTRS)
         end
@@ -129,7 +129,7 @@ module ROM
         def add(tuple)
           dn    = tuple.delete(:dn)
           attrs = canonicalise(tuple)
-          raise(OperationError, 'distinguished name is required') unless dn
+          raise(DistinguishedNameError, 'DN is required') unless dn
 
           log(__callee__, dn)
 
@@ -149,6 +149,8 @@ module ROM
         # @api public
         def modify(dn, tuple)
           log(__callee__, dn)
+
+          # entry = find(dn)
 
           new_dn = tuple.delete(:dn)
           attrs  = canonicalise(tuple)
@@ -200,11 +202,11 @@ module ROM
         #
         # @return [Array<Hash>,Hash]
         #
-        # @raise [OperationError] distinguished name not found
+        # @raise [DistinguishedNameError] DN not found
         #
         def find(dn)
           entry = by_dn(dn)
-          raise(OperationError, 'distinguished name not found') unless entry
+          raise(DistinguishedNameError, 'DN not found') unless entry
 
           entry.one? ? entry.first : entry
         end

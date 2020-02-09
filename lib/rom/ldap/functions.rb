@@ -6,7 +6,6 @@ module ROM
   module LDAP
     # @api private
     module Functions
-
       extend Dry::Transformer::Registry
 
       import Dry::Transformer::Coercions

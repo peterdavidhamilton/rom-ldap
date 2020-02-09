@@ -38,9 +38,8 @@ RSpec.describe ROM::LDAP::Gateway do
       context 'with invalid credentials' do
         it do
           expect { described_class.new(uri, username: 'cn=Carnage') }.to raise_error(
-            ROM::LDAP::ConfigError,
-            'Authentication failed for cn=Carnage'
-            )
+            ROM::LDAP::BindError, 'cn=Carnage'
+          )
         end
       end
     end

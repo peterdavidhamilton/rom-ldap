@@ -26,9 +26,8 @@ RSpec.describe ROM::LDAP::Client, '#open' do
   context 'when credentials are invalid' do
     let(:auth) { { username: 'unknown', password: 'wrong' } }
 
-    it 'raises ConfigError' do
-      expect { |b| client.open(&b) }.to raise_error(
-        ROM::LDAP::ConfigError, 'Authentication failed for unknown')
+    it 'raises BindError' do
+      expect { |b| client.open(&b) }.to raise_error(ROM::LDAP::BindError, 'unknown')
     end
   end
 

@@ -8,7 +8,7 @@ RSpec.describe ROM::LDAP::Relation do
       context 'when unsuccessful' do
         it 'raises error if missing dn' do
           expect { people.insert(cn: 'The Dark Knight') }.to raise_error(
-            ROM::LDAP::OperationError, 'distinguished name is required'
+            ROM::LDAP::DistinguishedNameError, 'DN is required'
           )
         end
       end
