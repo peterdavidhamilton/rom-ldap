@@ -8,10 +8,11 @@ pipelines:
           - apk upgrade --no-cache
           - apk add --no-cache build-base libxml2-dev openldap-clients git
           - gem install bundler --no-document
-          - bundle install -j $(nproc) --path vendor
+          - bundle config set path vendor
+          - bundle install -j $(nproc)
           - bundle exec rake ldap:modify
-          - bundle exec rspec        
-          - bundle install          
+          - bundle exec rspec
+          - bundle install
         services:
           - apacheds
           - 389ds
@@ -24,7 +25,7 @@ definitions:
     apacheds:
       image: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
       variables:
-        APACHEDS_INSTANCE: rom    
+        APACHEDS_INSTANCE: rom
     389ds:
       image: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:latest
       memory: 512

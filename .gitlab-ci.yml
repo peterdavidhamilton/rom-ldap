@@ -57,7 +57,8 @@ test:
     - apk upgrade --no-cache
     - apk add --no-cache build-base libxml2-dev openldap-clients git
     - gem install bundler --no-document
-    - bundle install -j $(nproc) --path vendor
+    - bundle config set path vendor
+    - bundle install -j $(nproc)
     - bundle exec rake ldap:modify
     - bundle exec rake
   artifacts:
