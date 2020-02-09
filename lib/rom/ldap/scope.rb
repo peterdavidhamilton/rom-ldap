@@ -1,6 +1,5 @@
 module ROM
   module LDAP
-
     #
     # Search Scope
     #
@@ -14,6 +13,5 @@ module ROM
     SCOPE_SUB   = 2 # "sub"
 
     SCOPES = [SCOPE_BASE, SCOPE_ONE, SCOPE_SUB].freeze
-
   end
 end

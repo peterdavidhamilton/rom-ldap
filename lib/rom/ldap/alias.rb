@@ -1,7 +1,5 @@
 module ROM
   module LDAP
-
-
     #
     # Alias Dereferencing [RFC4512]
     #
@@ -9,7 +7,6 @@ module ROM
     #
     # Dereferencing aliases can cause poor search performance for some LDAP directories.
     # Control the extent to which alias dereferencing occurs when searching the directory.
-
 
     # Do not dereference aliases in searching or in locating the base object of the search.
     DEREF_NEVER  = 0 # "never"
@@ -27,8 +24,5 @@ module ROM
 
     # Array of all dereferencing modes
     DEREF_ALL = [DEREF_NEVER, DEREF_SEARCH, DEREF_FIND, DEREF_ALWAYS].freeze
-
-
-
   end
 end

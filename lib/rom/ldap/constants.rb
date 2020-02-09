@@ -1,39 +1,46 @@
-require 'rom/ldap/controls'
-require 'rom/ldap/scopes'
-require 'rom/ldap/aliases'
+# frozen_string_literal: true
+
+require 'rom/ldap/oid'
+require 'rom/ldap/scope'
+require 'rom/ldap/alias'
 require 'rom/ldap/matchers'
 require 'rom/ldap/type_map'
 require 'rom/ldap/responses'
 
 module ROM
   module LDAP
-
-    # Matches an ldap protocol url ldap://host:port/base
+    # Matches an ldap(s) url
     #
     # @return [Regexp]
-    LDAPURI_REGEX = %r"^ldaps?://[\w/\.]+:?\d*/?(\w+=\w+,?)*.*$"
+    LDAPURI_REGEX = Regexp.union(
+      ::URI::DEFAULT_PARSER.make_regexp('ldap'),
+      ::URI::DEFAULT_PARSER.make_regexp('ldaps')
+    ).freeze
 
     # Any word character or hyphen, equals
     #
     # @return [Regexp]
-    DN_REGEX = /(([-\w]+=[-\w]+)*,?)/
+    DN_REGEX = /(([-\w]+=[-\w]+)*,?)/.freeze
 
     # Something in parentheses
     #
     # @return [Regexp]
-    FILTER_REGEX = /^\s*\(.*\)\s*$/
+    FILTER_REGEX = /^\s*\(.*\)\s*$/.freeze
 
     # @return [String]
-    NEW_LINE  = "\n".freeze
+    NEW_LINE = "\n"
 
     # @return [String]
-    WILDCARD  = '*'.freeze
+    WILDCARD = '*'
 
     # @return [Array<String>]
-    OP_ATTRS  = %w'+'.freeze
+    OP_ATTRS = %w[+].freeze
 
     # @return [Array<String>]
     ALL_ATTRS = [WILDCARD, *OP_ATTRS].freeze
+
+    # @return [String]
+    DEFAULT_PK = 'entrydn'
 
     # @return [Array<String>]
     #
@@ -43,26 +50,25 @@ module ROM
     #     type: ROM::LDAP::Types::Time
     #
     #
-    # @see Relation#add_timestamps
+    # @see Relation#operational
     #
     TIMESTAMPS = %w[createTimestamp modifyTimestamp].freeze
 
     # @return [String]
     #
-    DEFAULT_FILTER = '(objectClass=*)'.freeze
-
+    DEFAULT_FILTER = '(objectClass=*)'
 
     # Time conversion
     #
     # @return [Integer]
     #
     # @see Functions.to_time
-    TEN_MILLION = 10_000_000.freeze
+    TEN_MILLION = 10_000_000
 
     # @return [Integer]
     #
     # @see Functions.to_time
-    SINCE_1601  = 11_644_473_600.freeze
+    SINCE_1601 = 11_644_473_600
 
     # Internal abstraction of LDAP string search filter constructors.
     #
@@ -73,8 +79,10 @@ module ROM
     CONSTRUCTORS = {
         con_and: '&',   # AND / AMPERSAND   / %x26
         con_or:  '|',   # OR  / VERTBAR     / %x7C
-        con_not: '!',   # NOT / EXCLAMATION / %x21
+        con_not: '!'    # NOT / EXCLAMATION / %x21
       }.freeze
+
+    CONSTRUCTOR_REGEX = Regexp.union(/\s*\|\s*/, /\s*\&\s*/).freeze
 
     # Internal abstraction of LDAP string search filter operators.
     #
@@ -92,6 +100,8 @@ module ROM
     #                         matchingrule COLON EQUALS assertionvalue )
     #
     OPERATORS = {
+        op_bineq: '=',  # Binary comparison
+
         op_eql: '=',    # Equal to
         op_prx: '~=',   # Approximately equal to
         op_gte: '>=',   # Lexicographically greater than or equal to
@@ -99,6 +109,7 @@ module ROM
         op_ext: ':='    # Bitwise comparison of numeric values
       }.freeze
 
+    OPERATOR_REGEX = Regexp.union(*OPERATORS.values).freeze
 
     # @return [Array]
     #
@@ -126,7 +137,7 @@ module ROM
         '*'  => '2A',   #   ASTERISK / %x2A
         '('  => '28',   #   LPARENS  / %x28
         ')'  => '29',   #   RPARENS  / %x29
-        '\\' => '5C',   #   ESC      / %x5C
+        '\\' => '5C'    #   ESC      / %x5C
       }.freeze
 
     #
@@ -147,11 +158,25 @@ module ROM
     # are represented as a backslash followed by the two hexadecimal digits
     # representing the value of the encoded octet.
     #
-    UNESCAPE_REGEX   = /\\([a-f\d]{2})/i.freeze
+    UNESCAPE_REGEX = /\\([a-f\d]{2})/i.freeze
 
+    # @return [Regexp]
     #
-    ESCAPE_REGEX = Regexp.new('[' + ESCAPES.keys.map { |e| Regexp.escape(e) }.join + ']')
+    ESCAPE_REGEX = Regexp.new('[' + ESCAPES.keys.map { |e| Regexp.escape(e) }.join + ']').freeze
 
+    # @return [Regexp]
+    #
+    VAL_REGEX = %r"(?:[-\[\]{}\w*.+/:@=,#\$%&!'^~\s\xC3\x80-\xCA\xAF]|[^\x00-\x7F]|\x5C(?:[\x20-\x23]|[\x2B\x2C]|[\x3B-\x3E]|\x5C)|\\[a-fA-F\d]{2})+"u.freeze
 
+    # Local file path
+    #
+    # @return [Regexp]
+    #
+    BIN_FILE_REGEX = %r{^file://(.*)}.freeze
+
+    # $1 = attribute
+    # $3 = value
+    #
+    LDIF_LINE_REGEX = /^([^:]+):([\:]?)[\s]*<?(.*)$/.freeze
   end
 end

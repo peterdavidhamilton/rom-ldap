@@ -1,17 +1,17 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
-
-    EXTENSIONS = {
-      password_modify:                  '1.3.6.1.4.1.4203.1.11.1',
-    }.freeze
-
-    # LDAP CONTROL OIDs
+    # LDAP OID hash map
     #
-    # http://oid-info.com/get/{{OID}}
-    # https://ldap.com/ldap-oid-reference-guide/
-    # http://ldapwiki.com/wiki/LDAP%20Extensions%20and%20Controls%20Listing
+    # @see http://oid-info.com/get/{{OID}}
+    # @see https://ldap.com/ldap-oid-reference-guide/
+    # @see http://ldapwiki.com/wiki/LDAP%20Extensions%20and%20Controls%20Listing
     #
-    CONTROLS = {
+    # @return [Hash]
+    #
+    # @api private
+    OID = {
       matched_values:                   '1.2.826.0.1.3344810.2.3',
       paged_results:                    '1.2.840.113556.1.4.319',
       show_deleted:                     '1.2.840.113556.1.4.417',
@@ -39,6 +39,7 @@ module ROM
       modify_increment:                 '1.3.6.1.1.14',
       transaction_start_request:        '1.3.6.1.1.21.1',
       transaction_spec_request:         '1.3.6.1.1.21.2',
+      transaction_end_request:          '1.3.6.1.1.21.3',
       dont_use_copy:                    '1.3.6.1.1.22',
       password_policy_request:          '1.3.6.1.4.1.42.2.27.8.5.1',
       get_effective_rights_request:     '1.3.6.1.4.1.42.2.27.9.5.2',
@@ -58,10 +59,22 @@ module ROM
       sync_done:                        '1.3.6.1.4.1.4203.1.9.1.3',
       sync_info_message:                '1.3.6.1.4.1.4203.1.9.1.4',
       subentries:                       '1.3.6.1.4.1.4203.1.10.1',
+      password_modify:                  '1.3.6.1.4.1.4203.1.11.1',
       dereference:                      '1.3.6.1.4.1.4203.666.5.16',
       cascade:                          '1.3.6.1.4.1.18060.0.0.1',
+      launch_diagnostic_ui_request:     '1.3.6.1.4.1.18060.0.1.1',
+      launch_diagnostic_ui_response:    '1.3.6.1.4.1.18060.0.1.2',
       graceful_shutdown_request:        '1.3.6.1.4.1.18060.0.1.3',
+      graceful_shutdown_response:       '1.3.6.1.4.1.18060.0.1.4',
       graceful_disconnect:              '1.3.6.1.4.1.18060.0.1.5',
+      stored_procedure_request:         '1.3.6.1.4.1.18060.0.1.6',
+      stored_procedure_response:        '1.3.6.1.4.1.18060.0.1.7',
+      create_grouping_request:          '2.16.840.1.113719.1.27.103.1',
+      create_grouping_response:         '2.16.840.1.113719.1.27.103.1',
+      end_grouping_request:             '2.16.840.1.113719.1.27.103.2',
+      end_grouping_response:            '2.16.840.1.113719.1.27.103.2',
+      grouping:                         '2.16.840.1.113719.1.27.103.7',
+      transaction_grouping:             '2.16.840.1.113719.1.27.103.8',
       manage_dsa_it:                    '2.16.840.1.113730.3.4.2',
       persistent_search:                '2.16.840.1.113730.3.4.3',
       netscape_password_expired:        '2.16.840.1.113730.3.4.4',
@@ -78,7 +91,5 @@ module ROM
       proxied_authorization_v2:         '2.16.840.1.113730.3.4.18',
       virtual_attributes_only_request:  '2.16.840.1.113730.3.4.19'
     }.freeze
-
-
   end
 end
