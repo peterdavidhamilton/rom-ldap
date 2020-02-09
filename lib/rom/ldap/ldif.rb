@@ -1,9 +1,14 @@
+require 'rom/ldap/ldif/importer'
+require 'rom/ldap/ldif/exporter'
+
 require 'rom/initializer'
 #
 # @see https://docs.oracle.com/cd/E10773_01/doc/oim.1014/e10531/ldif_appendix.htm
 #
 module ROM
   module LDAP
+    module_function
+
     #
     # LDAP Data Interchange Format (LDIF)
     #
@@ -13,60 +18,17 @@ module ROM
     # @see Relation::Exporting
     #
     module LDIF
-      # Export Entry objects as LDIF files.
+      # @example
       #
-      # @param tuple [Entry]
+      #   ROM::LDAP::LDIF("version: 3\n") => [{}]
+      #
+      # @param ldif [String]
+      #
+      # @return [Array<Hash>]
       #
       # @api private
-      class Exporter
-        extend Initializer
-
-        # Dataset
-        #
-        param :tuples, type: Types::Strict::Array.of(Types::Strict::Hash)
-
-        # @return [String]
-        #
-        # @api private
-        def to_ldif
-          tuples.map { |tuple| create_entry(tuple) }.join(NEW_LINE)
-        end
-
-        private
-
-        def create_entry(tuple)
-          ary = []
-          tuple.each do |key, values|
-            values.each { |value| ary << key_value_pair(key, value) }
-          end
-          ary << NEW_LINE
-          ary
-        end
-
-        # @api private
-        def key_value_pair(key, value)
-          if value_is_binary?(value)
-            "#{key}:: #{new_value(value)}"
-          else
-            "#{key}: #{value}"
-          end
-        end
-
-        # @api private
-        def value_is_binary?(value)
-          value = value.to_s
-          return true if (value[0] == ':') || (value[0] == '<')
-
-          value.each_byte do |byte|
-            return true if (byte < 32) || (byte > 126)
-          end
-          false
-        end
-
-        # @api private
-        def new_value(value)
-          [value].pack('m').chomp.gsub(/\n/m, NEW_LINE)
-        end
+      def self.to_tuples(ldif, &block)
+        Importer.new(ldif).to_tuples(&block)
       end
 
       # Extend functionality of Hash class.
@@ -95,5 +57,16 @@ module ROM
         end
       end
     end
+
+    # Parser for LDIF format
+    # rubocop:disable Naming/MethodName
+    #
+    # alias for LDIF.to_tuples
+    #
+    # @api public
+    def LDIF(ldif, &block)
+      LDIF.to_tuples(ldif, &block)
+    end
+    # rubocop:enable Naming/MethodName
   end
 end

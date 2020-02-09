@@ -5,6 +5,7 @@ require 'rom/ldap/ldif'
 module ROM
   module LDAP
     class Relation < ROM::Relation
+
       # LDIF, JSON, YAML and if loading extensions MsgPack and DSML.
       #
       module Exporting
@@ -24,13 +25,16 @@ module ROM
 
         # Export the relation as JSON
         #
+        # @param _opts [Mixed] compatibility with JSON.generate
+        #
         # @return [String]
         #
         # @example
         #   relation.to_json
+        #   JSON.generate(relation)
         #
         # @api public
-        def to_json
+        def to_json(_opts = nil)
           export.to_json
         end
 
@@ -46,7 +50,6 @@ module ROM
           export.to_yaml
         end
 
-
         private
 
         # Serialize the selected dataset attributes in a formatted string.
@@ -60,8 +63,8 @@ module ROM
         def export
           dataset.respond_to?(:export) ? dataset.export : dataset
         end
-
       end
+
     end
   end
 end
