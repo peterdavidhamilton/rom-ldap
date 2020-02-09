@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+#
+# Output LDIF file
+#
+# LDAPURI=ldap://uid=admin,ou=system:secret@localhost:1389 ./bin/seed
+# LDAPURI=ldap://uid=admin,ou=system:secret@localhost:1389 rake ldif:import[tmp/seed.ldif]'
+
+require 'bundler/setup'
+
+Bundler.setup
+
+# require 'pry'
+# require 'pry-byebug'
+
+require 'rom-ldap'
+require 'rom-factory'
+
+ENV['LDAPURI'] ||= 'ldap://localhost:1389'
+
+config = ROM::Configuration.new(:ldap) do |conf|
+  conf.relation(:specials) do
+    schema('(objectClass=*)') do
+      attribute :dn,           ROM::LDAP::Types::String
+      attribute :cn,           ROM::LDAP::Types::String
+      attribute :objectClass,  ROM::LDAP::Types::Strings
+      attribute :sn,           ROM::LDAP::Types::String
+      attribute :userPassword, ROM::LDAP::Types::String
+      attribute :jpegPhoto,    ROM::LDAP::Types::Binary
+    end
+  end
+end
+
+container = ROM.container(config)
+
+factories = ROM::Factory.configure { |c| c.rom = container }
+
+factories.define(:special) do |f|
+  f.cn           { [fake(:name, :first_name)] }
+  f.dn           { |cn| ["cn=#{cn[0]},ou=specs,dc=rom,dc=ldap"] }
+  f.sn           { [fake(:name, :last_name)] }
+  f.userPassword { |cn| cn.reverse }
+  f.objectClass  { %w[person inetOrgPerson extensibleObject] }
+  f.jpegPhoto    { [File.binread("#{Dir.pwd}/spec/support/pixel.jpg")] }
+end
+
+dataset = Array.new(3) { factories.structs[:special].to_h }
+
+ldif = ROM::LDAP::Relation.new(dataset).to_ldif
+
+File.write('tmp/seed.ldif', ldif, mode: 'a')
