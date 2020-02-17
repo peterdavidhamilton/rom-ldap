@@ -1,19 +1,38 @@
-# 0.2.0 / 2019-12-01
+## unreleased 
+
+<!-- TODO -->
+
+[Compare v0.2.0...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.0...master)
+
+
+# 0.2.0 / 2020-02-xx
 
 ### Changed
 
--
+- Internal parsing of query strings and abstract criteria
+- Type mapping from oid to ruby classes
+- `Dry::Transformer` replaces `Transproc`
+- Folder structure for vendor specific code
 
 ### Fixed 
 
--
+- Test suite
+- Running specs inside Docker
+- Gitlab CI/CD pipeline
+- Projected tuple attributes
+- Order results
+- Building deeply nested expression queries
 
 ### Added 
 
--
+- Missing spec coverage
+- Gateway configuration using ENV VARS
+- LDIF import functionality
+- Generating fixtures to LDIF using factories and `relation#to_ldif`
+- Missing query operators used inside `relation#where` blocks
+- Raw filter string parsing inside `relation#where` blocks
 
-
-
+[Compare v0.1.0...v0.2.0](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.1.0...0.2.0)
 
 
 
@@ -27,7 +46,7 @@
 
 - Use [Semantic Versioning](https://semver.org/) from now on, however changing the Ruby version dependency should constitute a MAJOR change, we are not yet ready for the public 1.0.0 release
 
-[Compare v0.0.14...develop](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.0.13...develop)
+[Compare v0.1.0...v0.0.14](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.1.0...v0.0.14)
 
 
 
