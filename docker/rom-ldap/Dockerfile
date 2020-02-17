@@ -1,5 +1,7 @@
 FROM ruby:2.4.5-alpine3.8 as gem
 
+LABEL description="ROM-LDAP Test Suite Container"
+
 RUN apk --no-cache upgrade && \
     apk --no-cache add build-base libxml2-dev openldap-clients git
 

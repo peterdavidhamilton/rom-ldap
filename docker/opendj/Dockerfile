@@ -2,7 +2,8 @@
 FROM java:8
 
 LABEL maintainer="rom-ldap" \
-      name="opendj"
+      name="opendj" \
+      description="OPENDJ service for ROM-LDAP"
 
 ARG version=4.3.1
 

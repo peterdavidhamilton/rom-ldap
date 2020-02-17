@@ -5,7 +5,8 @@ FROM debian:buster-slim
 
 LABEL maintainer="rom-ldap" \
       name="openldap" \
-      version="2.4.48"
+      version="2.4.48" \
+      description="OPENLDAP service for ROM-LDAP"
 
 RUN echo "deb http://ftp.debian.org/debian buster-backports main" >> /etc/apt/sources.list \
     && echo "path-include /usr/share/doc/krb5*" >> /etc/dpkg/dpkg.cfg.d/docker \

@@ -2,7 +2,8 @@
 FROM ubuntu:18.04
 
 LABEL maintainer="rom-ldap" \
-      name="apacheds"
+      name="apacheds" \
+      description="ApacheDS service for ROM-LDAP"
 
 RUN apt-get update \
       && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
