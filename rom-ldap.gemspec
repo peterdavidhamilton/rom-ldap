@@ -20,6 +20,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.required_ruby_version = '>= 2.4.0'
 
+  spec.add_runtime_dependency 'dry-core'
+  spec.add_runtime_dependency 'dry-equalizer'
+  spec.add_runtime_dependency 'dry-transformer'
   spec.add_runtime_dependency 'ldap-ber', '~> 0.0.2'
   spec.add_runtime_dependency 'rom-core', '~> 5.0', '>= 5.0.2'
 
