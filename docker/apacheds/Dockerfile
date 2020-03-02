@@ -19,7 +19,6 @@ ARG instance=default
 # ARG version=2.0.0.AM25
 ARG version=2.0.0-M24
 ARG architecture=amd64
-# ARG repo=www.eu.apache.org
 ARG repo=archive.apache.org
 
 ENV APACHEDS_INSTANCE $instance

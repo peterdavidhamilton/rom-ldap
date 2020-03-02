@@ -144,6 +144,8 @@ module ROM
       # Increment the message counter.
       #
       # @return [Integer]
+      #
+      # @api private
       def next_msgid
         @msgid ||= 0
         @msgid += 1
@@ -154,7 +156,9 @@ module ROM
       #
       # @return [PDU]
       #
-      # @raise [ResponseMissingOrInvalidError]
+      # @raise [ResponseError]
+      #
+      # @api private
       def submit(type, request, controls = nil)
         message_id = next_msgid
 
@@ -166,7 +170,7 @@ module ROM
           puts pdu.advice if ENV['DEBUG'] && pdu.advice && !pdu.advice.empty?
           pdu
         else
-          raise(ResponseMissingOrInvalidError, "Invalid #{type}")
+          raise(ResponseError, "Invalid #{type}")
         end
       end
 

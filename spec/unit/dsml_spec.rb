@@ -1,11 +1,11 @@
 require 'rom/ldap/extensions/dsml'
 
-RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
+RSpec.describe ROM::LDAP::DSML do
 
-  context 'with refinement' do
+  context 'using refinement' do
     using ROM::LDAP::DSML
 
-    describe 'Hash' do
+    describe ::Hash, '#to_dsml' do
       it 'returns a single entry in DSML format' do
 
         entry = {
@@ -45,7 +45,7 @@ RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
       end
     end
 
-    describe 'Array' do
+    describe ::Array, '#to_dsml' do
       it 'returns multiple entries in DSML format' do
 
         output = <<~EOF
@@ -119,17 +119,15 @@ RSpec.describe ROM::LDAP::DSML, '#to_dsml' do
   end
 
 
-  context 'without refinement' do
-    describe 'Hash' do
-      it 'raises an exception' do
-        expect { Hash.new.to_dsml }.to raise_error(NoMethodError)
-      end
+  context 'not using refinement' do
+    describe ::Hash, '#to_dsml' do
+      specify { expect(described_class.new).to_not respond_to(:to_dsml) }
+      specify { expect { described_class.new.to_dsml }.to raise_error(NoMethodError) }
     end
 
-    describe 'Array' do
-      it 'raises an exception' do
-        expect { Array.new.to_dsml }.to raise_error(NoMethodError)
-      end
+    describe ::Array, '#to_dsml' do
+      specify { expect(described_class.new).to_not respond_to(:to_dsml) }
+      specify { expect { described_class.new.to_dsml }.to raise_error(NoMethodError) }
     end
   end
 

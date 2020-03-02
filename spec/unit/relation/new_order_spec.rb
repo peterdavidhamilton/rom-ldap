@@ -12,16 +12,14 @@ RSpec.describe ROM::LDAP::Relation, '#order' do
 
   with_vendors 'apache_ds', 'open_dj', '389_ds' do
 
-    describe 'integers' do
+    context 'with integers' do
       before do
-        (0..9).sort_by { rand }.each { |i|
-          factories[:person, uid_number: i]
-        }
+        (0..9).sort_by { rand }.each { |i| factories[:person, uid_number: i] }
       end
 
       let(:attribute) { :uid_number }
 
-      it 'in numerical order' do
+      specify 'in numerical order' do
         expect(forward).to eql([
           { uid_number: 0 },
           { uid_number: 1 },
@@ -36,7 +34,7 @@ RSpec.describe ROM::LDAP::Relation, '#order' do
         ])
       end
 
-      it 'in reverse numerical order' do
+      specify 'in reverse numerical order' do
         expect(backward).to eql([
             { uid_number: 9 },
             { uid_number: 8 },
@@ -53,7 +51,7 @@ RSpec.describe ROM::LDAP::Relation, '#order' do
     end
 
 
-    describe 'strings' do
+    context 'with strings' do
       before do
         %w[
           Bohr
@@ -71,7 +69,7 @@ RSpec.describe ROM::LDAP::Relation, '#order' do
 
       let(:attribute) { :sn }
 
-      it 'in alphabetical order' do
+      specify 'in alphabetical order' do
         expect(forward).to eql([
           { sn: ['Bohr']      },
           { sn: ['Curie']     },
@@ -86,7 +84,7 @@ RSpec.describe ROM::LDAP::Relation, '#order' do
         ])
       end
 
-      it 'in reverse alphabetical order' do
+      specify 'in reverse alphabetical order' do
         expect(backward).to eql([
           { sn: ['Turing']    },
           { sn: ['Tesla']     },

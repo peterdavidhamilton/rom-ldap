@@ -1,6 +1,6 @@
-RSpec.describe ROM::LDAP::Types do
+RSpec.describe 'Custom types' do
 
-  describe 'Address' do
+  describe 'ROM::LDAP::Types::Address' do
     subject(:type) { ROM::LDAP::Types::Address }
 
     it 'splits on $' do
@@ -15,7 +15,7 @@ RSpec.describe ROM::LDAP::Types do
     end
   end
 
-  describe 'Time' do
+  describe 'ROM::LDAP::Types::Time' do
     subject(:type) { ROM::LDAP::Types::Time }
 
     it 'ignores nil values' do
@@ -34,7 +34,7 @@ RSpec.describe ROM::LDAP::Types do
     end
   end
 
-  describe 'Bool' do
+  describe 'ROM::LDAP::Types::Bool' do
     subject(:type) { ROM::LDAP::Types::Bool }
 
     it 'coerces true values' do
@@ -54,7 +54,7 @@ RSpec.describe ROM::LDAP::Types do
     end
   end
 
-  describe 'Binary' do
+  describe 'ROM::LDAP::Types::Binary' do
     subject(:type) { ROM::LDAP::Types::Binary }
 
     # 'convert -size 1x1 xc:white /tmp/pixel.jpg'

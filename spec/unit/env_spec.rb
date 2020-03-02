@@ -9,167 +9,126 @@ RSpec.describe ROM::LDAP::Directory::ENV do
     ENV['LDAPBINDPW'] = nil
   end
 
-  let(:uri)    { nil }
+  let(:uri) { nil }
   let(:config) { {} }
-  let(:env)    { described_class.new(uri, config) }
-  let(:opts)   { env.to_h }
+  let(:env) { described_class.new(uri, config) }
 
+  subject(:opts) { env.to_h }
 
-  describe 'defaults' do
-    context 'when no variables are set' do
-      it 'infers localhost' do
-        expect(opts[:host]).to eql('localhost')
-      end
+  describe 'Using ENV vars and inferrence' do
+    context 'with unset variables' do
+      it { is_expected.to include(host: 'localhost') }
+      it { is_expected.to include(port: 389) }
+      it { is_expected.to include(ssl: nil) }
+      it { is_expected.to include(path: nil) }
+    end
 
-      it 'infers port 389' do
-        expect(opts[:port]).to eql(389)
-      end
+    context 'with LDAPURI=ldap://example.com:9389' do
+      before { ENV['LDAPURI'] = 'ldap://example.com:9389' }
+
+      it { is_expected.to include(host: 'example.com') }
+      it { is_expected.to include(port: 9389) }
+      it { is_expected.to include(ssl: nil) }
+      it { is_expected.to include(path: nil) }
+    end
+
+    context 'with LDAPHOST=example.com' do
+      before { ENV['LDAPHOST'] = 'example.com' }
+
+      it { is_expected.to include(host: 'example.com') }
+      it { is_expected.to include(port: 389) }
+      it { is_expected.to include(ssl: nil) }
+      it { is_expected.to include(path: nil) }
+    end
+
+    context 'with LDAPPORT=9389' do
+      before { ENV['LDAPPORT'] = '9389' }
+
+      it { is_expected.to include(host: 'localhost') }
+      it { is_expected.to include(port: 9389) }
+      it { is_expected.to include(ssl: nil) }
+      it { is_expected.to include(path: nil) }
     end
   end
 
 
+  describe 'Using a Gateway URL' do
+    context 'of ldaps://127.0.0.1' do
+      let(:uri) { 'ldaps://127.0.0.1' }
+      let(:config) { { ssl: :foo } }
 
-  describe 'LDAPS protocol' do
-    let(:uri) { 'ldaps://127.0.0.1' }
-    let(:config) { { ssl: :foo } }
-
-    it 'infers port 636' do
-      expect(opts[:port]).to eql(636)
+      it { is_expected.to include(host: '127.0.0.1') }
+      it { is_expected.to include(port: 636) }
+      it { is_expected.to include(ssl: :foo) }
+      it { is_expected.to include(path: nil) }
     end
 
-    it 'includes ssl config' do
-      expect(opts[:ssl]).to eql(:foo)
-    end
-  end
+    context 'of ldap:///var/run/ldap.sock' do
+      let(:uri) { 'ldap:///var/run/ldap.sock' }
 
-
-
-  describe 'spaces in LDAPURI username' do
-    let(:uri) { 'ldap://cn=Prince Adam@greyskull.net' }
-
-    subject(:env) { ->{ described_class.new(uri) } }
-
-    it { is_expected.to_not raise_error }
-  end
-
-
-  describe 'invalid protocol' do
-    let(:uri) { 'ldapx://127.0.0.1:10389' }
-
-    subject(:env) { ->{ described_class.new(uri) } }
-
-    it { is_expected.to raise_error(Dry::Types::ConstraintError) }
-  end
-
-
-  describe 'UNIX socket' do
-    let(:uri) { 'ldap:///var/run/ldap.sock' }
-
-    it '#port == nil' do
-      expect(opts[:port]).to eql(nil)
+      it { is_expected.to include(host: nil) }
+      it { is_expected.to include(port: nil) }
+      it { is_expected.to include(ssl: nil) }
+      it { is_expected.to include(path: '/var/run/ldap.sock') }
     end
 
-    it '#host == nil' do
-      expect(opts[:host]).to eql(nil)
+    context 'with a username containing a space' do
+      let(:uri) { 'ldap://cn=Prince Adam@greyskull.net' }
+      specify { expect { subject }.to_not raise_error }
     end
 
-    it '#path /var/run/ldap.sock' do
-      expect(opts[:path]).to eql('/var/run/ldap.sock')
+    context 'with an invalid protocol' do
+      let(:uri) { 'ldapx://127.0.0.1:10389' }
+      specify { expect { subject }.to raise_error(Dry::Types::ConstraintError) }
     end
   end
 
 
-
-  describe 'optional overrides' do
+  # NB: LDAPHOST and LDAPPORT have no effect
+  #
+  describe 'Overriding a Gateway' do
     let(:uri) { 'ldap://cn=prince-adam:cringer@greyskull.net' }
 
-    context 'LDAPBASE variable and LDAPURI' do
+    context 'with LDAPBASE=dc=grey,dc=skull' do
       before { ENV['LDAPBASE'] = 'dc=grey,dc=skull' }
-
-      it 'overrides' do
-        expect(env.base).to eql('dc=grey,dc=skull')
-      end
+      specify { expect(env.base).to eql('dc=grey,dc=skull') }
     end
 
-    context 'base option and LDAPURI' do
+    context 'with base: dc=grey,dc=skull' do
       let(:config) { { base: 'dc=grey,dc=skull' } }
-
-      it 'overrides' do
-        expect(env.base).to eql('dc=grey,dc=skull')
-      end
+      specify { expect(env.base).to eql('dc=grey,dc=skull') }
     end
 
-
-    context 'LDAPBINDDN variable and LDAPURI' do
+    context 'with LDAPBINDDN=he-man' do
       before { ENV['LDAPBINDDN'] = 'he-man' }
-
-      it 'overrides' do
-        expect(opts[:auth][:username]).to eql('he-man')
-      end
+      specify { is_expected.to include(auth: { username: 'he-man', password: 'cringer' }) }
     end
 
-    context 'username option and LDAPURI' do
+    context 'with username: he-man' do
       let(:config) { { username: 'he-man' } }
-
-      it 'overrides' do
-        expect(opts[:auth][:username]).to eql('he-man')
-      end
+      specify { is_expected.to include(auth: { username: 'he-man', password: 'cringer' }) }
     end
 
-
-    context 'LDAPBINDPW variable and LDAPURI' do
+    context 'with LDAPBINDPW=B@ttl3C4t' do
       before { ENV['LDAPBINDPW'] = 'B@ttl3C4t' }
-
-      it 'overrides' do
-        expect(opts[:auth][:password]).to eql('B@ttl3C4t')
-      end
+      specify { is_expected.to include(auth: { username: 'cn=prince-adam', password: 'B@ttl3C4t' }) }
     end
 
-    context 'password option and LDAPURI' do
+    context 'with password: B@ttl3C4t' do
       let(:config) { { password: 'B@ttl3C4t' } }
-
-      it 'overrides' do
-        expect(opts[:auth][:password]).to eql('B@ttl3C4t')
-      end
+      specify { is_expected.to include(auth: { username: 'cn=prince-adam', password: 'B@ttl3C4t' }) }
     end
 
-
-    describe 'LDAPHOST variable' do
+    context 'with LDAPHOST=snake-mountain.net' do
       before { ENV['LDAPHOST'] = 'snake-mountain.net' }
-
-      context 'and LDAPURI' do
-        it 'does nothing' do
-          expect(opts[:host]).to eql('greyskull.net')
-        end
-      end
-
-      context 'without LDAPURI' do
-        let(:uri) { nil }
-
-        it 'overrides' do
-          expect(opts[:host]).to eql('snake-mountain.net')
-        end
-      end
+      it { is_expected.to include(host: 'greyskull.net') }
+      it { is_expected.to_not include(host: 'snake-mountain.net') }
     end
 
-
-
-    describe 'LDAPPORT variable' do
+    context 'with LDAPPORT=121212' do
       before { ENV['LDAPPORT'] = '121212' }
-
-      context 'and LDAPURI' do
-        it 'does nothing' do
-          expect(opts[:port]).to eql(389)
-        end
-      end
-
-      context 'without LDAPURI' do
-        let(:uri) { nil }
-
-        it 'overrides' do
-          expect(opts[:port]).to eql(121212)
-        end
-      end
+      it { is_expected.to include(port: 389) }
+      it { is_expected.to_not include(port: 121212) }
     end
 
   end

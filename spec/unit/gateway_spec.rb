@@ -4,13 +4,12 @@ RSpec.describe ROM::LDAP::Gateway do
 
   with_vendors do
 
-    let(:gateway) { container.gateways[:default] }
-
     it_behaves_like 'a rom gateway' do
       let(:identifier) { :ldap }
       let(:gateway) { ROM::LDAP::Gateway }
     end
 
+    subject(:gateway) { container.gateways[:default] }
 
     it 'allows options to be passed to the directory' do
       gateway = described_class.new(uri, base: 'foo')
@@ -30,24 +29,19 @@ RSpec.describe ROM::LDAP::Gateway do
 
     describe 'authenticated connection' do
       context 'with valid credentials' do
-        it do
-          expect { gateway.dataset('(objectClass=*)') }.to_not raise_error
-        end
+        specify { expect { gateway.dataset('(objectClass=*)') }.to_not raise_error }
       end
 
       context 'with invalid credentials' do
-        it do
-          expect { described_class.new(uri, username: 'cn=Carnage') }.to raise_error(
-            ROM::LDAP::BindError, 'cn=Carnage'
-          )
-        end
+        subject { described_class.new(uri, username: 'cn=Carnage') }
+
+        specify { expect { subject }.to raise_error ROM::LDAP::BindError, 'cn=Carnage' }
       end
     end
 
 
 
     describe '#dataset?' do
-
       before do
         directory.add(
           dn: "cn=Venom,#{base}",
@@ -62,14 +56,14 @@ RSpec.describe ROM::LDAP::Gateway do
       end
 
       context 'when entries exist' do
-        it do
+        specify do
           expect(gateway.dataset('(objectclass=*)').count).to be > 0
           expect(gateway.dataset?('(objectclass=*)')).to be(true)
         end
       end
 
       context 'when entries do not exist' do
-        it do
+        specify do
           expect(gateway.dataset('(foo=bar)').count).to be(0)
           expect(gateway.dataset?('(foo=bar)')).to be(false)
         end

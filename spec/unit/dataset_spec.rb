@@ -9,8 +9,8 @@ RSpec.describe ROM::LDAP::Dataset do
   subject(:dataset) { relations.asgardians.dataset }
 
   it 'acts like an enumerator' do
-    expect(dataset).to respond_to(:each)
-    expect(dataset).to respond_to(:to_a)
+    is_expected.to respond_to(:each)
+    is_expected.to respond_to(:to_a)
   end
 
   it 'reveals internal options' do
@@ -31,17 +31,21 @@ RSpec.describe ROM::LDAP::Dataset do
     expect(dataset.opts).to have_key(:sort_attrs)
   end
 
-  it '#with overrides options' do
+  specify '#with overrides options' do
     expect(dataset.with(random: true).opts[:random]).to be(true)
     expect(dataset.with(attrs: %w[foo bar]).opts[:attrs]).to eql(%w[foo bar])
   end
 
 
-  it '#grep builds an OR query' do
+  specify '#grep builds an OR query' do
     criteria = dataset.grep(%i'givenname sn', 'odin').opts[:criteria]
 
     expect(criteria).to eql([
       :con_or, [[:op_eql, :givenname, '*odin*'], [:op_eql, :sn, '*odin*']]
     ])
+  end
+
+  specify '#inspect' do
+    expect(dataset.inspect).to eql('#<ROM::LDAP::Dataset: base="ou=specs,dc=rom,dc=ldap" [:op_eql, :cn, :wildcard] />')
   end
 end

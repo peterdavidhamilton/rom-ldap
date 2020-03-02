@@ -30,17 +30,17 @@ module ROM
       #
       # @!attribute [r] base
       #   @return [String] Set when initializing a relation
-      option :base, type: Types::DN, reader: :private, default: -> { directory.base }
+      option :base, type: Types::DN, reader: :private, default: proc { directory.base }
 
       #
       # @!attribute [r] criteria
       #   @return [Array] Query AST
-      option :criteria, type: Types::Strict::Array, reader: :private, default: -> { EMPTY_ARRAY }
+      option :criteria, type: Types::Strict::Array, reader: :private, default: proc { EMPTY_ARRAY }
 
       #
       # @!attribute [r] direction
       #   @return [Symbol]
-      option :direction, type: Types::Direction, reader: :private, default: -> { :asc }
+      option :direction, type: Types::Direction, reader: :private, default: proc { :asc }
 
       #
       # @!attribute [r] offset
@@ -53,7 +53,7 @@ module ROM
 
       # @option :random [TrueClass] Switch for randomisation
       #
-      option :random, type: Types::Strict::Bool, reader: :private, default: -> { false }
+      option :random, type: Types::Strict::Bool, reader: :private, default: proc { false }
 
       # Attributes to return. Needs to be set to the projected schema.
       #
@@ -61,7 +61,7 @@ module ROM
 
       # @option :aliases [Array]
       #
-      option :aliases, type: Types::Strict::Array, reader: :private, default: -> { EMPTY_ARRAY }
+      option :aliases, type: Types::Strict::Array, reader: :private, default: proc { EMPTY_ARRAY }
 
       # @option :sort_attrs [String,Symbol] Attribute name(s) to sort by.
       #
@@ -135,6 +135,15 @@ module ROM
       # @api public
       def inspect
         %(#<#{self.class}: base="#{base}" #{to_ast} />)
+      end
+
+      # This method is present in Sequel and ensures rom-sql/rom-ldap plugin interoperability.
+      #
+      # @return [Dataset]
+      #
+      # @api public
+      def unfiltered
+        with(criteria: EMPTY_ARRAY)
       end
 
       # Wildcard search on multiple attributes.

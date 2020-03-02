@@ -26,6 +26,10 @@ module ROM
     #
     SecureBindError               = Class.new(StandardError)
 
+    # @see Client#submit
+    #
+    ResponseError                 = Class.new(StandardError)
+
     # @see Directory::Operations#find, #by_dn, #add
     #
     DistinguishedNameError        = Class.new(StandardError)

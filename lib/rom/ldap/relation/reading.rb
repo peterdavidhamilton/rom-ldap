@@ -47,7 +47,7 @@ module ROM
         #
         # @api public
         def unfiltered
-          new(dataset.with(criteria: EMPTY_ARRAY))
+          new(dataset.unfiltered)
         end
 
         # Include internal operational attributes in the tuples.
@@ -431,7 +431,7 @@ module ROM
         #
         # @example
         #   users.rename(name: :user_name).first
-        #   # {:id => 1, :user_name => "Jane" }
+        #   # {:id => 1, :user_name => "Jane", ... }
         #
         # @param [Hash<Symbol=>Symbol>] options A name => new_name map
         #
@@ -439,7 +439,8 @@ module ROM
         #
         # @api public
         def rename(options)
-          schema.rename(options).call(self)
+          current = schema.map(&:name).map { |k| { k => k } }.reduce(&:merge)
+          schema.rename(current.merge(options)).call(self)
         end
 
         # Append specific columns to select clause

@@ -3,7 +3,8 @@ RSpec.describe ROM::LDAP::Relation, '#rename' do
   include_context 'people'
 
   before do
-    10.times { factories[:person, :sequence] }
+    # 10.times { factories[:person, :sequence] }
+    factories[:person, uid: 'tom', cn: 'bill bob']
   end
 
   subject(:relation) do
@@ -14,9 +15,9 @@ RSpec.describe ROM::LDAP::Relation, '#rename' do
     expect(relation.schema.map(&:alias)).to include(:user_id, :display_name)
   end
 
-  # it 'renames entries' do
-  #   expect(relation.rename(uid: :user_id).first).to eql({})
-  #   expect(relation.rename(cn: :display_name)).to eql({})
-  # end
+  it 'renames entry attributes' do
+    expect(relation.first).to include(user_id: ['tom'])
+    expect(relation.one).to include(display_name: ['bill bob'])
+  end
 
 end

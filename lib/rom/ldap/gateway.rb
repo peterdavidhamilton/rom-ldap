@@ -46,7 +46,7 @@ module ROM
       #
       # @return [LDAP::Gateway]
       #
-      def initialize(uri = nil, options = EMPTY_OPTS)
+      def initialize(uri = nil, **options)
         @directory = Directory.new(uri, options)
         @logger = options.fetch(:logger) { ::Logger.new(STDOUT) }
 
@@ -115,8 +115,7 @@ module ROM
       # @api public
       #
       def use_logger(logger)
-        @logger = logger
-        directory.logger = logger
+        directory.logger = @logger = logger
       end
 
       # Underlying directory type

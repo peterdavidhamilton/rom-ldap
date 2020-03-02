@@ -24,11 +24,13 @@ RSpec.describe 'auto restriction' do
       directory.delete("cn=gadget,#{base}")
     end
 
-    let(:users) { relations[:users] }
+    subject(:users) { relations[:users] }
 
     it 'builds query methods with meta :index' do
-      expect(users).to respond_to(:by_cn)
-      expect(users).to_not respond_to(:by_serial_number)
+      is_expected.to respond_to(:by_cn)
+      is_expected.to_not respond_to(:by_serial_number)
+      # expect(users).to respond_to(:by_cn)
+      # expect(users).to_not respond_to(:by_serial_number)
     end
 
     it 'queries build equality matcher' do

@@ -34,14 +34,14 @@ RSpec.describe ROM::LDAP::LDIF, '#to_ldif' do
 
 
   context 'without refinement' do
-    describe 'Hash' do
-      it 'raises an exception' do
+    describe ::Hash do
+      specify do
         expect { Hash.new.to_ldif }.to raise_error(NoMethodError)
       end
     end
 
-    describe 'Array' do
-      it 'raises an exception' do
+    describe ::Array do
+      specify do
         expect { Array.new.to_ldif }.to raise_error(NoMethodError)
       end
     end

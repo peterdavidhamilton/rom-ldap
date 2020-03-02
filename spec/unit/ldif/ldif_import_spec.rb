@@ -1,7 +1,7 @@
 RSpec.describe ROM::LDAP::LDIF, 'import ldif' do
 
 
-  let(:output) { ROM::LDAP::LDIF(input) }
+  subject(:output) { ROM::LDAP::LDIF(input) }
 
   context 'when attribute has multiple values' do
     let(:input) do
@@ -14,8 +14,11 @@ RSpec.describe ROM::LDAP::LDIF, 'import ldif' do
       EOF
     end
 
-    it 'they make an array' do
-      expect(output).to eql([{
+    # it 'they make an array' do
+      # expect(output).to eql([{
+      
+    it 'is an array' do
+      is_expected.to eql([{
         "objectClass" => [
           "extensibleObject",
           "inetOrgPerson",

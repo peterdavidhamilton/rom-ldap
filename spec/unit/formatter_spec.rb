@@ -88,7 +88,7 @@ RSpec.describe ROM::LDAP, 'schema formatting' do
         conf.relation(:downcase) { schema('(sn=*)', infer: true) }
       end
 
-      let(:attributes) { relations[:downcase].schema.to_h.keys }
+      subject(:attributes) { relations[:downcase].schema.to_h.keys }
 
       it 'creates lowercase symbols' do
         expect(ROM::LDAP.formatter['=HELLO World']).to eql(:helloworld)
@@ -116,7 +116,7 @@ RSpec.describe ROM::LDAP, 'schema formatting' do
         conf.relation(:reverse) { schema('(givenname=*)', infer: true) }
       end
 
-      let(:attributes) { relations[:reverse].schema.to_h.keys }
+      subject(:attributes) { relations[:reverse].schema.to_h.keys }
 
       it 'calls the formatter proc' do
         expect(ROM::LDAP.formatter['=HELLO World']).to eql(:dlrowolleh)

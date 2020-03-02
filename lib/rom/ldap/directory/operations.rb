@@ -89,6 +89,8 @@ module ROM
           else
             false
           end
+        rescue BindError
+          false
         end
 
         # Used by gateway[filter] to infer schema at boot.

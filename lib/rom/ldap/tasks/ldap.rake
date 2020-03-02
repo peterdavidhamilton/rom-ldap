@@ -30,7 +30,7 @@ module ROM
       #
       def modify(dir: root)
         puts 'ldapmodify is not installed!' if ldapmodify.empty?
-
+          
         Dir.glob("#{dir}/*.ldif") do |file|
           system(ldapmodify, '-x', *auth, '-a', '-c', '-v', '-f', file)
         end
@@ -43,6 +43,7 @@ module ROM
       end
 
       def auth
+        abort('LDAPBINDDN and LDAPBINDPW are not set') unless ENV['LDAPBINDDN'] && ENV['LDAPBINDPW']
         ['-D', ENV['LDAPBINDDN'], '-w', ENV['LDAPBINDPW']]
       end
 

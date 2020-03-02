@@ -23,13 +23,16 @@ RSpec.describe ROM::LDAP::Parsers::Attribute do
     describe 'first short name' do
       subject(:uid) { output.first }
 
-      it ':name' do
-        expect(uid[:name]).to eql(:diu)
-      end
+      it { is_expected.to include(name: :diu) }
+      it { is_expected.to include(canonical: 'uid') }
 
-      it ':canonical' do
-        expect(uid[:canonical]).to eql('uid')
-      end
+      # it ':name' do
+      #   expect(uid[:name]).to eql(:diu)
+      # end
+
+      # it ':canonical' do
+      #   expect(uid[:canonical]).to eql('uid')
+      # end
 
       it ':definition' do
         expect(uid[:definition]).to eql(attribute)

@@ -3,6 +3,12 @@ RSpec.describe ROM::LDAP::Directory do
   context 'ApacheDS' do
     include_context 'vendor', 'apache_ds'
 
+    subject { directory }
+
+    it { is_expected.to be_sortable }
+
+    it { is_expected.to be_pageable }
+
     it '#type returns symbol' do
       expect(directory.type).to eql(:apache_ds)
     end
@@ -47,8 +53,7 @@ RSpec.describe ROM::LDAP::Directory do
     end
 
     it '#supported_extensions lists oids in order' do
-      expect(directory.supported_extensions).to eql(
-        [
+      expect(directory.supported_extensions).to eql([
           '1.3.6.1.4.1.1466.20036',
           '1.3.6.1.4.1.1466.20037',
           '1.3.6.1.4.1.18060.0.1.3',
@@ -58,8 +63,7 @@ RSpec.describe ROM::LDAP::Directory do
     end
 
     it '#supported_controls lists oids in order' do
-      expect(directory.supported_controls).to eql(
-       [
+      expect(directory.supported_controls).to eql([
           '1.2.840.113556.1.4.1413',
           '1.2.840.113556.1.4.319',
           '1.2.840.113556.1.4.417',
@@ -83,14 +87,6 @@ RSpec.describe ROM::LDAP::Directory do
         ])
     end
 
-    it '#sortable? to be true' do
-      expect(directory.sortable?).to be(true)
-    end
-
-    it '#pageable? to be true' do
-      expect(directory.pageable?).to be(true)
-    end
-
     it '#schema_object_classes lists known classes' do
       expect(directory.schema_object_classes).to include(
         "( 1.3.6.1.4.1.18055.0.4.1.3.1001 NAME 'reptilia' DESC 'Reptiles' SUP top STRUCTURAL MUST species MAY ( cn $ populationCount $ extinct ) X-SCHEMA 'wildlife' )")
@@ -107,12 +103,18 @@ RSpec.describe ROM::LDAP::Directory do
   context '389DS' do
     include_context 'vendor', '389_ds'
 
+    subject { directory }
+
+    it { is_expected.to_not be_sortable }
+
+    it { is_expected.to be_pageable }
+
     it '#vendor_name' do
       expect(directory.vendor_name).to eql('389 Project')
     end
 
     it '#vendor_version' do
-      expect(directory.vendor_version).to match(/^389-Directory\/1.3.8.4 B[\d.]+$/)
+      expect(directory.vendor_version).to match(/^389-Directory\/1.3.9.1 B[\d.]+$/)
     end
 
     it '#type' do
@@ -138,14 +140,6 @@ RSpec.describe ROM::LDAP::Directory do
       ])
     end
 
-    it '#sortable? to be false' do
-      expect(directory.sortable?).to be(false)
-    end
-
-    it '#pageable? to be true' do
-      expect(directory.pageable?).to be(true)
-    end
-
     it '#netscapemdsuffix' do
       expect(directory.netscapemdsuffix).to eql('cn=ldap://dc=rom,dc=ldap:389')
     end
@@ -155,6 +149,12 @@ RSpec.describe ROM::LDAP::Directory do
 
   context 'OpenDJ' do
     include_context 'vendor', 'open_dj'
+
+    subject { directory }
+
+    it { is_expected.to_not be_sortable }
+
+    it { is_expected.to be_pageable }
 
     it '#vendor_name' do
       expect(directory.vendor_name).to eql('ForgeRock AS.')
@@ -180,20 +180,12 @@ RSpec.describe ROM::LDAP::Directory do
       ])
     end
 
-    it '#sortable? to be false' do
-      expect(directory.sortable?).to be(false)
-    end
-
-    it '#pageable? to be true' do
-      expect(directory.pageable?).to be(true)
-    end
-
     it '#full_vendor_version' do
       expect(directory.full_vendor_version).to match(/^\d.\d.\d.[a-f0-9]+$/)
     end
 
     it '#etag' do
-      expect(directory.etag).to eql('0000000031f85759')
+      expect(directory.etag).to match(/^[\da-f]{16}$/)
     end
   end
 
@@ -201,6 +193,12 @@ RSpec.describe ROM::LDAP::Directory do
 
   context 'OpenLDAP' do
     include_context 'vendor', 'open_ldap'
+
+    subject { directory }
+
+    it { is_expected.to_not be_sortable }
+
+    it { is_expected.to be_pageable }
 
     it '#vendor_name' do
       expect(directory.vendor_name).to eql('OpenLDAP')
@@ -224,14 +222,6 @@ RSpec.describe ROM::LDAP::Directory do
         1.3.6.1.4.1.4203.1.11.1
         1.3.6.1.4.1.4203.1.11.3
       ])
-    end
-
-    it '#sortable? to be false' do
-      expect(directory.sortable?).to be(false)
-    end
-
-    it '#pageable? to be true' do
-      expect(directory.pageable?).to be(true)
     end
   end
 

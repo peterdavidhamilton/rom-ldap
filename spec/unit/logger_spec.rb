@@ -2,7 +2,7 @@ RSpec.describe 'Logger' do
 
   include_context 'vendor', 'apache_ds'
 
-  let(:new_logger) { Logger.new(IO::NULL) }
+  subject(:new_logger) { Logger.new(IO::NULL) }
 
   it 'sets up a logger for directory' do
 

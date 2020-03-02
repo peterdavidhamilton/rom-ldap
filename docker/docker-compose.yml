@@ -40,6 +40,7 @@ services:
   # 1 ubuntu
   # docker build --build-arg instance=rom -t apacheds:2.0.0-M24 .
   # docker run -it -p 1389:10389 -e APACHEDS_INSTANCE=rom apacheds
+  # LDAPURI=ldap://localhost:1389 LDAPBINDDN=uid=admin,ou=system LDAPBINDPW=secret LDAPDIR=./spec/fixtures/ldif bundle exec rake ldap:modify
   # ou=schema
   #
   apacheds:
@@ -52,7 +53,6 @@ services:
         instance: rom
         # version: 2.0.0.AM25
         version: 2.0.0-M24
-        # repo: archive.apache.org
         architecture: amd64
     tty: true
     stdin_open: true
@@ -162,7 +162,7 @@ services:
     build:
       context: ./opendj
       args:
-        version: 4.4.3
+        version: 4.4.4
       labels:
         vendor: OpenIdentity
     tty: true
