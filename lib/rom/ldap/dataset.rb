@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/initializer'
 require 'rom/ldap/functions'
 
@@ -84,7 +86,7 @@ module ROM
       end
 
       # Dataset#where
-      alias where equal
+      alias_method :where, :equal
 
       # Initialise a new class overriding options.
       #

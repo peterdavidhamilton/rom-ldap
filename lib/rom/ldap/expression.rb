@@ -49,7 +49,7 @@ module ROM
       def to_filter
         "(#{to_raw_filter})"
       end
-      alias to_s to_filter
+      alias_method :to_s, :to_filter
 
       # AST with original atrributes and values
       #
@@ -64,7 +64,7 @@ module ROM
           [op, field, value]
         end
       end
-      alias to_a to_ast
+      alias_method :to_a, :to_ast
 
       # @return [String]
       #

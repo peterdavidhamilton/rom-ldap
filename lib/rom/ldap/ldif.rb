@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/ldap/ldif/importer'
 require 'rom/ldap/ldif/exporter'
 

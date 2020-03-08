@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'dry/transformer/all'
 require 'base64'
 require 'rom/support/inflector'

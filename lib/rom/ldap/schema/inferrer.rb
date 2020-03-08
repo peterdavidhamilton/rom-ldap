@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/ldap/schema/type_builder'
 require 'rom/ldap/schema/attributes_inferrer'
 require 'rom/ldap/attribute'

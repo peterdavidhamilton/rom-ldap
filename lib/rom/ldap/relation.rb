@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/ldap/types'
 require 'rom/ldap/schema'
 require 'rom/ldap/dataset'

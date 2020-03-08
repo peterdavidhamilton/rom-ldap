@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
     # Used in ROM::LDAP::Expression#to_ber.

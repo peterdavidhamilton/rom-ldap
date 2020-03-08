@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/initializer'
 
 module ROM
@@ -72,7 +74,7 @@ module ROM
         # @return [String]
         #
         def inspect
-          "<#{self.class.name} #{connection} />".freeze
+          "<#{self.class.name} #{connection} />"
         end
 
         private

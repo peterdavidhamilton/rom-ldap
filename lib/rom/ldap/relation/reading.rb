@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
     class Relation < ROM::Relation
@@ -142,8 +144,8 @@ module ROM
         def one?
           dataset.__send__(__method__)
         end
-        alias distinct? one?
-        alias unique? one?
+        alias_method :distinct?, :one?
+        alias_method :unique?, :one?
 
         # @return [Boolean]
         #
@@ -151,7 +153,7 @@ module ROM
         def any?(&block)
           dataset.__send__(__method__, &block)
         end
-        alias exist? any?
+        alias_method :exist?, :any?
 
         # @return [Boolean]
         #
@@ -321,7 +323,7 @@ module ROM
 
           new(dataset.grep(fields.map(&:name).sort, value))
         end
-        alias find grep
+        alias_method :find, :grep
 
         # Overwrites forwarding to Dataset#where
         #
@@ -423,7 +425,7 @@ module ROM
         def select(*args, &block)
           schema.project(*args, &block).call(self)
         end
-        alias project select
+        alias_method :project, :select
 
         # Rename attributes in a relation
         #

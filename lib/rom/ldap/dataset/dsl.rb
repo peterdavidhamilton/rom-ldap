@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
     class Dataset
@@ -52,7 +54,7 @@ module ROM
         def present(attribute)
           chain(:op_eql, attribute, :wildcard)
         end
-        alias has present
+        alias_method :has, :present
 
         # Absence filter aliased as 'hasnt'. Inverse of 'present'.
         #
@@ -66,7 +68,7 @@ module ROM
         def missing(attribute)
           chain(:con_not, [:op_eql, attribute, :wildcard])
         end
-        alias hasnt missing
+        alias_method :hasnt, :missing
 
         # Greater than filter
         #
@@ -76,7 +78,7 @@ module ROM
         def gt(args)
           chain(:con_not, [:op_lte, *args.to_a[0]])
         end
-        alias above gt
+        alias_method :above, :gt
 
         # Less than filter
         #
@@ -86,7 +88,7 @@ module ROM
         def lt(args)
           chain(:con_not, [:op_gte, *args.to_a[0]])
         end
-        alias below lt
+        alias_method :below, :lt
 
         # Greater than or equal filter
         #
@@ -130,7 +132,7 @@ module ROM
         def contains(args)
           chain(*match_dsl(args, left: WILDCARD, right: WILDCARD))
         end
-        alias matches contains
+        alias_method :matches, :contains
 
         # negate #contains
         #
@@ -147,7 +149,7 @@ module ROM
         def within(args)
           chain(:con_and, cover_dsl(args))
         end
-        alias between within
+        alias_method :between, :within
 
         # negate #outside
         #

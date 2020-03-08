@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'dry/core/cache'
 require 'dry/equalizer'
 require 'rom/initializer'
@@ -55,7 +57,7 @@ module ROM
         def fetch(key)
           formatted.fetch(rename(key), canonical[key])
         end
-        alias [] fetch
+        alias_method :[], :fetch
 
         # Find the first (only) value for an attribute.
         #
@@ -117,7 +119,7 @@ module ROM
         # @return [String]
         #
         def inspect
-          %(#<#{self.class} #{dn.empty? ? 'rootDSE' : dn} />).freeze
+          %(#<#{self.class} #{dn.empty? ? 'rootDSE' : dn} />)
         end
 
         private

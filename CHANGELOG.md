@@ -2,7 +2,12 @@
 
 <!-- TODO -->
 
+### Fixed 
+
+- Style/FrozenStringLiteralComment
+
 [Compare v0.2.0...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.0...master)
+
 
 
 # 0.2.0 / 2020-03-08
@@ -11,14 +16,14 @@
 
 - Move LDIF for specs under fixtures folder
 - Make the 'people' factory in specs usable by all vendors by dropping the non-standard attribute apple-imhandle
-- Make switching between vendors easier by replacing vendor-specific extensions with reloadable module injection
 - Deleted non-ldap related methods like #qualified
 - Internal parsing of query strings and abstract criteria
 - Type mapping from oid to ruby classes
 - `Dry::Transformer` replaces `Transproc`
 - Update to dry-types 1.2
-- Folder structure for vendor specific code
-- Simplify parsing as functions from string > ast > expression
+- Make switching between vendors easier by replacing vendor-specific extensions with reloadable module injection [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/04e828a9c327fadd0829839903e3953c5709ac0a)
+- Folder structure for vendor specific code [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/04e828a9c327fadd0829839903e3953c5709ac0a)
+- Simplify parsing as functions from string > ast > expression [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/0a71e469fe9f13cec9a2d111d5f2814e6c490dae)
 
 ### Fixed 
 
@@ -30,14 +35,13 @@
 - Rubocop errors
 - Gitlab CI/CD pipeline
 - Projected tuple attributes
-- Renamed tuple attributes
+- Renamed tuple attributes [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/c0670d38b866d28afba94fddd34fddb7df8d5d23)
 - Ordering results
-- Building deeply nested expression queries
+- Building deeply nested expression queries [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/0a71e469fe9f13cec9a2d111d5f2814e6c490dae)
 
 ### Added 
 
 - Implement the tree control in the client delete method making deletion of entries with children more efficient
-- All operator methods to query block !=, =~, !, 
 - Gateway configuration using ENV VARS
 - LDIF import functionality as rake task
 - Generating fixtures to LDIF using factories and `relation#to_ldif`

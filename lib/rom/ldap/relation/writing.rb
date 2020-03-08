@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ROM
   module LDAP
     class Relation < ROM::Relation

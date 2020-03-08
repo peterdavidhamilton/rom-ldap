@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # rubocop:disable Lint/SuppressedException
 begin
   require 'rubocop/rake_task'

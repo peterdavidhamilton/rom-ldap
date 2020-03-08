@@ -1,4 +1,4 @@
-# rubocop:disable Style/AsciiComments
+# frozen_string_literal: true
 
 require 'rom/types'
 require 'rom/ldap/functions'
@@ -156,5 +156,3 @@ module ROM
     end
   end
 end
-
-# rubocop:enable Style/AsciiComments

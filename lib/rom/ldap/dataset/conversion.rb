@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/ldap/parsers/abstract_syntax'
 require 'rom/ldap/parsers/filter_syntax'
 

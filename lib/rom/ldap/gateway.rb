@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'logger'
 require 'rom/gateway'
 require 'rom/ldap/directory'
@@ -70,7 +72,7 @@ module ROM
       def [](filter)
         directory.query_attributes(filter)
       end
-      alias call []
+      alias_method :call, :[]
 
       # Directory attributes identifiers and descriptions.
       #

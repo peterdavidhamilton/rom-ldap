@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/initializer'
 require 'dry/equalizer'
 
@@ -88,7 +90,7 @@ module ROM
             )
           end
 
-          alias limit_value per_page
+          alias_method :limit_value, :per_page
 
         end
 

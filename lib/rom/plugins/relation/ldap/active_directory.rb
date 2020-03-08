@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ROM
   module Plugins
     module Relation
@@ -42,11 +44,11 @@ module ROM
           RULE_BIT = ROM::LDAP::OID[:matching_rule_bit_and]
           RULE_CHAIN = ROM::LDAP::OID[:matching_rule_in_chain]
 
-          FLAG   = "systemFlags:#{RULE_BIT}:".freeze
-          GROUP  = "groupType:#{RULE_BIT}:".freeze
-          MEMBER = "memberOf:#{RULE_CHAIN}:".freeze
-          OPTS   = "options:#{RULE_BIT}:".freeze
-          UAC    = "userAccountControl:#{RULE_BIT}:".freeze
+          FLAG   = "systemFlags:#{RULE_BIT}:"
+          GROUP  = "groupType:#{RULE_BIT}:"
+          MEMBER = "memberOf:#{RULE_CHAIN}:"
+          OPTS   = "options:#{RULE_BIT}:"
+          UAC    = "userAccountControl:#{RULE_BIT}:"
 
           #
           # Ambiguous Name Resolution (ANR)

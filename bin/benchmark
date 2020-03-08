@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 # $ LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
 #     rake 'ldif:import[config/ldif/examples/users.ldif]'

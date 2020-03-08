@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 if ENV['DEBUG']
   # rubocop:disable Lint/SuppressedException
   begin

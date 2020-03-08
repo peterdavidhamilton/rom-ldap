@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'dry/core/cache'
 require 'rom/attribute'
 
@@ -128,7 +130,7 @@ module ROM
       def to_s
         meta[:canonical] || name.to_s
       end
-      alias original_name to_s
+      alias_method :original_name, :to_s
 
       # @return [TrueClass, FalseClass]
       #
@@ -171,7 +173,7 @@ module ROM
       def exists
         [:op_eql, name, :wildcard]
       end
-      alias ~@ exists
+      alias_method :~@, :exists
 
       # @example
       #   users.where { !given_name }
@@ -197,7 +199,7 @@ module ROM
       def is(value)
         [:op_eql, name, value]
       end
-      alias == is
+      alias_method :==, :is
 
       # @param value [Mixed]
       #
@@ -211,7 +213,7 @@ module ROM
       def not(value)
         [:con_not, is(value)]
       end
-      alias != not
+      alias_method :!=, :not
 
       # @param value [Mixed]
       #
@@ -225,7 +227,7 @@ module ROM
       def gt(value)
         [:con_not, lte(value)]
       end
-      alias > gt
+      alias_method :>, :gt
 
       # @param value [Mixed]
       #
@@ -239,7 +241,7 @@ module ROM
       def lt(value)
         [:con_not, gte(value)]
       end
-      alias < lt
+      alias_method :<, :lt
 
       # @param value [Mixed]
       #
@@ -253,7 +255,7 @@ module ROM
       def gte(value)
         [:op_gte, name, value]
       end
-      alias >= gte
+      alias_method :>=, :gte
 
       # @param value [Mixed]
       #
@@ -267,7 +269,7 @@ module ROM
       def lte(value)
         [:op_lte, name, value]
       end
-      alias <= lte
+      alias_method :<=, :lte
 
       # @param value [Mixed]
       #
@@ -281,7 +283,7 @@ module ROM
       def like(value)
         [:op_prx, name, value]
       end
-      alias =~ like
+      alias_method :=~, :like
 
       # @param value [Mixed]
       #
@@ -295,7 +297,7 @@ module ROM
       def not_like(value)
         [:con_not, like(value)]
       end
-      alias !~ not_like
+      alias_method :!~, :not_like
 
       # @param value [Mixed]
       #
@@ -316,7 +318,7 @@ module ROM
       def bitwise(value)
         [:op_eql, name, value]
       end
-      alias === bitwise
+      alias_method :===, :bitwise
 
       memoize :oid, :syntax, :joined, :canonical, :to_s
 

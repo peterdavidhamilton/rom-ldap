@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rom/schema'
 require 'rom/ldap/schema/dsl'
 require 'rom/ldap/restriction_dsl'

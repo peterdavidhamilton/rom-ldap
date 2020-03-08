@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 # LDAPURI=ldap://uid=admin,ou=system:secret@localhost:1389 ./bin/console
 
