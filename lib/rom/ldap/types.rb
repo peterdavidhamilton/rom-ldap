@@ -91,7 +91,7 @@ module ROM
       # @return [String]
       #
       # @api public
-      String  = Constructor(String,  ->(v) { Functions[:stringify].call(v[0]) })
+      String = Constructor(String, ->(v) { Functions[:stringify].call(v[0]) })
 
       # @return [Integer]
       #
@@ -101,22 +101,24 @@ module ROM
       # @return [Symbol]
       #
       # @api public
-      Symbol  = Constructor(Symbol,  ->(v) { Functions[:map_to_symbols][v][0] })
+      Symbol = Constructor(Symbol, ->(v) { Functions[:map_to_symbols][v][0] })
 
       # @return [Time]
       #
       # @api public
-      Time    = Constructor(Time,    ->(v) { Functions[:map_to_times][v][0] })
+      Time = Constructor(Time, ->(v) { Functions[:map_to_times][v][0] })
 
+      # @overload [ROM::Types::Bool]
+      #
       # @return [TrueClass, FalseClass]
       #
       # @api public
-      Bool    = Constructor(Bool,    ->(v) { Functions[:map_to_booleans][v][0] })
+      Bool = Constructor(Bool, ->(v) { Functions[:map_to_booleans][v][0] })
 
       # @return [String]
       #
       # @api public
-      Binary  = Constructor(String,  ->(v) { Functions[:map_to_base64][v][0] }).meta(binary: true)
+      Binary = Constructor(String, ->(v) { Functions[:map_to_base64][v][0] }).meta(binary: true)
 
       #
       # Multiple Values --------
@@ -125,32 +127,32 @@ module ROM
       # @return [Array<String>]
       #
       # @api public
-      Strings   = Constructor(Array, Functions[:stringify])
+      Strings = Constructor(Array, Functions[:stringify])
 
       # @return [Array<Integer>]
       #
       # @api public
-      Integers  = Constructor(Array, Functions[:map_to_integers])
+      Integers = Constructor(Array, Functions[:map_to_integers])
 
       # @return [Array<Symbol>]
       #
       # @api public
-      Symbols   = Constructor(Array, Functions[:map_to_symbols])
+      Symbols = Constructor(Array, Functions[:map_to_symbols])
 
       # @return [Array<Time>]
       #
       # @api public
-      Times     = Constructor(Array, Functions[:map_to_times])
+      Times = Constructor(Array, Functions[:map_to_times])
 
       # @return [Array<TrueClass, FalseClass>]
       #
       # @api public
-      Bools     = Constructor(Array, Functions[:map_to_booleans])
+      Bools = Constructor(Array, Functions[:map_to_booleans])
 
       # @return [Array<String>]
       #
       # @api public
-      Binaries  = Constructor(Array, Functions[:map_to_base64]).meta(binary: true)
+      Binaries = Constructor(Array, Functions[:map_to_base64]).meta(binary: true)
     end
   end
 end

@@ -5,32 +5,45 @@
 [Compare v0.2.0...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.0...master)
 
 
-# 0.2.0 / 2020-02-xx
+# 0.2.0 / 2020-03-08
 
 ### Changed
 
+- Move LDIF for specs under fixtures folder
+- Make the 'people' factory in specs usable by all vendors by dropping the non-standard attribute apple-imhandle
+- Make switching between vendors easier by replacing vendor-specific extensions with reloadable module injection
+- Deleted non-ldap related methods like #qualified
 - Internal parsing of query strings and abstract criteria
 - Type mapping from oid to ruby classes
 - `Dry::Transformer` replaces `Transproc`
+- Update to dry-types 1.2
 - Folder structure for vendor specific code
+- Simplify parsing as functions from string > ast > expression
 
 ### Fixed 
 
-- Test suite
+- Allow username and password inside uri
+- Handle IPV6 loopback addresses so localhost can be used
+- Test suite readability against all four vendors
+- Make running specs easier inside and outside of a docker environment with URI switching based on the context in which the suite is run
 - Running specs inside Docker
+- Rubocop errors
 - Gitlab CI/CD pipeline
 - Projected tuple attributes
-- Order results
+- Renamed tuple attributes
+- Ordering results
 - Building deeply nested expression queries
 
 ### Added 
 
-- Missing spec coverage
+- Implement the tree control in the client delete method making deletion of entries with children more efficient
+- All operator methods to query block !=, =~, !, 
 - Gateway configuration using ENV VARS
-- LDIF import functionality
+- LDIF import functionality as rake task
 - Generating fixtures to LDIF using factories and `relation#to_ldif`
 - Missing query operators used inside `relation#where` blocks
 - Raw filter string parsing inside `relation#where` blocks
+- Extra OIDs
 
 [Compare v0.1.0...v0.2.0](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.1.0...0.2.0)
 

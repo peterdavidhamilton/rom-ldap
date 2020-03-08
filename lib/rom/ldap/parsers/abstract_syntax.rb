@@ -13,7 +13,7 @@ module ROM
 
         param :ast, type: Types::Strict::Array
 
-        param :attributes, type: Types::Array.of(Types::Hash)
+        param :attributes, type: Types.Array(Types::Hash)
 
         def call
           case ast.size

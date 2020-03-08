@@ -185,7 +185,7 @@ module ROM
           end
 
           # 3. Edit attributes
-          if !attrs.empty?
+          unless attrs.empty?
 
             # Adding to RDN values?
             if attrs.key?(rdn_attr) && !attrs.key?(rdn_val)

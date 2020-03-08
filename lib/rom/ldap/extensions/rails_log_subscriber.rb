@@ -34,4 +34,3 @@ module ROM
     RailsLogSubscriber.attach_to(:rom)
   end
 end
-

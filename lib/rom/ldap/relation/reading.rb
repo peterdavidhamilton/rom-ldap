@@ -433,14 +433,13 @@ module ROM
         #   users.rename(name: :user_name).first
         #   # {:id => 1, :user_name => "Jane", ... }
         #
-        # @param [Hash<Symbol=>Symbol>] options A name => new_name map
+        # @param mapping [Hash<Symbol=>Symbol>] A name => new_name map
         #
         # @return [Relation]
         #
         # @api public
-        def rename(options)
-          current = schema.map(&:name).map { |k| { k => k } }.reduce(&:merge)
-          schema.rename(current.merge(options)).call(self)
+        def rename(mapping)
+          schema.rename(mapping).call(self)
         end
 
         # Append specific columns to select clause

@@ -1,3 +1,4 @@
+---
 version: '2.4'
 networks:
   rom-ldap-network:
@@ -162,7 +163,7 @@ services:
     build:
       context: ./opendj
       args:
-        version: 4.4.4
+        version: 4.4.3
       labels:
         vendor: OpenIdentity
     tty: true

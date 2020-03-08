@@ -13,7 +13,7 @@
     Use a real paged request instead of chunking all results
 
 5. **Transactions.**  
-    
+    Rollback failed acions.
 
 6. **Associated relations - preload_assoc and transproc.**   
     Build LDAP to LDAP relation associations automatically.
@@ -23,6 +23,11 @@
 7. **Rails integration**
 
 8. Directory instrumentation using dry-monitor to replace debug logging
+
+9. Consolidate ENV vars used in docker services
+
+10. rom/devtools integration
+
 
 ## ONGOING
 

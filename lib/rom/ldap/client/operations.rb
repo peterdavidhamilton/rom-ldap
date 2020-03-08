@@ -71,7 +71,7 @@ module ROM
 
                 # next page of results
                 #
-                if !cookie&.empty?
+                unless cookie&.empty?
 
                   # cookie => "\u0001\u0000\u0000"
                   # cookie.read_ber => true

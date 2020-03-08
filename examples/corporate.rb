@@ -9,7 +9,6 @@ require 'bundler/setup'
 
 Bundler.setup
 
-require 'pry'
 require 'pry-byebug'
 
 require 'rom-ldap'

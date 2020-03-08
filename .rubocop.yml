@@ -21,10 +21,38 @@ Naming/FileName:
   Exclude:
     - 'lib/rom-ldap.rb'
 
+Style/Alias:
+  Enabled: true
+  EnforcedStyle: prefer_alias_method
+
 Style/SymbolProc:
   Enabled: false
 
 Style/ParallelAssignment:
+  Enabled: false
+
+Style/LambdaCall:
+  Enabled: false
+
+Style/StabbyLambdaParentheses:
+  Enabled: false
+
+Style/FormatString:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/DateTime:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/EachWithObject:
   Enabled: false
 
 Layout/EmptyLinesAroundClassBody:
@@ -33,7 +61,7 @@ Layout/EmptyLinesAroundClassBody:
 Layout/EmptyLinesAroundModuleBody:
   EnforcedStyle: no_empty_lines
 
-Style/FrozenStringLiteralComment:
-  # EnforcedStyle: always
-  Enabled: false
+# Style/FrozenStringLiteralComment:
+#   Enabled: true
+#   EnforcedStyle: always
 

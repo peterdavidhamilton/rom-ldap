@@ -46,7 +46,7 @@ test:
       alias: 389ds
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
       alias: apacheds
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.4
+    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3
       alias: opendj
     - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.48
       alias: openldap

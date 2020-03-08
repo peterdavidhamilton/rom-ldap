@@ -6,7 +6,7 @@ module ROM
     MAJOR = 0
 
     # The minor version of ROM-LDAP. Bumped for every non-patch level release.
-    MINOR = 1
+    MINOR = 2
 
     # The tiny version of ROM-LDAP. Only bumped for bugfix releases.
     TINY  = 0

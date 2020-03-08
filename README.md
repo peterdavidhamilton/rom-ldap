@@ -1,12 +1,13 @@
 # ROM-LDAP
 
-[![pipeline status](https://gitlab.com/peterdavidhamilton/rom-ldap/badges/develop/pipeline.svg)][branch]
-
-[![coverage report](https://gitlab.com/peterdavidhamilton/rom-ldap/badges/develop/coverage.svg)][branch]
+[![pipeline status][pipeline]][branch] [![coverage report][coverage]][branch]
 
 
-[ROM-LDAP][rom-ldap] is a [ROM][rom-rb] adapter for [LDAP][ldap]. Internally it uses [ldap-ber][ldap-ber] which is a library of refinements to encode Ruby primitives.
+[ROM-LDAP][rom-ldap] is a [ROM][rom-rb] adapter for [LDAP][ldap]. 
+Internally it uses [ldap-ber][ldap-ber] which is a library of refinements to 
+encode Ruby primitives.
 
+LDAP can be used as a structured NoSQL server
 
 ## Requirements
 
@@ -73,7 +74,8 @@ for ruby by converting **"camelCase"** and **"hyphen-ated"** to **"snake_case"**
 config = ROM::Configuration.new(:ldap, nil, extensions: [:compatibility])
 ```
 
-The `ROM::LDAP::Relation` class already has support for exporting to `JSON`, `YAML` and `LDIF`. Other extensions are available including exporting to `DSML` format. 
+The `ROM::LDAP::Relation` class already has support for exporting to `JSON`, 
+`YAML` and `LDIF`. Other extensions are available including exporting to `DSML` format. 
 
 ```ruby
 config = ROM::Configuration.new(:ldap, nil, extensions: [:dsml_export]) do |conf|
@@ -93,11 +95,12 @@ rom.relations[:all].to_dsml
 
 ## Docker
 
-The project has docker provision for four LDAP servers to test against; see `spec/fixtures/vendors.yml` for connection details.
+The project has docker provision for four opensource entrprise class LDAP servers 
+test against; see `spec/fixtures/vendors.yml` for connection details.
 
 ```bash
 $ cd docker
-$ docker-compose up apacheds openldap 389ds opendj
+$ docker-compose up -d apacheds openldap 389ds opendj
 $ docker-compose up rom
 ```
 
@@ -106,25 +109,31 @@ $ docker-compose up rom
 1. **[ApacheDS][apacheds]** is an extensible and embeddable directory server 
   entirely written in Java, which has been certified LDAPv3 compatible by the 
   Open Group. The JDBM backend is fast at retreiving data but slow writing to 
-  disk.  
+  disk. 
   **[Apache Directory Studio][apachestudio]** is a complete directory tooling 
   platform intended to be used with any LDAP server however it is particularly 
   designed for use with the ApacheDS.  
-  You can import the vendor connection details into Apache Directory Studio using `spec/fixtures/vendors.lbc`.
+  You can import the vendor connection details into Apache Directory Studio using 
+  `spec/fixtures/vendors.lbc`.
 
-2. **[OpenLDAP][openldap]**
-  The MDB backend utilizes LMDB, a high performance replacement for Oracle Corporation's Berkeley DB.
+2. **[OpenLDAP][openldap]** is a high performance replacement for Oracle 
+  Corporation's Berkeley DB. 
 
-3. **[389DS][389ds]**  
+3. **[389DS][389ds]** from the Fedora Project.
   
 
-4. **OpenDJ**  
+4. **[OpenDJ][opendj]** Community Edition is an LDAPv3 compliant directory service 
+  written in Java from the Open Identity Platform.
 
 #### Schema
 
-A custom themed **wildlife** schema is loaded into [ApacheDS][apacheds] automatically but can also be loaded into OpenDJ and 389DS. Experimentation shows these are around 25 times faster than Apache in this environment when working with large datasets.
+A custom themed **wildlife** schema is loaded into [ApacheDS][apacheds] automatically 
+but can also be loaded into [OpenDJ][opendj] and [389DS][389ds]. 
+Experimentation shows these are around 25 times faster than Apache in this 
+environment when working with large datasets.
 
-If you have the `ldapmodify` command on your development machine you can use the following rake task to load the changes:
+If you have the `ldapmodify` command on your development machine you can use the 
+following rake task to load the changes:
 
 ```bash
 $ LDAPURI=ldap://localhost:4389 \
@@ -137,7 +146,8 @@ $ LDAPURI=ldap://localhost:4389 \
 You can also import 1000 example users with no dependency on local commands:
 
 ```bash
-$ DEBUG=y LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
+$ DEBUG=y \
+  LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
   rake 'ldif:import[spec/fixtures/ldif/examples/users.ldif]'
 ```
 
@@ -147,7 +157,9 @@ $ DEBUG=y LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
 
 ## Examples
 
-`$ ./bin/console`
+```bash
+$ ./bin/console
+```
 
 The console connects and loads [Pry][pry]
 
@@ -158,27 +170,37 @@ $ LDAPURI='ldap://uid=admin,ou=system:secret@localhost:1389' \
   rake 'ldif:import[spec/fixtures/ldif/examples/animals.ldif]'
 ```
 
+**[Fauna][fauna]** is a demo of [ROM-LDAP][rom-ldap] based on evolutionary taxonomy.
+
+
 
 
 
 
 ## History
 
-This project began as an attempt at using the [net-ldap][net-ldap] gem to create a new adapter for [ROM][rom-rb]. Eventually it was refactored and removed the [net-ldap][net-ldap] dependency, extracting the BER portion and using refinements instead of monkey-patching the standard library.
+This project began as an attempt at using the [net-ldap][net-ldap] gem to create 
+a new adapter for [ROM][rom-rb]. Eventually it was refactored and removed the 
+[net-ldap][net-ldap] dependency, extracting the BER portion and using refinements 
+instead of monkey-patching the standard library.
 
 Thank you...
 
 
 
 
-[389ds]: https://directory.fedoraproject.org/
+[389ds]: https://www.port389.org
 [apacheds]: http://directory.apache.org/apacheds/downloads
 [apachestudio]: http://directory.apache.org/studio/downloads
 [branch]: https://gitlab.com/peterdavidhamilton/rom-ldap/commits/develop
+[coverage]: https://gitlab.com/peterdavidhamilton/rom-ldap/badges/develop/coverage.svg
+[fauna]: https://gitlab.com/peterdavidhamilton/fauna
 [ldap-ber]: https://gitlab.com/peterdavidhamilton/ldap-ber
 [ldap]: https://ldap.com
 [net-ldap]: https://github.com/ruby-ldap/ruby-net-ldap
+[opendj]: https://www.openidentityplatform.org/opendj
 [openldap]: http://www.openldap.org
+[pipeline]: https://gitlab.com/peterdavidhamilton/rom-ldap/badges/develop/pipeline.svg
 [pry]: http://pryrepl.org/
 [rom-ldap]: https://gitlab.com/peterdavidhamilton/rom-ldap
 [rom-rb]: https://rom-rb.org

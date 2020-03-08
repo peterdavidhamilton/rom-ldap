@@ -76,7 +76,11 @@ module ROM
         return false if closed?
 
         if IO.select([socket], nil, nil, 0)
-          !socket.eof? rescue false
+          begin
+            !socket.eof?
+          rescue StandardError
+            false
+          end
         else
           true
         end

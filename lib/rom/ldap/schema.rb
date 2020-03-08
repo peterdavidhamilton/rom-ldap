@@ -31,6 +31,17 @@ module ROM
         relation.new(dataset, schema: self)
       end
 
+      # Rename schema attributes
+      #
+      # @see Relation#rename
+      #
+      # @return [Schema] A new schema with renamed attributes
+      #
+      # @api public
+      def rename(mapping)
+        super map(&:name).map { |k| { k => k } }.reduce(&:merge).merge(mapping)
+      end
+
       # Project a schema
       #
       # @see ROM::Schema#project

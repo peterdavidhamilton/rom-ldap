@@ -13,7 +13,7 @@ module ROM
 
         param :filter, type: Types::Filter
 
-        param :attributes, type: Types::Array.of(Types::Hash)
+        param :attributes, type: Types.Array(Types::Hash)
 
         attr_accessor :result
 

@@ -1,6 +1,6 @@
 version: 1
 
-dn: ou=animals,dc=rom,dc=ldap
+dn: ou=animals, dc=rom, dc=ldap
 ou: animals
 objectClass: organizationalUnit
 
@@ -8,7 +8,7 @@ dn: ou=extinct, ou=animals, dc=rom, dc=ldap
 ou: extinct
 objectClass: organizationalUnit
 
-dn: ou=groups,dc=rom,dc=ldap
+dn: ou=groups, dc=rom, dc=ldap
 ou: groups
 objectClass: organizationalUnit
 

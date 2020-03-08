@@ -27,6 +27,8 @@ if [[ $(/opt/opendj/bin/status) == *"not configured"* ]]; then
     --no-prompt \
     --doNotStart \
     --ldifFile $LDIF_FILE
+    # or
+    # --addBaseEntry
 
   /opt/opendj/bin/start-ds --systemInfo
 

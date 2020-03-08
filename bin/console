@@ -6,12 +6,13 @@ require 'bundler/setup'
 
 Bundler.setup
 
-require 'pry'
 require 'pry-byebug'
 
 require 'rom-ldap'
 require 'rom-repository'
 require 'rom-changeset'
+
+# NB: install libxml and msqpack
 
 # Pass nil to use ENV vars.
 config = ROM::Configuration.new(:ldap,

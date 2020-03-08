@@ -286,6 +286,3 @@ module ROM
     end
   end
 end
-
-
-
