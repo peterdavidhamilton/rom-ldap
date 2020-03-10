@@ -107,11 +107,11 @@ module ROM
       # @see https://tools.ietf.org/html/rfc4511#section-4.5.1.6
       #
       # @!attribute [r] attributes_only
-      #   @return [TrueClass, FalseClass] Do not include values.
+      #   @return [Boolean] Do not include values.
       option :attributes_only, type: Types::Strict::Bool, default: -> { false }
 
       # @!attribute [r] reverse
-      #   @return [TrueClass, FalseClass]
+      #   @return [Boolean]
       option :reverse, type: Types::Strict::Bool, default: -> { false }
 
       # Defaults to not paging results
@@ -119,7 +119,7 @@ module ROM
       # Adds :paged_result control to the request.
       #
       # @!attribute [r] paged
-      #   @return [TrueClass, FalseClass]
+      #   @return [Boolean]
       option :paged, type: Types::Strict::Bool, default: -> { false }
 
       # ads-maxTimeLimit: 15000

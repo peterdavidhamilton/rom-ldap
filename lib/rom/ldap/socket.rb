@@ -71,13 +71,13 @@ module ROM
       #
       #
       # @!attribute [r] retry_count
-      #   @return [TrueClass, FalseClass] default: true
+      #   @return [Boolean] default: true
       option :keep_alive, type: Types::Strict::Bool, reader: :private, default: -> { true }
 
       #
       #
       # @!attribute [r] buffered
-      #   @return [TrueClass, FalseClass] default: true
+      #   @return [Boolean] default: true
       option :buffered, type: Types::Strict::Bool, reader: :private, default: -> { true }
 
       # @return [::Socket, ::OpenSSL::SSL::SSLSocket]

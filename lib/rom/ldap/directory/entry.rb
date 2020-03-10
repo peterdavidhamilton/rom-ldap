@@ -92,7 +92,7 @@ module ROM
         #
         # @param tuple [Hash] keys and array of values
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         def include?(tuple)
           tuple.flat_map { |attr, vals| vals.map { |v| fetch(attr).include?(v) } }.all?
@@ -126,7 +126,7 @@ module ROM
 
         # @param meth [Symbol]
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         # @api private
         def respond_to_missing?(meth, include_private = false)

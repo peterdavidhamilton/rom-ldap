@@ -124,7 +124,7 @@ module ROM
 
       #
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def self.to_boolean(value)
         Dry::Transformer::Coercions::BOOLEAN_MAP.fetch(value.to_s.downcase)

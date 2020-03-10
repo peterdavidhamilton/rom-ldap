@@ -79,7 +79,7 @@ module ROM
         # @option :filter [String]
         # @option :password [String]
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         # @api public
         def bind_as(filter:, password:)

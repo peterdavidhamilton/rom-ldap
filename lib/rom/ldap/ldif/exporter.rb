@@ -61,7 +61,7 @@ module ROM
         #
         # @param value [String]
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         def value_is_binary?(value)
           return true if value.start_with?(':', '<')
 

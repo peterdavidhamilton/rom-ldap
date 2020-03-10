@@ -126,7 +126,7 @@ module ROM
           attribute[/^\( ([\d\.]*)/, 1]
         end
 
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         def editable?
           modifiable? and public?
@@ -134,7 +134,7 @@ module ROM
 
         # not user modifiable
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         def modifiable?
           attribute.scan(/NO-USER-MODIFICATION/).none?
@@ -150,7 +150,7 @@ module ROM
 
         # userApplications
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         def public?
           attribute[/USAGE (\S+)/, 1] == 'userApplications'
@@ -160,7 +160,7 @@ module ROM
         # distributedOperation
         # dSAOperation
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         def private?
           attribute[/USAGE (\S+)/, 1] != 'userApplications'
@@ -190,7 +190,7 @@ module ROM
 
         # single-value
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         def single_value?
           attribute.scan(/SINGLE-VALUE/).any?

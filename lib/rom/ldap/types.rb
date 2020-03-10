@@ -110,7 +110,7 @@ module ROM
 
       # @overload [ROM::Types::Bool]
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       # @api public
       Bool = Constructor(Bool, ->(v) { Functions[:map_to_booleans][v][0] })

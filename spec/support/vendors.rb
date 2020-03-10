@@ -25,7 +25,7 @@ end
 
 # Check if running inside a docker container
 #
-# @return [TrueClass, FalseClass]
+# @return [Boolean]
 #
 def docker?
   `ls -ali / | sed '2!d' | awk {'print $1'}`.to_i > 2

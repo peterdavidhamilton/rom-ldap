@@ -188,7 +188,7 @@ module ROM
 
       # predicates =======================  #
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def add_response?
         pdu_type == :add_response
@@ -196,7 +196,7 @@ module ROM
 
       # @see https://tools.ietf.org/html/rfc4511#section-4.2.1
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def bind_request?
         pdu_type == :bind_request
@@ -206,43 +206,43 @@ module ROM
       #
       # @see https://tools.ietf.org/html/rfc4511#section-4.2.2
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def bind_result?
         pdu_type.eql?(:bind_result)
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def search_request?
         pdu_type.eql?(:search_request)
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def search_result?
         pdu_type.eql?(:search_returned_data)
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def search_referral?
         pdu_type == :search_result_referral
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def extended_response?
         pdu_type == :extended_response
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def success?
         SUCCESS_CODES.include?(result_code_symbol)
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def failure?
         !success?
@@ -268,13 +268,13 @@ module ROM
         RESPONSES[result_code_symbol]
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def gteq_2?
         tag.length >= 2
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def gteq_3?
         tag.length >= 3

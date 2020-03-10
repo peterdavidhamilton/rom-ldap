@@ -165,7 +165,7 @@ module ROM
 
         # Check if vendor identifies as ActiveDirectory
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         # @api private
         def ad?
@@ -174,7 +174,7 @@ module ROM
 
         # Check if vendor identifies as OpenLDAP
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         # @api private
         def od?

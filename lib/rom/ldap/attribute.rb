@@ -24,7 +24,7 @@ module ROM
       # Attribute definition identifies this is not a directory internal attribute
       # and values can be altered.
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       # @api public
       def editable?
@@ -33,7 +33,7 @@ module ROM
 
       # Attribute definition identifies this attribute can not have multiple values.
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       # @api public
       def single?
@@ -42,7 +42,7 @@ module ROM
 
       # OID permits multiple values?
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       # @api public
       def multiple?
@@ -69,7 +69,7 @@ module ROM
       #   schema[:id, :tasks].joined?
       #   # => true
       #
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       # @api public
       def joined?
@@ -132,7 +132,7 @@ module ROM
       end
       alias_method :original_name, :to_s
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       # @api public
       def indexed?

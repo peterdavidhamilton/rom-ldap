@@ -54,7 +54,7 @@ module ROM
 
         # Validate plain password against encrypted SSHA password.
         #
-        # @return [TrueClass, FalseClass]
+        # @return [Boolean]
         #
         # @api public
         def self.check_ssha(password, encrypted)

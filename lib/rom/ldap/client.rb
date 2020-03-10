@@ -57,7 +57,7 @@ module ROM
         yield(@socket)
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def closed?
         socket.nil? || (socket.is_a?(::Socket) && socket.closed?)
@@ -72,7 +72,7 @@ module ROM
         @socket = nil
       end
 
-      # @return [TrueClass, FalseClass]
+      # @return [Boolean]
       #
       def alive?
         return false if closed?
