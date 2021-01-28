@@ -3,8 +3,8 @@
 [![pipeline status][pipeline]][branch] [![coverage report][coverage]][branch]
 
 
-[ROM-LDAP][rom-ldap] is a [ROM][rom-rb] adapter for [LDAP][ldap]. 
-Internally it uses [ldap-ber][ldap-ber] which is a library of refinements to 
+[ROM-LDAP][rom-ldap] is a [ROM][rom-rb] adapter for [LDAP][ldap].
+Internally it uses [ldap-ber][ldap-ber] which is a library of refinements to
 encode Ruby primitives.
 
 LDAP can be used as a structured NoSQL server
@@ -47,12 +47,12 @@ To configure a gateway connnection to an LDAP server use:
 config = ROM::Configuration.new(:ldap, 'ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap')
 
 rom = ROM.container(config).directory
-# => #<ROM::LDAP::Directory 
-#     uri='ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap' 
+# => #<ROM::LDAP::Directory
+#     uri='ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap'
 #     vendor='OpenLDAP' version='0.0' />
 ```
 
-If the URI is omitted, then environment variables can be used to set the connection. 
+If the URI is omitted, then environment variables can be used to set the connection.
 With no variables the connection will default to a local connection on port *389*.
 
 ```ruby
@@ -65,17 +65,17 @@ rom = ROM.container(config)
 
 #### Extensions
 
-For the greatest compatibility with Ruby method naming you can pass the optional 
+For the greatest compatibility with Ruby method naming you can pass the optional
 "compatibility" extension whilst configuring the gateway.
-This will format the attributes of directory entries into names more suitable 
+This will format the attributes of directory entries into names more suitable
 for ruby by converting **"camelCase"** and **"hyphen-ated"** to **"snake_case"**.
 
 ```ruby
 config = ROM::Configuration.new(:ldap, nil, extensions: [:compatibility])
 ```
 
-The `ROM::LDAP::Relation` class already has support for exporting to `JSON`, 
-`YAML` and `LDIF`. Other extensions are available including exporting to `DSML` format. 
+The `ROM::LDAP::Relation` class already has support for exporting to `JSON`,
+`YAML` and `LDIF`. Other extensions are available including exporting to `DSML` format.
 
 ```ruby
 config = ROM::Configuration.new(:ldap, nil, extensions: [:dsml_export]) do |conf|
@@ -95,7 +95,7 @@ rom.relations[:all].to_dsml
 
 ## Docker
 
-The project has docker provision for four opensource entrprise class LDAP servers 
+The project has docker provision for four opensource entrprise class LDAP servers
 test against; see `spec/fixtures/vendors.yml` for connection details.
 
 ```bash
@@ -106,33 +106,33 @@ $ docker-compose up rom
 
 #### Containers
 
-1. **[ApacheDS][apacheds]** is an extensible and embeddable directory server 
-  entirely written in Java, which has been certified LDAPv3 compatible by the 
-  Open Group. The JDBM backend is fast at retreiving data but slow writing to 
-  disk. 
-  **[Apache Directory Studio][apachestudio]** is a complete directory tooling 
-  platform intended to be used with any LDAP server however it is particularly 
-  designed for use with the ApacheDS.  
-  You can import the vendor connection details into Apache Directory Studio using 
+1. **[ApacheDS][apacheds]** is an extensible and embeddable directory server
+  entirely written in Java, which has been certified LDAPv3 compatible by the
+  Open Group. The JDBM backend is fast at retreiving data but slow writing to
+  disk.
+  **[Apache Directory Studio][apachestudio]** is a complete directory tooling
+  platform intended to be used with any LDAP server however it is particularly
+  designed for use with the ApacheDS.
+  You can import the vendor connection details into Apache Directory Studio using
   `spec/fixtures/vendors.lbc`.
 
-2. **[OpenLDAP][openldap]** is a high performance replacement for Oracle 
-  Corporation's Berkeley DB. 
+2. **[OpenLDAP][openldap]** is a high performance replacement for Oracle
+  Corporation's Berkeley DB.
 
 3. **[389DS][389ds]** from the Fedora Project.
-  
 
-4. **[OpenDJ][opendj]** Community Edition is an LDAPv3 compliant directory service 
+
+4. **[OpenDJ][opendj]** Community Edition is an LDAPv3 compliant directory service
   written in Java from the Open Identity Platform.
 
 #### Schema
 
-A custom themed **wildlife** schema is loaded into [ApacheDS][apacheds] automatically 
-but can also be loaded into [OpenDJ][opendj] and [389DS][389ds]. 
-Experimentation shows these are around 25 times faster than Apache in this 
+A custom themed **wildlife** schema is loaded into [ApacheDS][apacheds] automatically
+but can also be loaded into [OpenDJ][opendj] and [389DS][389ds].
+Experimentation shows these are around 25 times faster than Apache in this
 environment when working with large datasets.
 
-If you have the `ldapmodify` command on your development machine you can use the 
+If you have the `ldapmodify` command on your development machine you can use the
 following rake task to load the changes:
 
 ```bash
@@ -163,25 +163,31 @@ $ ./bin/console
 
 The console connects and loads [Pry][pry]
 
-To see a demonstration try `./examples/fauna.rb` after loading `animals.ldif`: 
+To see a demonstration try `./examples/fauna.rb` after importing `animals.ldif` and the appropriate `wildlife.ldif`:
+
+**ApacheDS ou=schema**
+```bash
+$ rake 'ldif:import[spec/fixtures/ldif/ou_wildlife.ldif]'
+```
+**OpenDJ and 389DS cn=schema**
+```bash
+$ rake 'ldif:import[spec/fixtures/ldif/cn_wildlife.ldif]'
+```
+
+**[Fauna][fauna]** is a demo of [ROM-LDAP][rom-ldap] based on evolutionary taxonomy.
 
 ```bash
 $ LDAPURI='ldap://uid=admin,ou=system:secret@localhost:1389' \
   rake 'ldif:import[spec/fixtures/ldif/examples/animals.ldif]'
 ```
 
-**[Fauna][fauna]** is a demo of [ROM-LDAP][rom-ldap] based on evolutionary taxonomy.
-
-
-
-
 
 
 ## History
 
-This project began as an attempt at using the [net-ldap][net-ldap] gem to create 
-a new adapter for [ROM][rom-rb]. Eventually it was refactored and removed the 
-[net-ldap][net-ldap] dependency, extracting the BER portion and using refinements 
+This project began as an attempt at using the [net-ldap][net-ldap] gem to create
+a new adapter for [ROM][rom-rb]. Eventually it was refactored and removed the
+[net-ldap][net-ldap] dependency, extracting the BER portion and using refinements
 instead of monkey-patching the standard library.
 
 Thank you...
