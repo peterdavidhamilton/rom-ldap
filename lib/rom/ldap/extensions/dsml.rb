@@ -70,13 +70,17 @@ module ROM
           end
         end
 
+        # Returns "<objectclass/>" if param is nil
+        #
         # <oc-value>inetOrgPerson</oc-value>
+        #
+        # @param [Array, Nil] values
         #
         # @yield [LibXML::XML::Node]
         #
         def classes(values)
           class_node = create_node('objectclass')
-          values.each do |value|
+          values.to_a.each do |value|
             value_node = create_node('oc-value')
             value_node.content = value
             class_node << value_node
