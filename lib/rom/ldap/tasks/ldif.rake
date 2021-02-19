@@ -1,3 +1,6 @@
+# @example
+#   load 'rom/ldap/tasks/ldif.rake'
+
 require 'rom/ldap'
 
 module ROM
@@ -32,12 +35,12 @@ namespace :ldif do
 
   #
   # Parse and import LDIF file
+  # rake 'ldif:import[examples/users.ldif]'
   #
   desc 'import'
   task :import, [:file] => :env do |_t, args|
     abort 'file is required' unless args[:file]
 
-    current = ROM::LDAP::RakeSupport.directory.base_total
     timer   = Time.now.utc
     counter = 0
 
@@ -46,20 +49,32 @@ namespace :ldif do
       ROM::LDAP::RakeSupport.directory.add(entry)
     end
 
-    added    = ROM::LDAP::RakeSupport.directory.base_total - current
     duration = Time.now.utc - timer
 
     puts "========================================="
-    puts "#{counter} entries attempted"
-    puts "#{added} entries added in #{duration} seconds"
+    puts "#{counter} entries in #{duration} seconds"
   end
 
 
 
+  #
+  # Print LDIF
+  # rake 'ldif:export[(cn=*)]'
+  #
   desc 'export'
-  task :export, [:filter, :attrs] => :env do |_t, args|
-    args.with_defaults(attrs: "+ \\*", filter: '(objectClass=*)')
+  task :export, [:filter] => :env do |_t, args|
+    args.with_defaults(filter: '(objectClass=*)')
 
+    using ROM::LDAP::LDIF
+
+    directory = ROM::LDAP::RakeSupport.directory
+    dataset   = ROM::LDAP::Dataset.new(directory: directory, name: args[:filter])
+
+    puts "#"
+    puts "# #{Time.now}"
+    puts "# ========================================="
+    puts ""
+    puts dataset.export.to_ldif
   end
 
 end
