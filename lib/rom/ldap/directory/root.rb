@@ -131,7 +131,7 @@ module ROM
         #
         # @return [Directory::Entry]
         #
-        # @raise [ResponseMissingError]
+        # @raise [ResponseError]
         #
         # @api private
         def root
@@ -141,14 +141,14 @@ module ROM
             attributes: ALL_ATTRS
           ).first
 
-          @root || raise(ResponseMissingError, 'Directory root failed to load')
+          @root || raise(ResponseError, 'Directory root failed to load')
         end
 
         # Representation of directory SubSchema
         #
         # @return [Directory::Entry]
         #
-        # @raise [ResponseMissingError]
+        # @raise [ResponseError]
         #
         # @api private
         def sub_schema
@@ -160,7 +160,7 @@ module ROM
             max_results: 1
           ).first
 
-          @sub_schema || raise(ResponseMissingError, 'Directory schema failed to load')
+          @sub_schema || raise(ResponseError, 'Directory schema failed to load')
         end
 
         # Check if vendor identifies as ActiveDirectory
