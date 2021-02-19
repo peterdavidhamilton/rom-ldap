@@ -36,7 +36,7 @@ module ROM
         end
 
         # @example
-        #   relation.update(2000, mail: 'fear_the_bat@gotham.com')
+        #   relation.update(mail: 'fear_the_bat@gotham.com')
         #   #=>  {}
         #
         # @param tuple [Hash]
@@ -49,7 +49,7 @@ module ROM
         end
 
         # @example
-        #   relation.delete('uid=batman,ou=users,dc=test') #=> { uid: 'batman'}
+        #   relation.delete #=> { uid: 'batman'}
         #
         # @return [Array<Directory::Entry, FalseClass>]
         #

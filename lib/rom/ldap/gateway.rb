@@ -91,7 +91,7 @@ module ROM
       #
       # @param name [String] An ldap compatible filter string.
       #
-      # @return [TrueClass, FlaseClass]
+      # @return [Boolean]
       #
       # @api public
       #
