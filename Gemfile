@@ -25,6 +25,7 @@ end
 group :test do
   gem 'msgpack', '~> 1.2.4' # @see spec/unit/relation/export_spec.rb
   gem 'libxml-ruby'         # @see spec/unit/relation/export_spec.rb
+  gem 'oj'                  # @see spec/unit/relation/export_spec.rb
   gem 'rom-factory'
   gem 'rspec'
   gem 'simplecov'
