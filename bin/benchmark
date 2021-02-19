@@ -1,28 +1,28 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
-
 #
-# $ LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
-#     rake 'ldif:import[config/ldif/examples/users.ldif]'
+# Comparison of rom-ldap against ruby-net-ldap
 #
-# $ LDAPHOST=127.0.0.1 \
-#     LDAPPORT=1389 \
-#     LDAPBASE=dc=rom,dc=ldap \
-#     LDAPBINDDN=uid=admin,ou=system \
-#     LDAPBINDPW=secret \
-#     ./bin/benchmark
-#
-
 require 'bundler/setup'
-
 Bundler.setup
 
-# require 'pry'
-# require 'pry-byebug'
-
+require 'pry-byebug'
 require 'benchmark/ips'
 require 'net-ldap'
 require 'rom-ldap'
+
+filter = '(cn=*)'
+file = 'spec/fixtures/ldif/users.ldif'
+
+ENV['LDAPHOST'] = 'localhost'
+ENV['LDAPPORT'] = '2389'
+ENV['LDAPBASE'] = 'ou=users,dc=rom,dc=ldap'
+ENV['LDAPBINDDN'] = 'cn=admin,dc=rom,dc=ldap'
+# ENV['LDAPBINDDN'] = 'cn=Directory Manager'
+ENV['LDAPBINDPW'] = 'topsecret'
+# ENV['LDAPBINDDN'] = 'uid=admin,ou=system'
+# ENV['LDAPBINDPW'] = 'secret'
+
 
 net_ldap = Net::LDAP.new(
   host: ENV['LDAPHOST'],
@@ -35,116 +35,25 @@ net_ldap = Net::LDAP.new(
   }
 )
 
-logger = Logger.new(File.open('./log/benchmark.log', 'a'))
-
-filter = '(objectclass=*)'
-
-config = ROM::Configuration.new(:ldap, nil, extensions: %i[compatibility], logger: logger)
-
-config.relation(:rom) do
-  schema(filter, infer: true) do
-    # use :timestamps,
-    #   attributes: %i(create_timestamp),
-    #   type: ROM::LDAP::Types::Time
-  end
-end
-
-config.relation(:static) do
-  schema(filter) do
-    attribute :cn, ROM::LDAP::Types::Strings
-
-    # use :timestamps,
-    #   attributes: %i(create_timestamp),
-    #   type: ROM::LDAP::Types::Time
-  end
+config = ROM::Configuration.new(:ldap) do |c|
+  c.relation(:ldap) { schema(filter, infer: true) }
 end
 
 rom = ROM.container(config)
 
-if rom.gateways[:default].directory.base_total <= 10
-  abort("
-  NB: seed directory with entries first.
+dataset = rom.relations[:ldap].dataset
 
-  $ rake 'ldif:import[spec/fixtures/ldif/examples/users.ldif]'
-  ")
-end
+ROM::LDAP::LDIF(File.read(file)) { |entry| dataset.add(entry) } if dataset.count.zero?
+
+puts "Testing against #{dataset.total} entries"
 
 Benchmark.ips do |bm|
-  bm.config(time: 5, warmup: 0.5, iterations: 3)
-
-  #
-  # Single Attribute
-  #
-  bm.report('NET one') do
-    net_ldap.search(attributes: %w[cn]).to_a
+  bm.report('NET::LDAP') do
+    net_ldap.search(filter: filter, attributes: %w[* +])
   end
 
-  bm.report('ROM [explicit] one') do
-    rom.relations[:static].project(:cn).to_a
-  end
-
-  bm.report('ROM [inferred] one') do
-    rom.relations[:rom].project(:cn).to_a
-  end
-
-  #
-  # All Attributes
-  #
-  bm.report('NET all') do
-    net_ldap.search
-  end
-
-  bm.report('ROM [explicit] all') do
-    rom.relations[:static].to_a
-  end
-
-  bm.report('ROM [inferred] all') do
-    rom.relations[:rom].to_a
-  end
-
-  #
-  # Converted to Structs
-  #
-  bm.report('NET struct') do
-    net_ldap.search.map { |e| OpenStruct.new(e.instance_variable_get(:@myhash)) }
-  end
-
-  bm.report('ROM [explicit] struct') do
-    rom.relations[:static].with(auto_struct: true).has(:cn).to_a
-  end
-
-  bm.report('ROM [inferred] struct') do
-    rom.relations[:rom].with(auto_struct: true).has(:cn).project(:cn).to_a
-  end
-
-  #
-  # With Operational Attributes
-  #
-  bm.report('NET operational') do
-    net_ldap.search(attributes: %w[* +])
-  end
-
-  bm.report('ROM [explicit] operational') do
-    rom.relations[:static].operational.has(:cn).to_a
-  end
-
-  bm.report('ROM [inferred] operational') do
-    rom.relations[:rom].operational.has(:cn).to_a
-  end
-
-  #
-  # Ordered Entries
-  #
-  # bm.report('NET order') do
-  #   net_ldap.search(sort_controls: ['cn'])
-  # end
-
-  bm.report('ROM [explicit] order') do
-    rom.relations[:static].order(:cn).to_a
-  end
-
-  bm.report('ROM [inferred] order') do
-    rom.relations[:rom].order(:cn).to_a
+  bm.report('rom-ldap') do
+    rom.relations[:ldap].operational.to_a
   end
 
   bm.compare!

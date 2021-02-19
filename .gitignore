@@ -5,6 +5,7 @@ coverage/
 doc/
 Gemfile.lock
 log/*.log
+pkg
 tags
-tmp/
-vendor/
+tmp
+vendor
