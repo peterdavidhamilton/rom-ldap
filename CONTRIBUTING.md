@@ -15,4 +15,4 @@ are still to be implemented.
 ## Asking for help
 
 If you need help getting started and the documentation is lacking you can try 
-emailing me at pete[at]peterdavidhamilton.com.
+emailing me at peter[at]pdhamilton.uk.
