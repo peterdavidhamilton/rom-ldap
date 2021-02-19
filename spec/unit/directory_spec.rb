@@ -114,7 +114,7 @@ RSpec.describe ROM::LDAP::Directory do
     end
 
     it '#vendor_version' do
-      expect(directory.vendor_version).to match(/^389-Directory\/1.3.9.1 B[\d.]+$/)
+      expect(directory.vendor_version).to match(/^389-Directory\/[\d.]+ B[\d.]+$/)
     end
 
     it '#type' do
@@ -209,7 +209,7 @@ RSpec.describe ROM::LDAP::Directory do
     end
 
     it '#organization' do
-      expect(directory.organization).to eql('ROM-LDAP OpenLDAP Server')
+      expect(directory.organization).to eql('ROM-LDAP')
     end
 
     it '#type' do

@@ -2,22 +2,25 @@ RSpec.describe ROM::LDAP::Relation, '#rename' do
 
   include_context 'people'
 
-  before do
-    # 10.times { factories[:person, :sequence] }
-    factories[:person, uid: 'tom', cn: 'bill bob']
-  end
+  with_vendors  do
 
-  subject(:relation) do
-    people.with(auto_struct: true).order(:uid).rename(uid: :user_id, cn: :display_name)
-  end
+    before do
+      factories[:person, uid: 'tom', cn: 'bill bob']
+    end
 
-  it 'aliases in schema' do
-    expect(relation.schema.map(&:alias)).to include(:user_id, :display_name)
-  end
+    subject(:relation) do
+      people.with(auto_struct: true).rename(uid: :user_id, cn: :display_name)
+    end
 
-  it 'renames entry attributes' do
-    expect(relation.first).to include(user_id: ['tom'])
-    expect(relation.one).to include(display_name: ['bill bob'])
+    it 'aliases in schema' do
+      expect(relation.schema.map(&:alias)).to include(:user_id, :display_name)
+    end
+
+    it 'renames entry attributes' do
+      expect(relation.first).to include(user_id: ['tom'])
+      expect(relation.one).to include(display_name: ['bill bob'])
+    end
+
   end
 
 end

@@ -9,7 +9,7 @@ RSpec.describe ROM::LDAP::Relation, '#list' do
   with_vendors do
 
     context 'structs' do
-      subject(:relation) { people.with(auto_struct: true).order(:uid) }
+      subject(:relation) { people.with(auto_struct: true).order(:uid_number) }
 
       it 'as flat array of coerced values' do
         expect(relation.list(:uid)).to eql(%w[user1 user2 user3 user4 user5])
@@ -28,7 +28,7 @@ RSpec.describe ROM::LDAP::Relation, '#list' do
 
 
     context 'hashes' do
-      subject(:relation) { people.with(auto_struct: false).order(:uid) }
+      subject(:relation) { people.with(auto_struct: false).order(:uid_number) }
 
       it 'as flat array of strings' do
         expect(relation.list(:uid)).to eql(%w[user1 user2 user3 user4 user5])
