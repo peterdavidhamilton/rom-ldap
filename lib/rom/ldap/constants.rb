@@ -9,6 +9,8 @@ require 'rom/ldap/matchers'
 require 'rom/ldap/type_map'
 require 'rom/ldap/responses'
 
+require 'uri'
+
 module ROM
   module LDAP
     # Matches an ldap(s) url
@@ -34,6 +36,12 @@ module ROM
 
     # @return [String]
     WILDCARD = '*'
+
+    # @return [String]
+    PERCENT_SPACE = '%20'
+
+    # @return [String]
+    SPACE = ' '
 
     # @return [Array<String>]
     OP_ATTRS = %w[+].freeze
@@ -79,7 +87,7 @@ module ROM
     # @return [Hash]
     #
     CONSTRUCTORS = {
-      con_and: '&', # AND / AMPERSAND   / %x26
+      con_and: '&',   # AND / AMPERSAND   / %x26
       con_or:  '|',   # OR  / VERTBAR     / %x7C
       con_not: '!'    # NOT / EXCLAMATION / %x21
     }.freeze
