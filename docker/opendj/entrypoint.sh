@@ -1,44 +1,23 @@
-#!/bin/bash -e
+#!/bin/sh
+# https://github.com/OpenIdentityPlatform/OpenDJ/wiki/Installation-Guide#to-install-opendj-directory-server-from-the-command-line
 
-LDAP_PORT=${LDAP_PORT:-389}
-LDAPS_PORT=${LDAPS_PORT:-636}
+/opendj/setup \
+--cli \
+--acceptLicense \
+--verbose \
+--no-prompt \
+--doNotStart \
+--enableStartTLS \
+--generateSelfSignedCertificate \
+--hostname rom.ldap \
+--baseDN dc=rom,dc=ldap \
+--rootUserPassword topsecret \
+--ldifFile /opendj/domain.ldif
 
+/opendj/bin/start-ds --systemInfo
 
-if [[ $(/opt/opendj/bin/status) == *"not configured"* ]]; then
+/opendj/bin/status
 
-  # https://github.com/OpenIdentityPlatform/OpenDJ/issues/53
-  # Requires 5GB of free space
-  echo "Configuring OpenDJ server..."
+/opendj/bin/start-ds --nodetach
 
-  LDIF_FILE=/ldif/domain.ldif
-
-  /opt/opendj/setup \
-    --cli \
-    --verbose \
-    --hostname $HOSTNAME \
-    --ldapPort $LDAP_PORT \
-    --ldapsPort $LDAPS_PORT \
-    --baseDN "$BASE_DN" \
-    --enableStartTLS \
-    --generateSelfSignedCertificate \
-    --rootUserDN "$ROOT_USER_DN" \
-    --rootUserPassword "$ROOT_PASSWORD" \
-    --acceptLicense \
-    --no-prompt \
-    --doNotStart \
-    --ldifFile $LDIF_FILE
-    # or
-    # --addBaseEntry
-
-  /opt/opendj/bin/start-ds --systemInfo
-
-  echo "Testing OpenDJ server..."
-
-  /opt/opendj/bin/status
-fi
-
-echo "Starting OpenDJ server...."
-
-/opt/opendj/bin/start-ds --nodetach
-
-tail -F /opt/opendj/logs/error
+tail -F /opendj/logs/error

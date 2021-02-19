@@ -1,70 +1,12 @@
-image: ruby:2.4.5-alpine3.8
-
 cache:
   key: $CI_PROJECT_NAME
   paths:
     - vendor/ruby
+    - vendor/cache
 
-variables:
-  # apacheds
-  APACHEDS_INSTANCE: rom
-
-  # openldap
-  LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
-  LDAP_DOMAIN: rom.ldap
-  LDAP_BASE_DN: dc=rom,dc=ldap
-  LDAP_ADMIN_PASSWORD: topsecret
-
-  # 389ds
-  LDAP_LOG_LEVEL: '0'
-  DIRSRV_ID: rom
-  DIRSRV_FQDN: rom.ldap
-  DIRSRV_SUFFIX: dc=rom,dc=ldap
-  DIRSRV_ROOT_DN: cn=Directory Manager
-  DIRSRV_ROOT_DN_PASSWORD: topsecret
-
-  # opendj
-  BASE_DN: dc=rom,dc=ldap
-  ROOT_USER_DN: cn=Directory Manager
-  ROOT_PASSWORD: topsecret
-
-
-
-
-test:
-  variables:
-    # rom
-    # LDAP variables used by rake to update schema
-    LDAPURI:    ldap://apacheds:10389
-    LDAPBINDDN: uid=admin,ou=system
-    LDAPBINDPW: secret
-    LDAPDIR:    ${CI_PROJECT_DIR}/spec/fixtures/ldif
-    # GITLAB_TOKEN: <repo-read> # for ldap-ber
-
-  services:
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:1.3.9.1
-      alias: 389ds
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
-      alias: apacheds
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3
-      alias: opendj
-    - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.48
-      alias: openldap
-    # - opendirectory
-    # - activedirectory
-
-  script:
-    - apk upgrade --no-cache
-    - apk add --no-cache build-base libxml2-dev openldap-clients git
-    - gem install bundler --no-document
-    - bundle config set path vendor
-    - bundle install -j $(nproc)
-    - bundle exec rake ldap:modify
-    - bundle exec rake
-  artifacts:
-    paths:
-      - coverage/
-
+artifacts:
+  paths:
+    - coverage/
 
 pages:
   stage: deploy
@@ -78,3 +20,53 @@ pages:
     expire_in: 30 days
   only:
     - deploy
+
+services:
+  - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/389ds:1.3.10.2
+    alias: 389ds
+  - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/apacheds:2.0.0-M24
+    alias: apacheds
+  - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.9
+    alias: opendj
+  - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.56
+    alias: openldap
+
+
+# variables:
+#   LDAPDIR: ${CI_PROJECT_DIR}/spec/fixtures/ldif
+
+before_script:
+  - apk upgrade --no-cache
+  - apk add --no-cache build-base libxml2-dev
+  - gem install bundler --no-document
+  - bundle config set path vendor
+  - bundle install -j $(nproc)
+
+
+# $ gitlab-runner exec docker --env GITLAB_TOKEN=$GITLAB_TOKEN test
+test:
+  # inherit:
+  #   default: true
+  #   variables: true
+  image: ruby:2.4-alpine
+  script: bundle exec rake spec --fail-fast
+
+test-2.5:
+  image: ruby:2.5-alpine
+  script: bundle exec rake spec --fail-fast
+
+test-2.6:
+  image: ruby:2.6-alpine
+  script: bundle exec rake spec --fail-fast
+
+test-2.7:
+  image: ruby:2.7-alpine
+  script: bundle exec rake spec --fail-fast
+
+# test-3.0:
+#   image: ruby:3.0-alpine
+#   script: bundle exec rake spec --fail-fast
+
+
+
+

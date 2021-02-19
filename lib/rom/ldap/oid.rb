@@ -63,6 +63,7 @@ module ROM
       sync_info_message:                '1.3.6.1.4.1.4203.1.9.1.4',
       subentries:                       '1.3.6.1.4.1.4203.1.10.1',
       password_modify:                  '1.3.6.1.4.1.4203.1.11.1',
+      val_sort:                         '1.3.6.1.4.1.4203.666.5.14',
       dereference:                      '1.3.6.1.4.1.4203.666.5.16',
       cascade:                          '1.3.6.1.4.1.18060.0.0.1',
       launch_diagnostic_ui_request:     '1.3.6.1.4.1.18060.0.1.1',

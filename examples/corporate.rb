@@ -6,19 +6,14 @@
 #
 
 require 'bundler/setup'
-
 Bundler.setup
 
 require 'pry-byebug'
-
 require 'rom-ldap'
 require 'rom-repository'
 require 'rom-changeset'
 require 'rom/transformer'
 
-
-ENV['DEBUG'] ||= 'y'
-ENV['LDAPURI'] ||= 'ldaps://cn=admin,dc=rom,dc=ldap:topsecret@localhost:2636'
 
 #
 # Entity

@@ -1,0 +1,25 @@
+; https://access.redhat.com/documentation/en-us/red_hat_directory_server/10/html-single/installation_guide/index#Advanced_Configuration-Silent
+
+[General]
+FullMachineName=rom.ldap
+StrictHostCheck=false
+SuiteSpotUserID=dirsrv
+SuiteSpotGroup=dirsrv
+AdminDomain=rom.ldap
+ConfigDirectoryAdminID=unused-admin
+ConfigDirectoryAdminPwd=adminpassword
+
+[slapd]
+ServerIdentifier=rom
+ServerPort=389
+Suffix=dc=rom,dc=ldap
+RootDN=cn=Directory Manager
+RootDNPwd=topsecret
+AddSampleEntries=0
+AddOrgEntries=no
+InstallLdifFile=/domain.ldif
+
+[admin]
+Port=9830
+ServerAdminID=unused-admin
+ServerAdminPwd=adminpassword

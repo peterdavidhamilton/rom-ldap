@@ -1,44 +1,24 @@
-#!/usr/bin/dumb-init /bin/bash
+#!/bin/bash
 
-APACHEDS_INSTANCE_DIRECTORY="${APACHEDS_DATA}/${APACHEDS_INSTANCE}"
-PIDFILE="${APACHEDS_INSTANCE_DIRECTORY}/run/apacheds-${APACHEDS_INSTANCE}.pid"
+WORKDIR=/apacheds/instances/$ADS_INSTANCE_NAME
 
-function cleanup {
-  if [ -e "${PIDFILE}" ]
-  then
-    echo "Cleaning up ${PIDFILE}"
-    rm "${PIDFILE}"
-  fi
-}
+rm -rf $WORKDIR/conf/ou=config*
+rm -rf $WORKDIR/partitions/*
 
-trap cleanup EXIT
+mkdir -p $WORKDIR/{cache,conf,log,partitions,run}
 
-function shutdown {
-  /opt/apacheds-${APACHEDS_VERSION}/bin/apacheds stop ${APACHEDS_INSTANCE}
-}
+cp /config.ldif $WORKDIR/conf/
 
-trap shutdown INT TERM
+touch $WORKDIR/{log/apacheds.out,run/apacheds.pid}
+
+/apacheds/bin/apacheds.sh $ADS_INSTANCE_NAME start
 
 
-if [ ! -d ${APACHEDS_INSTANCE_DIRECTORY} ]
-then
-  echo "
-===================================================
-Configuring new instance ${APACHEDS_INSTANCE}...
-===================================================
-"
-  mkdir -p ${APACHEDS_INSTANCE_DIRECTORY}
-  cp -rv ${APACHEDS_BOOTSTRAP}/* ${APACHEDS_INSTANCE_DIRECTORY}
-  chown -v -R apacheds:apacheds ${APACHEDS_INSTANCE_DIRECTORY}
-else
-  echo "
-===================================================
-Instance ${APACHEDS_INSTANCE} is already configured
-===================================================
-"
-fi
+sleep 10
+
+ldapmodify -x -D uid=admin,ou=system -w secret -H ldap://localhost:10389 -a -c -v -f wildlife.ldif
+ldapmodify -x -D uid=admin,ou=system -w secret -H ldap://localhost:10389 -a -c -v -f nis.ldif
 
 
-/opt/apacheds-${APACHEDS_VERSION}/bin/apacheds start ${APACHEDS_INSTANCE}
+tail -f $WORKDIR/log/apacheds.out
 
-tail -F ${APACHEDS_INSTANCE_DIRECTORY}/log/apacheds.log
