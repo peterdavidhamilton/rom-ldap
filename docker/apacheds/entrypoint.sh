@@ -13,12 +13,17 @@ touch $WORKDIR/{log/apacheds.out,run/apacheds.pid}
 
 /apacheds/bin/apacheds.sh $ADS_INSTANCE_NAME start
 
+until curl -u 'uid=admin,ou=system:secret' ldap://localhost:10389/dc=rom,dc=ldap; do
+  sleep 2
+done
 
-sleep 10
-
-ldapmodify -x -D uid=admin,ou=system -w secret -H ldap://localhost:10389 -a -c -v -f wildlife.ldif
-ldapmodify -x -D uid=admin,ou=system -w secret -H ldap://localhost:10389 -a -c -v -f nis.ldif
-
+for i in wildlife nis; do
+  ldapmodify -x \
+    -D uid=admin,ou=system \
+    -w secret \
+    -H ldap://localhost:10389 \
+    -a -c -v -f $i.ldif
+done
 
 tail -f $WORKDIR/log/apacheds.out
 

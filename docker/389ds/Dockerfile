@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="rom-ldap" \
       name="389ds" \
-      description="389 Directory Server service for ROM-LDAP"
+      description="389DS for ROM-LDAP"
 
 ENV container "docker"
 

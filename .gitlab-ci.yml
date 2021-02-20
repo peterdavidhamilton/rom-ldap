@@ -11,7 +11,7 @@ services:
     alias: apacheds
   - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.9
     alias: opendj
-  - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.56
+  - name: registry.gitlab.com/peterdavidhamilton/rom-ldap/openldap:2.4.57
     alias: openldap
 
 # variables:
@@ -31,17 +31,17 @@ test-2.4:
   image: ruby:2.4-alpine
   script: bundle exec rspec --fail-fast
 
-test-2.5:
-  image: ruby:2.5-alpine
-  script: bundle exec rspec --fail-fast
+# test-2.5:
+#   image: ruby:2.5-alpine
+#   script: bundle exec rspec --fail-fast
 
-test-2.6:
-  image: ruby:2.6-alpine
-  script: bundle exec rspec --fail-fast
+# test-2.6:
+#   image: ruby:2.6-alpine
+#   script: bundle exec rspec --fail-fast
 
-test-2.7:
-  image: ruby:2.7-alpine
-  script: bundle exec rspec --fail-fast
+# test-2.7:
+#   image: ruby:2.7-alpine
+#   script: bundle exec rspec --fail-fast
 
 # test-3.0:
 #   image: ruby:3.0-alpine

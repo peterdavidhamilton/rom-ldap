@@ -10,7 +10,7 @@ services:
       context: ..
       dockerfile: docker/rom-ldap/Dockerfile
       args:
-        version: 2.7
+        version: 2.4
       labels:
         name: ROM LDAP Adapter
     # environment:
@@ -60,7 +60,7 @@ services:
 
 
   # $ docker exec -it openldap slapd -V
-  #   2.4.56
+  #   2.4.57
   #
   openldap:
     container_name: openldap
