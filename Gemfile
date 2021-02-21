@@ -16,7 +16,7 @@ end
 
 group :test do
   gem 'libxml-ruby'         # @see spec/unit/relation/export_spec.rb
-  gem 'msgpack', '~> 1.2.4' # @see spec/unit/relation/export_spec.rb
+  gem 'msgpack'             # @see spec/unit/relation/export_spec.rb
   gem 'oj'                  # @see spec/unit/relation/export_spec.rb
   gem 'rom' do
     gem 'rom-changeset'

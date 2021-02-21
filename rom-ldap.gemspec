@@ -10,18 +10,20 @@ Gem::Specification.new do |spec|
   spec.version = ROM::LDAP::VERSION.dup
   spec.authors = ['Peter Hamilton']
   spec.email = ['pete@peterdavidhamilton.com']
-  spec.summary = 'LDAP directory support for ROM'
-  spec.description = spec.summary
-  spec.homepage = 'http://rom-rb.org'
+  spec.summary = 'lightweight directory adapter for ROM'
+  spec.description = <<~EOF
+    ROM-LDAP is a Ruby Object Mapper gateway adapter for LDAP.
+    This gem is a reworking of NET::LDAP for use with ROM.
+  EOF
+  spec.homepage = 'https://rom-rb.org'
   spec.license = 'MIT'
   spec.files = Dir['*.md', 'lib/**/*', 'config/*.yml']
   spec.test_files = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
-  spec.required_ruby_version = '>= 2.4.0', '< 3.0'
+  spec.required_ruby_version = '~> 2.4'
 
-  spec.add_runtime_dependency 'dry-core', '~> 0.4', '< 0.5.0' # ruby 2.4 compatibility
-  spec.add_runtime_dependency 'dry-transformer', '~> 0.1.0'
-  spec.add_runtime_dependency 'ldap-ber', '0.1.0'
+  spec.add_runtime_dependency 'dry-transformer', '~> 0.1'
+  spec.add_runtime_dependency 'ldap-ber', '~> 0.1'
   spec.add_runtime_dependency 'rom-core', '~> 5.0'
 
   spec.add_development_dependency 'bundler'
