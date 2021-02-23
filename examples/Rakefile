@@ -1,0 +1,2 @@
+load '../lib/rom/ldap/tasks/ldap.rake'
+load '../lib/rom/ldap/tasks/ldif.rake'

@@ -1,6 +1,6 @@
 RSpec.describe 'Logger' do
 
-  include_context 'vendor', 'apache_ds'
+  include_context 'vendor'
 
   subject(:new_logger) { Logger.new(IO::NULL) }
 

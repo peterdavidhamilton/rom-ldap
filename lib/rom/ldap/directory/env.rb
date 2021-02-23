@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rom/initializer'
+require 'uri'
 
 module ROM
   module LDAP
@@ -32,15 +33,20 @@ module ROM
               type: Types::Strict::Hash,
               default: -> { EMPTY_OPTS }
 
-        # Percent encode any spaces in the BINDDN
+        # Build LDAP URL with encoded spaces.
         #
         # @return [URI::LDAP, URI::LDAPS]
         #
+        # @raise URI::InvalidURIError
         def uri
-          URI(URI.encode(connection))
+          URI(connection.gsub(SPACE, PERCENT_SPACE))
         end
 
-        # Global search base
+        # Global search base. The value is derived in this order:
+        #   1. Gateway Options
+        #   2. ENVs
+        #   3. URI (unless this is a socket) defaults ""
+        #   4. an empty string
         #
         # @example
         #   'ldap://localhost/ou=users,dc=rom,dc=ldap' => ou=users,dc=rom,dc=ldap
@@ -48,15 +54,17 @@ module ROM
         # @return [String]
         #
         def base
-          config.fetch(:base) { ::ENV['LDAPBASE'] || uri.dn }.to_s
+          config.fetch(:base) do
+            ::ENV['LDAPBASE'] || (path ? EMPTY_STRING : uri.dn.to_s)
+          end
         end
 
-        # Ensure usernames with encode spaces are decoded.
+        # Username and password.
         #
         # @return [Hash, NilClass]
         #
         def auth
-          { username: URI.decode(bind_dn), password: bind_pw } if bind_dn
+          { username: bind_dn, password: bind_pw } if bind_dn
         end
 
         # @return [Hash, NilClass]
@@ -103,7 +111,8 @@ module ROM
         # @return [String, NilClass]
         #
         def bind_dn
-          config.fetch(:username, ::ENV['LDAPBINDDN']) || uri.user
+          dn = config.fetch(:username, ::ENV['LDAPBINDDN']) || uri.user
+          dn.gsub(PERCENT_SPACE, SPACE) if dn
         end
         # rubocop:enable Lint/UriEscapeUnescape
 

@@ -1,29 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
-
 #
-# LDAPURI=ldap://uid=admin,ou=system:secret@localhost:1389 ./bin/console
-
+# Pry console for testing
+#
 require 'bundler/setup'
-
 Bundler.setup
 
 require 'pry-byebug'
-
 require 'rom-ldap'
 require 'rom-repository'
 require 'rom-changeset'
 
-# NB: install libxml and msqpack
 
-# Pass nil to use ENV vars.
-config = ROM::Configuration.new(:ldap,
-                                nil,
-                                extensions: %i[
-                                  compatibility
-                                  dsml_export
-                                  msgpack_export
-                                ])
+config = ROM::Configuration.new(:ldap, nil, extensions: %i[compatibility])
 
 require 'dry/monitor/notifications'
 notifications = Dry::Monitor::Notifications.new(:console)

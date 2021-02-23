@@ -4,7 +4,7 @@
 #
 # @return [String]
 def uri_for(vendor_name = nil)
-  vendor_name ||= 'apache_ds'
+  vendor_name ||= ENV.fetch('DEFAULT_VENDOR', 'apache_ds')
   HOSTS[vendor_name][source]
 end
 
@@ -18,10 +18,6 @@ def source
   end
 end
 
-# TODO: preflight check for running dependencies
-def running?
-  `curl ldap://localhost:13089/dc=rom,dc=ldap --noproxy localhost`
-end
 
 # Check if running inside a docker container
 #

@@ -1,6 +1,6 @@
 RSpec.describe ROM::LDAP::Parsers::Attribute do
 
-  include_context 'directory'
+  include_context 'vendor'
 
   before do
     ROM::LDAP.use_formatter(reverse_formatter)

@@ -37,57 +37,42 @@ RSpec.describe ROM::LDAP::Relation, '#operational' do
 
   after { relation.delete }
 
-  it { expect(relation.schema.attributes.count).to eql(7) }
+  with_vendors do
 
-  it { expect(relation.count).to eql(2) }
+    it { expect(relation.schema.attributes.count).to eql(7) }
 
-  it 'user only' do
-    expect(relation.first.size).to eql(3)
-    expect(relation.first.keys).to eql(
-        %i[
-          dn
-          object_class
-          ou
-        ]
-    )
-  end
+    it { expect(relation.count).to eql(2) }
+
+    it 'user only' do
+      expect(relation.first.size).to eql(3)
+      expect(relation.first.keys).to eql(%i[dn object_class ou])
+    end
 
 
-  it '#first' do
-    expect(relation.operational.first.size).to eql(12)
-
-    expect(relation.operational.first.keys).to eql(
-        %i[
+    it '#first' do
+      expect(relation.operational.first.keys).to include(
+        *%i[
           dn
           create_timestamp
           creators_name
-          entry_csn
-          entry_dn
-          entry_parent_id
-          entry_uuid
-          nb_children
-          nb_subordinates
           object_class
           ou
-          subschema_subentry
         ]
-    )
-  end
+      )
+    end
 
-  it '#to_a' do
-    expect(relation.operational.to_a.first.size).to eql(6)
-    expect(relation.operational.to_a.first[:create_timestamp]).to be_a(Time)
+    it '#to_a' do
+      expect(relation.operational.to_a.first[:create_timestamp]).to be_a(Time)
 
-    expect(relation.operational.to_a.first.keys).to eql(
-        %i[
+      expect(relation.operational.to_a.first.keys).to include(
+        *%i[
           create_timestamp
-          entry_dn
-          entry_parent_id
-          entry_uuid
           object_class
           ou
         ]
-    )
+      )
+    end
+
   end
 
 end

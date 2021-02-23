@@ -1,40 +1,42 @@
-# docker build --build-arg version=4.4.3 -t registry.gitlab.com/peterdavidhamilton/rom-ldap/opendj:4.4.3 .
-FROM java:8
+FROM java:alpine
 
 LABEL maintainer="rom-ldap" \
       name="opendj" \
-      description="OPENDJ service for ROM-LDAP"
+      description="OPENDJ for ROM-LDAP"
 
-ARG version=4.3.1
+ARG version=4.4.9
 
-ENV OPENDJ_URL https://github.com/OpenIdentityPlatform/OpenDJ/releases/download/$version/opendj-$version.zip
+ENV OPENDJ_URL "https://github.com/OpenIdentityPlatform/OpenDJ/releases/download/$version/opendj-$version.zip"
+ENV CURL_VERSION 7.65.3
 
-ENV BASE_DN "dc=example,dc=com"
-ENV ROOT_USER_DN "cn=Directory Manager"
-ENV ROOT_PASSWORD "secret"
-
-WORKDIR /opt
-
-RUN wget --quiet $OPENDJ_URL \
-    && unzip opendj-$version.zip \
-    && rm opendj-$version.zip
-
-RUN useradd -m -r -u 1001 -g root opendj
-
-RUN chgrp -R 0 /opt/opendj \
-    && chmod -R g=u /opt/opendj
+RUN apk --no-cache upgrade; \
+    apk --no-cache --update add openssl; \
+    apk --no-cache add bash build-base openldap-dev; \
+    apk --no-cache --virtual add curldeps; \
+    wget https://curl.haxx.se/download/curl-$CURL_VERSION.tar.bz2; \
+    tar xjvf curl-$CURL_VERSION.tar.bz2; \
+    rm curl-$CURL_VERSION.tar.bz2; \
+    cd curl-$CURL_VERSION; \
+    ./configure --prefix=/usr --enable-ldap --enable-ldaps; \
+    make; \
+    make install; \
+    cd /; \
+    rm -r curl-$CURL_VERSION; \
+    rm -r /var/cache/apk; \
+    rm -r /usr/share/man; \
+    apk del curldeps openldap-dev build-base; \
+    curl -L $OPENDJ_URL -o opendj-$version.zip; \
+    unzip opendj-$version.zip; \
+    rm opendj-$version.zip
 
 EXPOSE 389 636 4444
 
-COPY domain.ldif /ldif/domain.ldif
+ARG instance=rom
 
-VOLUME /opt/opendj
+COPY $instance/domain.ldif /opendj
 
-ADD entrypoint.sh /entrypoint.sh
+COPY $instance/wildlife.ldif /opendj/template/config/schema/99-user.ldif
 
-RUN chown opendj /entrypoint.sh \
-    && chmod +x /entrypoint.sh
+COPY entrypoint.sh /
 
-WORKDIR /opt/opendj
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT /entrypoint.sh

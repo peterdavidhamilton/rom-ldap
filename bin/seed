@@ -1,19 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
-
 #
-# Output LDIF file
+# Example of LDIF generation using rom-factory
 #
-# LDAPURI=ldap://uid=admin,ou=system:secret@localhost:1389 ./bin/seed
-# LDAPURI=ldap://uid=admin,ou=system:secret@localhost:1389 rake ldif:import[tmp/seed.ldif]'
-
 require 'bundler/setup'
-
 Bundler.setup
 
-# require 'pry'
-# require 'pry-byebug'
-
+require 'pry-byebug'
 require 'rom-ldap'
 require 'rom-factory'
 
@@ -38,11 +31,11 @@ factories = ROM::Factory.configure { |c| c.rom = container }
 
 factories.define(:special) do |f|
   f.cn           { [fake(:name, :first_name)] }
-  f.dn           { |cn| ["cn=#{cn[0]},ou=specs,dc=rom,dc=ldap"] }
+  f.dn           { |cn| ["cn=#{cn[0]},dc=example"] }
   f.sn           { [fake(:name, :last_name)] }
   f.userPassword { |cn| cn.reverse }
   f.objectClass  { %w[person inetOrgPerson extensibleObject] }
-  f.jpegPhoto    { [File.binread("#{Dir.pwd}/spec/support/pixel.jpg")] }
+  f.jpegPhoto    { [File.binread('spec/fixtures/pixel.jpg')] }
 end
 
 dataset = Array.new(3) { factories.structs[:special].to_h }

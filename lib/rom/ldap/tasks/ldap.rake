@@ -1,6 +1,12 @@
 #
 # Leverage LDAP env variables or RC files.
 #
+# @note
+#   Any LDAPURI must be compatible with ldapmodify.
+#
+# @example
+#   load 'rom/ldap/tasks/ldap.rake'
+#
 require 'pathname'
 require 'pry'
 
@@ -30,7 +36,7 @@ module ROM
       #
       def modify(dir: root)
         puts 'ldapmodify is not installed!' if ldapmodify.empty?
-          
+
         Dir.glob("#{dir}/*.ldif") do |file|
           system(ldapmodify, '-x', *auth, '-a', '-c', '-v', '-f', file)
         end

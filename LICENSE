@@ -1,6 +1,10 @@
-Copyright (c) 2016-2020 Peter Hamilton
+The MIT License
 
-MIT License
+Copyright (c) 2016-2021 Peter David Hamilton
+
+Inspiration for this code has been taken from the work of Francis Cianfrocca,
+Jeremy Evans, Piotr Solnic and contributors to Net::LDAP, Sequel and ROM::SQL.
+
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

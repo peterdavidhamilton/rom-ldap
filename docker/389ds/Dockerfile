@@ -2,33 +2,25 @@ FROM centos:7
 
 LABEL maintainer="rom-ldap" \
       name="389ds" \
-      description="389 Directory Server service for ROM-LDAP"
+      description="389DS for ROM-LDAP"
 
 ENV container "docker"
 
-RUN yum -y install 389-ds-base \
-    && rm -rf /usr/lib/systemd/system \
-    && sed -i 's/updateSelinuxPolicy($inf);//g' /usr/lib64/dirsrv/perl/*
-
-# $HOSTNAME
-ENV DIRSRV_FQDN "example.org"
-ENV DIRSRV_SUFFIX "dc=example,dc=org"
-
-# auth
-ENV DIRSRV_ROOT_DN "cn=Directory Manager"
-ENV DIRSRV_ROOT_DN_PASSWORD "secret"
-
-ENV DIRSRV_ADMIN_USERNAME "unused-admin"
-ENV DIRSRV_ADMIN_PASSWORD "adminpassword"
-ENV DIRSRV_ID "default"
-
-COPY domain.ldif /etc/dirsrv/domain.ldif
+RUN yum -y install 389-ds-base; \
+    yum clean all
 
 EXPOSE 389 636 9830
 
-ADD entrypoint.sh /entrypoint.sh
+ARG instance=rom
 
-RUN chown dirsrv:dirsrv /entrypoint.sh \
-    && chmod +x /entrypoint.sh
+ENV DIRSRV_ID $instance
 
-ENTRYPOINT ["/entrypoint.sh"]
+COPY $instance/wildlife.ldif /etc/dirsrv/schema/99user.ldif
+
+COPY $instance/domain.ldif /
+
+COPY $instance/config.inf /
+
+COPY entrypoint.sh /
+
+ENTRYPOINT /entrypoint.sh

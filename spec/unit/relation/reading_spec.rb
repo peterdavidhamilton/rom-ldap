@@ -6,34 +6,22 @@ RSpec.describe ROM::LDAP::Relation, 'reading' do
     10.times { factories[:person, :sequence] }
   end
 
-  subject(:relation) { people.with(auto_struct: true).order(:uid) }
+  subject(:relation) { people.with(auto_struct: true).order(:uid_number) }
 
-  # NB:
-  #   only OpenLDAP orders as user1,user2...user9,user10
-  #   others order as user1,user10...user8,user9
-  #
+
   with_vendors do
 
     it '#search' do
-      expect(relation.search('(uid=user7)').first[:uid]).to eql(['user7'])
+      expect(relation.search('(uid=user7)').first[:uid]).to eql(%w'user7')
     end
 
 
     it '#reverse' do
       expect(relation.reverse.to_a.map(&:uid)).to eql(
-        case vendor
-        when 'open_ldap'
-          [
-            ['user10'], ['user9'], ['user8'], ['user7'], ['user6'],
-            ['user5'], ['user4'], ['user3'], ['user2'], ['user1']
-          ]
-        else
-          [
-            ['user9'], ['user8'], ['user7'], ['user6'], ['user5'],
-            ['user4'], ['user3'], ['user2'], ['user10'], ['user1']
-          ]
-        end
-
+        [
+          ['user10'], ['user9'], ['user8'], ['user7'], ['user6'],
+          ['user5'], ['user4'], ['user3'], ['user2'], ['user1']
+        ]
       )
     end
 
@@ -47,8 +35,8 @@ RSpec.describe ROM::LDAP::Relation, 'reading' do
     it '#random' do
       expect(relation.random.to_a.map(&:uid)).not_to eql(
         [
-          ['user1'], ['user10'], ['user2'], ['user3'], ['user4'],
-          ['user5'], ['user6'], ['user7'], ['user8'], ['user9']
+          ['user1'], ['user2'], ['user3'], ['user4'], ['user5'],
+          ['user6'], ['user7'], ['user8'], ['user9'], ['user10']
         ]
       )
     end
@@ -56,40 +44,23 @@ RSpec.describe ROM::LDAP::Relation, 'reading' do
 
     it '#limit' do
       expect(relation.limit(3).to_a.map(&:uid)).to eql(
-        case vendor
-        when 'open_ldap'
-          [ ['user1'], ['user2'], ['user3']]
-        else
-          [ ['user1'], ['user10'], ['user2']]
-        end
+        [ ['user1'], ['user2'], ['user3'] ]
       )
     end
 
     it '#first' do
-      expect(relation.first[:uid]).to eql(['user1'])
+      expect(relation.first[:uid]).to eql(%w'user1')
     end
 
     it '#last' do
-      expect(relation.last[:uid]).to eql(
-        case vendor
-        when 'open_ldap'
-          ['user10']
-        else
-          ['user9']
-        end
-      )
+      expect(relation.last[:uid]).to eql(%w'user10')
     end
 
     it '#map' do
       expect(relation.map(:uid)).to be_a(Enumerator)
 
       expect(relation.limit(4).map(:uid).to_a).to eql(
-        case vendor
-        when 'open_ldap'
-          [['user1'], ['user2'], ['user3'], ['user4'] ]
-        else
-          [['user1'], ['user10'], ['user2'], ['user3'] ]
-        end
+        [['user1'], ['user2'], ['user3'], ['user4'] ]
       )
     end
 
@@ -101,11 +72,11 @@ RSpec.describe ROM::LDAP::Relation, 'reading' do
 
     it '#any?' do
       expect(relation.any? { |a| a[:uid] == %w'user1' }).to be(true)
-      expect(relation.exist? { |a| a[:uid] == ['foo'] }).to be(false)
+      expect(relation.exist? { |a| a[:uid] == %w'foo' }).to be(false)
     end
 
     it '#none?' do
-      expect(relation.none? { |a| a[:uid] == ['foo'] }).to be(true)
+      expect(relation.none? { |a| a[:uid] == %w'foo' }).to be(true)
     end
 
     it '#all?' do

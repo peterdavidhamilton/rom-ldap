@@ -209,7 +209,7 @@ RSpec.describe ROM::LDAP::Directory do
     end
 
     it '#organization' do
-      expect(directory.organization).to eql('ROM-LDAP OpenLDAP Server')
+      expect(directory.organization).to eql('ROM-LDAP')
     end
 
     it '#type' do

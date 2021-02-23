@@ -9,7 +9,7 @@ module ROM
     MINOR = 2
 
     # The tiny version of ROM-LDAP. Only bumped for bugfix releases.
-    TINY  = 0
+    TINY  = 2
 
     # The version of ROM-LDAP, as a string (e.g. "2.11.0")
     VERSION = [MAJOR, MINOR, TINY].join('.').freeze

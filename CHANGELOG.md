@@ -1,12 +1,43 @@
-## unreleased 
+## unreleased
 
 <!-- TODO -->
+[Compare v0.2.1...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.1...master)
 
-### Fixed 
 
-- Style/FrozenStringLiteralComment
+# 0.2.1 / 2021-02-19
 
-[Compare v0.2.0...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.0...master)
+### Fixed
+
+- Replace use of deprecated URI.encode/decode method for compatibility with Ruby v2.7. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/e2f8da009319d70f895a273c9b85a693906179f9)
+- Fix DSML export of an entry with `ObjectClasses` omitted. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/acb7df93446ec8da01764159c0d5dee4168bd8e0)
+- Correct misnamed error classes raise by the directory. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/acb7df93446ec8da01764159c0d5dee4168bd8e0)
+- Remove old development code and a general tidy up. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/55bf78d8953066a5391b90c0c53e17839fa27ef1)
+- Run more specs against all four test LDAP vendors. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/ff8d9279348fc3789415e769dd12c99fc2a875e6)
+- Restrict `gemspec` to Ruby version 2, preventing keyword params errors when running v3.
+- Fix ApacheDS docker container state contamination between loads.
+
+### Changed
+
+- Replace current year on license.
+- Simplify `docker-compose.yml` and `gitlab-ci.yml` removing deprecated ENV vars.
+- Build docker images with custom schema preloaded. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/ae2c17f464dd3906a9156c7e24da031f39505627)
+- Update specs for testing ordering against OpenLDAP with the `sssvlv` overlay module. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/ff8d9279348fc3789415e769dd12c99fc2a875e6)
+- Remove volumes for LDAP vendors in `docker-compose.yml`.  
+- Remove rom-ldap rake tasks from the gem Rakefile and only load in the examples folder. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/ae2c17f464dd3906a9156c7e24da031f39505627)
+- Remove comparison of total entries from `ldif:import` task as this is dependent on the connection using the correct base, the same as the entries being imported.
+- Simplify the `gemspec` dependencies.
+
+
+## Added
+
+- Add missing Style/FrozenStringLiteralComment lines.
+- Add spec for ldap unix socket connections.
+- Add extension for using the [OJ](http://www.ohler.com/oj/) gem. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/694b0563d96b81446c1172d3f5e5499ca329de93)
+- Add attribute ordering to the custom wildlife schema attributes. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/ae2c17f464dd3906a9156c7e24da031f39505627)
+- Allow the `DEFAULT_VENDOR` environment variable to change the default vendor used in a spec. [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/8894b2d50de01a3eb73ac9d48944cc52e68981b6)
+
+
+[Compare v0.2.0...v0.2.1](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.0...0.2.1)
 
 
 
@@ -25,7 +56,7 @@
 - Folder structure for vendor specific code [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/04e828a9c327fadd0829839903e3953c5709ac0a)
 - Simplify parsing as functions from string > ast > expression [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/0a71e469fe9f13cec9a2d111d5f2814e6c490dae)
 
-### Fixed 
+### Fixed
 
 - Allow username and password inside uri
 - Handle IPV6 loopback addresses so localhost can be used
@@ -39,7 +70,7 @@
 - Ordering results
 - Building deeply nested expression queries [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/0a71e469fe9f13cec9a2d111d5f2814e6c490dae)
 
-### Added 
+### Added
 
 - Implement the tree control in the client delete method making deletion of entries with children more efficient
 - Gateway configuration using ENV VARS
@@ -59,7 +90,7 @@
 
 - [BREAKING] rom-core (4.2.1) depends upon dry-types (0.15.0) which is only supported by ruby 2.4 and above. Change minimum supported version to 2.4
 
-### Fixed 
+### Fixed
 
 - Use [Semantic Versioning](https://semver.org/) from now on, however changing the Ruby version dependency should constitute a MAJOR change, we are not yet ready for the public 1.0.0 release
 
@@ -67,9 +98,9 @@
 
 
 
-# 0.0.14 / 2019-03-15 
+# 0.0.14 / 2019-03-15
 
-### Added 
+### Added
 
 - Draft `dry-monitor` LDAP logger [#ref](https://gitlab.com/peterdavidhamilton/rom-ldap/commit/018dbd51b1d675b3153d8ec1d12a2a1f0416243b)
 

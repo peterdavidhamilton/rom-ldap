@@ -1,5 +1,5 @@
 ---
-version: '2.4'
+version: '3.3'
 networks:
   rom-ldap-network:
 
@@ -9,28 +9,26 @@ services:
     build:
       context: ..
       dockerfile: docker/rom-ldap/Dockerfile
+      args:
+        version: 2.4
       labels:
         name: ROM LDAP Adapter
-    environment:
-      # - AD_URI
-      # - AD_USER
-      # - AD_PW
-      - GITLAB_TOKEN
-      - DEBUG
-      # LDAP variables used by rake to update schema
-      - LDAPURI=ldap://apacheds:10389
-      - LDAPBINDDN=uid=admin,ou=system
-      - LDAPBINDPW=secret
-      - LDAPDIR=/src/spec/fixtures/ldif
+    # environment:
+    #   - AD_URI
+    #   - AD_USER
+    #   - AD_PW
+    #   - GITLAB_TOKEN
+    #   - DEBUG
+    #   - LDAPDIR=/src/spec/fixtures/ldif
+    #   - DEFAULT_VENDOR=open_dj
     restart: on-failure
     depends_on:
-      - 389ds
       - apacheds
-      - opendj
       - openldap
+      - 389ds
+      - opendj
     volumes:
       - ..:/src
-      # - bundle_cache:/bundle
       - ../tmp/bundler:/bundle
     tty: true
     stdin_open: true
@@ -38,153 +36,95 @@ services:
       - rom-ldap-network
 
 
-  # 1 ubuntu
-  # docker build --build-arg instance=rom -t apacheds:2.0.0-M24 .
-  # docker run -it -p 1389:10389 -e APACHEDS_INSTANCE=rom apacheds
-  # LDAPURI=ldap://localhost:1389 LDAPBINDDN=uid=admin,ou=system LDAPBINDPW=secret LDAPDIR=./spec/fixtures/ldif bundle exec rake ldap:modify
-  # ou=schema
-  #
+
   apacheds:
     container_name: apacheds
     build:
       context: ./apacheds
-      labels:
-        vendor: Apache
       args:
         instance: rom
-        # version: 2.0.0.AM25
-        version: 2.0.0-M24
-        architecture: amd64
+        version: 2.0.0-M24 # tested against -M24
+      labels:
+        vendor: apache_ds
     tty: true
     stdin_open: true
     ports:
       - 1389:10389
       - 1636:10636
-    volumes:
-      - ../tmp/apacheds:/var/lib/apacheds
-    hostname: rom.ldap
     restart: on-failure
     healthcheck:
-      test: curl ldap://127.0.0.1:10389/dc=rom,dc=ldap || exit 1
-      interval: 2m
-      timeout: 10s
-      retries: 3
-    environment:
-      APACHEDS_INSTANCE: rom
+      test: "curl ldap://127.0.0.1:10389/dc=rom,dc=ldap || exit 1"
     networks:
       - rom-ldap-network
 
 
 
-  # 2 debian
-  # docker build -t openldap .
-  # docker run -it -p 2389:389 -e LDAP_DOMAIN=rom.ldap -e LDAP_BASE_DN=dc=rom,dc=ldap openldap
+  # $ docker exec -it openldap slapd -V
+  #   2.4.57
   #
   openldap:
     container_name: openldap
     build:
       context: ./openldap
+      args:
+        instance: rom
       labels:
-        vendor: OpenLDAP
+        vendor: open_ldap
     tty: true
     stdin_open: true
-    volumes:
-      # - ../tmp/openldap:/var/lib/ldap
-      # - ../tmp/openldap:/etc/ldap/slapd.d
-      - ../tmp/socket:/var/run/slapd
-      - ../tmp/openldap:/var/log
     ports:
       - 2389:389
       - 2636:636
-    hostname: rom.ldap
+    volumes:
+      - ../tmp/openldap:/var/run # ldapi://socket
     restart: on-failure
     healthcheck:
-      test: curl ldap://127.0.0.1:389/dc=rom,dc=ldap || exit 1
-      interval: 1m30s
-      timeout: 10s
-      retries: 1
-    environment:
-      # LDAP_LOG_LEVEL: 256
-      LDAP_ORGANISATION: ROM-LDAP OpenLDAP Server
-      LDAP_DOMAIN: rom.ldap
-      LDAP_BASE_DN: dc=rom,dc=ldap
-      LDAP_ADMIN_PASSWORD: topsecret
+      test: "curl -u 'cn=admin,dc=rom,dc=ldap:topsecret' ldap://127.0.0.1/dc=rom,dc=ldap || exit 1"
     networks:
       - rom-ldap-network
 
 
 
-  # 3 centos
-  # cd ./389ds && docker build -t 389ds .
-  # docker run -it -p 3389:389 -e DIRSRV_FQDN=rom.ldap -e DIRSRV_SUFFIX=dc=rom,dc=ldap 389
-  # cn=schema
+  # $ docker exec -it 389ds ns-slapd -v
+  #   1.3.10.2
   #
   389ds:
     container_name: 389ds
     build:
       context: ./389ds
+      args:
+        instance: rom
       labels:
-        vendor: 389ds
+        vendor: 389_ds
     tty: true
     stdin_open: true
     ports:
       - 3389:389
       - 3636:636
-    volumes:
-      - ../tmp/389ds:/var/log/dirsrv
-    hostname: rom.ldap
     restart: on-failure
     healthcheck:
-      test: "curl -u 'cn=Directory Manager:topsecret' ldap://127.0.0.1:389/dc=rom,dc=ldap || exit 1"
-      interval: 30s
-      timeout: 10s
-      retries: 1
-    environment:
-      LDAP_LOG_LEVEL: 0
-      DIRSRV_ID: rom
-      DIRSRV_FQDN: rom.ldap
-      DIRSRV_SUFFIX: dc=rom,dc=ldap
-      DIRSRV_ROOT_DN: cn=Directory Manager
-      DIRSRV_ROOT_DN_PASSWORD: topsecret
-      # DIRSRV_ADMIN_USERNAME: admin
-      # DIRSRV_ADMIN_PASSWORD: adminpassword
+      test: "curl -u 'cn=Directory Manager:topsecret' ldap://127.0.0.1/dc=rom,dc=ldap || exit 1"
     networks:
       - rom-ldap-network
 
 
 
-
-  # 4 debian
-  # docker build -t opendj .
-  # docker run -it -p 4389:389 -e BASE_DN=dc=rom,dc=ldap opendj
-  #
   opendj:
     container_name: opendj
     build:
       context: ./opendj
       args:
-        version: 4.4.3
+        version: 4.4.9
+        instance: rom
       labels:
-        vendor: OpenIdentity
+        vendor: open_dj
     tty: true
     stdin_open: true
     ports:
       - 4389:389
       - 4636:636
-    hostname: rom.ldap
     restart: on-failure
     healthcheck:
-      test: curl ldap://127.0.0.1:389/dc=rom,dc=ldap || exit 1
-      interval: 1m30s
-      timeout: 10s
-      retries: 1
-    environment:
-      BASE_DN: dc=rom,dc=ldap
-      ROOT_USER_DN: cn=Directory Manager
-      ROOT_PASSWORD: topsecret
+      test: "curl ldap://127.0.0.1/dc=rom,dc=ldap || exit 1"
     networks:
       - rom-ldap-network
-
-
-# volumes:
-#   bundle_cache:

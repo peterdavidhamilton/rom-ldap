@@ -143,6 +143,7 @@ RSpec.describe ROM::LDAP::Client, '#password_modify' do
 
       it do
         if vendor == '389_ds'
+          # the session is not protected by a protocol such as Transport Layer Security (TLS)
           skip '389DS requires a secure connection for password changes'
         end
 
@@ -158,7 +159,7 @@ RSpec.describe ROM::LDAP::Client, '#password_modify' do
 
 
 
-    context 'when changing someone elses password' do
+    context "when changing someone else's password" do
 
       let(:other_dn) { "cn=Mysterio,#{base}" }
 

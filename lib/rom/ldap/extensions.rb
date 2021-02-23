@@ -28,6 +28,13 @@ module ROM
       require 'rom/ldap/extensions/msgpack'
     end
 
+    # Patch #to_json method in relation instance.
+    #
+    register_extension(:oj_export) do
+      require 'rom/ldap/extensions/optimised_json'
+    end
+
+
     #=======================================
     # Autoloaded for Rails
     #=======================================

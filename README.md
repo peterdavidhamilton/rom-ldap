@@ -3,194 +3,148 @@
 [![pipeline status][pipeline]][branch] [![coverage report][coverage]][branch]
 
 
-[ROM-LDAP][rom-ldap] is a [ROM][rom-rb] adapter for [LDAP][ldap].
-Internally it uses [ldap-ber][ldap-ber] which is a library of refinements to
-encode Ruby primitives.
+[ROM-LDAP][rom-ldap] is a [ROM][rom-rb] adapter for [LDAP][ldap] and provides lightweight directory object mapping for Ruby.
+This gem makes it easier to use LDAP in your project or even as your primary datastore and an alternative to back-ends like MongoDB or CouchDB.
 
-LDAP can be used as a structured NoSQL server
+
 
 ## Requirements
 
-[ROM-LDAP][rom-ldap] requires [Ruby 2.4.0][ruby] or greater.
+[ROM-LDAP][rom-ldap] is compatible with versions of [Ruby][ruby] from 2.4 to 2.7.
+
+
+
+## History
+
+This project has evolved from a refactoring of the [net-ldap][net-ldap] gem and tries to emulate the functionality of
+[rom-sql][rom-sql] which is itself backed by the [sequel][sequel] gem.
+
+
+A more detailed walk-through of [rom-ldap][rom-ldap] can be found at [pdhamilton.uk][pdhamilton].
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your Gemfile:
 
 ```ruby
 gem 'rom-ldap'
 ```
 
-And then execute:
-
-```bash
-$ bundle
-```
-
-Or install it yourself as:
-
-```bash
-$ gem install rom-ldap
-```
-
-
-
-## Usage
-
-*Lightweight Directory Access Protocol* (LDAP) support for [rom-rb][rom-rb].
 
 #### Configuration
 
-To configure a gateway connnection to an LDAP server use:
+To configure a gateway connection to an LDAP server you can use environment variables or pass in a URI:
 
 ```ruby
+
 config = ROM::Configuration.new(:ldap, 'ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap')
 
-rom = ROM.container(config).directory
-# => #<ROM::LDAP::Directory
-#     uri='ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap'
-#     vendor='OpenLDAP' version='0.0' />
-```
-
-If the URI is omitted, then environment variables can be used to set the connection.
-With no variables the connection will default to a local connection on port *389*.
-
-```ruby
-ENV['LDAPURI'] = 'ldaps://cn=admin,dc=rom,dc=ldap:topsecret@openldap'
+ENV['LDAPURI'] = 'ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap'
 
 config = ROM::Configuration.new(:ldap)
 
 rom = ROM.container(config)
+
+directory = ROM.container(config).directory
+
+=> #<ROM::LDAP::Directory
+    uri='ldap://cn=admin,dc=rom,dc=ldap:topsecret@openldap'
+    vendor='OpenLDAP'
+    version='0.0' />
+
 ```
 
 #### Extensions
 
-For the greatest compatibility with Ruby method naming you can pass the optional
-"compatibility" extension whilst configuring the gateway.
-This will format the attributes of directory entries into names more suitable
-for ruby by converting **"camelCase"** and **"hyphen-ated"** to **"snake_case"**.
+For the greatest compatibility with Ruby method naming you can pass the optional "compatibility" extension whilst configuring the gateway.
+This will format the attributes of directory entries into names suitable for ruby methods by converting _camelCase_ and _kebab-case_ to _snake_case_.
 
 ```ruby
-config = ROM::Configuration.new(:ldap, nil, extensions: [:compatibility])
+config = ROM::Configuration.new(:ldap, extensions: [:compatibility])
 ```
 
-The `ROM::LDAP::Relation` class already has support for exporting to `JSON`,
-`YAML` and `LDIF`. Other extensions are available including exporting to `DSML` format.
+The `ROM::LDAP::Relation` class already has support for exporting to `JSON`, `YAML` and `LDIF`.
+Other extensions are available including exporting to `DSML` format.
 
 ```ruby
-config = ROM::Configuration.new(:ldap, nil, extensions: [:dsml_export]) do |conf|
+config = ROM::Configuration.new(:ldap, extensions: [:dsml_export]) do |conf|
   conf.relation(:all) { schema('(cn=*)', infer: true) }
 end
 
 rom = ROM.container(config)
 
-rom.relations[:all].to_json
-rom.relations[:all].to_yaml
-rom.relations[:all].to_ldif
 rom.relations[:all].to_dsml
 ```
 
 
 
 
-## Docker
+## LDAP Servers
 
-The project has docker provision for four opensource entrprise class LDAP servers
-test against; see `spec/fixtures/vendors.yml` for connection details.
+The project has docker provision for four opensource LDAP servers to test against;
+see `spec/fixtures/vendors.yml` for connection details.
+Allow the dependent services to boot before running the specs in the gem container.
 
-```bash
-$ cd docker
-$ docker-compose up -d apacheds openldap 389ds opendj
-$ docker-compose up rom
-```
-
-#### Containers
-
-1. **[ApacheDS][apacheds]** is an extensible and embeddable directory server
-  entirely written in Java, which has been certified LDAPv3 compatible by the
-  Open Group. The JDBM backend is fast at retreiving data but slow writing to
-  disk.
-  **[Apache Directory Studio][apachestudio]** is a complete directory tooling
-  platform intended to be used with any LDAP server however it is particularly
-  designed for use with the ApacheDS.
-  You can import the vendor connection details into Apache Directory Studio using
-  `spec/fixtures/vendors.lbc`.
-
-2. **[OpenLDAP][openldap]** is a high performance replacement for Oracle
-  Corporation's Berkeley DB.
-
-3. **[389DS][389ds]** from the Fedora Project.
+    $ cd docker
+    $ docker-compose up -d apacheds openldap 389ds opendj
+    $ docker-compose up rom
 
 
-4. **[OpenDJ][opendj]** Community Edition is an LDAPv3 compliant directory service
-  written in Java from the Open Identity Platform.
+1. _[ApacheDS][apacheds]_ is an extensible and embeddable directory server entirely written in Java.
 
-#### Schema
+2. _[OpenLDAP][openldap]_ is a high performance replacement for Oracle Corporation's Berkeley DB.
+  It is mostly written in C and its functionality can be extended with additional modules.
 
-A custom themed **wildlife** schema is loaded into [ApacheDS][apacheds] automatically
-but can also be loaded into [OpenDJ][opendj] and [389DS][389ds].
-Experimentation shows these are around 25 times faster than Apache in this
-environment when working with large datasets.
+3. _[389DS][389ds]_ from the Fedora Project is also written in Java.
 
-If you have the `ldapmodify` command on your development machine you can use the
-following rake task to load the changes:
-
-```bash
-$ LDAPURI=ldap://localhost:4389 \
-  LDAPBINDDN='cn=Directory Manager' \
-  LDAPBINDPW=topsecret \
-  LDAPDIR=./spec/fixtures/ldif \
-  rake ldap:modify`
-```
-
-You can also import 1000 example users with no dependency on local commands:
-
-```bash
-$ DEBUG=y \
-  LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
-  rake 'ldif:import[spec/fixtures/ldif/examples/users.ldif]'
-```
+4. _[OpenDJ][opendj]_ Community Edition from the Open Identity Platform is written in Java.
 
 
+A custom schema is loaded into each of the servers and defines attribute types and object classes used
+in the tests and [examples](#examples).
 
+
+## Seed Data
+
+_[Apache Directory Studio][apachestudio]_ is a cross-platform platform LDAP management application with a graphic interface.
+For convenience, you can import the predefined connection settings for the docker environment using the included file
+`spec/fixtures/vendors.lbc`.
+
+Alternatively, if you have the `ldapmodify` command installed on your development machine,
+you can use a rake task to import a folder of LDIF files:
+
+    $ LDAPURI=ldap://localhost:4389 \
+      LDAPBINDDN='cn=Directory Manager' \
+      LDAPBINDPW=topsecret \
+      LDAPDIR=./examples/ldif \
+      rake ldap:modify
+
+Or, you could import the _1000_ example users included with this project, with no dependency on other software.
+The `DEBUG` variable will print to screen any response from the server that would normally be logged.
+
+    $ DEBUG=y \
+      LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
+      rake 'ldif:import[examples/ldif/users.ldif]'
 
 
 ## Examples
 
-```bash
-$ ./bin/console
-```
+The console script connects and loads [Pry][pry] so you can explore your directory on the command line.
 
-The console connects and loads [Pry][pry]
+    $ ./bin/console
 
-To see a demonstration try `./examples/fauna.rb` after importing `animals.ldif` and the appropriate `wildlife.ldif`:
+To see a demonstration in action you can explore the examples after loading the seed data.
 
-**ApacheDS ou=schema**
-```bash
-$ rake 'ldif:import[spec/fixtures/ldif/ou_wildlife.ldif]'
-```
-**OpenDJ and 389DS cn=schema**
-```bash
-$ rake 'ldif:import[spec/fixtures/ldif/cn_wildlife.ldif]'
-```
+    $ rake 'ldif:import[examples/ldif/animals.ldif]'
 
-**[Fauna][fauna]** is a demo of [ROM-LDAP][rom-ldap] based on evolutionary taxonomy.
+    $ ./examples/fauna.rb
 
-```bash
-$ LDAPURI='ldap://uid=admin,ou=system:secret@localhost:1389' \
-  rake 'ldif:import[spec/fixtures/ldif/examples/animals.ldif]'
-```
+Check out _[Fauna][fauna]_ which is a more complete version of the example above and models data on evolutionary taxonomy.
+
+If you use _[Rails][rails]_ then try the _[rom-ldap-rails][rom-ldap-rails]_ repository,
+for a skeleton version of this same example applied to the [Ruby on Rails][rails] framework.
 
 
-
-## History
-
-This project began as an attempt at using the [net-ldap][net-ldap] gem to create
-a new adapter for [ROM][rom-rb]. Eventually it was refactored and removed the
-[net-ldap][net-ldap] dependency, extracting the BER portion and using refinements
-instead of monkey-patching the standard library.
-
-Thank you...
 
 
 
@@ -198,16 +152,21 @@ Thank you...
 [389ds]: https://www.port389.org
 [apacheds]: http://directory.apache.org/apacheds/downloads
 [apachestudio]: http://directory.apache.org/studio/downloads
-[branch]: https://gitlab.com/peterdavidhamilton/rom-ldap/commits/develop
-[coverage]: https://gitlab.com/peterdavidhamilton/rom-ldap/badges/develop/coverage.svg
+[branch]: https://gitlab.com/peterdavidhamilton/rom-ldap/commits/master
+[coverage]: https://gitlab.com/peterdavidhamilton/rom-ldap/badges/master/coverage.svg
 [fauna]: https://gitlab.com/peterdavidhamilton/fauna
 [ldap-ber]: https://gitlab.com/peterdavidhamilton/ldap-ber
 [ldap]: https://ldap.com
 [net-ldap]: https://github.com/ruby-ldap/ruby-net-ldap
 [opendj]: https://www.openidentityplatform.org/opendj
 [openldap]: http://www.openldap.org
-[pipeline]: https://gitlab.com/peterdavidhamilton/rom-ldap/badges/develop/pipeline.svg
-[pry]: http://pryrepl.org/
+[pdhamilton]: https://pdhamilton.uk/projects/rom-ldap
+[pipeline]: https://gitlab.com/peterdavidhamilton/rom-ldap/badges/master/pipeline.svg
+[pry]: http://pryrepl.org
+[rails]: https://rubyonrails.org
+[rom-ldap-rails]: https://gitlab.com/peterdavidhamilton/rom-ldap-rails
 [rom-ldap]: https://gitlab.com/peterdavidhamilton/rom-ldap
 [rom-rb]: https://rom-rb.org
-[ruby]: https://www.ruby-lang.org/en/downloads/
+[rom-sql]: https://rom-rb.org/5.0/learn/sql
+[ruby]: https://www.ruby-lang.org/en/downloads
+[sequel]: http://sequel.jeremyevans.net

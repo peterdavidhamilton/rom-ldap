@@ -1,5 +1,8 @@
-docker
 doc
+docker
+examples
+pkg
+vendor
 
 coverage/*
 !coverage/.keep
@@ -9,3 +12,4 @@ tmp/*
 
 log/*
 !log/.keep
+

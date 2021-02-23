@@ -281,8 +281,8 @@ module ROM
           [lower, upper]
         end
 
-        # If any of the following special characters must appear in the
-        # search filter as literals, they must be escsped.
+        # If any of the following special characters appear in the
+        # search filter as literals, they must be escaped with a backslash.
         #
         # "(", ")", "\", ,"/" "*", "null"
         #

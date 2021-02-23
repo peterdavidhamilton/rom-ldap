@@ -12,13 +12,12 @@ RSpec.describe ROM::LDAP::Relation, '#fetch' do
 
   include_context 'people'
 
-  before do
-    factories[:person, cn: 'Megatron', uid_number: 1]
-    factories[:person, cn: 'Optimus', uid_number: 2]
-  end
-
-  # FIXME: 389DS doesn't allow searches by entrydn?
   with_vendors do
+
+    before do
+      factories[:person, cn: 'Megatron', uid_number: 1]
+      factories[:person, cn: 'Optimus', uid_number: 2]
+    end
 
     context 'with default entrydn primary_key' do
       it 'returns a single tuple' do
