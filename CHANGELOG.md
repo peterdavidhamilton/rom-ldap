@@ -1,8 +1,24 @@
 ## unreleased
 
 <!-- TODO -->
-[Compare v0.2.1...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.1...master)
+[Compare v0.2.3...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.3...master)
 
+# 0.2.3 / 2021-02-xx
+
+### Fixed
+
+- Compatibility with pre-release ROM 6.0 and Ruby 3.0
+
+[Compare v0.2.2...v0.2.3](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.2...0.2.3)
+
+# 0.2.2 / 2021-02-21
+
+### Changed
+
+- CI/CD pipeline was failing because OpenDJ service requires more memory than the shared runners provide.
+- Yanked 0.2.1 to edit the gem description and credit Net::LDAP team for their part in this gem.
+
+[Compare v0.2.1...v0.2.2](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.1...0.2.2)
 
 # 0.2.1 / 2021-02-19
 

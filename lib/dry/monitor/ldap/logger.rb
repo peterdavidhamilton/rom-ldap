@@ -44,8 +44,8 @@ module Dry
         end
 
         def subscribe(notifications)
-          notifications.subscribe(:ldap) do |time:, name:, query:|
-            log_query(time, name, query)
+          notifications.subscribe(:ldap) do |ldap|
+            log_query(ldap[:time], ldap[:name], ldap[:query])
           end
         end
 

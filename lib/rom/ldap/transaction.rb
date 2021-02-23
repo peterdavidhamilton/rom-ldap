@@ -16,13 +16,11 @@ module ROM
         @directory = directory
       end
 
-      # rubocop:disable Lint/SuppressedException
       def run(opts = EMPTY_OPTS)
         directory.transaction(opts) { yield(self) }
       rescue ::ROM::Transaction::Rollback
         # noop
       end
-      # rubocop:enable Lint/SuppressedException
 
     end
   end

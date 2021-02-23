@@ -2,14 +2,13 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'rom', git: 'https://github.com/rom-rb/rom.git', branch: 'master'
-
 group :development do
-  gem 'awesome_print'
   gem 'pry', platforms: %i[jruby rbx]
   gem 'pry-byebug', platforms: :mri
-  gem 'yard-junk'
   gem 'rubocop-performance'
+  gem 'rubocop-rake'
+  gem 'rubocop-rspec'
+  gem 'yard-junk'
 
   # WIP
   gem 'dry-monitor'         # @see bin/console

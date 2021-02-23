@@ -25,8 +25,10 @@ module ROM
         #
         # @api public
         #
-        def query(filter: DEFAULT_FILTER, **options)
+        def query(**options)
           set, counter = [], 0
+
+          filter = options.delete(:filter) || DEFAULT_FILTER
 
           # TODO: pageable and search referrals
           params = {
@@ -39,8 +41,7 @@ module ROM
             # https://tools.ietf.org/html/rfc4511#section-4.5.3
           }
 
-          # pdu = client.search(params) do |search_referrals: |
-          pdu = client.search(params) do |dn, attributes|
+          pdu = client.search(**params) do |dn, attributes|
             counter += 1
             logger.debug("#{counter}: #{dn}") if ::ENV['DEBUG']
 

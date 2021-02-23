@@ -24,8 +24,9 @@ module ROM
         # @yield [Hash] :search_referrals
         #
         # @api private
-        def search(return_refs: true, **params)
-          search_request = SearchRequest.new(params)
+        def search(**params)
+          return_refs    = params.fetch(:return_refs, true)
+          search_request = SearchRequest.new(**params)
           request_type   = pdu_lookup(:search_request)
           result_pdu     = nil
 

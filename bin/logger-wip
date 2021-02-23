@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 #
-# Pry console for testing
+# WIP for dry-monitor
 #
 require 'bundler/setup'
 Bundler.setup
@@ -13,6 +13,23 @@ require 'rom-repository'
 require 'rom-changeset'
 
 config = ROM::Configuration.new(:ldap, extensions: %i[compatibility])
+
+require 'dry/monitor/notifications'
+notifications = Dry::Monitor::Notifications.new(:console)
+
+config.plugin :ldap, relations: :instrumentation do |c|
+  c.notifications = notifications
+end
+
+require 'dry/monitor/ldap/logger'
+# Dry::Monitor::LDAP::Logger.new(Logger.new($stdout)).subscribe(notifications)
+monitor = Dry::Monitor::LDAP::Logger.new(Logger.new($stdout))
+# require 'rouge/themes/ldap'
+# monitor.config.theme = ::Rouge::Themes::LDAP.new
+require 'rouge/themes/magritte'
+monitor.config.theme = ::Rouge::Themes::Magritte.new
+
+monitor.subscribe(notifications)
 
 config.relation(:entries) do
   schema('(objectClass=*)', infer: true) do

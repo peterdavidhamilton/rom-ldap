@@ -55,7 +55,7 @@ module ROM
       # @return [Client]
       #
       def client
-        @client ||= Client.new(env.to_h)
+        @client ||= Client.new(**env.to_h)
       end
 
       # Expected method inside gateway.

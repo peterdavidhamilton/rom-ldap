@@ -151,7 +151,7 @@ module ROM
       def result_controls
         ctrls.map do |control|
           oid, level, value = control
-          value, level = level, false if level&.is_a?(String)
+          value, level = level, false if level.is_a?(String)
           ::OpenStruct.new(oid: oid, criticality: level, value: value)
         end
       end

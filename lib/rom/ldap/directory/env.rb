@@ -16,7 +16,6 @@ module ROM
       # @see https://ldapwiki.com/wiki/LDAP%20URL
       # @see https://docs.oracle.com/cd/E19957-01/816-6402-10/url.htm
       #
-      # rubocop:disable Lint/UriEscapeUnescape
       #
       # @api private
       class ENV
@@ -114,7 +113,6 @@ module ROM
           dn = config.fetch(:username, ::ENV['LDAPBINDDN']) || uri.user
           dn.gsub(PERCENT_SPACE, SPACE) if dn
         end
-        # rubocop:enable Lint/UriEscapeUnescape
 
         # Override LDAPURI password with options or LDAPBINDPW
         #

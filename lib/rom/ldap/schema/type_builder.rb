@@ -61,7 +61,7 @@ module ROM
         # @api public
         def call(attribute_name, schema)
           attribute = find_attribute(attribute_name)
-          primitive = map_type(attribute)
+          primitive = map_type(**attribute)
           ruby_type = Types.const_get(primitive)
           read_type = !attribute[:single] ? Types.const_get(Inflector.pluralize(primitive)) : ruby_type
 

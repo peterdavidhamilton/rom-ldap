@@ -10,7 +10,7 @@ This gem makes it easier to use LDAP in your project or even as your primary dat
 
 ## Requirements
 
-[ROM-LDAP][rom-ldap] is compatible with versions of [Ruby][ruby] from 2.4 to 2.7.
+[ROM-LDAP][rom-ldap] is compatible with versions of [Ruby][ruby] 2.4 and above.
 
 
 

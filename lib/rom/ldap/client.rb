@@ -43,7 +43,7 @@ module ROM
       # @raise [BindError, SecureBindError]
       def open
         unless alive?
-          @socket = Socket.new(options).call
+          @socket = Socket.new(**options).call
 
           # tls
           if ssl
@@ -51,7 +51,7 @@ module ROM
             sasl_bind # (mechanism:, credentials:, challenge:)
           end
 
-          bind(auth) unless auth.nil? # simple auth
+          bind(**auth) unless auth.nil? # simple auth
         end
 
         yield(@socket)

@@ -5,7 +5,7 @@ FROM ruby:$version-alpine as gem
 LABEL description="ROM-LDAP Test Suite Container"
 
 RUN apk --no-cache upgrade; \
-    apk --no-cache add build-base libxml2-dev git
+    apk --no-cache add build-base libxml2-dev
 
 ENV LDAPDIR="/schema" \
     BUNDLE_PATH="/bundle" \
