@@ -122,9 +122,10 @@ you can use a rake task to import a folder of LDIF files:
 Or, you could import the _1000_ example users included with this project, with no dependency on other software.
 The `DEBUG` variable will print to screen any response from the server that would normally be logged.
 
+    $ cd examples
     $ DEBUG=y \
       LDAPURI='ldap://cn=Directory Manager:topsecret@localhost:4389' \
-      rake 'ldif:import[examples/ldif/users.ldif]'
+      rake 'ldif:import[ldif/users.ldif]'
 
 
 ## Examples
@@ -135,9 +136,9 @@ The console script connects and loads [Pry][pry] so you can explore your directo
 
 To see a demonstration in action you can explore the examples after loading the seed data.
 
-    $ rake 'ldif:import[examples/ldif/animals.ldif]'
-
-    $ ./examples/fauna.rb
+    $ cd examples
+    $ rake 'ldif:import[ldif/animals.ldif]'
+    $ ./fauna.rb
 
 Check out _[Fauna][fauna]_ which is a more complete version of the example above and models data on evolutionary taxonomy.
 

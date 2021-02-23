@@ -77,12 +77,12 @@ namespace :ldap do
   #   $ LDAPURI=ldap://127.0.0.1:3389 \
   #     LDAPBINDDN='cn=Directory Manager' \
   #     LDAPBINDPW=topsecret \
-  #     LDAPDIR=./spec/fixtures/ldif \
+  #     LDAPDIR=./examples/ldif \
   #     rake ldap:modify
   #
   desc 'Use ldapmodify'
   task :modify, [:dir] => :env do |_t, args|
-    ROM::LDAP::RakeSupport.modify(args)
+    ROM::LDAP::RakeSupport.modify(**args)
   end
 
 
@@ -97,7 +97,7 @@ namespace :ldap do
   desc 'Use ldapsearch'
   task :search, [:filter, :attrs] => :env do |_t, args|
     args.with_defaults(attrs: "+ \\*", filter: '(objectClass=*)')
-    ROM::LDAP::RakeSupport.search(args)
+    ROM::LDAP::RakeSupport.search(**args)
   end
 
 end
