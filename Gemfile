@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'rom', git: 'https://github.com/rom-rb/rom.git', branch: 'master'
+
 group :development do
   gem 'awesome_print'
   gem 'pry', platforms: %i[jruby rbx]
@@ -18,12 +20,6 @@ group :test do
   gem 'libxml-ruby'         # @see spec/unit/relation/export_spec.rb
   gem 'msgpack'             # @see spec/unit/relation/export_spec.rb
   gem 'oj'                  # @see spec/unit/relation/export_spec.rb
-  gem 'rom' do
-    gem 'rom-changeset'
-    gem 'rom-core'
-    gem 'rom-mapper'
-    gem 'rom-repository'
-  end
   gem 'rom-factory'
   gem 'rspec'
   gem 'simplecov'
