@@ -22,7 +22,7 @@ module ROM
       # @api public
       def to_ber
         require 'rom/ldap/expression_encoder'
-        ExpressionEncoder.new(options).call
+        ExpressionEncoder.new(**options).call
       end
 
       # Unbracketed filter string

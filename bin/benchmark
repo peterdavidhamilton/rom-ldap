@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 #
 # Comparison of rom-ldap against ruby-net-ldap
 #
@@ -22,7 +23,6 @@ ENV['LDAPBINDDN'] = 'cn=admin,dc=rom,dc=ldap'
 ENV['LDAPBINDPW'] = 'topsecret'
 # ENV['LDAPBINDDN'] = 'uid=admin,ou=system'
 # ENV['LDAPBINDPW'] = 'secret'
-
 
 net_ldap = Net::LDAP.new(
   host: ENV['LDAPHOST'],

@@ -1,6 +1,6 @@
 RSpec.describe ROM::LDAP::Gateway do
 
-  subject(:gateway) { described_class.new(uri, gateway_opts) }
+  subject(:gateway) { described_class.new(uri, **gateway_opts) }
 
   with_vendors do
     it 'connects to an LDAP server' do

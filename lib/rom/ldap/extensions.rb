@@ -34,7 +34,6 @@ module ROM
       require 'rom/ldap/extensions/optimised_json'
     end
 
-
     #=======================================
     # Autoloaded for Rails
     #=======================================

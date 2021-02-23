@@ -96,7 +96,7 @@ module ROM
       #
       # @api public
       def with(overrides)
-        self.class.new(options.merge(overrides))
+        self.class.new(**options.merge(overrides))
       end
 
       # @return [Hash] internal options

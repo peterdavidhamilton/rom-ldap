@@ -21,13 +21,17 @@
     Simple rudimentary RDMS.
     <https://www.openldap.org/doc/admin24/intro.html#LDAP%20vs%20RDBMS>
 
-7. Directory instrumentation using dry-monitor to replace debug logging.
+7. **Logging**
+   Directory instrumentation using dry-monitor to replace debug logging.
 
-8. `rom/devtools` integration.
+8. **ROM-RB**
+   Keep pace with other rom-rb improvements like `rom/devtools` integration.
 
+9. **CI/CD**
+   Speed up testing by only using OpenLDAP, with other vendors as optional extras (including Microsoft AD LDS).
 
 ## ONGOING
 
-- Improve Rspec coverage, currently 90% complete @ v0.1.0
-- Improve Yard docs, currently 72% complete @ v0.1.0
+- Improve Rspec coverage, currently 90% complete @ v0.2.3
+- Improve Yard docs, currently 76% complete @ v0.2.3
 - Ensure Rubocop style compliance
