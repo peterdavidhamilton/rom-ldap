@@ -3,7 +3,7 @@
 <!-- TODO -->
 [Compare v0.2.3...master](https://gitlab.com/peterdavidhamilton/rom-ldap/compare/v0.2.3...master)
 
-# 0.2.3 / 2021-02-xx
+# 0.2.3 / 2021-02-23
 
 ### Fixed
 
