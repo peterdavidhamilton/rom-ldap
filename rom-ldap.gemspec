@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.metadata    = {
     'source_code_uri'   => 'https://gitlab.com/peterdavidhamilton/rom-ldap',
     'bug_tracker_uri'   => 'https://gitlab.com/peterdavidhamilton/rom-ldap/issues',
-    'wiki_uri'          => 'https://gitlab.com/peterdavidhamilton/rom-ldap/wikis'
+    'wiki_uri'          => 'https://gitlab.com/peterdavidhamilton/rom-ldap/wikis',
     'documentation_uri' => 'https://pdhamilton.uk/projects/rom-ldap',
     'mailing_list_uri'  => 'https://discourse.rom-rb.org/',
   }
