@@ -37,9 +37,9 @@ test:2.7:
   image: ruby:2.7-alpine
   script: bundle exec rspec --fail-fast
 
-# test:3.0:
-#   image: ruby:3.0-alpine
-#   script: bundle exec rspec --fail-fast
+test:3.0:
+  image: ruby:3.0-alpine
+  script: bundle exec rspec --fail-fast
 
 
 
