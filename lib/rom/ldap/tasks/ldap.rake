@@ -8,7 +8,6 @@
 #   load 'rom/ldap/tasks/ldap.rake'
 #
 require 'pathname'
-require 'pry'
 
 module ROM
   module LDAP
